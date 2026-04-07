@@ -1,0 +1,59 @@
+INPUTS
+- course_id: {{course_id}}
+- video_id: {{video_id}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- domain: {{domain}}
+- source_srt: {{source_srt}}
+- target_srt_draft: {{target_srt_draft}}
+- common_glossary: {{common_glossary}}
+- domain_glossary: {{domain_glossary}}
+- temp_glossary: {{temp_glossary}}
+- html_decision_log: {{html_decision_log}}
+- score_target: {{score_target}}
+
+CONTEXT
+The HTML MASTER for this course has already been translated and validated.
+The html_decision_log is the AUTHORITY for all terminology, cultural choices, and link replacements.
+You MUST align this SRT with every choice documented in the html_decision_log.
+
+SRT-SPECIFIC CONSTRAINTS
+- Max ~42 characters per line, 2 lines per subtitle block
+- Sentence length: short, oral register, teleprompter-friendly
+- Lip-sync risk: flag expansions > 20% of original segment duration
+- Acronyms: apply phonetic reading strategy (spell out or read as word per domain norms)
+- Preserve all timecodes exactly — only translate text content
+
+TASK
+1) Translate each SRT segment using: domain_glossary + common_glossary + temp_glossary.
+2) Align all terminology with html_decision_log (same Concept Swaps, same term choices).
+3) Enforce SRT formatting constraints (line length, oral register).
+4) Flag any lip-sync risk segments.
+5) Log every change in decision_log.
+6) Output STRICT JSON only.
+
+OUTPUT SCHEMA:
+{
+  "status": "pass|revise",
+  "score_total": 0,
+  "revised_srt": "...",
+  "decision_log": [
+    {
+      "timecode": "00:00:00,000 --> 00:00:03,000",
+      "source_text": "",
+      "draft_input": "",
+      "final_output": "",
+      "change_type": "terminology|tone|format|lip_sync_flag|cultural_swap",
+      "decision_note": ""
+    }
+  ],
+  "lip_sync_flags": [
+    {
+      "timecode": "",
+      "expansion_pct": 0,
+      "note": ""
+    }
+  ],
+  "temp_glossary_patch": [],
+  "report_md": "## SRT Audit ..."
+}

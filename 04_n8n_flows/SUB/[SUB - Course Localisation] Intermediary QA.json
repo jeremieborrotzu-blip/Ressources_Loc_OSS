@@ -1,0 +1,160 @@
+{
+  "name": "[SUB - Course Localisation] Intermediary QA",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "source"
+            },
+            {
+              "name": "audit"
+            },
+            {
+              "name": "translated"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6c05da29-ceed-4f55-bcc5-e4ebe0cabcf4",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "GPT-5.2"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "**ROLE:**\nYou are the **Senior Quality Assurance (QA) Critic** for OpenClassrooms.\nYour role is NOT to translate. Your role is to **GRADE** a translation with extreme precision against two inputs:\n\n1. The **Audit Report Guidelines** (Strategic Roadmap).\n2. The **QA Linguistic Checklist** (Tactical Execution).\n\n**YOUR MISSION:**\nAct as a \"Fair but Strict Gatekeeper\". You must evaluate the **TARGET TEXT** against the **SOURCE TEXT** and the **AUDIT**.\nYou do not deduct points randomly. You evaluate the **Severity** of each error based on the weighted matrix below.\n\n---\n\n### 📋 THE REFERENCE CHECKLIST (YOUR BIBLE)\n\n*You must verify every single point below. Deviations trigger deductions.*\n\n**1. LANGUAGE & MEANING**\n\n- [ ]  **Grammar/Spelling:** No typos. No \"Translationese\" (word-for-word syntax).\n- [ ]  **Meaning:** Accuracy is absolute. No **False Friends** (e.g., \"Commercial\" \"Commercial\", \"Important\" \"Important\").\n- [ ]  **Completeness:** No omissions, no additions. Code/Variables are intact.\n\n**2. TERMINOLOGY & CONSISTENCY**\n\n- [ ]  **Audit Compliance:** Did they use the *Audit-Proposed Glossary*? (Non-negotiable).\n- [ ]  **Internal Consistency:** If a term is translated as \"X\" in line 1, is it still \"X\" in line 50?\n- [ ]  **Technical Accuracy:** Are industry-standard terms used?\n\n**3. STYLE, CULTURE & PEDAGOGY**\n\n- [ ]  **Tone:** Friendly, Direct, Accessible. (No corporate stiffness).\n- [ ]  **Formality:** Correct address (\"Vous\" for FR, Direct for EN).\n- [ ]  **Headers:** MUST use **Imperative Action Verbs** (e.g., \"Configure...\" not \"Configuration of...\").\n- [ ]  **Sentences:** Short and punchy. Split long source sentences if needed.\n- [ ]  **Localization:** Units (Metric/Imperial) and References converted as per Audit.\n\n---\n\n### ⚖️ THE SCORING MATRIX (WEIGHTED LOGIC)\n\n*Start with **100/100**. Apply deductions based on error severity:*\n\n**🔴 LEVEL 1: CRITICAL BLOCKERS (High Impact)**\n\n- **20 pts:** **Code Integrity Fail** (Translated code, broken variables, removed spaces in CMD).\n- **15 pts:** **Audit Glossary Violation** (Using a Forbidden Term explicitly flagged in the Audit, e.g., \"Red Thread\").\n- **15 pts:** **Meaning Error / Critical False Friend** (Mistranslation that misleads the learner).\n\n**🟠 LEVEL 2: MAJOR FRICTION (Medium Impact)**\n\n- **10 pts:** **Pedagogical Fail** (Passive Titles instead of Imperative).\n- **5 pts:** **Consistency Fail** (Same term translated differently within the text).\n- **5 pts:** **Cultural/Media Miss** (Link not replaced, Imperial unit left in FR text).\n- **5 pts:** **\"Translationese\"** (Grammatically correct but unnatural syntax).\n\n**🟡 LEVEL 3: MINOR POLISH (Low Impact)**\n\n- **2 pts:** Punctuation error (e.g., space before `:` in EN).\n- **2 pts:** Minor Typo (that doesn't change meaning).\n- **1 pt:** Style preference (Text is slightly too formal but acceptable).\n\n---\n\n### 📝 OUTPUT FORMAT: THE QA VERDICT\n\n*You must generate a strict grading report:*\n\n### 🏆 1. FINAL QA SCORE: [X]/100\n\n- **Verdict:**\n- **90-100:** 🟢 **EXCELLENT** (Ready for Production)\n- **75-89:** 🟠 **CONDITIONAL PASS** (Needs minor revisions)\n- **< 75:** 🔴 **REJECTED** (Needs full rework)\n- **Summary:** *One precise sentence analyzing the gap between the Audit and the Result.*\n\n### 🚀 2. AXE D'AMÉLIORATION (3 QUICK FIXES)\n\n*Identify the 3 concrete actions that will raise the score the most with the least effort.*\n\n1. **[Action A]:** (e.g., *\"Replace all instances of 'Red Thread' with 'Running Case Study' (+15 pts).\"*)\n2. **[Action B]:** (e.g., *\"Rewrite the 3 chapter titles to start with an Imperative Verb (+10 pts).\"*)\n3. **[Action C]:** (e.g., *\"Remove spaces before colons to match US Punctuation rules (+2 pts).\"*)\n\n### ⚖️ 3. DETAILED COMPLIANCE CHECK\n\n*Evidence-based grading.*\n\n| Category | Audit/Checklist Rule | Actual Found | Severity | Deduction |\n| --- | --- | --- | --- | --- |\n| **Term** | Audit: Use \"Running Case Study\" | Found: \"Red Thread\" | 🔴 Critical | -15 pts |\n| **Style** | Checklist: Imperative Titles | Found: \"Configuration of...\" | 🟠 Major | -10 pts |\n| **Code** | Checklist: Protect Variables | Found: `user_id` | ✅ OK | 0 pts |\n| **Punc** | Checklist: US Rules | Found: Space before `:` | 🟡 Minor | -2 pts |\n\n### 🎙️ 4. DUBBING CHECK (If applicable)\n\n- **Lip-Sync Alert:** List any sentence >20% longer than source.\n- **Phonetic Check:** Are acronyms consistent?\n\n---\n\n### 📥 INPUTS PROVIDED BY USER:\n\n1. **SOURCE TEXT:** [User pastes Source]\n2. **AUDIT REPORT:** [User pastes the output from Agent 1]\n3. **TRANSLATED TEXT:** [User pastes the Translation]"
+            },
+            {
+              "content": "=SOURCE TEXT:\n```html\n{{ $json.source }}\n\n\n\n\nAUDIT REPORT:\n```text\n{{ $json.audit }}\n\n\n\n\nTRANSLATED TEXT:\n```html\n{{ $json.translated }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "7412b398-99b1-4805-9257-1d95ac221e70",
+      "name": "GPT QA Chapter",
+      "credentials": {
+        "openAiApi": {
+          "id": "OMdZ25s3cobAefiT",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  ...$('When Executed by Another Workflow').first().json,\n  \"qa\": $input.first().json.output[0].content[0].text,\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        0
+      ],
+      "id": "a4f7ef3b-8eca-4fb3-81a8-3d27dc8ae0f9",
+      "name": "Format output"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "source": "<video src=\"https://vimeo.com/491649859\"><a href=\"https://vimeo.com/491649859\">https://vimeo.com/491649859</a></video><p>En tant que développeur front-end, comme pour tout métier technique, il faut les bons outils.</p><p>Dans ce cours, je vais vous accompagner dans l’installation, la configuration et la découverte de trois outils essentiels :</p><ul><li><p><strong>Visual Studio Code</strong>, qui sera votre outil principal pour écrire du code, avec son éditeur avancé, son explorateur de fichiers, sa palette de commandes, et tout son outillage intégré ;</p></li><li><p><strong>Chrome</strong> et <strong>Firefox</strong>, deux navigateurs incontournables pour analyser et tester vos projets grâce à leurs puissants outils de développeur, ou <strong><em>devtools</em></strong>.</p></li></ul><p><em>Prêt à vous lancer ? Rejoignez-moi dans ce cours !</em></p><aside data-claire-semantic=\"information\"><p><strong>Objectif pédagogique :</strong></p><p>À l'issue de ce cours, vous serez capable de mettre en place un environnement de développement front-end.</p></aside><p></p>",
+          "audit": "### 🏁 1) Audit Overview\n\n- **Direction:** French → US English  \n- **Domain:** Tech / front-end tooling onboarding (education)\n- **Localizability score:** **88/100**\n- **Penalties (examples):**\n  - **−6** Media risk: embedded Vimeo may be blocked in some corporate/LMS contexts; needs fallback\n  - **−4** Minor terminology consistency: “devtools” casing/usage + “front-end” hyphenation\n  - **−2** Pedagogy: headings are fine, but action-verb headers could be stronger if this is a module intro page\n\n---\n\n### 🌍 2) Deep Cultural & Societal Adaptation Report\n\n| Category | Source segment | Cultural barrier / friction | Proposed “Concept Swap” (Target) | Adaptation effort |\n| --- | --- | --- | --- | --- |\n| Tech ecosystem | “Visual Studio Code” | None (global standard) | Keep “Visual Studio Code (VS Code)” | Low |\n| Tech ecosystem | “Chrome et Firefox” | None (US standard) | Keep; optionally mention “Chrome or Firefox” to avoid implying both are required | Low |\n| Terminology | “outils de développeur, ou devtools” | US learners expect “Developer Tools (DevTools)” (Chrome branding) | “built-in Developer Tools (DevTools)” | Low |\n| Pedagogy/expectations | “Je vais vous accompagner…” | FR mentorship phrasing; US tone is typically more direct | “In this course, you’ll install, configure, and explore…” | Low |\n| Inclusivity/access | Video-only entry point | Some US orgs require accessibility (captions/transcript) | Ensure captions + downloadable transcript | Medium |\n| Platform friction | Vimeo embed | Some networks block Vimeo; LMS sometimes needs specific embed patterns | Provide alternate link + hosted MP4 or mirrored platform | Medium |\n\n---\n\n### 🔗 3) Exhaustive Media & Link Inventory\n\n| Resource type | Original link/name | Risk status | Proposed alternative (Target) | Justification |\n| --- | --- | --- | --- | --- |\n| Video (embed) | `<video src=\"https://vimeo.com/491649859\">…</video>` | **Medium** | Use Vimeo embed iframe (proper player), plus **fallback**: direct link + downloadable MP4 (if available) | The current HTML uses `<video src>` with a Vimeo page URL (not a direct MP4 stream); may not play reliably in browsers/LMS |\n| Link (same as above) | `https://vimeo.com/491649859` | **Low** | Keep; add “Open in new tab” text | Provides fallback access if embed fails |\n\n**UI language mismatch check:** not verifiable from the snippet alone; if the video shows French UI, it will be a **US-localization blocker** unless subtitles/US UI re-recording are planned.\n\n---\n\n### 🚩 4) Textual Blockers (Code, Terminology, Tone)\n\n| Severity | Segment | Issue | Fix recommendation |\n| --- | --- | --- | --- |\n| **Critical** | `<video src=\"https://vimeo.com/491649859\">` | Not a direct video file URL; HTML5 `<video>` likely won’t play | Replace with Vimeo **iframe embed code** or provide an actual MP4 source |\n| High | “Chrome et Firefox… grâce à leurs puissants outils de développeur, ou devtools.” | “devtools” is informal; US expects “Developer Tools (DevTools)” | Use “Developer Tools (DevTools)” and keep capitalization consistent |\n| Medium | “En tant que développeur front-end…” | Hyphenation varies; “front-end developer” is common US form | Use “front-end developer” (adj) / “front end” (noun) consistently |\n| Low | “Prêt à vous lancer ? Rejoignez-moi…” | Tone is fine; in US English, often slightly less “join me” marketing | Optional: “Ready to get started? Let’s begin.” |\n\n**Technical integrity checks**\n- Tags are properly closed (`</video>`, `</a>`, lists, `<aside>`).  \n- No placeholders/variables present.  \n- No keyboard/hardware bias detected in this excerpt.\n\n---\n\n### 🎙️ 5) Phonetic & Dubbing Guide\n\n| Term | Strategy | Phonetic guide (TL) | Syllable impact |\n| --- | --- | --- | --- |\n| Visual Studio Code | Keep official name; optionally add acronym once | “VIZH-oo-uhl STOO-dee-oh KOHd” / “V-S Code” | Neutral |\n| VS Code | Use acronym after first mention | “Vee-Ess Code” | Neutral |\n| Chrome | Keep | “Krohm” | Neutral |\n| Firefox | Keep | “Fai-er-foks” | Neutral |\n| DevTools | Use branded capitalization | “Dehv-Toolz” | Neutral |\n\nLip-sync risk: low for straightforward sentences, but **French → English** often expands; if dubbing, expect **~10–20%** timing adjustment.\n\n---\n\n### 📚 6) Glossary & Comparison Table\n\n| Source term | Proposed target term | Category |\n| --- | --- | --- |\n| développeur front-end | front-end developer | Tech |\n| outils | tools | General |\n| installation, configuration, découverte | install, set up/configure, and explore | Pedagogy |\n| explorateur de fichiers | file explorer | Tech |\n| palette de commandes | Command Palette | Tech (VS Code feature name) |\n| outils de développeur / devtools | Developer Tools (DevTools) | Tech |\n\n---\n\n### 💡 7) Lead Architect’s Note\n\nThis content is **highly portable** to the US market: the tools (VS Code, Chrome, Firefox) are standard and culturally neutral. The main risks are **media implementation** (the Vimeo URL inside an HTML5 `<video>` tag is likely to fail) and **accessibility/compliance** expectations (captions + transcript are commonly required). Recommended action plan: (1) fix the embed method + add a fallback link, (2) standardize US-facing terminology (“Developer Tools (DevTools)”, “Command Palette”), and (3) ensure the video UI language aligns with the target locale or provide subtitles/re-recording if needed.",
+          "translated": "<video src=\"https://vimeo.com/491649859\"><a href=\"https://vimeo.com/491649859\">https://vimeo.com/491649859</a></video><p>As a front-end developer—as with any technical role—you need the right tools.</p><p>In this course, I’ll walk you through installing, setting up, and getting familiar with three essential tools:</p><ul><li><p><strong>Visual Studio Code</strong>, your primary tool for writing code, with its advanced editor, file explorer, Command Palette, and built-in tooling; </p></li><li><p><strong>Chrome</strong> and <strong>Firefox</strong>, two must-have browsers for analyzing and testing your projects using their powerful developer tools, or <strong><em>devtools</em></strong>.</p></li></ul><p><em>Ready to get started? Join me in this course!</em></p><aside data-claire-semantic=\"information\"><p><strong>Learning objective:</strong></p><p>By the end of this course, you’ll be able to set up a front-end development environment.</p></aside><p></p>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "GPT QA Chapter": [
+      {
+        "json": {
+          "output": [
+            {
+              "id": "msg_0eeb4dce74887c71006989b2ff91d881a09569beb74b58583c",
+              "type": "message",
+              "status": "completed",
+              "content": [
+                {
+                  "type": "output_text",
+                  "annotations": [],
+                  "logprobs": [],
+                  "text": "### 🏆 1. FINAL QA SCORE: **0/100**\n\n- **Verdict:** 🔴 **REJECTED** (Needs full rework)  \n- **Summary:** The submission is non-evaluable because both the **SOURCE TEXT** and **TRANSLATED TEXT** are effectively empty (no content to verify), so meaning, terminology, style, and audit compliance cannot be assessed.\n\n---\n\n### 🚀 2. AXE D'AMÉLIORATION (3 QUICK FIXES)\n\n1. **Provide the full SOURCE HTML content:** Paste the actual source snippet between the backticks so QA can verify meaning and structure.  \n2. **Provide the full TRANSLATED HTML content:** Paste the complete target HTML so we can check glossary compliance (e.g., “Developer Tools (DevTools)”, “front-end developer”) and tone.  \n3. **Include the video embed block if present:** The audit flags a **critical** issue around `<video src=\"https://vimeo.com/...\">`; without the block, we can’t confirm whether it was fixed (iframe embed + fallback link).\n\n---\n\n### ⚖️ 3. DETAILED COMPLIANCE CHECK (Evidence-based)\n\n| Category | Audit/Checklist Rule | Actual Found | Severity | Deduction |\n| --- | --- | --- | --- | --- |\n| **Completeness** | Checklist: No omissions; translation must cover all source content | Source content missing/empty | 🔴 Critical | -100 pts |\n| **Meaning** | Checklist: Accuracy is absolute | Not verifiable (no text) | 🔴 Critical | 0 pts (covered by completeness) |\n| **Terminology** | Audit: Use “Developer Tools (DevTools)”, “front-end developer”, etc. | Not verifiable (no text) | 🟠 Major | 0 pts (blocked) |\n| **Media** | Audit: Fix Vimeo `<video src>` issue; use iframe + fallback | Not verifiable (no embed provided) | 🔴 Critical | 0 pts (blocked) |\n| **Style/Headers** | Checklist: Imperative action verbs in headings | Not verifiable | 🟠 Major | 0 pts (blocked) |\n| **Code integrity** | Checklist: HTML/tags intact | Not verifiable | 🟠 Major | 0 pts (blocked) |\n\n> Note: I’m assigning a **hard fail due to missing input**, not because of identified linguistic errors.\n\n---\n\n### 🎙️ 4. DUBBING CHECK (If applicable)\n\n- **Lip-Sync Alert:** Not applicable (no sentences provided).  \n- **Phonetic Check:** Not applicable (no terms present).\n\n---\n\nIf you paste the actual **SOURCE HTML** and the **TRANSLATED HTML**, I’ll run the full audit-based QA scoring (100-point scale) and flag exact lines with glossary violations, embed compliance, and style issues."
+                }
+              ],
+              "role": "assistant"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "GPT QA Chapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPT QA Chapter": {
+      "main": [
+        [
+          {
+            "node": "Format output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format output": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "cdda0478-a4d0-465e-b5ff-c77605a9c2ec",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8524bd12d70e0a97c731d06e7b34aca714fad09c346374a21b1e6e6cde0f217e"
+  },
+  "id": "9MpxvBsBtzpumi3bo7fLX",
+  "tags": []
+}

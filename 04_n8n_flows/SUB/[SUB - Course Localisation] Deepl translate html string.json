@@ -1,0 +1,345 @@
+{
+  "name": "[SUB - Course Localisation] Deepl translate html string",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepl.com/v2/document",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            },
+            {
+              "name": "source_lang",
+              "value": "={{ $('Start').item.json.sourceLang }}"
+            },
+            {
+              "name": "target_lang",
+              "value": "={{ $('Start').item.json.targetLang }}"
+            },
+            {
+              "name": "={{ $('Start').item.json.dicId? \"glossary_id\":\"\" }}",
+              "value": "={{ $('Start').item.json.dicId? $('Start').item.json.dicId:\"\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1968,
+        48
+      ],
+      "id": "ec9472d1-5ec8-4b82-875a-347c242611aa",
+      "name": "Deepl post translation",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lY3GsmAudw993tKe",
+          "name": "Deepl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2176,
+        48
+      ],
+      "id": "5bfaf60c-7dbe-4ab2-a02e-df15a0563e6a",
+      "name": "Wait",
+      "webhookId": "9eeacded-f09f-4fce-9ae5-ba10ad7127a7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.deepl.com/v2/document/{{ $('Deepl post translation').item.json.document_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "document_key",
+              "value": "={{ $('Deepl post translation').item.json.document_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2368,
+        48
+      ],
+      "id": "b764a191-14ed-46e2-9637-61e62ab57a34",
+      "name": "Deepl check completion",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lY3GsmAudw993tKe",
+          "name": "Deepl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.deepl.com/v2/document/{{ $('Deepl post translation').item.json.document_id }}/result",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "document_key",
+              "value": "={{ $('Deepl post translation').item.json.document_key }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2832,
+        16
+      ],
+      "id": "63420c26-a00d-450f-8032-3fd9a98e4873",
+      "name": "Deepl get translated",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lY3GsmAudw993tKe",
+          "name": "Deepl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "done",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "df00af76-151e-448b-8dbf-7c58f9f440f6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "done"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0f07891a-545b-4f47-b800-4348aeb007f5",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2560,
+        32
+      ],
+      "id": "c08841b1-2216-483a-a193-fa049a0191e2",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code node (JavaScript)\n\nconst text = $input.first().json.html\nconst filename = 'file.html'\n\n// Create one output item with a binary \"file\"\nreturn [\n  {\n    json: {\n      filename,\n    },\n    binary: {\n      file: {\n        data: Buffer.from(text, 'utf8').toString('base64'),\n        mimeType: 'text/plain',\n        fileName: filename,\n      },\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        48
+      ],
+      "id": "bb4aed99-c4a9-46fe-a39d-a93b25743aff",
+      "name": "Make html file"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "sourceLang"
+            },
+            {
+              "name": "targetLang"
+            },
+            {
+              "name": "dicId"
+            },
+            {
+              "name": "html"
+            }
+          ]
+        }
+      },
+      "id": "9565de23-eb26-4e60-81c6-ed8698f31881",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        1552,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Deepl error while translating"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2832,
+        176
+      ],
+      "id": "c5c3c2c8-9542-41e5-a2c7-654e44db074e",
+      "name": "Stop and Error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Make html file": {
+      "main": [
+        [
+          {
+            "node": "Deepl post translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deepl post translation": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Deepl check completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deepl check completion": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Deepl get translated",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Make html file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5fd749b6-704c-427c-84b2-a0d25223ee99",
+  "meta": {
+    "instanceId": "8524bd12d70e0a97c731d06e7b34aca714fad09c346374a21b1e6e6cde0f217e"
+  },
+  "id": "T1TnJoCwcg7WjffV",
+  "tags": []
+}

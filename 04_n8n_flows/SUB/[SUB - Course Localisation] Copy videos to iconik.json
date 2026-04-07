@@ -1,0 +1,2445 @@
+{
+  "name": "[SUB - Course Localisation] Copy videos to iconik",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "courseHTML"
+            },
+            {
+              "name": "iconikName"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ef952e5a-87b8-4256-9a14-14dbf1b165e9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "courseHTML",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "video",
+              "cssSelector": "video",
+              "returnValue": "attribute",
+              "attribute": "src",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        0
+      ],
+      "id": "fa76548a-0b3b-4610-bce9-bb665f0f870c",
+      "name": "Extract vimeo URLs"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        640,
+        0
+      ],
+      "id": "e230a610-c19d-4b66-be46-339070ce6d38",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.vimeo.com/videos/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1008,
+        96
+      ],
+      "id": "67b83c32-664c-4cab-ac49-c94a6837f092",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ZbEsJjyu0FLr5yG3",
+          "name": "Vimeo - OC"
+        },
+        "httpBearerAuth": {
+          "id": "yvoegKXfo9SO4u6g",
+          "name": "Vimeo OC"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {id:$input.first().json.link.split('/').pop().split('?')[0]}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        96
+      ],
+      "id": "558c4756-8ebc-4d2a-b1c1-2a06c6dd686b",
+      "name": "Parse vimeo ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "const link = $input.first().json.link\nconst name = $input.first().json.name\nconst source = $input.first().json.download.sort((a,b)=>a.size - b.size).pop().link\n\nreturn {link,name,source}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        96
+      ],
+      "id": "ed056098-067e-43b6-bc98-633cee038615",
+      "name": "Retrieve source link"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "61cd1782-d02a-4f8a-b89a-690e9b919e34",
+              "leftValue": "={{ $json.count_link }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1712,
+        0
+      ],
+      "id": "ea3bfcb5-2aae-43bb-8bc5-a19ec5f6de29",
+      "name": "If videos"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://app.iconik.io/api/assets/v1/collections",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": {{ JSON.stringify($('When Executed by Another Workflow').item.json.iconikName) }}\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1968,
+        0
+      ],
+      "id": "f995e865-f795-4d0c-aec7-8e6f7a7812ff",
+      "name": "Iconik - create collection",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.video\n  .filter(url=>url.includes(\"vimeo.com\"))\n  .map(x=>{return{\"link\":x,\"name\":null,\"source\":null}})"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ],
+      "id": "812af447-f3f8-4d58-88a2-aad41b0b257f",
+      "name": "filter tags"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c3f6e878-612f-4102-8159-1b0a8606bbcd",
+              "leftValue": "={{ $json.source }}",
+              "rightValue": "http",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1328,
+        0
+      ],
+      "id": "06c99c20-4273-4e60-aba8-fd5bde339153",
+      "name": "Filter videos"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $(\"Filter videos\").all()"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2144,
+        0
+      ],
+      "id": "768f5ecb-986e-4ec5-a5e3-d4d4d088a81f",
+      "name": "Loop videos"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "link"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        1536,
+        0
+      ],
+      "id": "2f0f383d-79f2-4a09-aef8-11949ea802c0",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2352,
+        0
+      ],
+      "id": "776abcfa-d3ac-4c65-8739-782b80237e3a",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.source }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2592,
+        96
+      ],
+      "id": "19265021-c3e6-4836-a68f-8957737c7312",
+      "name": "Download vimeo",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://app.iconik.io/API/assets/v1/assets?assign_to_collection=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"analyze_status\": \"N/A\",\n  \"archive_status\": \"NOT_ARCHIVED\",\n  \"collection_id\": {{ JSON.stringify($('Iconik - create collection').first().json.id) }},\n  \"is_online\": true,\n  \"status\": \"ACTIVE\",\n  \"title\": {{ JSON.stringify($(\"Download vimeo\").first().binary.data.fileName) }},\n  \"type\": \"ASSET\"\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2928,
+        96
+      ],
+      "id": "467bd51a-ccae-4ba4-a2d1-d1e6f356b1cc",
+      "name": "Create Iconik asset",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://app.iconik.io/API/files/v1/storages/matching/FILES/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3120,
+        96
+      ],
+      "id": "2cafe4a7-192b-4683-856f-495bed0e5e0b",
+      "name": "Get Iconik storage",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Iconik asset').item.json.id }}/formats/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"user_id\": {{ JSON.stringify($('Create Iconik asset').item.json.created_by_user) }},\n  \"name\": \"ORIGINAL\",\n  \"metadata\": [{\"internet_media_type\": \"video/mp4\"}], \n  \"storage_methods\": [\"S3\"]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3296,
+        96
+      ],
+      "id": "44427936-3b6c-40ab-b576-053a71b4da9c",
+      "name": "Create Iconik format",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Iconik asset').item.json.id }}/file_sets/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"format_id\": {{ JSON.stringify($json.id) }},\n  \"storage_id\": {{ JSON.stringify($('Get Iconik storage').item.json.id) }},\n  \"base_dir\": \"/\",\n  \"name\": {{ JSON.stringify($('Loop Over Items1').item.json.name+\".mp4\") }},\n  \"component_ids\": []\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3472,
+        96
+      ],
+      "id": "536ae46d-6608-432a-ba42-f4a7f28ecff1",
+      "name": "Create Iconik fileset",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Iconik asset').item.json.id }}/files/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"size\":{{ $('Compute filesize').item.json.size }},\n  \"original_name\": {{ JSON.stringify($json.name) }},\n  \"directory_path\": \"\",\n  \"type\": \"FILE\",\n  \"format_id\": {{ JSON.stringify($('Create Iconik format').item.json.id) }},\n  \"file_set_id\": {{ JSON.stringify($json.id) }},\n  \"storage_id\": {{ JSON.stringify($('Get Iconik storage').item.json.id) }},\n  \"multipart_upload_url\": false\n  }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3664,
+        96
+      ],
+      "id": "f223bea1-7b3f-4819-9046-009eb6c87c12",
+      "name": "Create Iconik upload URL",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function sizeToBytes(input) {\n  if (input == null) return NaN;\n\n  const s = String(input).trim();\n  if (!s) return NaN;\n\n  // Fast path: pure number => bytes\n  if (/^\\d+(\\.\\d+)?$/.test(s)) return Math.round(Number(s));\n\n  // Normalize: remove commas, collapse spaces\n  const normalized = s.replace(/,/g, \"\").replace(/\\s+/g, \" \").trim();\n\n  // e.g. \"2.2MB\", \"2.2 MB\", \"456 bytes\", \"10B\", \"1.5GiB\"\n  const match = normalized.match(/^(\\d+(?:\\.\\d+)?)\\s*(bytes?|b|kib|kb|mib|mb|gib|gb|tib|tb)$/i);\n  if (!match) return NaN;\n\n  const value = Number(match[1]);\n  const unitRaw = match[2].toLowerCase();\n\n  // Decimal (SI): KB=1000, MB=1000^2, ...\n  const DEC = { b: 1, kb: 1e3, mb: 1e6, gb: 1e9, tb: 1e12 };\n  // Binary (IEC): KiB=1024, MiB=1024^2, ...\n  const BIN = { kib: 1024, mib: 1024 ** 2, gib: 1024 ** 3, tib: 1024 ** 4 };\n\n  let multiplier;\n  if (unitRaw === \"byte\" || unitRaw === \"bytes\" || unitRaw === \"b\") multiplier = 1;\n  else if (unitRaw in DEC) multiplier = DEC[unitRaw];\n  else if (unitRaw in BIN) multiplier = BIN[unitRaw];\n  else return NaN;\n\n  return Math.round(value * multiplier);\n}\n\nreturn {size:sizeToBytes($('Download vimeo').first().binary.data.fileSize)}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        96
+      ],
+      "id": "25220080-5c7b-4072-a226-0bd38a7919fb",
+      "name": "Compute filesize"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://app.iconik.io/API/jobs/v1/jobs/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"object_type\": \"assets\",\n  \"object_id\": {{ JSON.stringify($('Create Iconik asset').item.json.id) }},\n  \"type\": \"TRANSFER\",\n  \"status\": \"STARTED\",\n  \"title\": \"Upload {{ $('Download vimeo').item.binary.data.fileName }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3840,
+        96
+      ],
+      "id": "2d4290e0-42be-44c5-882b-ed36eeb937a7",
+      "name": "Start job",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('Create Iconik upload URL').item.json.upload_url }}",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "={{ $('Download vimeo').item.binary.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4000,
+        96
+      ],
+      "id": "102fd31d-a088-456f-880c-24ba97be7da5",
+      "name": "Upload file"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Iconik asset').item.json.id }}/files/{{ $('Create Iconik upload URL').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"status\":\"CLOSED\",\"progress_processed\":100}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4160,
+        96
+      ],
+      "id": "6aecde9a-ce43-4bea-98e1-c4385ce210c4",
+      "name": "Patch file",
+      "executeOnce": true,
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Iconik asset').item.json.id }}/files/{{ $('Create Iconik upload URL').item.json.id }}/keyframes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4320,
+        96
+      ],
+      "id": "c89a1708-90f3-426c-b974-643e1a102f34",
+      "name": "Generate keyframes",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://app.iconik.io/API/jobs/v1/jobs/{{ $('Start job').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"progress_processed\":100, \"status\": \"FINISHED\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4496,
+        96
+      ],
+      "id": "c684d32c-b02d-4a65-8d6c-28962330a869",
+      "name": "Finish Job",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "link"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        2672,
+        -96
+      ],
+      "id": "620ac734-e6e5-4258-830f-ee3b823c6923",
+      "name": "Summarize1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://app.iconik.io/API/assets/v1/collections/{{ $('Iconik - create collection').first().json.id }}/shares/url",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"allow_approving_comments\": true,\n  \"allow_comments\": true,\n  \"allow_download\": true,\n  \"allow_download_proxy\": false,\n  \"allow_setting_approve_status\": false,\n  \"allow_upload\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2848,
+        -96
+      ],
+      "id": "52808f42-d182-4373-a582-ec5009e54536",
+      "name": "Make share link",
+      "credentials": {
+        "httpCustomAuth": {
+          "id": "mwyh3rkcrTowV6vx",
+          "name": "Iconik - OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {'Iconik URL':$input.first().json.url}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3056,
+        -96
+      ],
+      "id": "3913e67d-dc6b-4a40-ac10-a40194639fa7",
+      "name": "Output"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {'Iconik URL':null}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        208
+      ],
+      "id": "9707b9cf-e72a-4152-ada8-a402199e4b7e",
+      "name": "Output1"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "courseHTML": "<video src=\"https://vimeo.com/256607984\"><a href=\"https://vimeo.com/256607984\">https://vimeo.com/256607984</a></video><p>Au sein des entreprises, l’écrit reste le vecteur principal de communication. Mais on peut parfois se sentir démuni face à toutes les règles à respecter... Les écrits restent très <strong>codifiés</strong>, même si les emails s'échangent très facilement.</p><p>Il faut donc apprendre à rédiger correctement et efficacement vos écrits dans le cadre professionnel ! Cela vous permettra de montrer votre maîtrise du sujet et vos compétences en <strong>communication</strong>.</p><p>Tout au long du cours, je vous donnerai des <strong>exemples concrets</strong> qui vous permettront de mieux faire passer vos messages à l'écrit. Vous aurez ainsi en main les clés pour rédiger dans le contexte professionnel, en fonction de votre objectif, de votre cible et du format choisi.</p><p>Quel que soit votre métier, vous y trouverez les éléments qui vous permettront de progresser et d'acquérir cette compétence essentielle !</p><aside data-claire-semantic=\"information\"><p>Objectifs : à la fin de ce cours, vous serez capable de...</p><ul><li><p>Préparer vos écrits en définissant des objectifs, une cible et un format ;</p></li><li><p>Structurer vos idées et hiérarchiser l’information ;</p></li><li><p>Développer un raisonnement en utilisant des techniques rhétoriques ;</p></li><li><p>Adapter la rédaction de votre texte en fonction du format choisi ;</p></li><li><p>Effectuer une relecture efficace ;</p></li><li><p>Travailler votre mise en page.</p></li></ul></aside><aside data-claire-semantic=\"warning\"><p>Pré-requis : aucun ! Ce cours est ouvert à toutes et à tous :)</p></aside><p>Ce cours vous aidera à rédiger vos écrits. Si vous souhaitez plutôt apprendre à utiliser un outil de traitement de texte, vous pouvez suivre le cours <a href=\"/fr/courses/5870066-realisez-des-documents-texte\">Réalisez des documents textes</a> !</p>\n<h2>Préparez votre écrit</h2>\n\n<h3>Définissez des objectifs clairs</h3>\n<video src=\"https://vimeo.com/256607328\"><a href=\"https://vimeo.com/256607328\">https://vimeo.com/256607328</a></video><p>Bienvenue dans ce cours ! Nous allons voir ensemble pas à pas, avec des exemples précis, comment préparer, rédiger et relire vos écrits professionnels.</p><p>L’objectif de ce chapitre est de voir concrètement comment préparer vos écrits professionnels, en commençant par définir votre objectif.</p><h4>Définissez votre objectif</h4><p>Il faut en effet vous interroger sur votre objectif : que souhaitez vous faire passer comme message à la personne à laquelle vous vous adressez par écrit ?</p><aside data-claire-semantic=\"information\"><p>Les objectifs peuvent être multiples :</p><ul><li><p>présenter des résultats, des évènements ;</p></li><li><p>transmettre une position de l’entreprise sur un sujet ;</p></li><li><p>réaliser une réclamation ;</p></li><li><p>informer, former, expliquer ;</p></li><li><p>solliciter des informations, des actions ;</p></li><li><p>donner des instructions.</p></li></ul></aside><p>Dépendront de votre objectif :</p><ul><li><p>le <strong>support</strong> utilisé : nous n’envoyons pas, par exemple, une lettre pour demander l’horaire d’une réunion à un collègue.</p></li><li><p>les choix <strong>rédactionnels </strong>: nous ne nous adressons pas, par exemple, de la même manière si on demande une information ou si on répond à une réclamation.</p></li></ul><h4>Tirez les conséquences de vos objectifs</h4><h4>Les conséquences en termes de support</h4><p>Vous pouvez très souvent associer un support à un objectif donné.<strong> </strong></p><p>Si votre objectif est de <strong>donner des instructions, privilégiez une note d’instructions ou note de service.</strong> Cela favorisera la conservation des informations et entraînera une possible réutilisation.</p><blockquote><p>Par exemple, une note d’instructions comptables peut être réutilisée chaque année avec une légère actualisation.</p></blockquote><p>Si votre objectif est de rapporter <strong>des faits</strong><strong>, privilégiez un compte-rendu</strong>. </p><blockquote><p>Par exemple, un compte-rendu de réunion permet de retrouver le contenu d’une réunion et de garder une trace des décisions et des débats.</p></blockquote><p>Si votre objectif est de <strong>réaliser une réclamation, privilégiez une lettre</strong>. Cela donnera un caractère plus formel et vous permettra en plus d’assurer une meilleure traçabilité de l’envoi.</p><blockquote><p>Par exemple, pour une réclamation en matière d’impôts, une lettre recommandée avec accusé de réception est nécessaire.</p></blockquote><p>Si votre objectif est <strong>d’informer, privilégiez un email</strong>. Cela sera plus souple et évitera d’encombrer ultérieurement les dossiers ou le serveur informatique avec des informations qui ne seront peut-être plus d’actualité très rapidement.</p><h4>Les conséquences en termes de choix rédactionnels</h4><p>La définition de l’objectif est primordiale car elle constitue votre « feuille de route » également pour vos choix rédactionnels, du début jusqu’à la fin du texte.</p><aside data-claire-semantic=\"information\"><p>Cela concerne notamment le choix de la formule de politesse, c’est-à-dire la formule écrite qui sert à terminer un écrit de façon polie.</p></aside><p><strong>Exemples :</strong></p><ul><li><p>Si votre interlocuteur vous a fourni des informations et que vous souhaitez un complément d’information, commencez par remercier poliment votre interlocuteur pour les premières informations déjà communiquées. Cela l’encouragera à continuer à coopérer.</p></li><li><p>Si vous interlocuteur vous adresse une réclamation, commencez votre réponse par « Nous comprenons votre mécontentement ». La prise en compte de son mécontentement apaisera votre interlocuteur.</p></li><li><p>Si vous souhaitez une action de la part de votre interlocuteur, privilégiez la formule de politesse suivante : « Je vous remercie par avance ». Nous reviendrons ultérieurement sur le choix de la formule de politesse.</p></li></ul><p></p><p>Vous savez maintenant définir l’objectif de votre écrit professionnel. Étudions maintenant la cible de votre écrit !</p>\n<h3>Identifiez votre cible</h3>\n<video src=\"https://vimeo.com/256607536\"><a href=\"https://vimeo.com/256607536\">https://vimeo.com/256607536</a></video><p>Il faut maintenant identifier votre cible. Cela vous permettra aussi de choisir le support ainsi que les choix rédactionnels.</p><h4>Identifiez les types de destinataires</h4><p>Les écrits professionnels peuvent être destinés à l’interne ou à l’externe de l’entreprise.</p><h4>Les destinataires internes</h4><p>Les écrits destinés à <strong>l’interne</strong> de l’entreprise sont notamment :</p><ul><li><p>les rapports internes ;</p></li><li><p>les emails qui donnent des consignes de travail ou font le point sur l'organisation ;</p></li><li><p>les notes d’instructions ;</p></li><li><p>les formations internes ;</p></li><li><p>les informations diffusées sur un intranet ou sur une messagerie interne.</p></li></ul><aside data-claire-semantic=\"information\"><p>Les <strong>intranets</strong> et les <strong>messageries internes</strong> sont de plus en plus utilisés au sein des entreprises. En effet, ils permettent de diffuser l’information sans encombrer les boites mail. Cela évite aux collaborateurs de perdre un temps significatif à trier leur boite mail. Adoptez donc ce format si le contenu s'y prête !</p></aside><h4>Les destinataires externes</h4><p>Les écrits destinés à <strong>l’externe</strong> de l’entreprise sont notamment :</p><ul><li><p>les lettres ;</p></li><li><p>les emails ;</p></li><li><p>les communiqués de presse ;</p></li><li><p>les publicités ;</p></li><li><p>les écrits destinés à être diffusés sur le site institutionnel de l’entreprise ou sur les réseaux sociaux (Twitter, LinkedIn, Facebook, etc.)</p></li></ul><aside data-claire-semantic=\"warning\"><p>Les écrits destinés à l'externe doivent être particulièrement soignés. Il faut en effet éviter à tout prix de donner une mauvaise image de votre entreprise à travers des documents inadaptés ou contenant des erreurs !</p></aside><h4>Adaptez votre écrit à votre cible</h4><h4><strong>Personnalisez votre écrit</strong></h4><p>Personnalisez au maximum votre écrit professionnel, surtout lorsqu’il s’agit d’un email. L’interlocuteur sera beaucoup plus <strong>impliqué</strong> ! En fonction de la cible, adaptez notamment la <strong>formule d’appel</strong>, c’est-à-dire les premiers mots de votre écrit professionnel.</p><p>Pour les premières phrases, commencez si possible par la <strong>formule</strong> « Comme convenu / Comme évoqué lors (…) », cela permet de personnaliser votre message et de replacer le contexte, ce qui aidera votre interlocuteur à saisir plus rapidement les enjeux.</p><aside data-claire-semantic=\"error\"><p>Bannissez le « Suite à » ❌ qui n’est pas correct et préférez le « À la suite de » ✅.</p></aside><p>Privilégiez un langage standard et compréhensible par tous. Cela évitera de commettre des impairs et sera plus simple pour vous.</p><aside data-claire-semantic=\"warning\"><p>Soyez vigilant à la <strong>cible directe</strong> (le ou les destinataires de votre écrit professionnel) mais aussi à la <strong>cible indirecte</strong> (les personnes susceptibles d’avoir accès à votre écrit professionnel).</p><p>En effet, votre écrit professionnel pourrait se retrouver entre les mains d’une personne qui n’était pas le destinataire à l’origine (du fait d'un transfert de mail par exemple).</p><p>Cela vous évitera de commettre une maladresse, comme par exemple diffuser des informations sensibles ou adopter un ton qui n’est pas adapté. :euh:</p></aside><h4><strong>Adaptez les premières lignes à votre destinataire</strong></h4><p>Afin d’anticiper comment va être reçu votre écrit professionnel, mettez-vous dans la peau de votre interlocuteur.</p><ul><li><p>L’interlocuteur souhaite un texte <strong>clair</strong>, c’est-à-dire qui ne nécessitera pas d’effort de compréhension de sa part. Faites donc preuve de pédagogie.</p></li><li><p>L’interlocuteur ne souhaite pas devoir fournir un effort de recherche d’informations complémentaires lorsqu’il recevra votre écrit. Votre document doit donc être <strong>concis mais complet</strong>.</p></li><li><p>Enfin, vous devez vous interroger avant d'écrire sur les <strong>raisons</strong> qui pousseront votre lecteur à passer du temps à vous lire : va-t-il s’informer ? Être en mesure de décider d’une action à mener ? Apprendre quelque chose ? Vérifiez donc que votre écrit correspond à son besoin.</p></li></ul><aside data-claire-semantic=\"information\"><p>Commencez par une synthèse adaptée aux besoins spécifiques de votre lecteur avant d’indiquer les développements nécessaires pour communiquer une information exacte et complète.</p></aside><p>Exemple de synthèse en introduction :</p><blockquote><p>« Bonjour Mathieu,</p><p>Comme évoqué lors de la réunion du 12 mars dernier, je reviens vers toi concernant la possibilité d’obtenir une réduction d’impôt mécénat pour les dons réalisés en 2017.</p><p>Les dons effectués en 2017 pourront donner lieu à application d’une réduction d’impôt mécénat, à hauteur de 60 % du montant des dons effectués.</p><p>Les conditions de fond et de forme à respecter sont les suivantes :</p><p>(…)</p><p>Bien cordialement,</p><p>Thomas ».</p></blockquote><p></p><p>Vous savez maintenant préparer vos écrits professionnels en fonction de votre objectif et de la cible. Apprenez maintenant à choisir le format le plus pertinent !</p>\n<h3>Choisissez le format le plus pertinent</h3>\n<video src=\"https://vimeo.com/256607562\"><a href=\"https://vimeo.com/256607562\">https://vimeo.com/256607562</a></video><p>En fonction de votre objectif et de votre cible, que vous avez déjà définis, vous devez choisir le format le plus pertinent, c’est-à-dire le format qui vous permettra de communiquer de manière fluide, mais aussi de capitaliser sur votre travail, en vue d’une possible réutilisation.</p><aside data-claire-semantic=\"information\"><p>Il existe plusieurs types de format que nous allons détailler :</p><ul><li><p>la note de service ou note d'instructions ;</p></li><li><p>la note d'information ;</p></li><li><p>la note d'analyse ;</p></li><li><p>la note de synthèse ;</p></li><li><p>le compte-rendu.</p></li></ul></aside><h4>Choisissez entre les différents types de format</h4><h4>La note de service ou note d’instructions</h4><p>Une note d’instructions est un document écrit qui retrace un processus interne à l’entreprise, un mode de fonctionnement. La note d’instruction aura pour but de matérialiser à l’écrit des pratiques ou des positions de l’entreprise. Cela permet de mettre en place des process et contribue ainsi à la bonne gestion de votre entreprise. Ces informations ont vocation à rester un certain temps dans l'entreprise, c'est pourquoi ils diffèrent d'une simple note d'information.</p><h4>La note d’information</h4><p>Une note d’information est un document écrit qui transmet une information dans le cadre des activités de l’entreprise. Elle pourra être transmise par email ou via l'intranet ou la messagerie interne de l'entreprise.</p><h4>La note d’analyse</h4><p>Une note d’analyse est un document écrit qui permet de retracer une analyse effectuée sur un sujet donné. La note d’analyse est souvent rédigée par des spécialistes au sein de l’entreprise.</p><blockquote><p>Par exemple,<strong> </strong>une note d’analyse fiscale rédigée par les fiscalistes ou une note d’analyse comptable par les comptables, à destination des autres équipes dans l'entreprise.</p></blockquote><aside data-claire-semantic=\"information\"><p>Privilégiez, pour les questions récurrentes que vous recevez, une note d’analyse plutôt qu’un email. Cela favorisera une réutilisation possible. Par ailleurs, une note d’analyse peut être conservée plus facilement par le destinataire qui évitera de vous reposer la même question ou ciblera sa question.</p><p>Plutôt que de demander une analyse complète, votre interlocuteur ne demandera qu’une confirmation ou une précision par mail, par exemple &quot;la loi est-elle toujours en vigueur ?&quot;.</p></aside><h4>La note de synthèse</h4><p>La note de synthèse est un écrit professionnel qui vise à résumer de manière synthétique et ordonnée plusieurs documents, soit sous forme de texte, soit sous forme de représentations (schémas).</p><p>L’objectif de la note de synthèse est donc de faire du gagner du temps au lecteur qui pourra s’y référer pour avoir une vue d’ensemble sur l’intégralité des documents.</p><h4>Le compte-rendu</h4><p>Le compte-rendu de réunion est un écrit professionnel interne qui relate de façon plus ou moins détaillé (selon sa forme) le contenu d’une réunion auquel le rédacteur a assisté.</p><p>Le compte-rendu peut prendre plusieurs formes :</p><ul><li><p>Le <strong>compte-rendu chronologique</strong> suit un plan linéaire, en retraçant l’intégralité des échanges oraux. Il n’est utilisé que lorsqu’il est important de mettre en évidence les positions individuelles de chacun des intervenants.</p></li><li><p>Le <strong>compte-rendu synthétique</strong> reconstruit l’ensemble des interventions de manière résumée. Le rédacteur réalise donc un travail de synthèse. Il supprimera notamment la mention de la personne auteure de l’intervention orale.</p></li><li><p><strong>Le compte-rendu synoptique</strong> est un compte-rendu réalisé sous forme de tableau. Le compte-rendu suit un plan thématique et est rédigé de manière très synthétique.</p></li></ul><aside data-claire-semantic=\"information\"><p>Sauf besoin particulier, privilégiez le plan thématique. Cela permet en effet d’être plus synthétique, de comprendre rapidement les sujets abordés. Il faut retravailler les prises de note afin d’ajouter des titres par exemple. Une retranscription non retravaillée des propos tenus lors d’une réunion sera fastidieuse à lire et donc très souvent inutile ! </p></aside><p>Le compte-rendu a trois objectifs.</p><ul><li><p>Il sert à <strong>laisser une trace écrite d’une situation vécue en entreprise</strong>. Le plus souvent, il s’agira donc d’une réunion.</p></li><li><p>Il sert aussi à constituer un <strong>outil de travail  partagé</strong>, c’est-à-dire un document de référence partagé par tous afin de <strong>valider une compréhension</strong> identique de la situation vécue par l’ensemble des participants.</p></li><li><p>Enfin, il permet de partager les informations communiquées avec les <strong>personnes absentes.</strong></p></li></ul><div data-claire-semantic=\"question\"><p>Comment travailler mon compte-rendu ?</p></div><p>Vous devez <strong>reformuler les propos, tant qu’ils restent fidèles aux propos</strong> tenus à l’oral.</p><p>Tâchez de ne pas oublier les détails (chiffres, dates évoquées) car ce sont souvent ce type d’informations que vont chercher les interlocuteurs lorsqu’ils relisent les comptes-rendus.</p><p>Éliminez les doublons, c’est-à-dire les propos qui reviennent plusieurs fois dans la conversation.</p><p>Enfin, comme dans tous les écrits professionnels, <strong>privilégiez les phrases courtes.</strong></p><h4>Distinguez le compte-rendu et le rapport</h4><p>Deux formats peuvent être confondus : le compte-rendu et le rapport. Voici des éléments pour les distinguer.</p><h5>Le compte rendu :</h5><ul><li><p>Le compte-rendu est un <strong>document objectif</strong> n’engageant son rédacteur que sur la qualité de la forme (la rédaction, la mise en page), mais pas du fond. ;</p></li><li><p>Le compte-rendu sert à <strong>reformuler de manière plus synthétique</strong> un contenu exprimé oralement généralement ; </p></li><li><p>Le compte-rendu sert à transmettre des informations <strong>de manière neutre.</strong></p></li></ul><p>Les qualités que vous devez développer pour rédiger des comptes-rendus de qualité sont donc l’écoute, la neutralité et l’esprit de synthèse.</p><h5>Le rapport :</h5><ul><li><p>Un rapport est un document qui <strong>engage la responsabilité personnelle</strong> de son rédacteur <strong>sur le fond et sur la forme ;</strong></p></li><li><p>Un rapport un document qui permet de développer une analyse autour d’une problématique définie ; </p></li><li><p>Un rapport contient une analyse personnelle d’un sujet. Il peut par exemple permettre de  proposer des pistes de résolution du problème ; </p></li><li><p>Un rapport permet de réaliser <strong>une argumentation dans le but de convaincre.</strong></p></li></ul><p>Vous devez éviter les doublons et tâcher d’être synthétique. Le rapport doit présenter une <strong>analyse détaillée et argumentée</strong>. Ce n’est pas pour autant qu’il faut faire du verbiage, c’est-à-dire un discours avec une abondance de paroles qui disent peu de choses.</p><aside data-claire-semantic=\"warning\"><p>Nous y reviendrons ultérieurement, mais dans le cadre d’un rapport, vous devez insérer des images pour illustrer des propos complexes, commenter les chiffres et rompre ainsi la monotonie de la lecture du texte. </p></aside><p></p><p>Vous connaissez dorénavant les différents types de format et êtes capables de les choisir en fonction de votre situation. Maintenant, vous devez préparer et structurer le contenu de votre écrit professionnel.</p><p></p><p></p><p></p>\n<h3>Structurez vos idées et hiérarchisez l'information</h3>\n<video src=\"https://vimeo.com/256607573\"><a href=\"https://vimeo.com/256607573\">https://vimeo.com/256607573</a></video><p>Vous avez presque terminé de préparer votre écrit professionnel ! Pour finir cette préparation, vous devez structurer vos idées et hiérarchiser l’information. En effet, même si vous choisissez le format le plus adapté à votre situation et que vous rédigez parfaitement, un texte décousu ne sera pas efficace pour communiquer. :)</p><h4>Rassemblez les informations</h4><p>Dans un premier temps, vous devez rassembler toutes les informations concernant le sujet que vous allez évoquer dans votre écrit professionnel.</p><aside data-claire-semantic=\"information\"><ul><li><p>Si les sources sont d'un même format et qu'il n'y en a pas trop, vous pouvez les réunir dans un <strong>document</strong> unique.</p></li><li><p>Si les sources sont multiples et de différents formats, vous pouvez les réunir sous un même <strong>dossier</strong>.</p></li></ul></aside><p>Gardez bien toutes ces informations au même endroit pour pouvoir y accéder au fur et à mesure de votre rédaction ! C'est également important de garder une trace une fois votre écrit rédigé pour pouvoir y revenir par la suite sans passer du temps à retrouver les informations, par exemple si quelqu'un vous demande des précisions ou la source de vos éléments.</p><h4>Sélectionnez les informations utiles au destinataire</h4><p>Vous connaissez sans doute beaucoup d'éléments sur le sujet de votre écrit, mais votre interlocuteur n'a pas besoin de tous ces éléments. Sélectionnez donc uniquement les informations utiles à votre destinataire. Vous pourrez compléter ensuite si besoin.</p><blockquote><p>Par exemple, si vous travaillez dans un cabinet de conseil, et que vous apprenez qu’une loi a changé et a des conséquences pour votre client, vous devrez être <strong>concis et informatif</strong> dans un premier temps. Si en revanche, votre client a déjà fait appel à vos services et vous demande une précision, vous rentrerez plus dans le détail. Chaque chose en son temps !</p></blockquote><p>Dans un contexte professionnel, chaque interlocuteur reçoit beaucoup d’informations quotidiennement. Vous devez donc trier les informations et ne lui communiquer que ce qui est important pour lui. Rien de plus énervant en effet que de recevoir un email contenant beaucoup d'informations qui ne nous concernent pas directement !</p><blockquote><p>Par exemple, si votre entreprise est implantée sur plusieurs sites, inutile de communiquer à l’ensemble des sites des informations qui ne concernent qu’un site en particulier !</p></blockquote><h4>Adaptez l’information</h4><p>Vous devez également adopter le style de vocabulaire selon l’expertise de votre interlocuteur. Vous avez sans doute une spécialité, mais ce n’est pas forcément la même que celle de celui à qui vous adressez un écrit !</p><p>Adaptez donc votre vocabulaire : <strong>pas de mot technique ni de jargon</strong> si vous vous adressez à la direction ou à un membre d’une autre équipe. Relisez-vous bien en essayant d’expliquer les choses de manière la plus simple possible. Si vous devez passer par un vocabulaire spécifique, expliquez-le bien.</p><h4>Organisez l’information</h4><p>Afin d’être efficace, les informations doivent être <strong>ordonnées</strong> et présentées dans une certaine logique. Vous devez donc réaliser <strong>un plan</strong>. En effet, même si votre écrit est rédigé dans une grammaire et dans un style parfait, l’interlocuteur sera perdu si les idées s’enchaînent sans lien et sans suite logique !</p><p><strong>Plusieurs types de plan existent :</strong></p><h4><strong>Le plan chronologique</strong></h4><p>Le plan chronologique peut être utile dans un compte-rendu par exemple car il permet de rapporter la chronologie des faits.</p><h4><strong>Le plan thématique</strong></h4><p>Le plan thématique est utile lorsque vous devez examiner différents angles d’un sujet.</p><blockquote><p>Exemple :</p><p>« L’entreprise BUTEX a décidé de renouveler l’ensemble de son parc informatique sur le site de Colombes.</p><p>D’un point de vue organisationnel, le renouvellement du parc entrainera une perte de productivité le temps de la mise en route, puis s’accompagnera d’une nette amélioration.</p><p>D’un point de vue trésorerie, la réalisation de l’investissement engendrera une sortie de cash sur l’année 2018 à hauteur de 50 000 €.</p><p>D’un point de vue comptable, le matériel informatique nouvellement acquis sera amorti sur 5 ans, entrainant (…) »</p></blockquote><h4><strong>Le plan argumentatif</strong></h4><p>Le plan argumentatif sera utile par exemple lorsque votre interlocuteur ne partage pas votre solution préconisée.</p><aside data-claire-semantic=\"information\"><p>Le plan sera la suivant :</p><ol><li><p><strong>Thèse</strong> : vous indiquez votre opinion</p></li><li><p><strong>Antithèse</strong> ou <strong>concession</strong> : vous montrez que vous êtes ouvert à l’opinion de votre interlocuteur et que avez saisi la situation dans sa globalité, que vous comprenez les raisons qui le poussent à promouvoir cette solution. </p></li><li><p><strong>Synthèse</strong> : vous proposez une solution proposée, qui pourra être la vôtre, si vous démontrez que les arguments mentionnés dans l’antithèse ne sont pas pertinents, ou bien le fruit d’un consensus entre votre position et celle de votre interlocuteur.</p></li></ol></aside><blockquote><p><strong>Exemple</strong> :</p><p> [Thèse] Ce prestataire ne me semble pas être la solution à notre problème. </p><p>[Antithèse ou concession] J'ai bien compris que le prix qu'il propose n'est pas élevé et que nous avons des contraintes financières importantes en ce moment. </p><p>[Synthèse] Cependant, même à petit prix, si le travail n'est pas fait correctement, nous n'aurons rien réglé. Je vous propose donc de demander une réduction de 10 % à l'autre prestataire pour que nous puissions combiner qualité et prix abordable. </p></blockquote><p></p><p>Pour marquer les différentes étapes de votre plan, pensez à utiliser des mots de liaison !</p><p>Vous savez maintenant préparer vos écrits professionnels. Place à la rédaction !</p>\n<h2>Lancez-vous dans la rédaction</h2>\n\n<h3>Développez un raisonnement</h3>\n<video src=\"https://vimeo.com/256612946\"><a href=\"https://vimeo.com/256612946\">https://vimeo.com/256612946</a></video><p>Vous savez désormais préparer vos écrits. Apprenez maintenant à adapter votre rédaction en fonction des objectifs, de la cible et du support choisi.</p><p>En fonction de l’objectif et de la cible, vous devez sélectionner une forme de discours, de laquelle découlera un type de raisonnement !</p><h4>Choisissez une forme de discours</h4><h4>Le texte descriptif</h4><p>Le texte descriptif a pour but de présenter des faits. Par exemple, à la suite du déménagement d’un service dans un autre bâtiment, vous devez informer les salariés de la méthode pour reconfigurer les imprimantes.</p><aside data-claire-semantic=\"warning\"><p>Choisissez un ton neutre, restez factuel et écrivez votre texte au présent ! </p></aside><blockquote><p>Exemple :  </p><p>&quot;Pour reconfigurer les imprimantes, le mode opératoire est le suivant :</p><p>cliquez sur le lien suivant (…) ;<br />sélectionnez l’imprimante C07_12_LX950 ;<br />Puis, allez dans panneau de configuration (…). &quot; </p></blockquote><h4>Le texte explicatif</h4><p>Le texte explicatif fournit les informations nécessaires à la compréhension.</p><aside data-claire-semantic=\"warning\"><p>Utilisez les mots de liaison pour convaincre !</p></aside><blockquote><p>Exemple :</p><p>« Vous souhaitez connaitre les raisons de l’augmentation de la prévision de charge d’impôts sur les sociétés de votre entreprise.</p><p>Selon nos informations, le gouvernement prévoit d’introduire une taxe exceptionnelle d’impôt sur les sociétés pour l’année 2017 pour les entreprises qui réalisent un chiffre d’affaire supérieur à 3 milliards d’euros.</p><p>En conséquence, votre entreprise, qui a réalisé un chiffre d’affaires de 3,7 milliards d’euros en 2017, est impactée par cette nouvelle mesure. »</p></blockquote><h4>Le texte injonctif</h4><p>Le texte injonctif vise à donner des instructions.</p><aside data-claire-semantic=\"warning\"><p>Pensez néanmoins à expliquer le bienfondé des instructions afin de faire adhérer votre lecteur ! </p></aside><blockquote><p>Exemple :</p><p>« Comme évoqué lors de la réunion de présentation concernant les nouvelles obligations comptables, les entreprises qui réalisent des échanges avec des filiales situées à l’étranger doivent communiquer chaque année la déclaration n°2257-SD.</p><p>Dans ce cadre, nous vous prions de bien vouloir recenser pour le 12 février prochain l’ensemble de vos prestations réalisées au bénéfice de filiales étrangères ». </p></blockquote><h4>Le texte argumentatif</h4><p>Le texte argumentatif vise à soutenir un raisonnement ou à convaincre quelqu’un de son point de vue.</p><aside data-claire-semantic=\"warning\"><p>Soyez positif, même lorsque vous marquez votre désaccord ! Cela obligera votre interlocuteur à réfléchir à votre position ou sollicitation. Il devra en retour utiliser le même registre pour vous répondre : il devra donc utiliser des arguments convaincants et vous répondre avec un ton courtois.</p></aside><blockquote><p>Exemple :</p><p>&quot;Bonjour Caroline,</p><p>À l’issue du processus de recrutement en interne pour le poste de développeur, il m’a été proposé de rejoindre les équipes installées en Espagne.</p><p> À ce stade, les modalités RH sont les suivantes : (…)</p><p> Je n’envisage pas le schéma actuel proposé car (…)</p><p> Pourrions-nous, s’il vous plait, échanger sur ce point rapidement ?</p><p> Je vous souhaite une agréable journée.</p><p> Pierre&quot; </p></blockquote><aside data-claire-semantic=\"information\"><p>Deux registres pour argumenter peuvent être utilisés : </p><ul><li><p><strong>Persuader </strong>: c’est le fait d’amener quelqu'un à croire, à penser, à vouloir, à faire quelque chose, en jouant sur sa sensibilité, par voie de séduction.</p></li><li><p><strong>Convaincre </strong>: c’est le fait d’amener quelqu'un à admettre une façon de penser ou de se conduire en lui exposant les raisons qu'il peut avoir de l'adopter.</p></li></ul></aside><p>Dans un contexte professionnel, vous devrez le plus souvent<strong> convaincre</strong>. Dans ce cas, le discours s’adressera davantage à la raison qu’aux émotions. Vous devrez <strong>utiliser des arguments</strong>, c'est pourquoi il faut choisir un type de raisonnement !</p><h4>Choisissez un type de raisonnement</h4><h4><strong>Le raisonnement d'autorité</strong></h4><p>Le raisonnement d’autorité consiste à invoquer une autorité - par exemple la hiérarchie, ou une loi - lors d’une argumentation, en accordant de la valeur à un propos en fonction de son origine plutôt que de son contenu.</p><blockquote><p>Exemple : « La politique RH de l'entreprise prévoit actuellement que, dans le cadre d’un détachement au sein d’une filiale en Espagne, le versement de la prime d’ancienneté est suspendu ».  </p><p>Ici, c'est l'origine du message, c'est-à-dire le service RH du groupe, qui prime. C'est cela qui va convaincre l'interlocuteur, car le service a autorité sur ces éléments.</p></blockquote><h4><strong>Le raisonnement logique</strong></h4><p>Le raisonnement logique consiste à établir une relation de cause à conséquence entre deux choses.</p><blockquote><p>Exemple : « Les demandes de mobilité au cours d’une année doivent parvenir au service RH avant le 1er janvier de l’année concernée. En l'occurrence, pour l’année 2018, votre demande de mobilité nous est parvenue le 12 janvier 2018. Dans ce cadre, notre service ne peut donner une suite favorable à votre demande de mobilité en 2018. ». </p><p>Ici, ce qui compte, c'est l'enchaînement logique : la date de la demande entraîne une impossibilité de la satisfaire. </p></blockquote><h4><strong>Le raisonnement analogique</strong></h4><p>Le raisonnement analogique consiste à réaliser une comparaison pour convaincre.</p><blockquote><p>« Le magasin situé à Marseille a réalisé une augmentation de chiffre d'affaires de 6 % cette année. Comme votre magasin a des contraintes similaires, nous attendons une augmentation d'au moins 5 % de votre chiffre d'affaires. »</p></blockquote><h4><strong>Le raisonnement par concession</strong></h4><p>Le raisonnement par concession consiste à anticiper les différences de position et à montrer que vous avez bien saisi la situation dans sa globalité.</p><blockquote><p>« J’ai bien noté qu’une réfection de la peinture était nécessaire dans le bâtiment B2 de l’usine de Nanterre. Cependant, le devis communiqué par l’entreprise s’élève à 50 000 €. De plus, il est prévu de déménager le bâtiment dans 18 mois. Dans ce cadre, ne pensez-vous pas qu’il serait de reporter toute dépense de réfection dans le bâtiment B2 de l’usine de Nanterre ? »</p><p>Dans ce cas, la personne fait une concession en notant que la réfection de la peinture est nécessaire, mais justifie son refus en apportant des éléments supplémentaires. </p></blockquote><p></p><p>Vous savez dorénavant sélectionner une forme de discours. Vous devez maintenant être capable de mobiliser le vocabulaire adapté pour communiquer simplement et efficacement !</p>\n<h3>Mobilisez le vocabulaire adapté</h3>\n<video src=\"https://vimeo.com/256607644\"><a href=\"https://vimeo.com/256607644\">https://vimeo.com/256607644</a></video><p>Une fois le raisonnement d茅ploy茅, il faut mobiliser le langage adapt茅 dans votre 茅crit.</p><h4>Utilisez un registre de langage adapt茅 脿 un 茅crit professionnel</h4><h4>Adaptez votre style</h4><p>Vous devez respecter quelques consignes simples de style :</p><ul><li><p>Faites des phrases courtes, d'environ 15 mots.</p></li><li><p>Privil茅giez les tournures actives plut么t que passives (par exemple &quot;J'ai compl茅t茅 le document&quot; plut么t que &quot;Le document a 茅t茅 compl茅t茅 par mes soins&quot;)</p></li><li><p>脡vitez les redondances et les r茅p茅titions</p></li><li><p>脡crivez un paragraphe par id茅e</p></li><li><p>Soyez concis</p></li><li><p>Restez courtois.</p></li></ul><p>Essayez au maximum de simplifier votre style. N'h茅sitez pas 脿 couper les phrases trop longues. Par exemple, supprimez les structures complexes comme 芦聽dans la mesure o霉聽禄 afin d鈥櫭﹙iter des聽erreurs et d鈥檃ll茅ger le style.</p><blockquote><p>鉂孌ans la mesure o霉 le document n鈥檃 pas 茅t茅 remis dans les d茅lais impartis, le Service RH ne peut pas prendre en compte votre formulaire car cela ne serait pas 茅quitable envers les autres salari茅s.</p><p>鉁匳otre document n鈥檃 pas 茅t茅 remis dans les d茅lais impartis. Par cons茅quent, le Service RH ne peut pas prendre en compte votre formulaire. En effet, ce ne serait pas 茅quitable envers les autres salari茅s de le faire.</p></blockquote><h4>Utilisez les mots de liaison</h4><p>N'h茅sitez pas 脿 utiliser des mots de liaison, qui permettent 脿 votre lecteur de mieux comprendre la structure de votre texte. En voici quelques exemples :</p><table><tbody><tr><td><p>Pour donner un exemple</p></td><td><p>par exemple</p></td></tr><tr><td><p>Pour donner une explication</p></td><td><p>en effet, car</p></td></tr><tr><td><p>Pour opposer une id茅e</p></td><td><p>n茅anmoins, en revanche, mais, au contraire</p></td></tr><tr><td><p>Pour d茅velopper une argumentation</p></td><td><p>ainsi, en effet聽</p></td></tr><tr><td><p>Pour conclure</p></td><td><p>donc, en d茅finitive, par cons茅quent</p></td></tr><tr><td><p>Pour ajouter une id茅e</p></td><td><p>de plus, en outre聽</p></td></tr></tbody></table><h4>Mobilisez des proc茅d茅s simples pour adoucir votre ton</h4><p>Dans la vie professionnelle, il arrive souvent de devoir faire passer des messages n茅gatifs ou pas tr猫s agr茅ables. Voici quelques proc茅d茅s qui vous permettent de donner l'information tout en ayant un ton plus doux !聽;)</p><h4>L鈥檜tilisation de la forme passive</h4><p>Nous venons de voir qu'une forme active est plus simple 脿 lire qu'une forme passive. Cependant, si vous souhaitez adoucir votre ton, vous pouvez utiliser la forme passive.</p><blockquote><p>鉂屄燩ierre a commis une erreur sur le fichier de TVA聽 mais il l鈥檃 corrig茅 dans une deuxi猫me version. 禄聽: On insiste ici sur l鈥櫭﹍茅ment n茅gatif, l鈥檈rreur.</p><p>鉁吢燣鈥檈rreur commise sur le fichier de TVA a 茅t茅 corrig茅e par Pierre dans une deuxi猫me version. 禄聽: On insiste ici sur l鈥櫭﹍茅ment positif, la correction.</p></blockquote><h4>L鈥檜tilisation du conditionnel</h4><blockquote><p>鉂屄燦ous souhaitons un retour pour le 12 f茅vrier prochain. 禄聽聽</p><p>鉁吢燦ous souhaiterions un retour pour le 12 f茅vrier prochain. 禄</p></blockquote><h4>L鈥檜tilisation d鈥檜n adverbe</h4><blockquote><p>鉂屄燰ous n鈥櫭猼es pas d鈥檃ccord avec la position du Service. 禄聽</p><p>鉁吢燰ous n鈥櫭猼es pas tout 脿 fait d鈥檃ccord avec la position du Service. 禄</p></blockquote><h4>L鈥檜tilisation de la forme interrogative</h4><blockquote><p>鉂屄燦ous souhaitons les documents pour le 12 f茅vrier prochain. 禄聽</p><p>鉁吢燩ourriez-vous nous communiquer, s鈥檌l vous pla卯t, les documents pour le 12 f茅vrier prochain聽? 禄</p></blockquote><h4>L鈥檜tilisation de mots avec une connotation positive</h4><blockquote><p>鉂屄燰otre analyse est fausse聽禄聽</p><p>鉁吢燰otre analyse n鈥檈st pas tout 脿 fait juste聽禄聽</p></blockquote><h4>Utilisez les bonnes formules de politesse</h4><p>La formule de politesse, c鈥檈st-脿-dire la formule 茅crite qui sert 脿 terminer un texte de fa莽on poli, doit transmettre un message qui est en rapport avec votre objectif et votre destinataire. C'est pourquoi il faut 茅viter d'avoir une formule pr茅-茅crite dans la signature de votre mail, qui ne correspondra pas 脿 toutes les situations !</p><p>Voici quelques cas types :</p><ul><li><p>Vous attendez une action de la part de l鈥檌nterlocuteur聽:聽芦聽Je vous remercie par avance. 禄.</p></li><li><p>Vous souhaitez vous assurer que l鈥檌nterlocuteur a compris votre message聽:聽芦聽 Je reste disponible si聽vous avez des questions. 禄.</p></li><li><p>Vous souhaitez v茅hiculer une image conviviale (par exemple pour adoucir un mail trop sec)聽:聽芦聽Bonne journ茅e聽禄, 芦聽Bon courage聽禄, 芦聽Bien cordialement聽禄.聽Ces formules sont聽conviviales tout en restant professionnelles. Attention cependant aux聽formules聽芦 脌 bient么t聽禄聽ou聽芦聽Bon week-end聽禄 qui peuvent para卯tre trop famili猫res. 脌 n'utiliser que si vous connaissez bien votre coll猫gue !</p></li></ul><p>Dans un courrier, privil茅giez les formules suivantes聽:</p><blockquote><p>芦 Je vous prie d鈥檃gr茅er, Madame, Monsieur, l鈥檈xpression de mes respectueuses salutations. 禄.</p><p>芦 Je vous prie d'agr茅er, Madame, Monsieur, l'expression de mes sentiments respectueux. 禄</p><p>芦 En esp茅rant une r茅ponse rapide de votre part, je vous prie d'agr茅er, Madame, Monsieur, l'expression de mes sentiments distingu茅s. 禄.</p></blockquote><p>Vous remarquerez que les deux premi猫res formules sont neutres. La troisi猫me formule vous permet d鈥檌nsister sur le fait que vous attendez une r茅ponse de votre interlocuteur. En fonction du contexte, privil茅giez la formule la plus adapt茅e.</p><p></p><p>Vous savez maintenant mobiliser le vocabulaire adapt茅. Maintenant, vous devez vous adapter au format choisi !</p>\n<h3>Adaptez-vous au format choisi</h3>\n<video src=\"https://vimeo.com/256607679\"><a href=\"https://vimeo.com/256607679\">https://vimeo.com/256607679</a></video><p>Voyons désormais comment le format que vous avez choisi va influencer votre rédaction.</p><p>Nous allons nous concentrer sur trois formats très souvent utilisés : les emails, les courriers, les comptes-rendus et les synthèses.</p><h4>Rédigez un email</h4><p>Un <strong>email</strong> est un document qu’un utilisateur saisit, envoie ou consulte en différé par l’intermédiaire d’un réseau informatique.</p><aside data-claire-semantic=\"information\"><p>Vous devez vous poser des questions avant de rédiger un mail :</p><ul><li><p>À combien d’interlocuteurs votre message est-il destiné ?</p></li><li><p>Votre message peut-il être mal interprété ?</p></li><li><p>Votre message nécessite-t-il une réponse ? Urgente ?</p></li><li><p>Votre message pourrait-il être transmis à d’autres interlocuteurs ?</p></li></ul></aside><h4><strong>Soignez votre objet</strong></h4><p><strong>L'objet</strong> d'un email est l'intitulé d'un message apparaissant dans la file d'attente des messages du logiciel de messagerie électronique. Il doit être court et précis et présenter en quelques mots le sujet que vous abordez. En effet, c’est en fonction de l’objet de l’email que le destinataire choisira ou non d’ouvrir l’email sur le moment. N’oubliez pas de rédiger un objet systématiquement, qui permettra de plus facilement retrouver le mail ensuite.</p><aside data-claire-semantic=\"information\"><p>Pour plus de clarté, enlevez les « RE : » ou « TR : » qui sont indiqués lorsque vous répondez à un email ou transférez un email. Cela prend de la place dans l’objet sans apporter d'utilité.</p></aside><p>Dans l’objet de l’email, pensez à indiquer le mois ou l’année concernée lorsque l’email concerne des éléments susceptibles d'être changés régulièrement.</p><h4>Soignez votre corps de mail</h4><p>Quelques conseils généraux :</p><ul><li><p>Ne rédigez jamais un email en étant en colère ! Si cela vous démange, retenez-vous quelques heures, vous n'écrirez pas de la même manière en ayant pris du recul. De même, n’écrivez pas en majuscule. Cela ne facilite pas la lecture et peut être pris pour un signe d’énervement de votre part.</p></li><li><p><strong>Ne traitez qu’un seul sujet à la fois</strong>. Cela permettra à votre interlocuteur de classer plus facilement votre mail et d’identifier une action par email. Si votre mail traite de plusieurs sujets, il est très probable que votre interlocuteur ne traite qu’une partie des actions. Votre email ne serait donc pas efficace ! Si vous devez traiter de plusieurs sujets, envoyez donc des emails différents, même si l'interlocuteur est le même.</p></li><li><p><strong>Faites des phrases simples et aérez le texte</strong>. Évitez les termes techniques. Lorsque vous ne pouvez pas substituer des termes techniques, pensez à préciser une définition si besoin. Cela améliorera l’efficacité de votre email et sera perçu comme une marque de respect de la part de votre interlocuteur, qui accueillera avec bienveillance votre effort de pédagogie. </p></li><li><p><strong>Évitez les fautes d’orthographe</strong>. Pas de panique, nous verrons dans la troisième partie les méthodes pour éviter les fautes d’orthographe ! Si vous faites souvent des erreurs, vous pouvez également rédiger votre texte sur un logiciel de traitement de texte comme Word, puis le copier - coller dans un email. Le correcteur d’orthographe pourra mettre ainsi en évidence certaines fautes d’orthographe.</p></li></ul><aside data-claire-semantic=\"information\"><p><strong>Conservez des exemples de mail récurrents</strong>. Cela vous permettra de gagner du temps,  d’éviter des fautes d’orthographes ou d’oublier certaines informations. Tâchez néanmoins de mettre en évidence les champs qui doivent être actualisés. Sinon, cela est contreproductif car vous pourriez communiquer des informations erronées !</p></aside><blockquote><p>Dans un email destiné à l’interne de l’entreprise, privilégiez la formule <em>« Bonjour Prénom », « Bonjour Prénom A + Prénom B »</em> (si le mail est destiné à 2 interlocuteurs), ou <em>« Bonjour à tous »</em> (si le mail est destiné à plus de 2 personnes).</p><p>Le <em>« Bonjour »</em> donne un ton positif à votre email et peut être utilisé avec une cible large, quelque soit la position de la personne dans la hiérarchie. </p><p>Dans un email destiné à l’externe de l’entreprise, privilégiez la formule « <em>Monsieur + Nom</em> », ou <em>« Madame + Nom ».</em></p></blockquote><p>Présentez-vous si votre interlocuteur ne vous connait pas, puis expliquez brièvement le contexte de la demande. Si le message est communiqué pour information, vous devez l’indiquer clairement dans l’objet et dans le corps du mail. Votre interlocuteur <strong>identifiera immédiatement que votre mail n’attend pas d’action en retour de sa part.</strong></p><p>Si  vous sollicitez un interlocuteur pour obtenir des informations, indiquez clairement la deadline (date de retour attendue), et pensez à remercier poliment votre interlocuteur pour d’éventuelles informations déjà recueillies. Cela l’encouragera à continuer à coopérer !</p><p>Si l’objectif du mail est d’organiser une réunion, vous devez proposer quelques créneaux. Cela est plus professionnel et donnera plus d’efficacité à votre mail.</p><p>Mentionnez les pièces-jointes et n’oubliez pas de les attacher à votre mail !</p><h4>Maîtrisez le bon usage des copies</h4><h5>Les copies conformes (CC)</h5><aside data-claire-semantic=\"information\"><p>Mettre une personne en copie est différent de lui adresser directement le message. Cela signifie qu'elle n'a pas à réaliser directement d'action à partir de l'email, mais que l'information donnée par l'email peut lui servir sur le moment ou plus tard.</p></aside><p>N’utilisez les copies que si cela présente une utilité. Par exemple, il peut être utile de mettre un interlocuteur en copie si cela <strong>fluidifie l’information.</strong></p><p>Les interlocuteurs qu’il peut être utile de mettre en copie :</p><ul><li><p>Les individus qui ont besoin de l’information transmise (sans être le destinataire direct). Cela peut être parce qu’ils ont besoin d’une visibilité sur un projet particulier, ou parce qu’ils seront concernés par la suite, etc. Cela vous évitera d’être contacté par une personne qui cherchera à son tour l’information.</p></li><li><p>Votre supérieur hiérarchique si votre message est important, pour lui donner plus de poids, ou si cela permet de réaliser un point d’étape et de donner de la visibilité sur votre travail. Ne le mettez pas en copie systématiquement car cela saturera sa boite mail et ne mettra pas en valeur votre travail. Si vous hésitez souvent à mettre votre supérieur hiérarchique en copie, vous pouvez définir avec lui un seuil d’importance à partir duquel il souhaite être copie.</p></li></ul><aside data-claire-semantic=\"warning\"><p>Si votre interlocuteur réalise une erreur dans un email (pièce-jointe manquante, oubli d’une information, etc.), répondez uniquement à cet interlocuteur en enlevant toutes les copies. En effet, personne n'aime être épinglée en public pour une erreur ! :(</p></aside><h5>Les copies cachées (CCI)</h5><p>L'élément CCI permet de mettre en copie des individus sans que les autres destinataires ne le sachent.</p><p>Vous ne devez utiliser les copies cachées que lorsque celles-ci sont <strong>assumées</strong>. Par exemple, si un fournisseur envoie un mail de prospection commerciale à tous ses clients, les clients ne souhaiteront pas voir affiché leur contact par souci de confidentialité. De même, si vous réalisez un mail dans le cadre d’un départ d’une entreprise, il peut être plus respectueux de ne pas afficher, aux yeux de tous, la liste des personnes avec lesquelles vous souhaitez garder contact et les autres.</p><p>Dans les autres cas, évitez les copies cachées qui montrent un manque de transparence !</p><h4>Rédigez un courrier</h4><p>Le <strong>courrier</strong> désigne la correspondance écrite entre une ou plusieurs personnes, généralement deux : un expéditeur qui l'envoie et un destinataire qui le reçoit. </p><p>Les lettres présentent des caractéristiques similaires :</p><ul><li><p>Des <strong>phrases courtes</strong> (pas plus de 2 ou 3 lignes) ;</p></li></ul><aside data-claire-semantic=\"warning\"><p>En relisant votre texte, pensez à couper les phrases trop longues. Vous êtes davantage susceptibles de commettre des fautes de construction lorsque votre phrase est longue. Vous ne devez mettre qu’une seule idée par phrase.</p></aside><ul><li><p><strong>Un style simple ;</strong></p></li><li><p><strong>La régularité des constructions</strong> et des phrases complètes avec un verbe conjugué ;</p></li></ul><blockquote><p><em>Exemple :</em></p><p>« Monsieur,</p><p>Nous avons reçu votre courrier en date du 12 février 2017.</p><p>Nous ne pouvons donner une suite favorable à votre requête. »</p></blockquote><ul><li><p><strong>Une absence d’humour</strong></p></li></ul><p>L’humour est accepté dans certains échanges de mails précis (avec un collègue avec qui vous vous entendez bien par exemple), mais il faut l’éviter dans les courriers qui ont une connotation plus officielle.</p><h4>L’en tête du courrier</h4><p>Les courriers présentent une forme particulière, avec un rappel de l'émetteur et du destinataire en en tête :</p><blockquote><p><em>À gauche :</em></p><p>[Prénom – Nom]</p><p>[Adresse]</p><p>[Code postal -Ville]</p><p>[☎ Téléphone]</p><p>[✉ Email]</p><p><em>À droite :</em></p><p>[Nom du destinataire]</p><p>[Fonction du destinataire]</p><p>[Adresse]</p><p>[Code postal – Ville]</p></blockquote><h4>Le plan du courrier</h4><p>Les courriers présentent également un plan particulier, qu'il est possible de suivre dans la plupart des cas.</p><blockquote><p>À [Ville], le [date]</p><p>Objet :</p><p>Référence :</p><p>Lettre recommandée avec accusé de réception n° [numéro du recommandé]</p><p>Monsieur, Madame (formule d’appel)</p><p>L’introduction (par exemple « En réponse à votre courrier en date du … », le rappel des faits)</p><p>Les conséquences</p><p>La conclusion</p><p>Je vous prie d’agréer, [Madame, Monsieur + Nom du destinataire si vous le connaissez], l’assurance de ma considération distinguée (la formule de politesse)</p><p>[Prénom – Nom + Signature]</p></blockquote><aside data-claire-semantic=\"warning\"><p>Imprimez le courrier, signez-le et scannez la version signée en PDF. Vous pouvez parfois directement signer le courrier via un logiciel. Ne communiquez pas une version Word du courrier. Cela n’a pas d’intérêt et présente le risque de subir une modification.</p></aside><blockquote><p><strong> Exemple :</strong></p><ul><li><p>Rappel des faits :</p></li></ul><p><em>« J’ai été assujetti au titre de l’année 2017 à la taxe d’habitation pour un montant de 873 € »</em></p><ul><li><p>Les circonstances actuelles :</p></li></ul><p><em>« Le logement était en cours de réfection totale au 1er janvier 2017, et n’était donc pas occupé au 1er janvier de l’année»</em></p><ul><li><p>Les conséquences :</p></li></ul><p><em>« La taxe d’habitation n’est pas due lorsque le logement n’est pas occupé au 1er janvier de l’année, à la condition que (…). En conséquence, le logement n’aurait pas du être soumis à la taxe d’habitation »</em>  </p><ul><li><p>La conclusion :</p></li></ul><p><em>« Je vous serais obligé, pour les raisons susmentionnées, de bien vouloir prononcer la décharge de la taxe d’habitation 2017 ». </em></p></blockquote><h4>Rédigez un compte-rendu</h4><p>Le compte-rendu de réunion est un écrit professionnel interne qui relate de façon plus ou moins détaillée (selon qu’il est chronologique, synthétique ou synoptique) le contenu d’une réunion auquel le rédacteur a assisté.</p><h4>La forme du compte-rendu</h4><p>Certaines mentions sont obligatoires :</p><ul><li><p>le titre ;</p></li><li><p>le lieu ;</p></li><li><p>la date et l’heure d’ouverture et de clôture de la réunion ;</p></li><li><p>les présents, les absents, les excusés ;</p></li><li><p>le nom du rédacteur ;</p></li><li><p>le nom des destinataires du compte-rendu s’ils sont différents des interlocuteurs invités à la réunion ;</p></li><li><p>l’ordre du jour.</p></li></ul><aside data-claire-semantic=\"warning\"><p>Indiquez le nom des interlocuteurs par ordre alphabétique de manière à ne vexer personne.</p></aside><h4>Le plan du compte-rendu</h4><p>Le compte-rendu s’articule autour d’un plan en 3 parties :</p><ul><li><p>Ordre du jour de la réunion ;</p></li><li><p>Synthèse des échanges / propositions ;</p></li><li><p>Décisions prises / Actions futures à mener.</p></li></ul><aside data-claire-semantic=\"information\"><p><strong>Faites attention à respecter une unité grammaticale</strong></p><p><strong>Par exemple :</strong></p><ul><li><p>RéalisER un bilan du groupe de travail n°1</p></li><li><p>EffectuER une proposition sur la manière de résorber le problème dans l’usine de Clichy</p></li><li><p>DéveloppER la notion de (…)</p></li></ul></aside><p>Rédigez votre texte au temps présent. Cela simplifiera la lecture.</p><h4>Rédigez une synthèse</h4><p>La note de synthèse vise à <strong>résumer de manière synthétique et ordonnée plusieurs documents</strong>, soit sous forme de texte, soit sous forme de représentations (schémas, dessin, etc.).</p><p>L’objectif de la note de synthèse est de faire du gagner du temps au lecteur qui pourra s’y référer pour avoir une vue d’ensemble sur l’intégralité des documents.</p><p>Le plan suivant doit être suivi :</p><ul><li><p>Introduction (phrase d’accroche et annonce du plan) ;</p></li><li><p>Développement (développer les idées en s’appuyant sur les documents) ;</p></li><li><p>Conclusion (elle établit un bilan).</p></li></ul><p></p><p>Vous savez maintenant parfaitement rédiger des écrits professionnels structurés et adaptés à votre objectif, à votre cible et au format choisi. Vous devez maintenant maintenant finaliser vos écrits !</p>\n<h2>Finalisez votre écrit</h2>\n\n<h3>Évitez les pièges en orthographe</h3>\n<video src=\"https://vimeo.com/256607752\"><a href=\"https://vimeo.com/256607752\">https://vimeo.com/256607752</a></video><p>Vous savez désormais rédiger parfaitement un texte adapté à votre objectif, votre cible, et en fonction du format choisi. Vous devez maintenant savoir finaliser vos écrits. La forme compte autant que le fond !</p><p>Commençons tout d'abord par les éléments qui fâchent : les fautes d'orthographes ! :'(</p><h4><strong>Apprenez à repérer les fautes récurrentes </strong></h4><p>Vous devez connaître les fautes d’orthographes récurrentes et les moyens pour les éviter.</p><p>Les erreurs les plus commises sont celles-ci :</p><ul><li><p>Les consonnes doubles dans certains mots comme dans &quot;parallèle&quot; (qui ne s’est jamais posé la question : un ou deux « l » ?)</p></li><li><p>Les pluriels irréguliers comme dans &quot;un bail / des baux&quot; ; &quot;un portail / des portails&quot;</p></li><li><p>Les propositions subordonnées comme dans &quot;les mentions auxquelles vous faites référence&quot;</p></li></ul><p>Apprenez aussi à repérer les <strong>erreurs de syntaxe</strong> :</p><ul><li><p>Le barbarisme est une faute de langage qui consiste soit à se servir de mots altérés, soit à donner aux mots un sens différent que celui qu’ils ont reçu de l’usage. Par exemple, « L’eau bouillit » ❌à la place de « L’eau bout » ✅</p></li><li><p>Le solécisme est une faute de syntaxe. L'erreur la plus commise est celle de dire « L’ami à Pierre » ❌plutôt que « L’ami de Pierre » ✅</p></li><li><p>Le paronyme consiste à employer un mot dont la ressemblance avec un autre mot entraîne de fréquentes confusions. La plus commise est celle de dire « À l’intention de » ❌à la place de « À l'attention de » ✅</p></li></ul><p>De façon générale, privilégiez les phrases courtes pour éviter les erreurs de syntaxes.</p><p>Je vous conseille de vous faire un fichier (ou de noter dans un petit carnet) les erreurs que vous faites souvent, ou les mots de vocabulaire que vous employez souvent et qui sont durs à orthographier. Ainsi, vous pourrez vous y référer en cas de doute, et noter les choses vous permet aussi de mieux les mémoriser ! ;)</p><h4><strong>Trouvez des astuces pour éviter les fautes d’orthographe</strong></h4><h4>Posez-vous les bonnes questions</h4><p>Voici quelques exemples de questions à vous poser lorsque vous avez un doute sur l'orthographe...</p><blockquote><p>&quot;er&quot; ou &quot;é&quot; ? Pour le savoir, remplacez un verbe du 1er groupe par un verbe du 2e groupe</p><p>« j’ai participé » ✅… car on dit « j’ai bu » et non « j’ai boire ».</p><p>&quot;est&quot; ou &quot;ait&quot; ? Pour le savoir, demandez-vous si on utilise le verbe &quot;avoir&quot; ou &quot;être&quot;</p><p>« Je lui ai parlé afin qu’il ait toutes les informations » ✅, car on dit &quot;avoir les informations&quot; et non &quot;être les informations&quot;</p></blockquote><h4>Utilisez un correcteur d'orthographe</h4><p>Vous pouvez rédiger dans un premier temps votre texte dans un logiciel de traitement de texte comme Word afin d’utiliser le correcteur d’orthographe.</p><h4>Remaniez votre phrase lorsque vous n’êtes pas sûr de l’orthographe</h4><p>Si vous avez parfois des doutes concernant l'orthographe, n'hésitez pas à remanier votre phrase pour contourner le problème. Il s’agit par exemple des accords des participes passés et de la concordance des temps, c’est-à-dire la correspondance, nécessaire d'après le sens et la chronologie des actions, entre le <strong>temps du verbe</strong> de la proposition principale et le temps du verbe de la proposition subordonnée. Vous pouvez alors remplacer les pronoms relatifs par des adjectifs ou par un adjectif possessif.</p><blockquote><p>Exemples :</p><p>« Les matériaux qui <em>ont été</em> récemment acquis au sein de l’unité de production présentent des caractéristiques similaires aux anciens, mais sont de meilleure qualité » :'(</p><p>« Les matériaux récemment acquis au sein de l’unité de production présentent des caractéristiques similaires aux anciens, mais sont de meilleure qualité » :)</p><p>« L’étude qu’il a <em>réalisée</em> n’est pas rigoureuse » :'(</p><p>« Son étude n’est pas rigoureuse »<em> </em> :)</p></blockquote><h4>Remplacez les propositions subordonnées par un verbe à l’infinitif</h4><blockquote><p>« Nous pourrons remplacer le collaborateur sans que nous <em>recrutiions</em> à l’externe » :'(</p><p>« Nous pourrons remplacer le collaborateur sans recruter à l’externe » :)</p></blockquote><h4>Utilisez la ponctuation à bon escient</h4><p>Restez sobre et n’utilisez la ponctuation que pour clarifier votre phrase et lui donner du sens.</p><p>Pour les énumérations, on utilise le point virgule  :</p><blockquote><p>1 (….) ; 2 (…) ; 3 (…).</p></blockquote><p>N’utilisez les points de suspension que lorsque vous coupez une citation.</p><blockquote><p>« Ce courrier mentionne « Les pénalités dues [...] sont à payer sous un mois. » ». Les points de suspension dans d'autres contextes relèvent plutôt du ton oral. </p></blockquote><p>N’utilisez pas les points d’exclamation dans vos écrits professionnels.</p><blockquote><p>« Bonjour Sarah, » plutôt que « Bonjour Sarah ! » qui a une connotation plus familière.</p></blockquote><p>Vous connaissez les erreurs d'orthographe et de syntaxe fréquemment réalisées. Vous devez maintenant être capable de les éliminer grâce à une relecture efficace !</p><p></p>\n<h3>Relisez-vous efficacement</h3>\n<video src=\"https://vimeo.com/256607835\"><a href=\"https://vimeo.com/256607835\">https://vimeo.com/256607835</a></video><p>Se relire est une étape indispensable à un écrit professionnel efficace.</p><aside data-claire-semantic=\"information\"><p>Conseil pratique : effectuez votre relecture à tête reposée. Pensez à relire à voix haute. </p></aside><p>Mais elle ne sert à rien s'il s'agit d'une relecture rapide sans méthode ! Nous allons donc détailler deux méthodes qui pourront vous aider :</p><ul><li><p>la relecture thématique ;</p></li><li><p>la relecture à l'envers.</p></li></ul><h4>Effectuez une relecture thématique</h4><p>La relecture thématique consiste à relire le texte plusieurs fois, avec <strong>à chaque relecture un et un seul objectif</strong>. Cet objectif va dépendre des erreurs que vous faites le plus fréquemment.</p><blockquote><p>Exemples :</p><ul><li><p>Si vous oubliez souvent des mots ou des informations, faites une relecture du texte dans son ensemble en faisant attention à chaque mot ;</p></li><li><p>Si vous avez du mal à conjuguer correctement les verbes, faites une relecture en lisant uniquement les verbes pour s'assurer de leur orthographe ;</p></li><li><p>Si vous avez tendance à faire des phrases trop longues, relisez les phrases une par une en vous donnant comme objectif de ne pas faire des phrases de plus de deux lignes ;</p></li><li><p>etc.</p></li></ul></blockquote><p>Donc si vous faites beaucoup d’erreurs d’orthographe, n’hésitez pas à faire plusieurs relectures en vous concentrant sur un seul élément à chaque fois : la conjugaison des verbes, puis les adjectifs, etc.</p><p>À cette étape, pensez à éviter les répétitions, ajouter des mots de liaison, mettre en gras les mots clés ou les mots outils.</p><ul><li><p>Un mot-clé est un mot fortement chargé de sens. La mise en gras permet donc une assimilation plus rapide des notions développées dans l’écrit.</p></li><li><p>Un mot-outil est un mot difficilement mémorisable mais qui a pourtant une importance pour la compréhension (une date par exemple).</p></li></ul><aside data-claire-semantic=\"information\"><p>Pour supprimer les répétitions, variez les mots ! Par exemple, réaliser une mission / effectuer une mission / accomplir une mission / exercer une mission. N'hésitez pas à vous faire vos propres listes. </p></aside><h4>Effectuez une relecture à l’envers</h4><p>La <strong>relecture à l’envers</strong> est une technique de relecture consistant à relire un texte en partant des phrases de fin vers celles du début. Cette technique vous oblige à vous concentrer sur les fautes d’orthographes, les fautes de frappe et les oublis de mot. Cela évite au cerveau d’anticiper la phrase ou de se laisser entraîner par le sens et donc de ne pas se rendre compte qu’il y a des mots manquants ou des erreurs.</p><p></p><aside data-claire-semantic=\"information\"><p>Parfois également, effectuer une relecture en changeant de police, ou en imprimant le texte permet de mieux repérer les erreurs ! N'hésitez pas à essayer plusieurs techniques et à retenir celle qui vous correspond le mieux. ;)</p></aside><p></p><p>Vous savez maintenant préparer, rédiger et relire efficacement votre écrit professionnel. Néanmoins, il arrive parfois que vos propos soient complexes ou abstraits ou comportent de nombreuses données chiffrées. Dans ce cadre, vous devez illustrer efficacement vos propos !</p><p></p>\n<h3>Illustrez votre propos</h3>\n<video src=\"https://vimeo.com/256607892\"><a href=\"https://vimeo.com/256607892\">https://vimeo.com/256607892</a></video><p>Si votre propos est dense ou technique, vous pouvez avoir intérêt à y ajouter des images ou des graphiques. Mais il faut respecter quelques règles pour que votre écrit reste professionnel et agréable à lire !</p><h4>Le choix des images</h4><p> Les graphiques peuvent être <strong>quantitatifs</strong> ou <strong>qualitatifs</strong>.</p><ul><li><p>Les graphiques quantitatifs servent à présenter des chiffres de manière plus claire que dans un tableau chiffré.</p></li><li><p>Les graphiques qualitatifs permettent de mieux visualiser un concept abstrait ou de s’assurer de la bonne compréhension d’un propos complexe.</p></li></ul><p>Exemple de graphique qualitatif : un organigramme, permettant d'expliquer plus facilement l'organisation décrite.</p><figure><img src=\"https://user.oc-static.com/upload/2018/02/27/15197462214473_Capture%20d%E2%80%99e%CC%81cran%202018-02-27%20a%CC%80%2016.43.10.png\" alt=\"Schéma d'organigramme\" /><figcaption>Organigramme d'entreprise</figcaption></figure><p>L’insertion d’image a aussi un but <strong>esthétique</strong>, afin de rendre la lecture plus agréable ou d'attirer l'œil, surtout si le texte écrit est long. </p><p>Exemple d’image inséré uniquement dans un but esthétique :</p><figure><img src=\"https://user.oc-static.com/upload/2018/02/27/1519746764083_Capture%20d%E2%80%99e%CC%81cran%202018-02-27%20a%CC%80%2016.52.29.png\" alt=\"Schéma inséré dans un but esthétique\" /><figcaption>Schéma inséré dans un but esthétique</figcaption></figure><p>Vous devez penser à indiquer une <strong>légende</strong> sur vos illustrations. </p><aside data-claire-semantic=\"information\"><p>Par ailleurs, l’insertion d’images peut permettre à l’interlocuteur de mieux visualiser une procédure à suivre. Dans le cadre d’un mode opératoire par exemple, il sera plus facile pour votre interlocuteur de suivre les différentes étapes si vous lui indiquez la procédure à suivre sous forme d’images. Dans ce cas, utilisez la fonction d'impression de l'écran sur votre clavier.</p></aside><h4>L'intégration et le traitement des images</h4><p>Sous un traitement de texte, vous travaillerez avec <strong>l’onglet insertion</strong>, pour <strong>insérer des tableaux ou des images</strong>.</p><p>Si vous double-cliquez sur l’image, vous pourrez retravailler votre image grâce aux fonctionnalités &quot;Format&quot;. Par exemple, vous pouvez :</p><ul><li><p>rogner les bords ;</p></li><li><p>modifier la position de l’image dans le texte ;</p></li><li><p>modifier la forme de l’image ;</p></li><li><p>modifier le bord de l’image ;</p></li><li><p>modifier le style de l’image ou ;</p></li><li><p>mettre des effets (lumière, ombre, etc.). N'en abusez cependant pas, restez simple !</p></li><li><p>“recolorier” l'image. Cela vous permet par exemple de rendre le fond d’une image transparent afin que l’image s’intègre mieux dans votre document.</p></li></ul><p>Veiller à obtenir un résultat clair et propre, avec des images bien dimensionnées, cadrées si possible, et intégrées de manière optimale au texte.</p><p></p><p>Vous savez désormais comment illustrer vos propos. Maintenant, place à la dernière étape : la mise en page !</p><p></p><p></p>\n<h3>Travaillez votre mise en page</h3>\n<video src=\"https://vimeo.com/256607903\"><a href=\"https://vimeo.com/256607903\">https://vimeo.com/256607903</a></video><p>Dernière étape de votre écrit professionnel : il faut soigner votre mise en page. C'est celle-ci qui permettra à votre lecteur de voir la qualité globale de votre texte d'un coup d'œil.</p><h4>La charte graphique</h4><p>On appelle &quot;charte graphique&quot; un guide qui permet d'uniformiser tous les éléments graphiques (écriture, images, mise en page, etc.) d'un document voire d'une organisation de manière plus générale. Il s'agit de garder une cohérence tout au long d'un même écrit : même police, même couleur de caractères, etc.</p><h4>La police</h4><p>Il existe deux types de police :</p><ul><li><p>les polices « à empattement », c'est-à-dire avec des extensions qui terminent les extrémités de lettres, par exemple Times New Roman ;</p></li><li><p>les police « à bâton », sans empattement, par exemple Arial.</p></li></ul><figure><img src=\"https://user.oc-static.com/upload/2018/02/27/15197510793482_Serif_and_sans-serif_03.png\" alt=\"L'empattement de la police est ici en rouge\" /><figcaption>L'empattement de la police est ici en rouge</figcaption></figure><p>La lecture sur un écran est facilitée lorsque le texte est rédigé dans une police « à bâton ».</p><p>Évitez les polices fantaisistes (par exemple « Comic sans MS »). Cela vous enlèverait toute crédibilité.</p><aside data-claire-semantic=\"information\"><p>De façon générale, il est impératif d'uniformiser la police pour tout le texte, c'est-à-dire de choisir la même police pour tout le texte (ou une police pour les titres, et une autre pour le corps du texte).</p></aside><h4>La couleur</h4><p>Privilégiez les couleurs sobres comme le noir ou le bleu foncé. Le rouge, le vert, le violet sont à proscrire aussi bien dans vos comptes-rendus et lettres que dans vos emails.</p><h4>Le gras</h4><p>Utilisez le gras avec parcimonie. Utilisé à bon escient, il vous permettra de mettre en avant certains mots clés/mots outils, permettant une lecture et surtout une relecture plus facile pour votre interlocuteur. En revanche, utilisé trop souvent, il rendra votre texte illisible.</p><p>Un mot-clé est un mot fortement chargé de sens. La mise en gras permet donc une assimilation plus rapide des notions développées dans l’écrit.<br />Un mot-outil  est un mot difficilement mémorisable mais qui a pourtant une importance pour la compréhension (une date par exemple).</p><h4>La signature d’email</h4><p>Vous pouvez configurer votre boîte mail pour qu'une signature apparaisse par défaut, c'est-à-dire que des éléments soient intégrés automatiquement à la fin de vos emails.</p><p>Pensez à indiquer les mentions suivantes :</p><ul><li><p>Votre nom complet ;</p></li><li><p>Votre fonction ;</p></li><li><p>Le nom de votre organisation ;</p></li><li><p>Vos coordonnées téléphoniques ;</p></li><li><p>Votre adresse de bureau (avec le numéro de bureau) si c'est nécessaire.</p></li></ul><p>Afin de réaliser une signature de mail, voici des exemples de mode opératoire :</p><ul><li><p>Sur Outlook, allez sur Outils &gt; Options &gt; Format de courrier &gt; Signatures.</p></li><li><p>Sur Gmail, allez sur Paramètres &gt; Général &gt; Signature.</p></li></ul><p>Une signature complète permettra à votre interlocuteur d’avoir toutes les informations utiles sans avoir à les chercher. Cela renforcera donc l'efficacité de vos messages sans vous prendre de temps !</p><aside data-claire-semantic=\"warning\"><p>En revanche, l’objectif de la signature du mail n’est pas de véhiculer des messages qui peuvent être mal perçues ou donner une image brouillonne !</p></aside><blockquote><p>Exemples :</p><p>✓ « Un geste simple pour l'environnement, n'imprimez ce message que si vous en avez l'utilité » : ce message peut être indiqué dans la signature de mail car il véhicule un message qui colle aux valeurs de l’entreprise et peut être repris par plusieurs collaborateurs de l’entreprise.</p><p>✗ « Les courriels envoyés le soir ou le week-end n’appellent pas une réponse immédiate » : ce message peut être mal interprété. Si un message envoyé le soir n’implique pas de réponse immédiate, cela signifie-t-il a contrario qu’un message envoyé au milieu de la matinée exige une réponse dans les dix minutes qui suivent ?</p></blockquote><h4>Le sommaire</h4><p>Le sommaire consiste à indiquer au début d’un rapport la liste des chapitres, des parties et éventuellement des paragraphes accompagnés des numéros de page.</p><p>L’objectif du chapitre est donc de permettre au lecteur du rapport de trouver facilement à quelle page du rapport consulter l’information ou l’analyse qu’il cherche.</p><p>Il est préférable de réaliser un sommaire automatique plutôt que manuel. Ainsi, si vous ajoutez un paragraphe ou modifiez des éléments, le sommaire s'ajustera automatiquement.</p><p>Voici le mode opératoire pour ajouter un sommaire automatique sur un traitement de texte :</p><ol><li><p>Attribuez à chaque titre un style (Titre 1, Titre 2, Titre 3,...)</p></li><li><p>Cliquez sur l'onglet référence ;</p></li><li><p>Cliquez sur Table des matières et choisir son style de sommaire ;</p></li><li><p>Finissez par Mettre à jour la table.</p></li></ol><p>Pensez à indiquer le mot « <em>sommaire </em>» en haut de la page. De plus, pensez à insérer des pointillés et à augmenter l’interligne pour faciliter le repérage visuel par le lecteur. Vous pouvez enfin différencier la taille de l’écriture. Par exemple<strong>,</strong> utilisez la taille 14 pour l’indication d’un chapitre, la taille 12 pour l’indication d’une partie, et la taille 9 pour l’indication d’un paragraphe, etc. </p><p></p><p>Vous savez maintenant préparer, rédiger et finaliser vos écrits professionnels. Cela vous permettra de mieux prouver vos compétences en communication et votre maîtrise du sujet !</p>\n<h3>Entraînez-vous en rédigeant un écrit</h3>\n<h4>À vous de jouer !</h4><aside data-claire-semantic=\"information\"><p>Pour vous entraîner, réalisez cet exercice étape par étape. Une fois terminé, vous pouvez comparer votre travail avec les pistes que je vous propose.</p></aside><p>Cette activité consiste à rédiger un email, en se concentrant particulièrement sur la relecture.</p><p>Vous êtes le Responsable d’un magasin d’une chaîne. À ce titre, vous êtes en charge de développer le chiffre d'affaires du magasin.</p><p>Dans ce cadre, le Responsable de la Direction des Ventes de la chaîne vous demande de lui expliquer les raisons d’une baisse importante du chiffre d’affaires en janvier pour le rayon Vins et Champagne  (-5,82 %).</p><p>Vous répondez à la requête de votre Responsable des ventes par email en profitez pour lui communiquer les bons résultats sur les autres rayons.</p><p>Voici l’évolution du chiffre d’affaires en janvier pour les autres rayons du magasin :</p><ul><li><p>Entretien (+0,28 %) ;</p></li><li><p>Epicerie sucrée (-0,77 %) ;</p></li><li><p>Epicerie salée (+0,5 %) ;</p></li><li><p>Surgelé (+2,89 %) ;</p></li><li><p>Hygiène et beauté (+3,91 %) ;</p></li><li><p>Vins et Champagnes (-5,82 %) ;</p></li><li><p>Fruits et légumes (+4,11 %) ;</p></li><li><p>Produits frais  (+1,00 %).</p></li></ul><aside data-claire-semantic=\"information\"><p><strong>Conseils pratiques</strong> : soignez votre argumentation, évitez les fautes d’orthographe et de syntaxe, utilisez les mots de liaison, insérez des graphiques pertinents et enfin, travaillez votre mise en page (police, couleur, gras, etc.). N'oubliez pas la formule qui ouvre le message ni la formule de politesse à la fin !</p></aside><h4>Vérifiez votre travail</h4><aside data-claire-semantic=\"information\"><p>Alors, vous êtes allé au bout ? Voici <a href=\"https://drive.google.com/file/d/1l8MsqAKFESM-MIH2WrwEH0-0FD5gflpw/view?usp=sharing\">un exemple</a> pour vous permettre de vérifier votre travail.</p></aside>",
+          "iconikName": "TEST"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Loop videos": [
+      {
+        "json": {
+          "link": "https://vimeo.com/256607984",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_0-0_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/99ef2fd5/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=821311bf22190ef6780321b3ac3b64d3e905264b7a46add537a4db036ab5a101&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607328",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-1_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607328/container/f60f69f4-9e65-43cd-9979-8961d93123de/7c59efb0/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-1_tlk.mp4?expires=1769507425&loc=external&oauth2_token_id=1785873960&signature=eb144cb7f49907215710595c1dff426f236d9cb7d4492440b30ea4eb81957735&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607536",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-2_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607536/container/644b7367-9101-49c3-9854-32ed584d67a1/ad48abea/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-2_tlk?expires=1769507427&loc=external&oauth2_token_id=1785873960&signature=e0002f6e80485c47bf820e697a5db917b7c3f6c8214d7233232d3427f12af107&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607562",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-3_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607562/container/9a9ad37c-62be-4c12-b357-28a1e25ccd30/7ff5b093/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-3_tlk?expires=1769507428&loc=external&oauth2_token_id=1785873960&signature=66f2227e9057bc9e130a032c21ab036c5db781d620ff294e4fa5076de7934ae2&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607573",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-4_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607573/container/b7d38456-fc7a-4b6f-84ab-93755583c375/c2c4edcc/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-4_tlk.mp4?expires=1769507428&loc=external&oauth2_token_id=1785873960&signature=cd07dddb7ca75e42ece31bd1c764d0d0a656e6df63d21a76af8a05dfa8397f1d&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256612946",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_2-1_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256612946/container/183e5828-7601-48dd-8b6e-3828dd5ba914/8475734d/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_2-1_tlk?expires=1769507429&loc=external&oauth2_token_id=1785873960&signature=03e41f13491c6faddf8dc8cb18949a7c59f20023ee865b99c30e2eccdaaa7a49&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607644",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_2-2_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607644/container/1a166ffb-60b8-4780-9d1d-b37cff60badb/1e9f556b/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_2-2_tlk.mp4?expires=1769507430&loc=external&oauth2_token_id=1785873960&signature=fd0fa81e5811351747883e7a6d0d2f732551ef7efb8f9a2123ab3c7d74ad5f12&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607679",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_2-3_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607679/container/f4b02eb6-9901-49d4-9bf7-49474f85a9ae/596d3957/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_2-3_tlk?expires=1769507430&loc=external&oauth2_token_id=1785873960&signature=3728b248fbb166a6e4afcc132b3402a0385c85fe00c4a0262b359df17e317f18&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607752",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-1_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607752/container/3adb611a-3915-4e6f-bcf1-0bd6ed46c4ec/326b330c/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-1_tlk.mp4?expires=1769507431&loc=external&oauth2_token_id=1785873960&signature=89b958136e732ec62e72c0cd5a61d9203a5b2b8de48d7a8d9d4146c6109c5674&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607835",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-2_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607835/container/7bcb0b40-e193-49f5-ad1a-3fe707523294/6c7f29ca/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-2_tlk?expires=1769507431&loc=external&oauth2_token_id=1785873960&signature=195e5509514ef2cddf442f860831405f53b38275228cc9cbae7803b857fce1da&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607892",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-3_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607892/container/d44f2119-ef79-40d8-9bc9-3d0065d587e6/4b65b219/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-3_tlk?expires=1769507432&loc=external&oauth2_token_id=1785873960&signature=13c58d08c0314209c3ec48f75e6b127b5a8a046df9870f5144ecece22fd6ef9b&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 10
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607903",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-4_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607903/container/94f5f2a5-b867-493e-9a65-9ce507f9e037/415ea445/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-4_tlk.mp4?expires=1769507433&loc=external&oauth2_token_id=1785873960&signature=acf6bd485ea40410d6dc50be96c34744865dce13bee7092fe033e12605e3ffd4&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 11
+        }
+      }
+    ],
+    "Iconik - create collection": [
+      {
+        "json": {
+          "category": null,
+          "created_by_user": "f1773e7c-4745-11ee-b6e5-d2ed5e222b50",
+          "custom_keyframe": null,
+          "custom_order_status": "DISABLED",
+          "custom_poster": null,
+          "date_created": "2026-01-26T09:49:28.334999+00:00",
+          "date_deleted": null,
+          "date_modified": "2026-01-26T09:49:28.335003+00:00",
+          "deleted_by_user": null,
+          "external_id": null,
+          "id": "4e43239e-fa9c-11f0-bc0a-1e2c43bf7396",
+          "is_root": true,
+          "keyframe_asset_ids": [],
+          "parent_id": null,
+          "project_id": null,
+          "status": "ACTIVE",
+          "storage_id": null,
+          "title": "TEST"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Summarize": [
+      {
+        "json": {
+          "count_link": 12
+        },
+        "pairedItem": [
+          {
+            "item": 0
+          },
+          {
+            "item": 1
+          },
+          {
+            "item": 2
+          },
+          {
+            "item": 3
+          },
+          {
+            "item": 4
+          },
+          {
+            "item": 5
+          },
+          {
+            "item": 6
+          },
+          {
+            "item": 7
+          },
+          {
+            "item": 8
+          },
+          {
+            "item": 9
+          },
+          {
+            "item": 10
+          },
+          {
+            "item": 11
+          }
+        ]
+      }
+    ],
+    "Filter videos": [
+      {
+        "json": {
+          "link": "https://vimeo.com/256607984",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_0-0_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/99ef2fd5/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=821311bf22190ef6780321b3ac3b64d3e905264b7a46add537a4db036ab5a101&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607328",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-1_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607328/container/f60f69f4-9e65-43cd-9979-8961d93123de/7c59efb0/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-1_tlk.mp4?expires=1769507425&loc=external&oauth2_token_id=1785873960&signature=eb144cb7f49907215710595c1dff426f236d9cb7d4492440b30ea4eb81957735&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607536",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-2_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607536/container/644b7367-9101-49c3-9854-32ed584d67a1/ad48abea/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-2_tlk?expires=1769507427&loc=external&oauth2_token_id=1785873960&signature=e0002f6e80485c47bf820e697a5db917b7c3f6c8214d7233232d3427f12af107&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607562",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-3_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607562/container/9a9ad37c-62be-4c12-b357-28a1e25ccd30/7ff5b093/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-3_tlk?expires=1769507428&loc=external&oauth2_token_id=1785873960&signature=66f2227e9057bc9e130a032c21ab036c5db781d620ff294e4fa5076de7934ae2&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607573",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_1-4_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607573/container/b7d38456-fc7a-4b6f-84ab-93755583c375/c2c4edcc/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_1-4_tlk.mp4?expires=1769507428&loc=external&oauth2_token_id=1785873960&signature=cd07dddb7ca75e42ece31bd1c764d0d0a656e6df63d21a76af8a05dfa8397f1d&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256612946",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_2-1_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256612946/container/183e5828-7601-48dd-8b6e-3828dd5ba914/8475734d/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_2-1_tlk?expires=1769507429&loc=external&oauth2_token_id=1785873960&signature=03e41f13491c6faddf8dc8cb18949a7c59f20023ee865b99c30e2eccdaaa7a49&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607644",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_2-2_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607644/container/1a166ffb-60b8-4780-9d1d-b37cff60badb/1e9f556b/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_2-2_tlk.mp4?expires=1769507430&loc=external&oauth2_token_id=1785873960&signature=fd0fa81e5811351747883e7a6d0d2f732551ef7efb8f9a2123ab3c7d74ad5f12&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607679",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_2-3_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607679/container/f4b02eb6-9901-49d4-9bf7-49474f85a9ae/596d3957/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_2-3_tlk?expires=1769507430&loc=external&oauth2_token_id=1785873960&signature=3728b248fbb166a6e4afcc132b3402a0385c85fe00c4a0262b359df17e317f18&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607752",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-1_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607752/container/3adb611a-3915-4e6f-bcf1-0bd6ed46c4ec/326b330c/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-1_tlk.mp4?expires=1769507431&loc=external&oauth2_token_id=1785873960&signature=89b958136e732ec62e72c0cd5a61d9203a5b2b8de48d7a8d9d4146c6109c5674&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607835",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-2_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607835/container/7bcb0b40-e193-49f5-ad1a-3fe707523294/6c7f29ca/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-2_tlk?expires=1769507431&loc=external&oauth2_token_id=1785873960&signature=195e5509514ef2cddf442f860831405f53b38275228cc9cbae7803b857fce1da&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607892",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-3_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607892/container/d44f2119-ef79-40d8-9bc9-3d0065d587e6/4b65b219/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-3_tlk?expires=1769507432&loc=external&oauth2_token_id=1785873960&signature=13c58d08c0314209c3ec48f75e6b127b5a8a046df9870f5144ecece22fd6ef9b&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 10
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607903",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_3-4_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607903/container/94f5f2a5-b867-493e-9a65-9ce507f9e037/415ea445/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_3-4_tlk.mp4?expires=1769507433&loc=external&oauth2_token_id=1785873960&signature=acf6bd485ea40410d6dc50be96c34744865dce13bee7092fe033e12605e3ffd4&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 11
+        }
+      }
+    ],
+    "Extract vimeo URLs": [
+      {
+        "json": {
+          "video": [
+            "https://vimeo.com/256607984",
+            "https://vimeo.com/256607328",
+            "https://vimeo.com/256607536",
+            "https://vimeo.com/256607562",
+            "https://vimeo.com/256607573",
+            "https://vimeo.com/256612946",
+            "https://vimeo.com/256607644",
+            "https://vimeo.com/256607679",
+            "https://vimeo.com/256607752",
+            "https://vimeo.com/256607835",
+            "https://vimeo.com/256607892",
+            "https://vimeo.com/256607903"
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "filter tags": [
+      {
+        "json": {
+          "link": "https://vimeo.com/256607984",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607328",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607536",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607562",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607573",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256612946",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607644",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607679",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607752",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607835",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607892",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/256607903",
+          "name": null,
+          "source": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "HTTP Request": [
+      {
+        "json": {
+          "uri": "/videos/256607984",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_0-0_TLK",
+          "description": null,
+          "type": "video",
+          "link": "https://vimeo.com/256607984",
+          "player_embed_url": "https://player.vimeo.com/video/256607984?h=07322cc598",
+          "duration": 46,
+          "width": 1920,
+          "language": null,
+          "height": 1080,
+          "embed": {
+            "html": "<iframe src=\"https://player.vimeo.com/video/256607984?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=159155\" width=\"1920\" height=\"1080\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" title=\"FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_0-0_TLK\"></iframe>",
+            "badges": {
+              "hdr": false,
+              "live": {
+                "streaming": false,
+                "archived": false
+              },
+              "staff_pick": {
+                "normal": false,
+                "best_of_the_month": false,
+                "best_of_the_year": false,
+                "premiere": false
+              },
+              "vod": false,
+              "weekend_challenge": false
+            },
+            "interactive": false,
+            "buttons": {
+              "watchlater": false,
+              "share": false,
+              "embed": false,
+              "hd": false,
+              "fullscreen": true,
+              "scaling": true,
+              "like": false
+            },
+            "logos": {
+              "vimeo": false,
+              "custom": {
+                "active": false,
+                "url": null,
+                "link": null,
+                "use_link": false,
+                "sticky": false
+              }
+            },
+            "play_button": {
+              "position": "auto"
+            },
+            "title": {
+              "name": "hide",
+              "owner": "hide",
+              "portrait": "hide"
+            },
+            "end_screen": [],
+            "playbar": true,
+            "quality_selector": true,
+            "pip": true,
+            "autopip": true,
+            "volume": true,
+            "color": "00adef",
+            "colors": {
+              "color_one": "000000",
+              "color_two": "00adef",
+              "color_three": "ffffff",
+              "color_four": "000000"
+            },
+            "event_schedule": true,
+            "has_cards": false,
+            "outro_type": "link",
+            "show_timezone": false,
+            "cards": [],
+            "airplay": true,
+            "audio_tracks": true,
+            "chapters": true,
+            "chromecast": true,
+            "closed_captions": true,
+            "transcript": true,
+            "skipping_forward": true,
+            "ask_ai": false,
+            "uri": "/presets/120692089",
+            "email_capture_form": [],
+            "speed": true
+          },
+          "created_time": "2018-02-20T16:06:51+00:00",
+          "modified_time": "2026-01-26T09:11:57+00:00",
+          "release_time": "2018-02-20T16:06:51+00:00",
+          "content_rating": [
+            "safe"
+          ],
+          "content_rating_class": "safe",
+          "rating_mod_locked": false,
+          "license": "by-nc-sa",
+          "privacy": {
+            "view": "disable",
+            "embed": "public",
+            "download": false,
+            "add": true,
+            "comments": "nobody"
+          },
+          "pictures": {
+            "uri": "/videos/256607984/pictures/1627191138",
+            "active": true,
+            "type": "custom",
+            "base_link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d?region=us",
+            "sizes": [
+              {
+                "width": 100,
+                "height": 75,
+                "link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_100x75?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_100x75%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 200,
+                "height": 150,
+                "link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_200x150?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_200x150%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 295,
+                "height": 166,
+                "link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_295x166?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_295x166%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 640,
+                "height": 360,
+                "link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_640x360?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_640x360%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 960,
+                "height": 540,
+                "link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_960x540?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_960x540%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 1280,
+                "height": 720,
+                "link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_1280x720?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_1280x720%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 1920,
+                "height": 1080,
+                "link": "https://i.vimeocdn.com/video/1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_1920x1080?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627191138-b8e3c6ed8b9e22583e560d1f35c46c05a54391cabb0d6e84aa59bbe4a111fe78-d_1920x1080%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              }
+            ],
+            "resource_key": "b2c9fb0350fa7dd2349af1516c58ace0b6083d6d",
+            "default_picture": false
+          },
+          "tags": [],
+          "stats": {
+            "plays": 29822
+          },
+          "categories": [],
+          "uploader": {
+            "pictures": {
+              "uri": "/users/19604204/pictures/28786337",
+              "active": true,
+              "type": "custom",
+              "base_link": "https://i.vimeocdn.com/portrait/28786337?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us",
+              "sizes": [
+                {
+                  "width": 30,
+                  "height": 30,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_30x30?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 72,
+                  "height": 72,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_72x72?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 75,
+                  "height": 75,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_75x75?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 100,
+                  "height": 100,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_100x100?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 144,
+                  "height": 144,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_144x144?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 216,
+                  "height": 216,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_216x216?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 288,
+                  "height": 288,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_288x288?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 300,
+                  "height": 300,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_300x300?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 360,
+                  "height": 360,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_360x360?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                }
+              ],
+              "resource_key": "3df391019bd727629ba6eb2b891524884a793071",
+              "default_picture": false
+            }
+          },
+          "metadata": {
+            "connections": {
+              "comments": {
+                "uri": "/videos/256607984/comments",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 0
+              },
+              "credits": {
+                "uri": "/videos/256607984/credits",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 0
+              },
+              "likes": {
+                "uri": "/videos/256607984/likes",
+                "options": [
+                  "GET"
+                ],
+                "total": 0
+              },
+              "pictures": {
+                "uri": "/videos/256607984/pictures",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 4
+              },
+              "texttracks": {
+                "uri": "/videos/256607984/texttracks",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 1
+              },
+              "related": null,
+              "recommendations": {
+                "uri": "/videos/256607984/recommendations",
+                "options": [
+                  "GET"
+                ],
+                "resource_signature": "e748683ddeebfbee8f8c59264980b2d360177c303748c869a71d775b353956eb_1769421260"
+              },
+              "albums": {
+                "uri": "/videos/256607984/albums",
+                "options": [
+                  "GET",
+                  "PATCH"
+                ],
+                "total": 0
+              },
+              "available_albums": {
+                "uri": "/videos/256607984/available_albums",
+                "options": [
+                  "GET"
+                ],
+                "total": 68
+              },
+              "versions": {
+                "uri": "/videos/256607984/versions",
+                "options": [
+                  "GET"
+                ],
+                "total": 1,
+                "current_uri": "/videos/256607984/versions/134305075",
+                "resource_key": "b2c6859f6f2d5e3fee8a52a6dd381a6fcc6bd0f5",
+                "create_storyboard_id": "",
+                "latest_incomplete_version": null
+              }
+            },
+            "interactions": {
+              "report": {
+                "uri": "/videos/256607984/report",
+                "options": [
+                  "POST"
+                ],
+                "reason": [
+                  "pornographic",
+                  "harassment",
+                  "ripoff",
+                  "incorrect rating",
+                  "spam",
+                  "causes harm",
+                  "csam",
+                  "voting misinformation"
+                ]
+              },
+              "view_team_members": {
+                "uri": "/videos/256607984/teammembers",
+                "options": [
+                  "GET"
+                ]
+              },
+              "edit": {
+                "uri": "/videos/256607984",
+                "options": [
+                  "PATCH"
+                ],
+                "blocked_fields": []
+              },
+              "edit_content_rating": {
+                "uri": "/videos/256607984",
+                "options": [
+                  "PATCH"
+                ],
+                "content_rating": [
+                  "language",
+                  "drugs",
+                  "violence",
+                  "nudity",
+                  "advertisement",
+                  "safe",
+                  "unrated"
+                ]
+              },
+              "edit_privacy": {
+                "uri": "/videos/256607984",
+                "options": [
+                  "PATCH"
+                ],
+                "content_type": "application/vnd.vimeo.video",
+                "properties": [
+                  {
+                    "name": "privacy.view",
+                    "required": true,
+                    "options": [
+                      "anybody",
+                      "nobody",
+                      "team",
+                      "password",
+                      "disable",
+                      "unlisted"
+                    ]
+                  }
+                ]
+              },
+              "delete": {
+                "uri": "/videos/256607984",
+                "options": [
+                  "DELETE"
+                ]
+              },
+              "can_update_privacy_to_public": {
+                "uri": "/videos/256607984",
+                "options": [
+                  "PATCH"
+                ]
+              },
+              "invite": {
+                "uri": "/users/19604204/team_user_clip_access_grants",
+                "options": [
+                  "GET",
+                  "POST"
+                ]
+              },
+              "trim": {
+                "uri": "/videos/256607984/cliptrim",
+                "options": [
+                  "GET",
+                  "POST"
+                ]
+              },
+              "validate": {
+                "uri": "/videos/256607984/validate",
+                "options": [
+                  "PUT"
+                ]
+              }
+            },
+            "is_vimeo_create": false,
+            "is_screen_record": false
+          },
+          "manage_link": "/manage/videos/256607984",
+          "user": {
+            "uri": "/users/19604204",
+            "name": "OpenClassrooms",
+            "link": "https://vimeo.com/openclassrooms",
+            "capabilities": {
+              "hasLiveSubscription": true
+            },
+            "location": "",
+            "gender": "n",
+            "bio": "L’entreprise est née de la rencontre de Pierre Dubuc et Mathieu Nebra, alors âgés de respectivement 11 et 13 ans. Tous deux animés de la même passion pour l’informatique, ils lancent leur premier cours de programmation en ligne en 1999 ; dès le début de l’histoire, l’objectif est de rendre accessible un savoir complexe.\n\nUne communauté de plus en plus large se construit progressivement autour de Mathieu et Pierre, qui lancent alors l’un des premiers forums en ligne d’entraide au code à la programmation : le Site du Zéro. Mine d’information pour tous les passionnés d’internet, le SdZ devient vite une référence à travers le Web francophone.\n\nEn 2013, les deux associés décident de lancer OpenClassrooms, une véritable école en ligne offrant d’abord de très nombreux cours gratuits sur une multitude de sujets ; OpenClassrooms propose aujourd’hui de nombreux parcours menant à une licence ou un mastère, ou encore à un diplôme inscrit au Répertoire National des Compétences Professionnelles.\n\nLa priorité d’OpenClassrooms, c’est l’employabilité. Notre objectif et le critère de réussite que nous nous sommes donnés, c’est d’aider chaque année un million d'étudiants OpenClassrooms à trouver un travail ou à évoluer dans leur carrière à partir de 2025.",
+            "short_bio": "OpenClassrooms est une école en ligne comptant 300 000 étudiants connectés chaque mois à travers le monde.",
+            "created_time": "2013-07-18T08:42:12+00:00",
+            "pictures": {
+              "uri": "/users/19604204/pictures/28786337",
+              "active": true,
+              "type": "custom",
+              "base_link": "https://i.vimeocdn.com/portrait/28786337?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us",
+              "sizes": [
+                {
+                  "width": 30,
+                  "height": 30,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_30x30?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 72,
+                  "height": 72,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_72x72?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 75,
+                  "height": 75,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_75x75?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 100,
+                  "height": 100,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_100x100?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 144,
+                  "height": 144,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_144x144?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 216,
+                  "height": 216,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_216x216?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 288,
+                  "height": 288,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_288x288?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 300,
+                  "height": 300,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_300x300?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 360,
+                  "height": 360,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_360x360?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                }
+              ],
+              "resource_key": "3df391019bd727629ba6eb2b891524884a793071",
+              "default_picture": false
+            },
+            "websites": [
+              {
+                "uri": "/users/19604204/links/7988638",
+                "name": "OpenClassrooms",
+                "link": "http://www.openclassrooms.com",
+                "type": "link",
+                "description": "Make education accessible"
+              }
+            ],
+            "metadata": {
+              "connections": {
+                "albums": {
+                  "uri": "/users/19604204/albums",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 68
+                },
+                "appearances": {
+                  "uri": "/users/19604204/appearances",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "categories": {
+                  "uri": "/users/19604204/categories",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "channels": {
+                  "uri": "/users/19604204/channels",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "feed": {
+                  "uri": "/users/19604204/feed",
+                  "options": [
+                    "GET"
+                  ]
+                },
+                "followers": {
+                  "uri": "/users/19604204/followers",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 1101
+                },
+                "following": {
+                  "uri": "/users/19604204/following",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "groups": {
+                  "uri": "/users/19604204/groups",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "likes": {
+                  "uri": "/users/19604204/likes",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "membership": {
+                  "uri": "/users/19604204/membership/",
+                  "options": [
+                    "PATCH"
+                  ]
+                },
+                "moderated_channels": {
+                  "uri": "/users/19604204/channels?filter=moderated",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "portfolios": {
+                  "uri": "/users/19604204/portfolios",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "videos": {
+                  "uri": "/users/19604204/videos",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 16951
+                },
+                "watchlater": {
+                  "uri": "/users/19604204/watchlater",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "shared": {
+                  "uri": "/users/19604204/shared/videos",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "pictures": {
+                  "uri": "/users/19604204/pictures",
+                  "options": [
+                    "GET",
+                    "POST"
+                  ],
+                  "total": 2
+                },
+                "watched_videos": {
+                  "uri": "/me/watched/videos",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "folders_root": {
+                  "uri": "/users/19604204/folders/root",
+                  "options": [
+                    "GET"
+                  ]
+                },
+                "folders": {
+                  "uri": "/users/19604204/folders",
+                  "options": [
+                    "GET",
+                    "POST"
+                  ],
+                  "total": 661
+                },
+                "teams": {
+                  "uri": "/users/19604204/teams",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 1
+                },
+                "permission_policies": {
+                  "uri": "/users/19604204/permission_policies",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 13
+                },
+                "block": {
+                  "uri": "/me/block",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                }
+              }
+            },
+            "location_details": {
+              "formatted_address": "",
+              "latitude": null,
+              "longitude": null,
+              "city": null,
+              "state": null,
+              "neighborhood": null,
+              "sub_locality": null,
+              "state_iso_code": null,
+              "country": null,
+              "country_iso_code": null
+            },
+            "skills": [],
+            "available_for_hire": false,
+            "can_work_remotely": false,
+            "preferences": {
+              "videos": {
+                "rating": [
+                  "safe"
+                ],
+                "autocc_display_enabled_by_default": false,
+                "license": "by-nc-sa",
+                "hide_stats": true,
+                "privacy": {
+                  "view": "disable",
+                  "comments": "nobody",
+                  "embed": "public",
+                  "download": false,
+                  "add": true,
+                  "allow_share_link": true
+                }
+              },
+              "webinar_registrant_lower_watermark_banner_dismissed": []
+            },
+            "content_filter": [
+              "language",
+              "drugs",
+              "violence",
+              "nudity",
+              "safe",
+              "unrated"
+            ],
+            "resource_key": "bb310bc46054140a7481d03f7905a95fe2ef50e0",
+            "account": "enterprise"
+          },
+          "last_user_action_event_date": "2023-03-24T14:49:59+00:00",
+          "parent_folder": null,
+          "review_page": {
+            "active": true,
+            "link": "https://vimeo.com/openclassrooms/review/256607984/5be4d52a41",
+            "is_shareable": true
+          },
+          "files": [
+            {
+              "quality": "hd",
+              "rendition": "1080p",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=28cf890d40c942c909727f3d865280c3985e2dfcd46a9c1b3ea6820cfc3eedd3",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 24203793,
+              "md5": "2ce6eea3a6c4a4cdb9a79894aabb11e6",
+              "public_name": "1080p",
+              "size_short": "23.08MB"
+            },
+            {
+              "quality": "hd",
+              "rendition": "720p",
+              "type": "video/mp4",
+              "width": 1280,
+              "height": 720,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/rendition/720p/file.mp4%20%28720p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=749eda6fff1aee92dbbd437b92b7a2f47f6d994cbf80a5930aeb1f7b6e87d616",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 10183844,
+              "md5": "2a79373bc8333ee80257939f36720570",
+              "public_name": "720p",
+              "size_short": "9.71MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "540p",
+              "type": "video/mp4",
+              "width": 960,
+              "height": 540,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/rendition/540p/file.mp4%20%28540p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=05c2909691b2cb89999388071343b2f7e5179dab6ea09d641121d7f8498c15ce",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 6346027,
+              "md5": "752fd0c1c709d2905516d53359ad4ab1",
+              "public_name": "540p",
+              "size_short": "6.05MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "360p",
+              "type": "video/mp4",
+              "width": 640,
+              "height": 360,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/rendition/360p/file.mp4%20%28360p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=7b2b7e7ecc9582990ab152ae92b7636a21a33a559c5b25e2d75f3766c7df1100",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 2917294,
+              "md5": "26cde0f5daeb41850902d97636c421a0",
+              "public_name": "360p",
+              "size_short": "2.78MB"
+            },
+            {
+              "quality": "hls",
+              "rendition": "adaptive",
+              "type": "video/mp4",
+              "link": "https://player.vimeo.com/external/256607984.m3u8?s=29b56c6739a3011f778576ac34037b207476f6c1&oauth2_token_id=1785873960",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 24203793,
+              "md5": "2ce6eea3a6c4a4cdb9a79894aabb11e6",
+              "public_name": "1080p",
+              "size_short": "23.08MB"
+            }
+          ],
+          "download": [
+            {
+              "quality": "hd",
+              "rendition": "1080p",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "expires": "2026-01-27T09:50:22+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/c9093fbe/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk%20%281080p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=a74312f604257253c5fcef0fe25255a78d0d75d1af78210baa42f38e4e269ac2&user_id=19604204",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 24203793,
+              "md5": "2ce6eea3a6c4a4cdb9a79894aabb11e6",
+              "public_name": "1080p",
+              "size_short": "23.08MB"
+            },
+            {
+              "quality": "hd",
+              "rendition": "720p",
+              "type": "video/mp4",
+              "width": 1280,
+              "height": 720,
+              "expires": "2026-01-27T09:50:22+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/fe51b1b8/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk%20%28720p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=593ccf85004fb152ddc23b6013d684e12bde392302d7738ac52881a698071941&user_id=19604204",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 10183844,
+              "md5": "2a79373bc8333ee80257939f36720570",
+              "public_name": "720p",
+              "size_short": "9.71MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "540p",
+              "type": "video/mp4",
+              "width": 960,
+              "height": 540,
+              "expires": "2026-01-27T09:50:22+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/a7e5ffde/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk%20%28540p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=59ed743ade2c43cfea8e7e1a28eabbca807f83f0c80903b0107e60347e360236&user_id=19604204",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 6346027,
+              "md5": "752fd0c1c709d2905516d53359ad4ab1",
+              "public_name": "540p",
+              "size_short": "6.05MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "360p",
+              "type": "video/mp4",
+              "width": 640,
+              "height": 360,
+              "expires": "2026-01-27T09:50:22+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/9d0d5754/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk%20%28360p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=c17e92ec579d2014cb8b0ecd9bd710a1dbeb1a0ff5338577079bc662c7f01ada&user_id=19604204",
+              "created_time": "2018-02-20T16:07:06+00:00",
+              "fps": 25,
+              "size": 2917294,
+              "md5": "26cde0f5daeb41850902d97636c421a0",
+              "public_name": "360p",
+              "size_short": "2.78MB"
+            },
+            {
+              "quality": "source",
+              "rendition": "source",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "expires": "2026-01-27T09:50:22+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/99ef2fd5/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=821311bf22190ef6780321b3ac3b64d3e905264b7a46add537a4db036ab5a101&user_id=19604204",
+              "created_time": "2018-02-20T16:06:53+00:00",
+              "fps": 25,
+              "size": 53358677,
+              "md5": "6f00d522cc6d6bd44d6cfb1d024f3c92",
+              "public_name": "source",
+              "size_short": "50.89MB"
+            }
+          ],
+          "app": {
+            "name": "Parallel Uploader",
+            "uri": "/apps/87099"
+          },
+          "play": {
+            "progressive": [
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 1920,
+                "height": 1080,
+                "link_expiration_time": "2026-01-27T09:50:22+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/c9093fbe/file.mp4%20%281080p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=9a76add24f18e27133d2047ba4278039400ad0a5a2ee56ec81fe666c452d5219&user_id=19604204",
+                "created_time": "2018-02-20T16:07:06+00:00",
+                "fps": 25,
+                "size": 24203793,
+                "md5": "2ce6eea3a6c4a4cdb9a79894aabb11e6",
+                "rendition": "1080p"
+              },
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 1280,
+                "height": 720,
+                "link_expiration_time": "2026-01-27T09:50:22+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/fe51b1b8/file.mp4%20%28720p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=f8385373bb5358050bb3dfa43de35efc6ba0933115065cc25f8de283d93d69fd&user_id=19604204",
+                "created_time": "2018-02-20T16:07:06+00:00",
+                "fps": 25,
+                "size": 10183844,
+                "md5": "2a79373bc8333ee80257939f36720570",
+                "rendition": "720p"
+              },
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 960,
+                "height": 540,
+                "link_expiration_time": "2026-01-27T09:50:22+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/a7e5ffde/file.mp4%20%28540p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=a63309beb9825abb9d10117729b63e6c69e730c2319ca780cbca7861ae69a3b2&user_id=19604204",
+                "created_time": "2018-02-20T16:07:06+00:00",
+                "fps": 25,
+                "size": 6346027,
+                "md5": "752fd0c1c709d2905516d53359ad4ab1",
+                "rendition": "540p"
+              },
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 640,
+                "height": 360,
+                "link_expiration_time": "2026-01-27T09:50:22+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/9d0d5754/file.mp4%20%28360p%29.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=562818e9ee3979d85505a8b5c299f9b98fc288efda62bd484cd991180da554b7&user_id=19604204",
+                "created_time": "2018-02-20T16:07:06+00:00",
+                "fps": 25,
+                "size": 2917294,
+                "md5": "26cde0f5daeb41850902d97636c421a0",
+                "rendition": "360p"
+              }
+            ],
+            "source": {
+              "quality": "source",
+              "rendition": "source",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "expires": "2026-01-27T09:50:22+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/99ef2fd5/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=821311bf22190ef6780321b3ac3b64d3e905264b7a46add537a4db036ab5a101&user_id=19604204",
+              "created_time": "2018-02-20T16:06:53+00:00",
+              "fps": 25,
+              "size": 53358677,
+              "md5": "6f00d522cc6d6bd44d6cfb1d024f3c92",
+              "public_name": "source",
+              "size_short": "50.89MB"
+            },
+            "hls": {
+              "link_expiration_time": "2026-01-27T09:49:22+00:00",
+              "link": "https://player.vimeo.com/play/cdea4d49-d6f4-4a73-b130-9a851f895b29/hls.m3u8?s=256607984_1769507362_82d0bfa8853afc7e046294d17a595b83&context=Vimeo%5CController%5CApi%5CResources%5CVideoController.&oauth2_token_id=1785873960"
+            },
+            "dash": {
+              "link_expiration_time": "2026-01-27T09:49:22+00:00",
+              "link": "https://player.vimeo.com/play/cdea4d49-d6f4-4a73-b130-9a851f895b29/dash.mpd?s=256607984_1769507362_82d0bfa8853afc7e046294d17a595b83&context=Vimeo%5CController%5CApi%5CResources%5CVideoController.&oauth2_token_id=1785873960"
+            },
+            "status": "playable"
+          },
+          "status": "available",
+          "resource_key": "5705928fa552742b80f36700e2279715c1d78b4e",
+          "upload": {
+            "status": "complete",
+            "link": null,
+            "upload_link": null,
+            "form": null,
+            "approach": null,
+            "size": null,
+            "redirect_url": null
+          },
+          "transcode": {
+            "status": "complete"
+          },
+          "is_playable": true,
+          "has_audio": true
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Parse vimeo ID": [
+      {
+        "json": {
+          "id": "256607984"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Retrieve source link": [
+      {
+        "json": {
+          "link": "https://vimeo.com/256607984",
+          "name": "FR_4929676_CRS_redigez-des-ecrits-professionnels_0-0_0-0_TLK",
+          "source": "https://player.vimeo.com/progressive_redirect/download/256607984/container/cdea4d49-d6f4-4a73-b130-9a851f895b29/99ef2fd5/fr_4929676_crs_redigez-des-ecrits-professionnels_0-0_0-0_tlk.mp4?expires=1769507422&loc=external&oauth2_token_id=1785873960&signature=821311bf22190ef6780321b3ac3b64d3e905264b7a46add537a4db036ab5a101&user_id=19604204"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Summarize1": [
+      {
+        "json": {
+          "count_link": 12
+        },
+        "pairedItem": [
+          {
+            "item": 0
+          },
+          {
+            "item": 1
+          },
+          {
+            "item": 2
+          },
+          {
+            "item": 3
+          },
+          {
+            "item": 4
+          },
+          {
+            "item": 5
+          },
+          {
+            "item": 6
+          },
+          {
+            "item": 7
+          },
+          {
+            "item": 8
+          },
+          {
+            "item": 9
+          },
+          {
+            "item": 10
+          },
+          {
+            "item": 11
+          }
+        ]
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Extract vimeo URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract vimeo URLs": {
+      "main": [
+        [
+          {
+            "node": "filter tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Filter videos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse vimeo ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Retrieve source link",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse vimeo ID": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve source link": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If videos": {
+      "main": [
+        [
+          {
+            "node": "Iconik - create collection",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iconik - create collection": {
+      "main": [
+        [
+          {
+            "node": "Loop videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter tags": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter videos": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "If videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop videos": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Summarize1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download vimeo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download vimeo": {
+      "main": [
+        [
+          {
+            "node": "Compute filesize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Iconik asset": {
+      "main": [
+        [
+          {
+            "node": "Get Iconik storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Iconik storage": {
+      "main": [
+        [
+          {
+            "node": "Create Iconik format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Iconik format": {
+      "main": [
+        [
+          {
+            "node": "Create Iconik fileset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Iconik fileset": {
+      "main": [
+        [
+          {
+            "node": "Create Iconik upload URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Iconik upload URL": {
+      "main": [
+        [
+          {
+            "node": "Start job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute filesize": {
+      "main": [
+        [
+          {
+            "node": "Create Iconik asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start job": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Patch file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Patch file": {
+      "main": [
+        [
+          {
+            "node": "Generate keyframes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate keyframes": {
+      "main": [
+        [
+          {
+            "node": "Finish Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finish Job": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize1": {
+      "main": [
+        [
+          {
+            "node": "Make share link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make share link": {
+      "main": [
+        [
+          {
+            "node": "Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "fb57da39-d214-472d-ac21-b63df938373c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8524bd12d70e0a97c731d06e7b34aca714fad09c346374a21b1e6e6cde0f217e"
+  },
+  "id": "fWoWg12qd1gSvJ0Q4Ib9s",
+  "tags": []
+}

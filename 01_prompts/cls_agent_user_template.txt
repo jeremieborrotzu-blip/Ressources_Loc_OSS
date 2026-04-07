@@ -1,0 +1,70 @@
+INPUTS
+- course_id: {{course_id}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- domain: {{domain}}
+- content_type: {{content_type}}
+- audience: {{audience}}
+- constraints: {{constraints}}
+- source_content: {{source_content}}
+- target_draft: {{target_draft}}
+- common_glossary: {{common_glossary}}
+- domain_glossary: {{domain_glossary}}
+- temp_glossary: {{temp_glossary}}
+- media_inventory: {{media_inventory}}
+- previous_reports: {{previous_reports}}
+- score_target: {{score_target}}
+
+TASK
+1) Run the 6-pillar audit (technical integrity, pedagogical tone, terminology & brand, cultural portability, media & resources, AV/dubbing).
+2) Produce a score_total (0-100) with breakdown and penalties.
+3) Apply all corrections to the target draft:
+   - Replace forbidden terms
+   - Apply Concept Swaps for cultural friction
+   - Replace external links with target-language equivalents where possible
+   - Enforce glossary consistency
+4) For every change made, log it in decision_log with: segment_id, source_text, draft_input, final_output, change_type, decision_note.
+5) Output temp_glossary_patch for any new/updated terms detected.
+6) If score_total < score_target, list critical_blockers and actions_next.
+7) Output STRICT JSON only.
+
+OUTPUT SCHEMA:
+{
+  "status": "pass|revise",
+  "score_total": 0,
+  "score_breakdown": {
+    "technical_integrity": 0,
+    "pedagogical_tone": 0,
+    "terminology_brand": 0,
+    "cultural_portability": 0,
+    "media_resources": 0,
+    "av_dubbing": 0,
+    "penalties": []
+  },
+  "revised_content": "...",
+  "decision_log": [
+    {
+      "segment_id": "",
+      "source_text": "",
+      "draft_input": "",
+      "final_output": "",
+      "change_type": "terminology|link_swap|cultural_swap|tone|format|media_flag",
+      "decision_note": "",
+      "direction": "fr>en|en>fr"
+    }
+  ],
+  "critical_blockers": [],
+  "temp_glossary_patch": [
+    {
+      "source_term": "",
+      "target_term": "",
+      "direction": "fr>en|en>fr",
+      "domain": "",
+      "category": "tech|brand|pedagogy|admin|work_culture|ui|proper_noun",
+      "context_note": "",
+      "do_not_translate": false
+    }
+  ],
+  "actions_next": [],
+  "report_md": "## Audit Overview ..."
+}
