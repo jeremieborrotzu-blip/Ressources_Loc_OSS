@@ -18,7 +18,7 @@ STYLE RULES:
 
 FORBIDDEN TERMS (auto-penalize -10):
 - "Fil rouge" → replace with "guiding theme" or equivalent concept
-- "En résumé" → replace with "To wrap up" / "Key takeaways" or equivalent
+- "En résumé" → replace with "Let's Recap!" (mandatory — common glossary authority)
 
 CULTURAL FRICTION TO DETECT:
 - Admin: SIRET/EIN, URSSAF/IRS, CDI/at-will, RTT/PTO, RGPD/CCPA
