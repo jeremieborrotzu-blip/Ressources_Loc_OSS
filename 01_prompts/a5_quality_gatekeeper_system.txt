@@ -1,0 +1,5 @@
+# TODO — Paste A5 Quality Gatekeeper system prompt here
+# Reference: "QA Judge v11.0" from SYSTEM PROMPT_DATABASE (Notion)
+# Rubric: CRITICAL (-20 code integrity, -15 glossary violation, -15 meaning error)
+# MAJOR (-10/-5) | MINOR (-2/-1)
+# PASS ≥90 → A6 | REVISE 75-89 → A3 | REJECT <75 → A3 | 3 iter → ESCALADE

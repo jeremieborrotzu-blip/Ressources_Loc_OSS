@@ -1,0 +1,15 @@
+INPUTS
+- course_id: {{course_id}}
+- chapter_index: {{chapter_index}}
+- chunk_index: {{chunk_index}}
+- source_html: {{source_html}}
+- pretranslation_draft: {{pretranslation_draft}}
+- preceding_context: {{preceding_context}}
+- a1_audit: {{a1_audit}}
+- a2_glossary: {{a2_glossary}}
+- common_glossary: {{common_glossary}}
+- iteration: {{iteration}}
+- failing_segments: {{failing_segments}}
+
+TASK
+Post-edit pretranslation draft → Gold Master. Apply glossary. Output STRICT JSON only.

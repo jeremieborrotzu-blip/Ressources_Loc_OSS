@@ -1,0 +1,9 @@
+INPUTS
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- html_content: {{html_content}}
+- preceding_context: {{preceding_context}}
+
+TASK
+Translate html_content from source_language to target_language.
+Preserve all HTML structure exactly. Return translated HTML only.

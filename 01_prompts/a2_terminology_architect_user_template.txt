@@ -1,0 +1,12 @@
+INPUTS
+- course_id: {{course_id}}
+- detected_domain: {{detected_domain}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- a1_outputs: {{a1_outputs}}
+- common_glossary: {{common_glossary}}
+- domain_validated_tm: {{domain_validated_tm}}
+- domain_unvalidated_tm: {{domain_unvalidated_tm}}
+
+TASK
+Build unified glossary from 3 sources. Resolve conflicts. Output STRICT JSON only.
