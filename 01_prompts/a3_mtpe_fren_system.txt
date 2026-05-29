@@ -1,0 +1,3 @@
+# TODO — Paste A3 MTPE FR→EN system prompt here
+# Reference: "MTPE Specialist v4.2" from SYSTEM PROMPT_DATABASE (Notion)
+# Note: "DeepL draft" → replaced by "GPT-4o pre-translation draft" (decision actée)

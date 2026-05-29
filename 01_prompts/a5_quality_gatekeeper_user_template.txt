@@ -1,0 +1,16 @@
+INPUTS
+- course_id: {{course_id}}
+- chapter_index: {{chapter_index}}
+- chunk_index: {{chunk_index}}
+- source_html: {{source_html}}
+- translated_html: {{translated_html}}
+- a1_audit: {{a1_audit}}
+- a2_glossary: {{a2_glossary}}
+- a4_swap_log: {{a4_swap_log}}
+- common_glossary: {{common_glossary}}
+- iteration: {{iteration}}
+- previous_qa_report: {{previous_qa_report}}
+- score_target: {{score_target}}
+
+TASK
+Score translation /100. List critical_blockers with segment_ids. Output STRICT JSON only.

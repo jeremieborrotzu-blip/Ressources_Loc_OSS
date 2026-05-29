@@ -1,0 +1,4 @@
+# TODO — Paste A2 Terminology Architect system prompt here
+# Reference: "Lead Corpus Terminologist" from SYSTEM PROMPT_DATABASE (Notion)
+# Input: A1 outputs from all chapters + common_glossary + domain_tm
+# Output: unified glossary JSON

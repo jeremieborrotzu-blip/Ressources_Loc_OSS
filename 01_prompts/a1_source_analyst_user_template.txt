@@ -1,0 +1,11 @@
+INPUTS
+- course_id: {{course_id}}
+- chapter_index: {{chapter_index}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- html_content: {{html_content}}
+- common_glossary: {{common_glossary}}
+
+TASK
+Run 6-pillar audit. Detect domain (Tech/Data/Business/Career/Soft_Skills).
+Output STRICT JSON only.

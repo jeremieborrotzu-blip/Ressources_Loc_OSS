@@ -1,0 +1,4 @@
+# TODO — Paste A1 Source Analyst system prompt here
+# Reference: "Global Auditor v9.0" from SYSTEM PROMPT_DATABASE (Notion)
+# 6 pillars: Technical Integrity (15) | Pedagogical Tone (15) | Terminology & Brand (15) | Cultural & Societal (25) | Media & Resources (15) | Dubbing & AV (15)
+# Output: localizability_score, pillar_scores{}, blockers[], media_inventory[], proposed_terminology[], cultural_flags[], detected_domain
