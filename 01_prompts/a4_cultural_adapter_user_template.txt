@@ -1,0 +1,71 @@
+INPUTS
+- course_id: {{course_id}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- domain: {{domain}}
+- audience: {{audience}}
+- source_content: {{source_content}}
+- a3_gold_master: {{a3_gold_master}}
+- a1_cultural_flags: {{a1_cultural_flags}}
+- a2_terminology_decisions: {{a2_terminology_decisions}}
+- common_glossary: {{common_glossary}}
+- constraints: {{constraints}}
+
+TASK
+1) Read a1_cultural_flags[]. For each flag, determine if A3 resolved it. If not, escalate as new_flag with severity CRITICAL.
+2) Scan the full a3_gold_master for concept-locked terms not caught by A1 — activate the swap libraries matching the domain input.
+3) For every term identified, apply exactly one decision: SWAP, CONSERVE+EXPLAIN, or NO_CHANGE.
+   - SWAP: replace the source-locked concept with the target-culture equivalent.
+   - CONSERVE+EXPLAIN: keep the source term, add a parenthetical note directly in the adapted_content.
+   - NO_CHANGE: term is correctly adapted — log for traceability only.
+4) Never touch HTML tags, code blocks, placeholders, or data-claire-semantic attributes.
+5) Never re-translate culturally neutral text.
+6) Produce cultural_portability_score (out of 25): start at 25, deduct per unresolved flag (CRITICAL −5, MAJOR −3, MINOR −1).
+7) Output temp_glossary_patch for any new domain-specific swap decisions to persist to the domain glossary CSV.
+8) Output STRICT JSON only.
+
+OUTPUT SCHEMA:
+{
+  "status": "complete",
+  "course_id": "",
+  "source_language": "",
+  "target_language": "",
+  "domain": "",
+  "cultural_portability_score": 0,
+  "adapted_content": "...",
+  "swap_log": [
+    {
+      "segment_id": "A4-001",
+      "source_term": "",
+      "a3_draft_value": "",
+      "final_output": "",
+      "decision_type": "SWAP|CONSERVE_EXPLAIN|NO_CHANGE",
+      "swap_category": "institutional|methodological|regulatory|administrative|idiomatic|format|forbidden_term|data_feature|hr_culture|legal",
+      "domain": "",
+      "a1_flagged": true,
+      "decision_note": ""
+    }
+  ],
+  "new_flags": [
+    {
+      "flag_id": "A4-FLAG-001",
+      "severity": "CRITICAL|MAJOR|MINOR",
+      "term": "",
+      "location": "",
+      "issue": "",
+      "recommendation": ""
+    }
+  ],
+  "temp_glossary_patch": [
+    {
+      "source_term": "",
+      "target_term": "",
+      "direction": "fr>en|en>fr",
+      "domain": "",
+      "category": "institutional|methodological|regulatory|administrative|idiomatic|data_feature|hr_culture|legal",
+      "context_note": "",
+      "do_not_translate": false
+    }
+  ],
+  "actions_next": []
+}
