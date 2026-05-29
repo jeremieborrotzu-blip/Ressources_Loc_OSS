@@ -1,0 +1,560 @@
+{
+  "version": "1.0",
+  "description": "OpenClassrooms Common Glossary — source of absolute authority. Never overridden by domain TM or agent decisions.",
+  "direction": "fr>en",
+  "terms": [
+    {
+      "category": "Structure",
+      "source_fr": "Cours",
+      "target_en": "Course",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Partie",
+      "target_en": "Part",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Chapitre",
+      "target_en": "Chapter",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Section",
+      "target_en": "Section",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Introduction",
+      "target_en": "Introduction",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Conclusion",
+      "target_en": "Conclusion",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Rencontrez vos professeurs",
+      "target_en": "Meet your instructors",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Rencontrez les intervenants",
+      "target_en": "Meet the speakers",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Tirez un maximum de ce cours",
+      "target_en": "Make the most out of this course",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Structure",
+      "source_fr": "Tirez le meilleur de ce cours",
+      "target_en": "Make the most out of this course",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Objectifs pédagogiques",
+      "target_en": "Learning outcomes",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "À la fin de ce cours, vous serez capable de :",
+      "target_en": "By the end of this course, you will be able to:",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "À l’issue de ce cours…",
+      "target_en": "By the end of this course…",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "En résumé",
+      "target_en": "Let's Recap!",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Quiz",
+      "target_en": "Quiz",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Évaluez vos connaissances",
+      "target_en": "Test your knowledge",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Prérequis",
+      "target_en": "Prerequisites",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Pas de panique",
+      "target_en": "No need to worry",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Vous allez apprendre à…",
+      "target_en": "You will learn to…",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Suivre pas à pas",
+      "target_en": "Follow step by step",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Démonstration vidéo",
+      "target_en": "Video walkthrough",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Vidéo",
+      "target_en": "Video",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Contenu texte / contenu textuel",
+      "target_en": "Text content",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Courte vidéo (qui résume…)",
+      "target_en": "Short video (that summarizes…)",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Scénario",
+      "target_en": "Scenario",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Exemple",
+      "target_en": "Example",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Exercice",
+      "target_en": "Exercise",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Activité",
+      "target_en": "Activity",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "À vous de jouer !",
+      "target_en": "Over to You!",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Correction",
+      "target_en": "Solution",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Réponse",
+      "target_en": "Answer",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Conseil / quelques conseils",
+      "target_en": "Tip/Tips",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Bravo !",
+      "target_en": "Well done!",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Continuez votre apprentissage",
+      "target_en": "Keep learning",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Information (encadré)",
+      "target_en": "Note",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Attention (encadré)",
+      "target_en": "Warning",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Question (encadré)",
+      "target_en": "Question",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Astuce",
+      "target_en": "A quick tip",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Pédagogie",
+      "source_fr": "Important",
+      "target_en": "Important",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Cliquez",
+      "target_en": "Click",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Onglet",
+      "target_en": "Tab",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Télécharger",
+      "target_en": "Download",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Import Project",
+      "target_en": "Import Project",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Code du cours",
+      "target_en": "Course code",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Dépôt Git",
+      "target_en": "Git repository",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Branche",
+      "target_en": "Branch",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Installer",
+      "target_en": "Install",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Configuration",
+      "target_en": "Configuration",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Paramètres",
+      "target_en": "Settings",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Connexion",
+      "target_en": "Login",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Interface",
+      "source_fr": "Formulaire de connexion",
+      "target_en": "Login form",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Marque OC",
+      "source_fr": "OpenClassrooms",
+      "target_en": "OpenClassrooms",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Marque OC",
+      "source_fr": "Mentor",
+      "target_en": "Mentor",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Marque OC",
+      "source_fr": "Parcours",
+      "target_en": "Path",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Marque OC",
+      "source_fr": "Apprenant",
+      "target_en": "Student",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Marque OC",
+      "source_fr": "Plateforme",
+      "target_en": "Platform",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Marque OC",
+      "source_fr": "Professeur(s)",
+      "target_en": "Instructor(s)",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Marque OC",
+      "source_fr": "Intervenant(s)",
+      "target_en": "Speaker(s)",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Projet",
+      "target_en": "Project",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Application",
+      "target_en": "Application",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Équipe",
+      "target_en": "Team",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Client",
+      "target_en": "Client",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Utilisateur",
+      "target_en": "User",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Besoin",
+      "target_en": "Need",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Stratégie",
+      "target_en": "Strategy",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Organisation",
+      "source_fr": "Objectif(s)",
+      "target_en": "Goal(s)",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Évaluation",
+      "source_fr": "Évaluation",
+      "target_en": "Assessment",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Évaluation",
+      "source_fr": "Livrable",
+      "target_en": "Deliverable",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Évaluation",
+      "source_fr": "Critères",
+      "target_en": "Criteria",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Ressources",
+      "source_fr": "Documentation",
+      "target_en": "Documentation",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Ressources",
+      "source_fr": "Ressource(s)",
+      "target_en": "Resource(s)",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Ressources",
+      "source_fr": "Exemple de code",
+      "target_en": "sample code",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Ressources",
+      "source_fr": "Dépôt",
+      "target_en": "Repository",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Ressources",
+      "source_fr": "Lien",
+      "target_en": "Link",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Ressources",
+      "source_fr": "Références",
+      "target_en": "References",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Navigation",
+      "source_fr": "Suivant",
+      "target_en": "Next",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Navigation",
+      "source_fr": "Précédent",
+      "target_en": "Previous",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Navigation",
+      "source_fr": "Chapitre suivant",
+      "target_en": "Next chapter",
+      "authority": "common_glossary",
+      "do_not_override": true
+    },
+    {
+      "category": "Style",
+      "source_fr": "Bonjour et bienvenue dans ce cours !",
+      "target_en": "Welcome to this course!",
+      "authority": "common_glossary",
+      "do_not_override": true
+    }
+  ]
+}
