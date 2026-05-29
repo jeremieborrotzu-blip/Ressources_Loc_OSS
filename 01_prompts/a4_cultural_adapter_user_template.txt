@@ -21,7 +21,7 @@ TASK
 4) Never touch HTML tags, code blocks, placeholders, or data-claire-semantic attributes.
 5) Never re-translate culturally neutral text.
 6) Produce cultural_portability_score (out of 25): start at 25, deduct per unresolved flag (CRITICAL −5, MAJOR −3, MINOR −1).
-7) Output temp_glossary_patch for any new domain-specific swap decisions to persist to the domain glossary CSV.
+7) Output domain_tm_patch for any new domain-specific swap decisions to persist to the domain glossary CSV.
 8) Output STRICT JSON only.
 
 OUTPUT SCHEMA:
@@ -56,7 +56,7 @@ OUTPUT SCHEMA:
       "recommendation": ""
     }
   ],
-  "temp_glossary_patch": [
+  "domain_tm_patch": [
     {
       "source_term": "",
       "target_term": "",
