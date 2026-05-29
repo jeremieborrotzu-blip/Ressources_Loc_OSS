@@ -1,0 +1,52 @@
+INPUTS
+- course_id: {{course_id}}
+- target_language: {{target_language}}
+- domain: {{domain}}
+- adapted_content: {{adapted_content}}
+
+NOTE: You do NOT receive source_content, audit reports, or glossaries. Apply isolation rule as defined in system prompt.
+
+TASK
+1) Read the adapted_content as a native speaker of the target language. Do not infer or imagine what the source said.
+2) Evaluate against all 5 naturalness criteria: native-speaker sound, no calques, rhythm, idiomatic collocations, publishable without modification.
+3) Apply mandatory OC style rules (imperative headings, inclusive language, forbidden terms, "Over To You!", "Let's Recap!") — these apply even in isolation.
+4) Log every issue found with: issue_id, severity, checklist_category, location, draft_value, suggested_fix, decision_note.
+5) Compute naturalness_score (start at 10, deduct per severity: CRITICAL −3, MAJOR −1, MINOR −0.5).
+6) For every CRITICAL and MAJOR issue, produce a fopr_ready_item (compatible with FOPR OSS review log format).
+7) Apply all safe fixes directly to the content and return revised_content.
+   - Safe to fix directly: spelling, grammar, collocation, heading form, punctuation, inclusive language, calques.
+   - Flag only (do not fix): anything that could change the pedagogical meaning — route to A3 via actions_next.
+8) Output verdict: "ready_to_publish" if naturalness_score >= 8, "needs_revision" if < 8.
+9) Output STRICT JSON only.
+
+OUTPUT SCHEMA:
+{
+  "status": "pass|revise",
+  "course_id": "",
+  "target_language": "",
+  "domain": "",
+  "naturalness_score": 0,
+  "verdict": "ready_to_publish|needs_revision",
+  "issue_log": [
+    {
+      "issue_id": "A6-001",
+      "severity": "CRITICAL|MAJOR|MINOR",
+      "checklist_category": "grammar|naturalness|calque|rhythm|collocation|heading|punctuation|inclusive|forbidden_term",
+      "location": "",
+      "draft_value": "",
+      "suggested_fix": "",
+      "decision_note": ""
+    }
+  ],
+  "fopr_ready_items": [
+    {
+      "location": "",
+      "source": "A6 isolation — source not reviewed",
+      "target": "",
+      "issue": "",
+      "change_made_or_suggested": ""
+    }
+  ],
+  "revised_content": "...",
+  "actions_next": []
+}
