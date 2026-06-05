@@ -1,0 +1,437 @@
+{
+  "updatedAt": "2026-06-04T17:18:21.636Z",
+  "createdAt": "2026-05-29T14:08:42.529Z",
+  "id": "P2YD7sOqf6uMAtqU",
+  "name": "[SUB] CLS v3 — Batch Submitter",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "Input from MAIN",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "n1",
+      "name": "Build JSONL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\n// Builds the JSONL file for OpenAI Batch API\n// Input: { model, system_prompt, user_message, custom_id, agent_name, max_tokens }\nconst inp = $input.first().json;\n\nconst request = {\n  custom_id: inp.custom_id || `${inp.agent_name || 'agent'}-${Date.now()}`,\n  method:    'POST',\n  url:       '/v1/chat/completions',\n  body: {\n    model:      inp.model || 'gpt-4o',\n    messages: [\n      { role: 'system', content: inp.system_prompt },\n      { role: 'user',   content: inp.user_message  }\n    ],\n    max_tokens:       inp.max_tokens       || 16000,\n    temperature:      inp.temperature      ?? 0.3,\n    response_format:  inp.response_format  || { type: 'json_object' }\n  }\n};\n\nconst jsonl = JSON.stringify(request);\n\nreturn [{ json: {\n  jsonl,\n  custom_id:   request.custom_id,\n  agent_name:  inp.agent_name,\n  model:       inp.model,\n  course_id:   inp.course_id,\n  chapter_index: inp.chapter_index,\n  chunk_index:   inp.chunk_index,\n  // Pass through all pipeline metadata\n  pipeline_meta: inp.pipeline_meta || {}\n}}];\n"
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Upload JSONL to OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/files",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formData",
+              "name": "purpose",
+              "value": "batch"
+            },
+            {
+              "parameterType": "formData",
+              "name": "file",
+              "value": "={{ $json.jsonl }}",
+              "inputDataFieldName": "file",
+              "contentType": "application/jsonl",
+              "fileName": "batch_input.jsonl"
+            }
+          ]
+        }
+      },
+      "notes": "⚠️ Credential 'OpenAI API Key' à créer dans n8n (Header Auth: Authorization: Bearer {key})",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oWQq1j5RXiUXQXHK",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "id": "n3",
+      "name": "After Upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\n// After file upload — extract file_id and prepare batch creation\nconst resp = $input.first().json;\nconst fileId = resp.id;\nif (!fileId) throw new Error(`File upload failed: ${JSON.stringify(resp)}`);\n\nreturn [{ json: {\n  file_id:     fileId,\n  custom_id:   $('Build JSONL').first().json.custom_id,\n  agent_name:  $('Build JSONL').first().json.agent_name,\n  model:       $('Build JSONL').first().json.model,\n  course_id:   $('Build JSONL').first().json.course_id,\n  chapter_index: $('Build JSONL').first().json.chapter_index,\n  chunk_index:   $('Build JSONL').first().json.chunk_index,\n  pipeline_meta: $('Build JSONL').first().json.pipeline_meta\n}}];\n"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Create Batch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1040,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/batches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "input_file_id": "={{ $json.file_id }}",
+          "endpoint": "/v1/chat/completions",
+          "completion_window": "24h"
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oWQq1j5RXiUXQXHK",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Return Batch Info",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\n// After batch creation — return batch_id for the Poller\nconst resp = $input.first().json;\nconst batchId = resp.id;\nif (!batchId) throw new Error(`Batch creation failed: ${JSON.stringify(resp)}`);\n\nreturn [{ json: {\n  batch_id:    batchId,\n  status:      resp.status,\n  file_id:     $('After Upload').first().json.file_id,\n  custom_id:   $('After Upload').first().json.custom_id,\n  agent_name:  $('After Upload').first().json.agent_name,\n  model:       $('After Upload').first().json.model,\n  course_id:   $('After Upload').first().json.course_id,\n  chapter_index: $('After Upload').first().json.chapter_index,\n  chunk_index:   $('After Upload').first().json.chunk_index,\n  pipeline_meta: $('After Upload').first().json.pipeline_meta,\n  submitted_at: new Date().toISOString()\n}}];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Input from MAIN": {
+      "main": [
+        [
+          {
+            "node": "Build JSONL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build JSONL": {
+      "main": [
+        [
+          {
+            "node": "Upload JSONL to OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload JSONL to OpenAI": {
+      "main": [
+        [
+          {
+            "node": "After Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "After Upload": {
+      "main": [
+        [
+          {
+            "node": "Create Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Batch": {
+      "main": [
+        [
+          {
+            "node": "Return Batch Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "7e1f150a-b7f4-40b5-a411-4758e8ecb9d1",
+  "activeVersionId": "7e1f150a-b7f4-40b5-a411-4758e8ecb9d1",
+  "versionCounter": 8,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T14:08:42.532Z",
+      "createdAt": "2026-05-29T14:08:42.532Z",
+      "role": "workflow:owner",
+      "workflowId": "P2YD7sOqf6uMAtqU",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-04T17:18:21.639Z",
+    "createdAt": "2026-06-04T17:18:21.639Z",
+    "versionId": "7e1f150a-b7f4-40b5-a411-4758e8ecb9d1",
+    "workflowId": "P2YD7sOqf6uMAtqU",
+    "nodes": [
+      {
+        "id": "n0",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "n1",
+        "name": "Build JSONL",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          260,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\n// Builds the JSONL file for OpenAI Batch API\n// Input: { model, system_prompt, user_message, custom_id, agent_name, max_tokens }\nconst inp = $input.first().json;\n\nconst request = {\n  custom_id: inp.custom_id || `${inp.agent_name || 'agent'}-${Date.now()}`,\n  method:    'POST',\n  url:       '/v1/chat/completions',\n  body: {\n    model:      inp.model || 'gpt-4o',\n    messages: [\n      { role: 'system', content: inp.system_prompt },\n      { role: 'user',   content: inp.user_message  }\n    ],\n    max_tokens:       inp.max_tokens       || 16000,\n    temperature:      inp.temperature      ?? 0.3,\n    response_format:  inp.response_format  || { type: 'json_object' }\n  }\n};\n\nconst jsonl = JSON.stringify(request);\n\nreturn [{ json: {\n  jsonl,\n  custom_id:   request.custom_id,\n  agent_name:  inp.agent_name,\n  model:       inp.model,\n  course_id:   inp.course_id,\n  chapter_index: inp.chapter_index,\n  chunk_index:   inp.chunk_index,\n  // Pass through all pipeline metadata\n  pipeline_meta: inp.pipeline_meta || {}\n}}];\n"
+        }
+      },
+      {
+        "id": "n2",
+        "name": "Upload JSONL to OpenAI",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          520,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.openai.com/v1/files",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "parameterType": "formData",
+                "name": "purpose",
+                "value": "batch"
+              },
+              {
+                "parameterType": "formData",
+                "name": "file",
+                "value": "={{ $json.jsonl }}",
+                "inputDataFieldName": "file",
+                "contentType": "application/jsonl",
+                "fileName": "batch_input.jsonl"
+              }
+            ]
+          }
+        },
+        "notes": "⚠️ Credential 'OpenAI API Key' à créer dans n8n (Header Auth: Authorization: Bearer {key})",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oWQq1j5RXiUXQXHK",
+            "name": "OpenAI API Key"
+          }
+        }
+      },
+      {
+        "id": "n3",
+        "name": "After Upload",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          780,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\n// After file upload — extract file_id and prepare batch creation\nconst resp = $input.first().json;\nconst fileId = resp.id;\nif (!fileId) throw new Error(`File upload failed: ${JSON.stringify(resp)}`);\n\nreturn [{ json: {\n  file_id:     fileId,\n  custom_id:   $('Build JSONL').first().json.custom_id,\n  agent_name:  $('Build JSONL').first().json.agent_name,\n  model:       $('Build JSONL').first().json.model,\n  course_id:   $('Build JSONL').first().json.course_id,\n  chapter_index: $('Build JSONL').first().json.chapter_index,\n  chunk_index:   $('Build JSONL').first().json.chunk_index,\n  pipeline_meta: $('Build JSONL').first().json.pipeline_meta\n}}];\n"
+        }
+      },
+      {
+        "id": "n4",
+        "name": "Create Batch",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          1040,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.openai.com/v1/batches",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "input_file_id": "={{ $json.file_id }}",
+            "endpoint": "/v1/chat/completions",
+            "completion_window": "24h"
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oWQq1j5RXiUXQXHK",
+            "name": "OpenAI API Key"
+          }
+        }
+      },
+      {
+        "id": "n5",
+        "name": "Return Batch Info",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1300,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\n// After batch creation — return batch_id for the Poller\nconst resp = $input.first().json;\nconst batchId = resp.id;\nif (!batchId) throw new Error(`Batch creation failed: ${JSON.stringify(resp)}`);\n\nreturn [{ json: {\n  batch_id:    batchId,\n  status:      resp.status,\n  file_id:     $('After Upload').first().json.file_id,\n  custom_id:   $('After Upload').first().json.custom_id,\n  agent_name:  $('After Upload').first().json.agent_name,\n  model:       $('After Upload').first().json.model,\n  course_id:   $('After Upload').first().json.course_id,\n  chapter_index: $('After Upload').first().json.chapter_index,\n  chunk_index:   $('After Upload').first().json.chunk_index,\n  pipeline_meta: $('After Upload').first().json.pipeline_meta,\n  submitted_at: new Date().toISOString()\n}}];\n"
+        }
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Build JSONL",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build JSONL": {
+        "main": [
+          [
+            {
+              "node": "Upload JSONL to OpenAI",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload JSONL to OpenAI": {
+        "main": [
+          [
+            {
+              "node": "After Upload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "After Upload": {
+        "main": [
+          [
+            {
+              "node": "Create Batch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Batch": {
+        "main": [
+          [
+            {
+              "node": "Return Batch Info",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-04T17:43:51.500Z",
+        "id": 271,
+        "workflowId": "P2YD7sOqf6uMAtqU",
+        "versionId": "7e1f150a-b7f4-40b5-a411-4758e8ecb9d1",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-04T17:44:18.752Z",
+        "id": 284,
+        "workflowId": "P2YD7sOqf6uMAtqU",
+        "versionId": "7e1f150a-b7f4-40b5-a411-4758e8ecb9d1",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-04T17:44:18.743Z",
+        "id": 283,
+        "workflowId": "P2YD7sOqf6uMAtqU",
+        "versionId": "7e1f150a-b7f4-40b5-a411-4758e8ecb9d1",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}

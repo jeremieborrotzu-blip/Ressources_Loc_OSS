@@ -1,0 +1,511 @@
+{
+  "updatedAt": "2026-06-05T06:56:40.703Z",
+  "createdAt": "2026-05-29T14:13:50.539Z",
+  "id": "hNdY7a7cIqY1aLIm",
+  "name": "[AGENT] CLS v3 — A1 Source Analyst",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "Input from MAIN",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "n1",
+      "name": "Prep URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "jsCode": "return [{json: {sys_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a1_source_analyst_system.txt\", usr_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a1_source_analyst_user_template.txt\", ...($input.first().json)}}];"
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Load System",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        440,
+        180
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Prep URLs').item.json.sys_url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Load User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        440,
+        420
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Prep URLs').item.json.usr_url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Build Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\nconst inp = $('Input from MAIN').first().json;\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nlet   usr = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\nconst vars = {\n  course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n  chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n  target_language: inp.target_language||'en-US', detected_domain: inp.detected_domain||'',\n  html_content: inp.html||inp.html_content||'', source_html: inp.html||inp.source_html||'',\n  pretranslation_draft: inp.pretranslation_draft||'', translated_html: inp.translated_html||'',\n  preceding_context: inp.preceding_context||'',\n  a1_audit: JSON.stringify(inp.a1_audit||{}), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n  a2_glossary: JSON.stringify(inp.a2_glossary||{}), a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n  common_glossary: JSON.stringify(inp.common_glossary||[]),\n  domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n  domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n  iteration: inp.iteration||1, failing_segments: JSON.stringify(inp.failing_segments||[]),\n  previous_qa_report: JSON.stringify(inp.previous_qa_report||{}),\n  score_target: inp.score_target||90\n};\nObject.entries(vars).forEach(([k,v]) => {\n  usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n});\nreturn [{json:{\n  system_prompt: sys, user_message: usr,\n  model: 'gpt-5.4', temperature: 0.1, max_tokens: 16000,\n  custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a1sourceanalyst',\n  agent_name: 'A1 Source Analyst', course_id: inp.course_id,\n  chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n  pipeline_meta: inp.pipeline_meta||{}\n}}];\n"
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Call Submitter",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "workflowId": "P2YD7sOqf6uMAtqU",
+        "mode": "passThrough"
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Call Poller",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        300
+      ],
+      "parameters": {
+        "workflowId": "HDdfFxAIS1qnLUEe",
+        "mode": "passThrough"
+      }
+    },
+    {
+      "id": "n7",
+      "name": "Return Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1480,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\nconst p = $input.first().json;\nif(p.status==='failed'||p.status==='timed_out')\n  return [{json:{status:'error',agent:'A1 Source Analyst',error:p.error,escalation:true,\n    course_id:p.course_id,chapter_index:p.chapter_index,chunk_index:p.chunk_index}}];\nreturn [{json:{status:'ok',agent:'A1 Source Analyst',agent_output:p.agent_output||null,\n  course_id:p.course_id,chapter_index:p.chapter_index,chunk_index:p.chunk_index,\n  pipeline_meta:p.pipeline_meta||{}}}];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Input from MAIN": {
+      "main": [
+        [
+          {
+            "node": "Prep URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep URLs": {
+      "main": [
+        [
+          {
+            "node": "Load System",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load System": {
+      "main": [
+        [
+          {
+            "node": "Load User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load User": {
+      "main": [
+        [
+          {
+            "node": "Build Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Message": {
+      "main": [
+        [
+          {
+            "node": "Call Submitter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Submitter": {
+      "main": [
+        [
+          {
+            "node": "Call Poller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Poller": {
+      "main": [
+        [
+          {
+            "node": "Return Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "5f3acb50-6cb6-4e87-8cce-c693cbf1bf22",
+  "activeVersionId": "5f3acb50-6cb6-4e87-8cce-c693cbf1bf22",
+  "versionCounter": 10,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T14:13:50.541Z",
+      "createdAt": "2026-05-29T14:13:50.541Z",
+      "role": "workflow:owner",
+      "workflowId": "hNdY7a7cIqY1aLIm",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-05T06:56:40.705Z",
+    "createdAt": "2026-06-05T06:56:40.705Z",
+    "versionId": "5f3acb50-6cb6-4e87-8cce-c693cbf1bf22",
+    "workflowId": "hNdY7a7cIqY1aLIm",
+    "nodes": [
+      {
+        "id": "n0",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "n1",
+        "name": "Prep URLs",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          300
+        ],
+        "parameters": {
+          "jsCode": "return [{json: {sys_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a1_source_analyst_system.txt\", usr_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a1_source_analyst_user_template.txt\", ...($input.first().json)}}];"
+        }
+      },
+      {
+        "id": "n2",
+        "name": "Load System",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          440,
+          180
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Prep URLs').item.json.sys_url }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/vnd.github.v3+json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "n3",
+        "name": "Load User",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          440,
+          420
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Prep URLs').item.json.usr_url }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/vnd.github.v3+json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "n4",
+        "name": "Build Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          700,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\nconst inp = $('Input from MAIN').first().json;\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nlet   usr = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\nconst vars = {\n  course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n  chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n  target_language: inp.target_language||'en-US', detected_domain: inp.detected_domain||'',\n  html_content: inp.html||inp.html_content||'', source_html: inp.html||inp.source_html||'',\n  pretranslation_draft: inp.pretranslation_draft||'', translated_html: inp.translated_html||'',\n  preceding_context: inp.preceding_context||'',\n  a1_audit: JSON.stringify(inp.a1_audit||{}), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n  a2_glossary: JSON.stringify(inp.a2_glossary||{}), a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n  common_glossary: JSON.stringify(inp.common_glossary||[]),\n  domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n  domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n  iteration: inp.iteration||1, failing_segments: JSON.stringify(inp.failing_segments||[]),\n  previous_qa_report: JSON.stringify(inp.previous_qa_report||{}),\n  score_target: inp.score_target||90\n};\nObject.entries(vars).forEach(([k,v]) => {\n  usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n});\nreturn [{json:{\n  system_prompt: sys, user_message: usr,\n  model: 'gpt-5.4', temperature: 0.1, max_tokens: 16000,\n  custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a1sourceanalyst',\n  agent_name: 'A1 Source Analyst', course_id: inp.course_id,\n  chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n  pipeline_meta: inp.pipeline_meta||{}\n}}];\n"
+        }
+      },
+      {
+        "id": "n5",
+        "name": "Call Submitter",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          960,
+          300
+        ],
+        "parameters": {
+          "workflowId": "P2YD7sOqf6uMAtqU",
+          "mode": "passThrough"
+        }
+      },
+      {
+        "id": "n6",
+        "name": "Call Poller",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          1220,
+          300
+        ],
+        "parameters": {
+          "workflowId": "HDdfFxAIS1qnLUEe",
+          "mode": "passThrough"
+        }
+      },
+      {
+        "id": "n7",
+        "name": "Return Output",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1480,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\nconst p = $input.first().json;\nif(p.status==='failed'||p.status==='timed_out')\n  return [{json:{status:'error',agent:'A1 Source Analyst',error:p.error,escalation:true,\n    course_id:p.course_id,chapter_index:p.chapter_index,chunk_index:p.chunk_index}}];\nreturn [{json:{status:'ok',agent:'A1 Source Analyst',agent_output:p.agent_output||null,\n  course_id:p.course_id,chapter_index:p.chapter_index,chunk_index:p.chunk_index,\n  pipeline_meta:p.pipeline_meta||{}}}];\n"
+        }
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Prep URLs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prep URLs": {
+        "main": [
+          [
+            {
+              "node": "Load System",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load System": {
+        "main": [
+          [
+            {
+              "node": "Load User",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load User": {
+        "main": [
+          [
+            {
+              "node": "Build Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Message": {
+        "main": [
+          [
+            {
+              "node": "Call Submitter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Submitter": {
+        "main": [
+          [
+            {
+              "node": "Call Poller",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Poller": {
+        "main": [
+          [
+            {
+              "node": "Return Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-05T06:56:40.743Z",
+        "id": 381,
+        "workflowId": "hNdY7a7cIqY1aLIm",
+        "versionId": "5f3acb50-6cb6-4e87-8cce-c693cbf1bf22",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-05T06:56:40.732Z",
+        "id": 380,
+        "workflowId": "hNdY7a7cIqY1aLIm",
+        "versionId": "5f3acb50-6cb6-4e87-8cce-c693cbf1bf22",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}

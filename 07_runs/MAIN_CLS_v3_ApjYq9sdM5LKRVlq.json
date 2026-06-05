@@ -1,1 +1,3319 @@
-{"updatedAt":"2026-06-04T23:00:13.201Z","createdAt":"2026-05-29T14:16:26.563Z","id":"ApjYq9sdM5LKRVlq","name":"[MAIN] CLS v3 — Course Localisation","description":null,"active":true,"isArchived":false,"nodes":[{"parameters":{"path":"cls-v3-form","formTitle":"CLS v3 — Course Localisation","formDescription":"OpenClassrooms Content Localization System v3","formFields":{"values":[{"fieldLabel":"Source Course ID","requiredField":true},{"fieldLabel":"Target Course ID","requiredField":true},{"fieldLabel":"Source Language","fieldType":"dropdown","fieldOptions":{"values":[{"option":"fr"},{"option":"en"}]},"requiredField":true},{"fieldLabel":"Target Language","fieldType":"dropdown","fieldOptions":{"values":[{"option":"en-US"},{"option":"fr-FR"}]},"requiredField":true},{"fieldLabel":"Email","fieldType":"email","requiredField":true},{"fieldLabel":"Localiser le cours (HTML)","fieldType":"checkbox","fieldOptions":{"values":[{}]}},{"fieldLabel":"Audit du contenu (A1)","fieldType":"checkbox","fieldOptions":{"values":[{}]}},{"fieldLabel":"Score de localisabilite","fieldType":"checkbox","fieldOptions":{"values":[{}]}},{"fieldLabel":"Quality Check /100","fieldType":"checkbox","fieldOptions":{"values":[{}]}}]},"options":{}},"id":"form","name":"CLS v3 Form","type":"n8n-nodes-base.formTrigger","typeVersion":1,"position":[0,400],"webhookId":"f146189f-507c-44da-beb7-6c888a156a3f"},{"parameters":{"jsCode":"\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].filter(x=>x).length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].filter(x=>x).length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].filter(x=>x).length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].filter(x=>x).length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"},"id":"init","name":"Init Params","type":"n8n-nodes-base.code","typeVersion":2,"position":[240,400]},{"parameters":{"workflowId":{"__rl":true,"value":"RtYARZLkIJyKeoWz","mode":"id"},"options":{"waitForSubWorkflow":true}},"id":"ext","name":"Call HTML Extraction","type":"n8n-nodes-base.executeWorkflow","typeVersion":1.1,"position":[480,400]},{"parameters":{"jsCode":"\nconst html=$('Call HTML Extraction').first().json.html||'';\nconst urlRx=/(?:src|href)=\"([^\"#][^\"]*)\"/g;\nconst semRx=/data-claire-semantic=\"([^\"]+)\"/g;\nconst urls=[]; let m;\nwhile((m=urlRx.exec(html))!==null) urls.push(m[1]);\nconst claire=[]; let s;\nwhile((s=semRx.exec(html))!==null) claire.push(s[1]);\nreturn [{json:{type:'fingerprint',urls:[...new Set(urls)],\n  claire_semantics:[...new Set(claire)],\n  code_blocks_count:(html.match(/<pre[^>]*>/gi)||[]).length,\n  raw_html:html}}];\n"},"id":"fp","name":"Extract Fingerprint","type":"n8n-nodes-base.code","typeVersion":2,"position":[720,400]},{"parameters":{"workflowId":"zDg9JS6pco9fiHTk","mode":"passThrough","options":{}},"id":"pre","name":"Call Pre-Processor","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[960,400]},{"parameters":{"workflowId":"H88p5deRTIHpQ7S8","mode":"passThrough","options":{}},"id":"g1","name":"Glossary Load 1 (pre-A1)","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[1200,400]},{"parameters":{"batchSize":5,"options":{}},"id":"sA1","name":"Batch A1 (5/run)","type":"n8n-nodes-base.splitInBatches","typeVersion":3,"position":[1440,576]},{"parameters":{"workflowId":"hNdY7a7cIqY1aLIm","mode":"passThrough","options":{}},"id":"a1","name":"Call A1","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[1680,400]},{"parameters":{"jsCode":"\nconst a1s=$input.all();\nconst domains=a1s.map(i=>i.json.agent_output?.detected_domain).filter(Boolean);\nconst cnt={}; domains.forEach(d=>cnt[d]=(cnt[d]||0)+1);\nconst det=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'Tech';\nreturn [{json:{detected_domain:det,a1_outputs:a1s.map(i=>i.json.agent_output).filter(Boolean),\n  course_id:a1s[0]?.json.course_id, target_course_id:a1s[0]?.json.target_course_id||'',\n  source_language:a1s[0]?.json.source_language||'fr',\n  target_language:a1s[0]?.json.target_language||'en-US', score_target:90}}];\n"},"id":"det","name":"Detect Domain","type":"n8n-nodes-base.code","typeVersion":2,"position":[1920,400]},{"parameters":{"workflowId":"H88p5deRTIHpQ7S8","mode":"passThrough","options":{}},"id":"g2","name":"Glossary Load 2 (post-A1)","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[2160,400]},{"parameters":{"workflowId":"BKminhI3j8D4ybs1","mode":"passThrough","options":{}},"id":"a2","name":"Call A2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[2400,400]},{"parameters":{"batchSize":3,"options":{}},"id":"sP1","name":"Batch Phase 1 (3/run)","type":"n8n-nodes-base.splitInBatches","typeVersion":3,"position":[2640,496]},{"parameters":{"workflowId":"rfWAld7K9VOXvPrE","mode":"passThrough","options":{}},"id":"pt","name":"Call Pre-Translation","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[2880,400]},{"parameters":{"mode":"expression","output":"={{ $json.source_language === 'fr' ? 0 : 1 }}"},"id":"dir","name":"Direction?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[3120,400]},{"parameters":{"workflowId":"JLDchUnpFLdgHbkn","mode":"passThrough","options":{}},"id":"a3fr","name":"Call A3 FR-EN","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3360,288]},{"parameters":{"workflowId":"Eq5Bk0IbKstJMr4P","mode":"passThrough","options":{}},"id":"a3en","name":"Call A3 EN-FR","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3360,528]},{"parameters":{"workflowId":"cHTqFQHBnEkeRAJB","mode":"passThrough","options":{}},"id":"a4","name":"Call A4","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3600,400]},{"parameters":{"workflowId":"De0vqzEM9LlJ0wVB","mode":"passThrough","options":{}},"id":"a5","name":"Call A5","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3840,400]},{"parameters":{"jsCode":"\nconst a5=$input.first().json.agent_output||{};\nconst iter=($input.first().json.iteration||1);\nconst score=a5.score_total||0;\nconst pass=score>=90; const maxed=iter>=3;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':(maxed?'ESCALATE':'REVISE'),\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"},"id":"qa1","name":"QA Check iter1","type":"n8n-nodes-base.code","typeVersion":2,"position":[4080,400]},{"parameters":{"mode":"expression","output":"={{ $json.qa_status==='PASS'?0:$json.qa_status==='ESCALATE'?2:1 }}"},"id":"sw1","name":"Score >= 90?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[4320,400]},{"parameters":{"workflowId":"JLDchUnpFLdgHbkn","mode":"passThrough","options":{}},"id":"a3i2","name":"Call A3 iter2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[4560,640]},{"parameters":{"workflowId":"cHTqFQHBnEkeRAJB","mode":"passThrough","options":{}},"id":"a4i2","name":"Call A4 iter2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[4800,640]},{"parameters":{"workflowId":"De0vqzEM9LlJ0wVB","mode":"passThrough","options":{}},"id":"a5i2","name":"Call A5 iter2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[5040,640]},{"parameters":{"jsCode":"\nconst a5=$input.first().json.agent_output||{};\nconst iter=2;\nconst score=a5.score_total||0; const pass=score>=90;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':'REVISE',\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"},"id":"qa2","name":"QA Check iter2","type":"n8n-nodes-base.code","typeVersion":2,"position":[5280,640]},{"parameters":{"mode":"expression","output":"={{ $json.qa_status==='PASS'?0:1 }}"},"id":"sw2","name":"Score >= 90 iter2?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[5520,544]},{"parameters":{"workflowId":"JLDchUnpFLdgHbkn","mode":"passThrough","options":{}},"id":"a3i3","name":"Call A3 iter3","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[5760,672]},{"parameters":{"workflowId":"cHTqFQHBnEkeRAJB","mode":"passThrough","options":{}},"id":"a4i3","name":"Call A4 iter3","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6000,672]},{"parameters":{"workflowId":"De0vqzEM9LlJ0wVB","mode":"passThrough","options":{}},"id":"a5i3","name":"Call A5 iter3","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6240,672]},{"parameters":{"workflowId":"MQObMb9lhovhBBs8","mode":"passThrough","options":{}},"id":"a6","name":"Call A6","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6464,80]},{"parameters":{"jsCode":"\nconst chunks=$input.all();\nconst translated=chunks.map(c=>({\n  chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n  translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n  type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n  a6_issue_log:c.json.agent_output?.issue_log||[],\n  naturalness_score:c.json.agent_output?.naturalness_score||null,\n  course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n  source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n  score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n}));\nreturn translated.map(t=>({json:t}));\n"},"id":"mrg","name":"Merge Phase 1","type":"n8n-nodes-base.code","typeVersion":2,"position":[6720,400]},{"parameters":{"workflowId":"odMhJgxadf3RPAHp","mode":"passThrough","options":{}},"id":"rea","name":"Call Reassembler","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6960,400]},{"parameters":{"mode":"expression","output":"={{ $json.structural_integrity?0:1 }}"},"id":"str","name":"Structural OK?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[7200,400]},{"parameters":{"workflowId":"fBgHok8kQUPxlTAT","mode":"passThrough","options":{}},"id":"del","name":"Call Deliver Output","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[7440,288]},{"parameters":{"jsCode":"return [{json:{status:'BLOCKED',error:'Structural integrity check failed',...$input.first().json}}];"},"id":"blk","name":"Flag BLOCKED","type":"n8n-nodes-base.code","typeVersion":2,"position":[7440,528]},{"parameters":{"jsCode":"const d=$input.first().json; return [{json:{status:d.status||'DONE',course_id:d.course_id,target_course_id:d.target_course_id,deliverables:d.deliverables||{},completed_at:new Date().toISOString()}}];"},"id":"fin","name":"Final Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[7680,400]},{"parameters":{"rules":{"values":[{"conditions":{"combinator":"and","conditions":[{"leftValue":"={{ $('Init Params').first().json.enabled_modules.audit_only }}","rightValue":true,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.localize_html }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}}],"options":{}},"renameOutput":true,"outputKey":"audit_only"},{"conditions":{"combinator":"and","conditions":[{"leftValue":"={{ $('Init Params').first().json.enabled_modules.score_loc }}","rightValue":true,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.localize_html }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.audit_only }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}}],"options":{}},"renameOutput":true,"outputKey":"score_only"}]},"options":{"fallbackOutput":"extra"}},"id":"post-a1-switch","name":"Post-A1 Mode?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[2144,96]},{"parameters":{"jsCode":"\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nreturn [{json:{\n  status:'AUDIT_COMPLETE', mode:'audit_only',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  chunks_audited:a1.length,\n  a1_results:a1,\n  summary:`A1 audit complete — ${a1.length} chunk(s) analysed`\n}}];\n"},"id":"audit-summary","name":"Audit Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[2480,208]},{"parameters":{"jsCode":"\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a1.map(r => r.localizability_score || 0).filter(s=>s>0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;\nconst blockers = a1.flatMap(r => r.blockers || []);\nreturn [{json:{\n  status:'SCORE_COMPLETE', mode:'score_loc',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  localizability_score:avg,\n  blockers_count:blockers.length,\n  blockers:blockers,\n  summary:`Localizability score: ${avg}/100 — ${blockers.length} blocker(s)`\n}}];\n"},"id":"score-summary","name":"Score Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[2480,608]},{"parameters":{"rules":{"values":[{"conditions":{"combinator":"and","conditions":[{"leftValue":"={{ $('Init Params').first().json.enabled_modules.qa_check }}","rightValue":true,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.localize_html }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}}],"options":{}},"renameOutput":true,"outputKey":"qa_only"}]},"options":{"fallbackOutput":"extra"}},"id":"post-qa-switch","name":"Post-QA Mode?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[6528,672]},{"parameters":{"jsCode":"\nconst a5 = $('Call A5 iter3').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a5.map(r=>r.score||0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;\nreturn [{json:{\n  status:'QA_COMPLETE', mode:'qa_check',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  qa_score:avg,\n  pass: avg>=90,\n  chunks:a5.length,\n  summary:`QA score: ${avg}/100 — ${avg>=90?'PASS':'FAIL'}`\n}}];\n"},"id":"qa-summary","name":"QA Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[6800,528]},{"parameters":{"assignments":{"assignments":[{"id":"e467b19b-1547-4eff-8dc0-5c38b4e18240","name":"Course ID","value":"={{ $('Init Params').first().json.course_id }}","type":"string"}]},"options":{}},"id":"c49a2c2b-2d5a-4d77-8f54-80fb711aaa1d","name":"Prepare Course ID","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[256,208]},{"parameters":{"jsCode":"\nconst html     = $('Call HTML Extraction').first().json.html || '';\nconst params   = $('Init Params').first().json;\nconst fp       = $('Extract Fingerprint').first().json;\n\nreturn [{json: {\n  html:              html,\n  course_id:         params.course_id,\n  target_course_id:  params.target_course_id,\n  source_language:   params.source_language,\n  target_language:   params.target_language,\n  enabled_modules:   params.enabled_modules,\n  fingerprint: {\n    urls:              fp.urls,\n    claire_semantics:  fp.claire_semantics,\n    code_blocks_count: fp.code_blocks_count\n  }\n}}];\n"},"id":"3bb4f370-6b44-45ed-ba30-f5a081759da7","name":"Prepare Pre-Processor Input","type":"n8n-nodes-base.code","typeVersion":2,"position":[688,224]},{"id":"bf5d989f-b1d3-44e9-b66d-282e9b1a9ded","name":"Format Audit Report","type":"n8n-nodes-base.code","typeVersion":2,"position":[2730,208],"parameters":{"jsCode":"\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Audit Report — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  'Chunks analysed: ' + d.chunks_audited, '',\n  '## A1 Results',\n];\n(d.a1_results || []).forEach((r,i) => {\n  const score = r.localizability_score ?? 'N/A';\n  const blockers = (r.blockers || []).map(b => '- ' + b).join('\\n') || '- None';\n  lines.push('### Chunk ' + (i+1) + '\\nScore: ' + score + '/100\\nBlockers:\\n' + blockers + '\\n');\n});\nreturn [{json:{md:lines.join('\\n'), filename:'audit_'+d.course_id+'.md', email:ip.email, course_id:d.course_id}}];\n"}},{"id":"6c26ec05-1888-433b-86fd-0be935e5ad65","name":"Send Audit Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[2980,208],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] Audit — {{ $json.course_id }}","message":"=Audit report for course {{ $json.course_id }} is attached.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"}}},{"id":"41d53159-be83-47d1-a3f3-4cd0f26fa93f","name":"Format Score Report","type":"n8n-nodes-base.code","typeVersion":2,"position":[2730,608],"parameters":{"jsCode":"\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Localizability Score — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**Score: ' + d.localizability_score + '/100**',\n  'Blockers: ' + d.blockers_count, '',\n  '## Blockers',\n  ...(d.blockers||[]).map(b=>'- '+b)\n];\nreturn [{json:{md:lines.join('\\n'), filename:'score_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.localizability_score}}];\n"}},{"id":"1379ee06-4a9b-4411-867c-3167491acc66","name":"Send Score Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[2980,608],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] Score — {{ $json.course_id }} — {{ $json.score }}/100","message":"=Localizability score {{ $json.score }}/100. See attachment.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"}}},{"id":"6a37c026-4e7c-4f82-9532-8984dc80476c","name":"Format QA Report","type":"n8n-nodes-base.code","typeVersion":2,"position":[7050,528],"parameters":{"jsCode":"\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Quality Check — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**QA Score: ' + d.qa_score + '/100 — ' + (d.pass ? 'PASS ✓' : 'FAIL ✗') + '**',\n  'Chunks evaluated: ' + d.chunks\n];\nreturn [{json:{md:lines.join('\\n'), filename:'qa_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.qa_score, pass:d.pass}}];\n"}},{"id":"c504b3c2-1188-43d1-b5b7-9ac32ceaaa67","name":"Send QA Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[7300,528],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] QA — {{ $json.course_id }} — {{ $json.score }}/100 {{ $json.pass ? 'PASS' : 'FAIL' }}","message":"=QA score {{ $json.score }}/100. See attachment.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"}}},{"id":"eb64727e-7267-43d1-bd10-979ab9e278fd","name":"Format HTML Delivery","type":"n8n-nodes-base.code","typeVersion":2,"position":[7690,288],"parameters":{"jsCode":"\nconst ip = $('Init Params').first().json;\nconst reassembler = $('Call Reassembler').first().json;\nconst html = reassembler.final_html || '';\nconst course_id = ip.course_id;\nreturn [{json:{\n  html: html,\n  filename: course_id + '_localized.html',\n  email: ip.email,\n  course_id: course_id\n}}];\n"}},{"id":"3824b805-e54c-429d-ad3b-cb8a88376e0d","name":"Send HTML Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[7940,288],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] Localized HTML — {{ $json.course_id }}","message":"=Localized HTML file for course {{ $json.course_id }} is attached.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.html).toString('base64'), type: 'text/html', encoding: 'base64'}] }}"}}}],"connections":{"CLS v3 Form":{"main":[[{"node":"Init Params","type":"main","index":0}]]},"Init Params":{"main":[[{"node":"Prepare Course ID","type":"main","index":0}]]},"Call HTML Extraction":{"main":[[{"node":"Extract Fingerprint","type":"main","index":0}]]},"Extract Fingerprint":{"main":[[{"node":"Prepare Pre-Processor Input","type":"main","index":0}]]},"Call Pre-Processor":{"main":[[{"node":"Glossary Load 1 (pre-A1)","type":"main","index":0}]]},"Glossary Load 1 (pre-A1)":{"main":[[{"node":"Batch A1 (5/run)","type":"main","index":0}]]},"Batch A1 (5/run)":{"main":[[{"node":"Call A1","type":"main","index":0}]]},"Call A1":{"main":[[{"node":"Detect Domain","type":"main","index":0}]]},"Detect Domain":{"main":[[{"node":"Post-A1 Mode?","type":"main","index":0}]]},"Glossary Load 2 (post-A1)":{"main":[[{"node":"Call A2","type":"main","index":0}]]},"Call A2":{"main":[[{"node":"Batch Phase 1 (3/run)","type":"main","index":0}]]},"Batch Phase 1 (3/run)":{"main":[[{"node":"Call Pre-Translation","type":"main","index":0}]]},"Call Pre-Translation":{"main":[[{"node":"Direction?","type":"main","index":0}]]},"Direction?":{"main":[[{"node":"Call A3 FR-EN","type":"main","index":0}],[{"node":"Call A3 EN-FR","type":"main","index":0}]]},"Call A3 FR-EN":{"main":[[{"node":"Call A4","type":"main","index":0}]]},"Call A3 EN-FR":{"main":[[{"node":"Call A4","type":"main","index":0}]]},"Call A4":{"main":[[{"node":"Call A5","type":"main","index":0}]]},"Call A5":{"main":[[{"node":"QA Check iter1","type":"main","index":0}]]},"QA Check iter1":{"main":[[{"node":"Score >= 90?","type":"main","index":0}]]},"Score >= 90?":{"main":[[{"node":"Call A6","type":"main","index":0}],[{"node":"Call A3 iter2","type":"main","index":0}],[{"node":"Call A6","type":"main","index":0}]]},"Call A3 iter2":{"main":[[{"node":"Call A4 iter2","type":"main","index":0}]]},"Call A4 iter2":{"main":[[{"node":"Call A5 iter2","type":"main","index":0}]]},"Call A5 iter2":{"main":[[{"node":"QA Check iter2","type":"main","index":0}]]},"QA Check iter2":{"main":[[{"node":"Score >= 90 iter2?","type":"main","index":0},{"node":"Send an Email","type":"main","index":0}]]},"Score >= 90 iter2?":{"main":[[{"node":"Call A6","type":"main","index":0}],[{"node":"Call A3 iter3","type":"main","index":0}]]},"Call A3 iter3":{"main":[[{"node":"Call A4 iter3","type":"main","index":0}]]},"Call A4 iter3":{"main":[[{"node":"Call A5 iter3","type":"main","index":0}]]},"Call A5 iter3":{"main":[[{"node":"Post-QA Mode?","type":"main","index":0}]]},"Call A6":{"main":[[{"node":"Merge Phase 1","type":"main","index":0}]]},"Merge Phase 1":{"main":[[{"node":"Call Reassembler","type":"main","index":0}]]},"Call Reassembler":{"main":[[{"node":"Structural OK?","type":"main","index":0}]]},"Structural OK?":{"main":[[{"node":"Call Deliver Output","type":"main","index":0}],[{"node":"Flag BLOCKED","type":"main","index":0}]]},"Call Deliver Output":{"main":[[{"node":"Format HTML Delivery","type":"main","index":0}]]},"Flag BLOCKED":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Post-A1 Mode?":{"main":[[{"node":"Audit Summary","type":"main","index":0}],[{"node":"Score Summary","type":"main","index":0}],[{"node":"Glossary Load 2 (post-A1)","type":"main","index":0}]]},"Audit Summary":{"main":[[{"node":"Format Audit Report","type":"main","index":0}]]},"Score Summary":{"main":[[{"node":"Format Score Report","type":"main","index":0}]]},"Post-QA Mode?":{"main":[[{"node":"QA Summary","type":"main","index":0}],[{"node":"Call A6","type":"main","index":0}]]},"QA Summary":{"main":[[{"node":"Format QA Report","type":"main","index":0}]]},"Prepare Course ID":{"main":[[{"node":"Call HTML Extraction","type":"main","index":0}]]},"Prepare Pre-Processor Input":{"main":[[{"node":"Call Pre-Processor","type":"main","index":0}]]},"Format Audit Report":{"main":[[{"node":"Send Audit Email","type":"main","index":0}]]},"Send Audit Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Format Score Report":{"main":[[{"node":"Send Score Email","type":"main","index":0}]]},"Send Score Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Format QA Report":{"main":[[{"node":"Send QA Email","type":"main","index":0}]]},"Send QA Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Format HTML Delivery":{"main":[[{"node":"Send HTML Email","type":"main","index":0}]]},"Send HTML Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]}},"settings":{"executionOrder":"v1","callerPolicy":"workflowsFromSameOwner","availableInMCP":false},"staticData":null,"meta":{"templateCredsSetupCompleted":true},"pinData":{},"versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","activeVersionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","versionCounter":81,"triggerCount":1,"shared":[{"updatedAt":"2026-05-29T14:16:26.565Z","createdAt":"2026-05-29T14:16:26.565Z","role":"workflow:owner","workflowId":"ApjYq9sdM5LKRVlq","projectId":"7y0kZCkeSDugmpzP","project":{"updatedAt":"2026-03-12T16:05:16.582Z","createdAt":"2026-03-12T16:02:39.200Z","id":"7y0kZCkeSDugmpzP","name":"Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>","type":"personal","icon":null,"description":null,"creatorId":"7ae71612-d8be-4acd-a26d-869e32490f0e"}}],"tags":[],"activeVersion":{"updatedAt":"2026-06-04T23:06:04.000Z","createdAt":"2026-06-04T23:00:13.203Z","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","workflowId":"ApjYq9sdM5LKRVlq","nodes":[{"parameters":{"path":"cls-v3-form","formTitle":"CLS v3 — Course Localisation","formDescription":"OpenClassrooms Content Localization System v3","formFields":{"values":[{"fieldLabel":"Source Course ID","requiredField":true},{"fieldLabel":"Target Course ID","requiredField":true},{"fieldLabel":"Source Language","fieldType":"dropdown","fieldOptions":{"values":[{"option":"fr"},{"option":"en"}]},"requiredField":true},{"fieldLabel":"Target Language","fieldType":"dropdown","fieldOptions":{"values":[{"option":"en-US"},{"option":"fr-FR"}]},"requiredField":true},{"fieldLabel":"Email","fieldType":"email","requiredField":true},{"fieldLabel":"Localiser le cours (HTML)","fieldType":"checkbox","fieldOptions":{"values":[{}]}},{"fieldLabel":"Audit du contenu (A1)","fieldType":"checkbox","fieldOptions":{"values":[{}]}},{"fieldLabel":"Score de localisabilite","fieldType":"checkbox","fieldOptions":{"values":[{}]}},{"fieldLabel":"Quality Check /100","fieldType":"checkbox","fieldOptions":{"values":[{}]}}]},"options":{}},"id":"form","name":"CLS v3 Form","type":"n8n-nodes-base.formTrigger","typeVersion":1,"position":[0,400],"webhookId":"f146189f-507c-44da-beb7-6c888a156a3f"},{"parameters":{"jsCode":"\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].filter(x=>x).length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].filter(x=>x).length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].filter(x=>x).length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].filter(x=>x).length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"},"id":"init","name":"Init Params","type":"n8n-nodes-base.code","typeVersion":2,"position":[240,400]},{"parameters":{"workflowId":{"__rl":true,"value":"RtYARZLkIJyKeoWz","mode":"id"},"options":{"waitForSubWorkflow":true}},"id":"ext","name":"Call HTML Extraction","type":"n8n-nodes-base.executeWorkflow","typeVersion":1.1,"position":[480,400]},{"parameters":{"jsCode":"\nconst html=$('Call HTML Extraction').first().json.html||'';\nconst urlRx=/(?:src|href)=\"([^\"#][^\"]*)\"/g;\nconst semRx=/data-claire-semantic=\"([^\"]+)\"/g;\nconst urls=[]; let m;\nwhile((m=urlRx.exec(html))!==null) urls.push(m[1]);\nconst claire=[]; let s;\nwhile((s=semRx.exec(html))!==null) claire.push(s[1]);\nreturn [{json:{type:'fingerprint',urls:[...new Set(urls)],\n  claire_semantics:[...new Set(claire)],\n  code_blocks_count:(html.match(/<pre[^>]*>/gi)||[]).length,\n  raw_html:html}}];\n"},"id":"fp","name":"Extract Fingerprint","type":"n8n-nodes-base.code","typeVersion":2,"position":[720,400]},{"parameters":{"workflowId":"zDg9JS6pco9fiHTk","mode":"passThrough","options":{}},"id":"pre","name":"Call Pre-Processor","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[960,400]},{"parameters":{"workflowId":"H88p5deRTIHpQ7S8","mode":"passThrough","options":{}},"id":"g1","name":"Glossary Load 1 (pre-A1)","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[1200,400]},{"parameters":{"batchSize":5,"options":{}},"id":"sA1","name":"Batch A1 (5/run)","type":"n8n-nodes-base.splitInBatches","typeVersion":3,"position":[1440,576]},{"parameters":{"workflowId":"hNdY7a7cIqY1aLIm","mode":"passThrough","options":{}},"id":"a1","name":"Call A1","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[1680,400]},{"parameters":{"jsCode":"\nconst a1s=$input.all();\nconst domains=a1s.map(i=>i.json.agent_output?.detected_domain).filter(Boolean);\nconst cnt={}; domains.forEach(d=>cnt[d]=(cnt[d]||0)+1);\nconst det=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'Tech';\nreturn [{json:{detected_domain:det,a1_outputs:a1s.map(i=>i.json.agent_output).filter(Boolean),\n  course_id:a1s[0]?.json.course_id, target_course_id:a1s[0]?.json.target_course_id||'',\n  source_language:a1s[0]?.json.source_language||'fr',\n  target_language:a1s[0]?.json.target_language||'en-US', score_target:90}}];\n"},"id":"det","name":"Detect Domain","type":"n8n-nodes-base.code","typeVersion":2,"position":[1920,400]},{"parameters":{"workflowId":"H88p5deRTIHpQ7S8","mode":"passThrough","options":{}},"id":"g2","name":"Glossary Load 2 (post-A1)","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[2160,400]},{"parameters":{"workflowId":"BKminhI3j8D4ybs1","mode":"passThrough","options":{}},"id":"a2","name":"Call A2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[2400,400]},{"parameters":{"batchSize":3,"options":{}},"id":"sP1","name":"Batch Phase 1 (3/run)","type":"n8n-nodes-base.splitInBatches","typeVersion":3,"position":[2640,496]},{"parameters":{"workflowId":"rfWAld7K9VOXvPrE","mode":"passThrough","options":{}},"id":"pt","name":"Call Pre-Translation","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[2880,400]},{"parameters":{"mode":"expression","output":"={{ $json.source_language === 'fr' ? 0 : 1 }}"},"id":"dir","name":"Direction?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[3120,400]},{"parameters":{"workflowId":"JLDchUnpFLdgHbkn","mode":"passThrough","options":{}},"id":"a3fr","name":"Call A3 FR-EN","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3360,288]},{"parameters":{"workflowId":"Eq5Bk0IbKstJMr4P","mode":"passThrough","options":{}},"id":"a3en","name":"Call A3 EN-FR","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3360,528]},{"parameters":{"workflowId":"cHTqFQHBnEkeRAJB","mode":"passThrough","options":{}},"id":"a4","name":"Call A4","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3600,400]},{"parameters":{"workflowId":"De0vqzEM9LlJ0wVB","mode":"passThrough","options":{}},"id":"a5","name":"Call A5","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[3840,400]},{"parameters":{"jsCode":"\nconst a5=$input.first().json.agent_output||{};\nconst iter=($input.first().json.iteration||1);\nconst score=a5.score_total||0;\nconst pass=score>=90; const maxed=iter>=3;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':(maxed?'ESCALATE':'REVISE'),\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"},"id":"qa1","name":"QA Check iter1","type":"n8n-nodes-base.code","typeVersion":2,"position":[4080,400]},{"parameters":{"mode":"expression","output":"={{ $json.qa_status==='PASS'?0:$json.qa_status==='ESCALATE'?2:1 }}"},"id":"sw1","name":"Score >= 90?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[4320,400]},{"parameters":{"workflowId":"JLDchUnpFLdgHbkn","mode":"passThrough","options":{}},"id":"a3i2","name":"Call A3 iter2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[4560,640]},{"parameters":{"workflowId":"cHTqFQHBnEkeRAJB","mode":"passThrough","options":{}},"id":"a4i2","name":"Call A4 iter2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[4800,640]},{"parameters":{"workflowId":"De0vqzEM9LlJ0wVB","mode":"passThrough","options":{}},"id":"a5i2","name":"Call A5 iter2","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[5040,640]},{"parameters":{"jsCode":"\nconst a5=$input.first().json.agent_output||{};\nconst iter=2;\nconst score=a5.score_total||0; const pass=score>=90;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':'REVISE',\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"},"id":"qa2","name":"QA Check iter2","type":"n8n-nodes-base.code","typeVersion":2,"position":[5280,640]},{"parameters":{"mode":"expression","output":"={{ $json.qa_status==='PASS'?0:1 }}"},"id":"sw2","name":"Score >= 90 iter2?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[5520,544]},{"parameters":{"workflowId":"JLDchUnpFLdgHbkn","mode":"passThrough","options":{}},"id":"a3i3","name":"Call A3 iter3","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[5760,672]},{"parameters":{"workflowId":"cHTqFQHBnEkeRAJB","mode":"passThrough","options":{}},"id":"a4i3","name":"Call A4 iter3","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6000,672]},{"parameters":{"workflowId":"De0vqzEM9LlJ0wVB","mode":"passThrough","options":{}},"id":"a5i3","name":"Call A5 iter3","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6240,672]},{"parameters":{"workflowId":"MQObMb9lhovhBBs8","mode":"passThrough","options":{}},"id":"a6","name":"Call A6","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6464,80]},{"parameters":{"jsCode":"\nconst chunks=$input.all();\nconst translated=chunks.map(c=>({\n  chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n  translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n  type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n  a6_issue_log:c.json.agent_output?.issue_log||[],\n  naturalness_score:c.json.agent_output?.naturalness_score||null,\n  course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n  source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n  score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n}));\nreturn translated.map(t=>({json:t}));\n"},"id":"mrg","name":"Merge Phase 1","type":"n8n-nodes-base.code","typeVersion":2,"position":[6720,400]},{"parameters":{"workflowId":"odMhJgxadf3RPAHp","mode":"passThrough","options":{}},"id":"rea","name":"Call Reassembler","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[6960,400]},{"parameters":{"mode":"expression","output":"={{ $json.structural_integrity?0:1 }}"},"id":"str","name":"Structural OK?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[7200,400]},{"parameters":{"workflowId":"fBgHok8kQUPxlTAT","mode":"passThrough","options":{}},"id":"del","name":"Call Deliver Output","type":"n8n-nodes-base.executeWorkflow","typeVersion":1,"position":[7440,288]},{"parameters":{"jsCode":"return [{json:{status:'BLOCKED',error:'Structural integrity check failed',...$input.first().json}}];"},"id":"blk","name":"Flag BLOCKED","type":"n8n-nodes-base.code","typeVersion":2,"position":[7440,528]},{"parameters":{"jsCode":"const d=$input.first().json; return [{json:{status:d.status||'DONE',course_id:d.course_id,target_course_id:d.target_course_id,deliverables:d.deliverables||{},completed_at:new Date().toISOString()}}];"},"id":"fin","name":"Final Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[7680,400]},{"parameters":{"rules":{"values":[{"conditions":{"combinator":"and","conditions":[{"leftValue":"={{ $('Init Params').first().json.enabled_modules.audit_only }}","rightValue":true,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.localize_html }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}}],"options":{}},"renameOutput":true,"outputKey":"audit_only"},{"conditions":{"combinator":"and","conditions":[{"leftValue":"={{ $('Init Params').first().json.enabled_modules.score_loc }}","rightValue":true,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.localize_html }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.audit_only }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}}],"options":{}},"renameOutput":true,"outputKey":"score_only"}]},"options":{"fallbackOutput":"extra"}},"id":"post-a1-switch","name":"Post-A1 Mode?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[2144,96]},{"parameters":{"jsCode":"\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nreturn [{json:{\n  status:'AUDIT_COMPLETE', mode:'audit_only',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  chunks_audited:a1.length,\n  a1_results:a1,\n  summary:`A1 audit complete — ${a1.length} chunk(s) analysed`\n}}];\n"},"id":"audit-summary","name":"Audit Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[2480,208]},{"parameters":{"jsCode":"\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a1.map(r => r.localizability_score || 0).filter(s=>s>0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;\nconst blockers = a1.flatMap(r => r.blockers || []);\nreturn [{json:{\n  status:'SCORE_COMPLETE', mode:'score_loc',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  localizability_score:avg,\n  blockers_count:blockers.length,\n  blockers:blockers,\n  summary:`Localizability score: ${avg}/100 — ${blockers.length} blocker(s)`\n}}];\n"},"id":"score-summary","name":"Score Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[2480,608]},{"parameters":{"rules":{"values":[{"conditions":{"combinator":"and","conditions":[{"leftValue":"={{ $('Init Params').first().json.enabled_modules.qa_check }}","rightValue":true,"operator":{"type":"boolean","operation":"equals"}},{"leftValue":"={{ $('Init Params').first().json.enabled_modules.localize_html }}","rightValue":false,"operator":{"type":"boolean","operation":"equals"}}],"options":{}},"renameOutput":true,"outputKey":"qa_only"}]},"options":{"fallbackOutput":"extra"}},"id":"post-qa-switch","name":"Post-QA Mode?","type":"n8n-nodes-base.switch","typeVersion":3,"position":[6528,672]},{"parameters":{"jsCode":"\nconst a5 = $('Call A5 iter3').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a5.map(r=>r.score||0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;\nreturn [{json:{\n  status:'QA_COMPLETE', mode:'qa_check',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  qa_score:avg,\n  pass: avg>=90,\n  chunks:a5.length,\n  summary:`QA score: ${avg}/100 — ${avg>=90?'PASS':'FAIL'}`\n}}];\n"},"id":"qa-summary","name":"QA Summary","type":"n8n-nodes-base.code","typeVersion":2,"position":[6800,528]},{"parameters":{"assignments":{"assignments":[{"id":"e467b19b-1547-4eff-8dc0-5c38b4e18240","name":"Course ID","value":"={{ $('Init Params').first().json.course_id }}","type":"string"}]},"options":{}},"id":"c49a2c2b-2d5a-4d77-8f54-80fb711aaa1d","name":"Prepare Course ID","type":"n8n-nodes-base.set","typeVersion":3.4,"position":[256,208]},{"parameters":{"jsCode":"\nconst html     = $('Call HTML Extraction').first().json.html || '';\nconst params   = $('Init Params').first().json;\nconst fp       = $('Extract Fingerprint').first().json;\n\nreturn [{json: {\n  html:              html,\n  course_id:         params.course_id,\n  target_course_id:  params.target_course_id,\n  source_language:   params.source_language,\n  target_language:   params.target_language,\n  enabled_modules:   params.enabled_modules,\n  fingerprint: {\n    urls:              fp.urls,\n    claire_semantics:  fp.claire_semantics,\n    code_blocks_count: fp.code_blocks_count\n  }\n}}];\n"},"id":"3bb4f370-6b44-45ed-ba30-f5a081759da7","name":"Prepare Pre-Processor Input","type":"n8n-nodes-base.code","typeVersion":2,"position":[688,224]},{"id":"bf5d989f-b1d3-44e9-b66d-282e9b1a9ded","name":"Format Audit Report","type":"n8n-nodes-base.code","typeVersion":2,"position":[2730,208],"parameters":{"jsCode":"\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Audit Report — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  'Chunks analysed: ' + d.chunks_audited, '',\n  '## A1 Results',\n];\n(d.a1_results || []).forEach((r,i) => {\n  const score = r.localizability_score ?? 'N/A';\n  const blockers = (r.blockers || []).map(b => '- ' + b).join('\\n') || '- None';\n  lines.push('### Chunk ' + (i+1) + '\\nScore: ' + score + '/100\\nBlockers:\\n' + blockers + '\\n');\n});\nreturn [{json:{md:lines.join('\\n'), filename:'audit_'+d.course_id+'.md', email:ip.email, course_id:d.course_id}}];\n"}},{"id":"6c26ec05-1888-433b-86fd-0be935e5ad65","name":"Send Audit Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[2980,208],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] Audit — {{ $json.course_id }}","message":"=Audit report for course {{ $json.course_id }} is attached.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"}}},{"id":"41d53159-be83-47d1-a3f3-4cd0f26fa93f","name":"Format Score Report","type":"n8n-nodes-base.code","typeVersion":2,"position":[2730,608],"parameters":{"jsCode":"\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Localizability Score — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**Score: ' + d.localizability_score + '/100**',\n  'Blockers: ' + d.blockers_count, '',\n  '## Blockers',\n  ...(d.blockers||[]).map(b=>'- '+b)\n];\nreturn [{json:{md:lines.join('\\n'), filename:'score_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.localizability_score}}];\n"}},{"id":"1379ee06-4a9b-4411-867c-3167491acc66","name":"Send Score Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[2980,608],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] Score — {{ $json.course_id }} — {{ $json.score }}/100","message":"=Localizability score {{ $json.score }}/100. See attachment.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"}}},{"id":"6a37c026-4e7c-4f82-9532-8984dc80476c","name":"Format QA Report","type":"n8n-nodes-base.code","typeVersion":2,"position":[7050,528],"parameters":{"jsCode":"\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Quality Check — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**QA Score: ' + d.qa_score + '/100 — ' + (d.pass ? 'PASS ✓' : 'FAIL ✗') + '**',\n  'Chunks evaluated: ' + d.chunks\n];\nreturn [{json:{md:lines.join('\\n'), filename:'qa_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.qa_score, pass:d.pass}}];\n"}},{"id":"c504b3c2-1188-43d1-b5b7-9ac32ceaaa67","name":"Send QA Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[7300,528],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] QA — {{ $json.course_id }} — {{ $json.score }}/100 {{ $json.pass ? 'PASS' : 'FAIL' }}","message":"=QA score {{ $json.score }}/100. See attachment.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"}}},{"id":"eb64727e-7267-43d1-bd10-979ab9e278fd","name":"Format HTML Delivery","type":"n8n-nodes-base.code","typeVersion":2,"position":[7690,288],"parameters":{"jsCode":"\nconst ip = $('Init Params').first().json;\nconst reassembler = $('Call Reassembler').first().json;\nconst html = reassembler.final_html || '';\nconst course_id = ip.course_id;\nreturn [{json:{\n  html: html,\n  filename: course_id + '_localized.html',\n  email: ip.email,\n  course_id: course_id\n}}];\n"}},{"id":"3824b805-e54c-429d-ad3b-cb8a88376e0d","name":"Send HTML Email","type":"n8n-nodes-base.emailSend","typeVersion":2.1,"position":[7940,288],"credentials":{"smtp":{"id":"g6zrrMLej2ViXu6P","name":"SMTP account"}},"parameters":{"fromEmail":"learning.automations@openclassrooms.com","toEmail":"={{ $json.email }}","subject":"=[CLS] Localized HTML — {{ $json.course_id }}","message":"=Localized HTML file for course {{ $json.course_id }} is attached.","options":{"attachments":"={{ [{name: $json.filename, data: Buffer.from($json.html).toString('base64'), type: 'text/html', encoding: 'base64'}] }}"}}}],"connections":{"CLS v3 Form":{"main":[[{"node":"Init Params","type":"main","index":0}]]},"Init Params":{"main":[[{"node":"Prepare Course ID","type":"main","index":0}]]},"Call HTML Extraction":{"main":[[{"node":"Extract Fingerprint","type":"main","index":0}]]},"Extract Fingerprint":{"main":[[{"node":"Prepare Pre-Processor Input","type":"main","index":0}]]},"Call Pre-Processor":{"main":[[{"node":"Glossary Load 1 (pre-A1)","type":"main","index":0}]]},"Glossary Load 1 (pre-A1)":{"main":[[{"node":"Batch A1 (5/run)","type":"main","index":0}]]},"Batch A1 (5/run)":{"main":[[{"node":"Call A1","type":"main","index":0}]]},"Call A1":{"main":[[{"node":"Detect Domain","type":"main","index":0}]]},"Detect Domain":{"main":[[{"node":"Post-A1 Mode?","type":"main","index":0}]]},"Glossary Load 2 (post-A1)":{"main":[[{"node":"Call A2","type":"main","index":0}]]},"Call A2":{"main":[[{"node":"Batch Phase 1 (3/run)","type":"main","index":0}]]},"Batch Phase 1 (3/run)":{"main":[[{"node":"Call Pre-Translation","type":"main","index":0}]]},"Call Pre-Translation":{"main":[[{"node":"Direction?","type":"main","index":0}]]},"Direction?":{"main":[[{"node":"Call A3 FR-EN","type":"main","index":0}],[{"node":"Call A3 EN-FR","type":"main","index":0}]]},"Call A3 FR-EN":{"main":[[{"node":"Call A4","type":"main","index":0}]]},"Call A3 EN-FR":{"main":[[{"node":"Call A4","type":"main","index":0}]]},"Call A4":{"main":[[{"node":"Call A5","type":"main","index":0}]]},"Call A5":{"main":[[{"node":"QA Check iter1","type":"main","index":0}]]},"QA Check iter1":{"main":[[{"node":"Score >= 90?","type":"main","index":0}]]},"Score >= 90?":{"main":[[{"node":"Call A6","type":"main","index":0}],[{"node":"Call A3 iter2","type":"main","index":0}],[{"node":"Call A6","type":"main","index":0}]]},"Call A3 iter2":{"main":[[{"node":"Call A4 iter2","type":"main","index":0}]]},"Call A4 iter2":{"main":[[{"node":"Call A5 iter2","type":"main","index":0}]]},"Call A5 iter2":{"main":[[{"node":"QA Check iter2","type":"main","index":0}]]},"QA Check iter2":{"main":[[{"node":"Score >= 90 iter2?","type":"main","index":0},{"node":"Send an Email","type":"main","index":0}]]},"Score >= 90 iter2?":{"main":[[{"node":"Call A6","type":"main","index":0}],[{"node":"Call A3 iter3","type":"main","index":0}]]},"Call A3 iter3":{"main":[[{"node":"Call A4 iter3","type":"main","index":0}]]},"Call A4 iter3":{"main":[[{"node":"Call A5 iter3","type":"main","index":0}]]},"Call A5 iter3":{"main":[[{"node":"Post-QA Mode?","type":"main","index":0}]]},"Call A6":{"main":[[{"node":"Merge Phase 1","type":"main","index":0}]]},"Merge Phase 1":{"main":[[{"node":"Call Reassembler","type":"main","index":0}]]},"Call Reassembler":{"main":[[{"node":"Structural OK?","type":"main","index":0}]]},"Structural OK?":{"main":[[{"node":"Call Deliver Output","type":"main","index":0}],[{"node":"Flag BLOCKED","type":"main","index":0}]]},"Call Deliver Output":{"main":[[{"node":"Format HTML Delivery","type":"main","index":0}]]},"Flag BLOCKED":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Post-A1 Mode?":{"main":[[{"node":"Audit Summary","type":"main","index":0}],[{"node":"Score Summary","type":"main","index":0}],[{"node":"Glossary Load 2 (post-A1)","type":"main","index":0}]]},"Audit Summary":{"main":[[{"node":"Format Audit Report","type":"main","index":0}]]},"Score Summary":{"main":[[{"node":"Format Score Report","type":"main","index":0}]]},"Post-QA Mode?":{"main":[[{"node":"QA Summary","type":"main","index":0}],[{"node":"Call A6","type":"main","index":0}]]},"QA Summary":{"main":[[{"node":"Format QA Report","type":"main","index":0}]]},"Prepare Course ID":{"main":[[{"node":"Call HTML Extraction","type":"main","index":0}]]},"Prepare Pre-Processor Input":{"main":[[{"node":"Call Pre-Processor","type":"main","index":0}]]},"Format Audit Report":{"main":[[{"node":"Send Audit Email","type":"main","index":0}]]},"Send Audit Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Format Score Report":{"main":[[{"node":"Send Score Email","type":"main","index":0}]]},"Send Score Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Format QA Report":{"main":[[{"node":"Send QA Email","type":"main","index":0}]]},"Send QA Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]},"Format HTML Delivery":{"main":[[{"node":"Send HTML Email","type":"main","index":0}]]},"Send HTML Email":{"main":[[{"node":"Final Summary","type":"main","index":0}]]}},"authors":"Jérémie Borrotzu","name":"Version 90fd9fbd","description":"","autosaved":false,"workflowPublishHistory":[{"createdAt":"2026-06-04T23:02:35.716Z","id":357,"workflowId":"ApjYq9sdM5LKRVlq","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","event":"activated","userId":"7ae71612-d8be-4acd-a26d-869e32490f0e"},{"createdAt":"2026-06-04T23:03:22.157Z","id":359,"workflowId":"ApjYq9sdM5LKRVlq","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","event":"activated","userId":"7ae71612-d8be-4acd-a26d-869e32490f0e"},{"createdAt":"2026-06-04T23:05:00.585Z","id":361,"workflowId":"ApjYq9sdM5LKRVlq","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","event":"activated","userId":"7ae71612-d8be-4acd-a26d-869e32490f0e"},{"createdAt":"2026-06-04T23:06:04.404Z","id":363,"workflowId":"ApjYq9sdM5LKRVlq","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","event":"activated","userId":"7ae71612-d8be-4acd-a26d-869e32490f0e"},{"createdAt":"2026-06-04T23:03:22.098Z","id":358,"workflowId":"ApjYq9sdM5LKRVlq","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","event":"deactivated","userId":"7ae71612-d8be-4acd-a26d-869e32490f0e"},{"createdAt":"2026-06-04T23:04:57.497Z","id":360,"workflowId":"ApjYq9sdM5LKRVlq","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","event":"deactivated","userId":"7ae71612-d8be-4acd-a26d-869e32490f0e"},{"createdAt":"2026-06-04T23:05:59.672Z","id":362,"workflowId":"ApjYq9sdM5LKRVlq","versionId":"90fd9fbd-bea1-4ea1-94ac-3d912b76ba59","event":"deactivated","userId":"7ae71612-d8be-4acd-a26d-869e32490f0e"}]}}
+{
+  "updatedAt": "2026-06-05T07:03:34.850Z",
+  "createdAt": "2026-05-29T14:16:26.563Z",
+  "id": "ApjYq9sdM5LKRVlq",
+  "name": "[MAIN] CLS v3 — Course Localisation",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "cls-v3-form",
+        "formTitle": "CLS v3 — Course Localisation",
+        "formDescription": "OpenClassrooms Content Localization System v3",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Source Course ID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Course ID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Source Language",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "fr"
+                  },
+                  {
+                    "option": "en"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Language",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "en-US"
+                  },
+                  {
+                    "option": "fr-FR"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Localiser le cours (HTML)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Audit du contenu (A1)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Score de localisabilite",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Quality Check /100",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "respondWith": "text",
+          "responseText": "Your request has been submitted. Results will be sent to your email."
+        }
+      },
+      "id": "form",
+      "name": "CLS v3 Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        400
+      ],
+      "webhookId": "f146189f-507c-44da-beb7-6c888a156a3f"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
+      },
+      "id": "init",
+      "name": "Init Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "RtYARZLkIJyKeoWz",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "ext",
+      "name": "Call HTML Extraction",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst html=$('Call HTML Extraction').first().json.html||'';\nconst urlRx=/(?:src|href)=\"([^\"#][^\"]*)\"/g;\nconst semRx=/data-claire-semantic=\"([^\"]+)\"/g;\nconst urls=[]; let m;\nwhile((m=urlRx.exec(html))!==null) urls.push(m[1]);\nconst claire=[]; let s;\nwhile((s=semRx.exec(html))!==null) claire.push(s[1]);\nreturn [{json:{type:'fingerprint',urls:[...new Set(urls)],\n  claire_semantics:[...new Set(claire)],\n  code_blocks_count:(html.match(/<pre[^>]*>/gi)||[]).length,\n  raw_html:html}}];\n"
+      },
+      "id": "fp",
+      "name": "Extract Fingerprint",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "zDg9JS6pco9fiHTk",
+        "mode": "passThrough",
+        "options": {}
+      },
+      "id": "pre",
+      "name": "Call Pre-Processor",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        960,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "H88p5deRTIHpQ7S8",
+        "mode": "passThrough",
+        "options": {}
+      },
+      "id": "g1",
+      "name": "Glossary Load 1 (pre-A1)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "hNdY7a7cIqY1aLIm",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a1",
+      "name": "Call A1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst a1s=$input.all();\nconst domains=a1s.map(i=>i.json.agent_output?.detected_domain).filter(Boolean);\nconst cnt={}; domains.forEach(d=>cnt[d]=(cnt[d]||0)+1);\nconst det=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'Tech';\nreturn [{json:{detected_domain:det,a1_outputs:a1s.map(i=>i.json.agent_output).filter(Boolean),\n  course_id:a1s[0]?.json.course_id, target_course_id:a1s[0]?.json.target_course_id||'',\n  source_language:a1s[0]?.json.source_language||'fr',\n  target_language:a1s[0]?.json.target_language||'en-US', score_target:90}}];\n"
+      },
+      "id": "det",
+      "name": "Detect Domain",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "H88p5deRTIHpQ7S8",
+        "mode": "passThrough",
+        "options": {}
+      },
+      "id": "g2",
+      "name": "Glossary Load 2 (post-A1)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "BKminhI3j8D4ybs1",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a2",
+      "name": "Call A2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "rfWAld7K9VOXvPrE",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "pt",
+      "name": "Call Pre-Translation",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        2880,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.source_language === 'fr' ? 0 : 1 }}"
+      },
+      "id": "dir",
+      "name": "Direction?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        3120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JLDchUnpFLdgHbkn",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a3fr",
+      "name": "Call A3 FR-EN",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        3360,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Eq5Bk0IbKstJMr4P",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a3en",
+      "name": "Call A3 EN-FR",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        3360,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "cHTqFQHBnEkeRAJB",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a4",
+      "name": "Call A4",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        3600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "De0vqzEM9LlJ0wVB",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a5",
+      "name": "Call A5",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        3840,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst a5=$input.first().json.agent_output||{};\nconst iter=($input.first().json.iteration||1);\nconst score=a5.score_total||0;\nconst pass=score>=90; const maxed=iter>=3;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':(maxed?'ESCALATE':'REVISE'),\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"
+      },
+      "id": "qa1",
+      "name": "QA Check iter1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4080,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.qa_status==='PASS'?0:$json.qa_status==='ESCALATE'?2:1 }}"
+      },
+      "id": "sw1",
+      "name": "Score >= 90?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        4320,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JLDchUnpFLdgHbkn",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a3i2",
+      "name": "Call A3 iter2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        4560,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "cHTqFQHBnEkeRAJB",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a4i2",
+      "name": "Call A4 iter2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        4800,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "De0vqzEM9LlJ0wVB",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a5i2",
+      "name": "Call A5 iter2",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        5040,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst a5=$input.first().json.agent_output||{};\nconst iter=2;\nconst score=a5.score_total||0; const pass=score>=90;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':'REVISE',\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"
+      },
+      "id": "qa2",
+      "name": "QA Check iter2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5280,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.qa_status==='PASS'?0:1 }}"
+      },
+      "id": "sw2",
+      "name": "Score >= 90 iter2?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        5520,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JLDchUnpFLdgHbkn",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a3i3",
+      "name": "Call A3 iter3",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        5760,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "cHTqFQHBnEkeRAJB",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a4i3",
+      "name": "Call A4 iter3",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        6000,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "De0vqzEM9LlJ0wVB",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a5i3",
+      "name": "Call A5 iter3",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        6240,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "MQObMb9lhovhBBs8",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a6",
+      "name": "Call A6",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        6464,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst chunks=$input.all();\nconst translated=chunks.map(c=>({\n  chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n  translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n  type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n  a6_issue_log:c.json.agent_output?.issue_log||[],\n  naturalness_score:c.json.agent_output?.naturalness_score||null,\n  course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n  source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n  score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n}));\nreturn translated.map(t=>({json:t}));\n"
+      },
+      "id": "mrg",
+      "name": "Merge Phase 1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6720,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "odMhJgxadf3RPAHp",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "rea",
+      "name": "Call Reassembler",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        6960,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.structural_integrity?0:1 }}"
+      },
+      "id": "str",
+      "name": "Structural OK?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        7200,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "fBgHok8kQUPxlTAT",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "del",
+      "name": "Call Deliver Output",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        7440,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json:{status:'BLOCKED',error:'Structural integrity check failed',...$input.first().json}}];"
+      },
+      "id": "blk",
+      "name": "Flag BLOCKED",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7440,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d=$input.first().json; return [{json:{status:d.status||'DONE',course_id:d.course_id,target_course_id:d.target_course_id,deliverables:d.deliverables||{},completed_at:new Date().toISOString()}}];"
+      },
+      "id": "fin",
+      "name": "Final Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7680,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Init Params').first().json.enabled_modules.audit_only }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $('Init Params').first().json.enabled_modules.localize_html }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "options": {}
+              },
+              "renameOutput": true,
+              "outputKey": "audit_only"
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Init Params').first().json.enabled_modules.score_loc }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $('Init Params').first().json.enabled_modules.localize_html }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $('Init Params').first().json.enabled_modules.audit_only }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "options": {}
+              },
+              "renameOutput": true,
+              "outputKey": "score_only"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "post-a1-switch",
+      "name": "Post-A1 Mode?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        2144,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nreturn [{json:{\n  status:'AUDIT_COMPLETE', mode:'audit_only',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  chunks_audited:a1.length,\n  a1_results:a1,\n  summary:`A1 audit complete — ${a1.length} chunk(s) analysed`\n}}];\n"
+      },
+      "id": "audit-summary",
+      "name": "Audit Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a1.map(r => r.localizability_score || 0).filter(s=>s>0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;\nconst blockers = a1.flatMap(r => r.blockers || []);\nreturn [{json:{\n  status:'SCORE_COMPLETE', mode:'score_loc',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  localizability_score:avg,\n  blockers_count:blockers.length,\n  blockers:blockers,\n  summary:`Localizability score: ${avg}/100 — ${blockers.length} blocker(s)`\n}}];\n"
+      },
+      "id": "score-summary",
+      "name": "Score Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Init Params').first().json.enabled_modules.qa_check }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  },
+                  {
+                    "leftValue": "={{ $('Init Params').first().json.enabled_modules.localize_html }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "options": {}
+              },
+              "renameOutput": true,
+              "outputKey": "qa_only"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "post-qa-switch",
+      "name": "Post-QA Mode?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        6528,
+        672
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst a5 = $('Call A5 iter3').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a5.map(r=>r.score||0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;\nreturn [{json:{\n  status:'QA_COMPLETE', mode:'qa_check',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  qa_score:avg,\n  pass: avg>=90,\n  chunks:a5.length,\n  summary:`QA score: ${avg}/100 — ${avg>=90?'PASS':'FAIL'}`\n}}];\n"
+      },
+      "id": "qa-summary",
+      "name": "QA Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6800,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e467b19b-1547-4eff-8dc0-5c38b4e18240",
+              "name": "Course ID",
+              "value": "={{ $('Init Params').first().json.course_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c49a2c2b-2d5a-4d77-8f54-80fb711aaa1d",
+      "name": "Prepare Course ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst html     = $('Call HTML Extraction').first().json.html || '';\nconst params   = $('Init Params').first().json;\nconst fp       = $('Extract Fingerprint').first().json;\n\nreturn [{json: {\n  html:              html,\n  course_id:         params.course_id,\n  target_course_id:  params.target_course_id,\n  source_language:   params.source_language,\n  target_language:   params.target_language,\n  enabled_modules:   params.enabled_modules,\n  fingerprint: {\n    urls:              fp.urls,\n    claire_semantics:  fp.claire_semantics,\n    code_blocks_count: fp.code_blocks_count\n  }\n}}];\n"
+      },
+      "id": "3bb4f370-6b44-45ed-ba30-f5a081759da7",
+      "name": "Prepare Pre-Processor Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        224
+      ]
+    },
+    {
+      "id": "bf5d989f-b1d3-44e9-b66d-282e9b1a9ded",
+      "name": "Format Audit Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2730,
+        208
+      ],
+      "parameters": {
+        "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Audit Report — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  'Chunks analysed: ' + d.chunks_audited, '',\n  '## A1 Results',\n];\n(d.a1_results || []).forEach((r,i) => {\n  const score = r.localizability_score ?? 'N/A';\n  const blockers = (r.blockers || []).map(b => '- ' + b).join('\\n') || '- None';\n  lines.push('### Chunk ' + (i+1) + '\\nScore: ' + score + '/100\\nBlockers:\\n' + blockers + '\\n');\n});\nreturn [{json:{md:lines.join('\\n'), filename:'audit_'+d.course_id+'.md', email:ip.email, course_id:d.course_id}}];\n"
+      }
+    },
+    {
+      "id": "6c26ec05-1888-433b-86fd-0be935e5ad65",
+      "name": "Send Audit Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2980,
+        208
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      },
+      "parameters": {
+        "fromEmail": "learning.automations@openclassrooms.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=[CLS] Audit — {{ $json.course_id }}",
+        "message": "=Audit report for course {{ $json.course_id }} is attached.",
+        "options": {
+          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
+        }
+      }
+    },
+    {
+      "id": "41d53159-be83-47d1-a3f3-4cd0f26fa93f",
+      "name": "Format Score Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2730,
+        608
+      ],
+      "parameters": {
+        "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Localizability Score — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**Score: ' + d.localizability_score + '/100**',\n  'Blockers: ' + d.blockers_count, '',\n  '## Blockers',\n  ...(d.blockers||[]).map(b=>'- '+b)\n];\nreturn [{json:{md:lines.join('\\n'), filename:'score_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.localizability_score}}];\n"
+      }
+    },
+    {
+      "id": "1379ee06-4a9b-4411-867c-3167491acc66",
+      "name": "Send Score Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2980,
+        608
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      },
+      "parameters": {
+        "fromEmail": "learning.automations@openclassrooms.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=[CLS] Score — {{ $json.course_id }} — {{ $json.score }}/100",
+        "message": "=Localizability score {{ $json.score }}/100. See attachment.",
+        "options": {
+          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
+        }
+      }
+    },
+    {
+      "id": "6a37c026-4e7c-4f82-9532-8984dc80476c",
+      "name": "Format QA Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7050,
+        528
+      ],
+      "parameters": {
+        "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Quality Check — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**QA Score: ' + d.qa_score + '/100 — ' + (d.pass ? 'PASS ✓' : 'FAIL ✗') + '**',\n  'Chunks evaluated: ' + d.chunks\n];\nreturn [{json:{md:lines.join('\\n'), filename:'qa_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.qa_score, pass:d.pass}}];\n"
+      }
+    },
+    {
+      "id": "c504b3c2-1188-43d1-b5b7-9ac32ceaaa67",
+      "name": "Send QA Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        7300,
+        528
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      },
+      "parameters": {
+        "fromEmail": "learning.automations@openclassrooms.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=[CLS] QA — {{ $json.course_id }} — {{ $json.score }}/100 {{ $json.pass ? 'PASS' : 'FAIL' }}",
+        "message": "=QA score {{ $json.score }}/100. See attachment.",
+        "options": {
+          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
+        }
+      }
+    },
+    {
+      "id": "eb64727e-7267-43d1-bd10-979ab9e278fd",
+      "name": "Format HTML Delivery",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7690,
+        288
+      ],
+      "parameters": {
+        "jsCode": "\nconst ip = $('Init Params').first().json;\nconst reassembler = $('Call Reassembler').first().json;\nconst html = reassembler.final_html || '';\nconst course_id = ip.course_id;\nreturn [{json:{\n  html: html,\n  filename: course_id + '_localized.html',\n  email: ip.email,\n  course_id: course_id\n}}];\n"
+      }
+    },
+    {
+      "id": "3824b805-e54c-429d-ad3b-cb8a88376e0d",
+      "name": "Send HTML Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        7940,
+        288
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      },
+      "parameters": {
+        "fromEmail": "learning.automations@openclassrooms.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=[CLS] Localized HTML — {{ $json.course_id }}",
+        "message": "=Localized HTML file for course {{ $json.course_id }} is attached.",
+        "options": {
+          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.html).toString('base64'), type: 'text/html', encoding: 'base64'}] }}"
+        }
+      }
+    },
+    {
+      "id": "merge-glossary-chunks",
+      "name": "Merge Glossary into Chunks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        400
+      ],
+      "parameters": {
+        "jsCode": "const glossary = $('Glossary Load 1 (pre-A1)').first().json;\nconst chunks = $('Call Pre-Processor').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    common_glossary: glossary.common_glossary || [],\n    domain_validated_tm: glossary.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary.domain_unvalidated_tm || []\n  }\n}));"
+      }
+    },
+    {
+      "id": "merge-domain-chunks",
+      "name": "Merge Domain into Chunks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2060,
+        400
+      ],
+      "parameters": {
+        "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
+      }
+    }
+  ],
+  "connections": {
+    "CLS v3 Form": {
+      "main": [
+        [
+          {
+            "node": "Init Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Params": {
+      "main": [
+        [
+          {
+            "node": "Prepare Course ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call HTML Extraction": {
+      "main": [
+        [
+          {
+            "node": "Extract Fingerprint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Fingerprint": {
+      "main": [
+        [
+          {
+            "node": "Prepare Pre-Processor Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Pre-Processor": {
+      "main": [
+        [
+          {
+            "node": "Glossary Load 1 (pre-A1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Glossary Load 1 (pre-A1)": {
+      "main": [
+        [
+          {
+            "node": "Merge Glossary into Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A1": {
+      "main": [
+        [
+          {
+            "node": "Detect Domain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Domain": {
+      "main": [
+        [
+          {
+            "node": "Post-A1 Mode?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Glossary Load 2 (post-A1)": {
+      "main": [
+        [
+          {
+            "node": "Merge Domain into Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A2": {
+      "main": [
+        [
+          {
+            "node": "Call Pre-Translation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Pre-Translation": {
+      "main": [
+        [
+          {
+            "node": "Direction?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Direction?": {
+      "main": [
+        [
+          {
+            "node": "Call A3 FR-EN",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call A3 EN-FR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A3 FR-EN": {
+      "main": [
+        [
+          {
+            "node": "Call A4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A3 EN-FR": {
+      "main": [
+        [
+          {
+            "node": "Call A4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A4": {
+      "main": [
+        [
+          {
+            "node": "Call A5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A5": {
+      "main": [
+        [
+          {
+            "node": "QA Check iter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QA Check iter1": {
+      "main": [
+        [
+          {
+            "node": "Score >= 90?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score >= 90?": {
+      "main": [
+        [
+          {
+            "node": "Call A6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call A3 iter2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call A6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A3 iter2": {
+      "main": [
+        [
+          {
+            "node": "Call A4 iter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A4 iter2": {
+      "main": [
+        [
+          {
+            "node": "Call A5 iter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A5 iter2": {
+      "main": [
+        [
+          {
+            "node": "QA Check iter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QA Check iter2": {
+      "main": [
+        [
+          {
+            "node": "Score >= 90 iter2?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score >= 90 iter2?": {
+      "main": [
+        [
+          {
+            "node": "Call A6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call A3 iter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A3 iter3": {
+      "main": [
+        [
+          {
+            "node": "Call A4 iter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A4 iter3": {
+      "main": [
+        [
+          {
+            "node": "Call A5 iter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A5 iter3": {
+      "main": [
+        [
+          {
+            "node": "Post-QA Mode?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A6": {
+      "main": [
+        [
+          {
+            "node": "Merge Phase 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Phase 1": {
+      "main": [
+        [
+          {
+            "node": "Call Reassembler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Reassembler": {
+      "main": [
+        [
+          {
+            "node": "Structural OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structural OK?": {
+      "main": [
+        [
+          {
+            "node": "Call Deliver Output",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flag BLOCKED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Deliver Output": {
+      "main": [
+        [
+          {
+            "node": "Format HTML Delivery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag BLOCKED": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post-A1 Mode?": {
+      "main": [
+        [
+          {
+            "node": "Audit Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Score Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Glossary Load 2 (post-A1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audit Summary": {
+      "main": [
+        [
+          {
+            "node": "Format Audit Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Summary": {
+      "main": [
+        [
+          {
+            "node": "Format Score Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post-QA Mode?": {
+      "main": [
+        [
+          {
+            "node": "QA Summary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call A6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QA Summary": {
+      "main": [
+        [
+          {
+            "node": "Format QA Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Course ID": {
+      "main": [
+        [
+          {
+            "node": "Call HTML Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pre-Processor Input": {
+      "main": [
+        [
+          {
+            "node": "Call Pre-Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Audit Report": {
+      "main": [
+        [
+          {
+            "node": "Send Audit Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Audit Email": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Score Report": {
+      "main": [
+        [
+          {
+            "node": "Send Score Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Score Email": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format QA Report": {
+      "main": [
+        [
+          {
+            "node": "Send QA Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send QA Email": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format HTML Delivery": {
+      "main": [
+        [
+          {
+            "node": "Send HTML Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send HTML Email": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Glossary into Chunks": {
+      "main": [
+        [
+          {
+            "node": "Call A1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Domain into Chunks": {
+      "main": [
+        [
+          {
+            "node": "Call A2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+  "activeVersionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+  "versionCounter": 111,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T14:16:26.565Z",
+      "createdAt": "2026-05-29T14:16:26.565Z",
+      "role": "workflow:owner",
+      "workflowId": "ApjYq9sdM5LKRVlq",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-05T07:03:34.852Z",
+    "createdAt": "2026-06-05T07:03:34.852Z",
+    "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+    "workflowId": "ApjYq9sdM5LKRVlq",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "cls-v3-form",
+          "formTitle": "CLS v3 — Course Localisation",
+          "formDescription": "OpenClassrooms Content Localization System v3",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Source Course ID",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Target Course ID",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Source Language",
+                "fieldType": "dropdown",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "fr"
+                    },
+                    {
+                      "option": "en"
+                    }
+                  ]
+                },
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Target Language",
+                "fieldType": "dropdown",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "en-US"
+                    },
+                    {
+                      "option": "fr-FR"
+                    }
+                  ]
+                },
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Email",
+                "fieldType": "email",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Localiser le cours (HTML)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Audit du contenu (A1)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Score de localisabilite",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Quality Check /100",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              }
+            ]
+          },
+          "options": {
+            "respondWith": "text",
+            "responseText": "Your request has been submitted. Results will be sent to your email."
+          }
+        },
+        "id": "form",
+        "name": "CLS v3 Form",
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          400
+        ],
+        "webhookId": "f146189f-507c-44da-beb7-6c888a156a3f"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
+        },
+        "id": "init",
+        "name": "Init Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "RtYARZLkIJyKeoWz",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "ext",
+        "name": "Call HTML Extraction",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          480,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst html=$('Call HTML Extraction').first().json.html||'';\nconst urlRx=/(?:src|href)=\"([^\"#][^\"]*)\"/g;\nconst semRx=/data-claire-semantic=\"([^\"]+)\"/g;\nconst urls=[]; let m;\nwhile((m=urlRx.exec(html))!==null) urls.push(m[1]);\nconst claire=[]; let s;\nwhile((s=semRx.exec(html))!==null) claire.push(s[1]);\nreturn [{json:{type:'fingerprint',urls:[...new Set(urls)],\n  claire_semantics:[...new Set(claire)],\n  code_blocks_count:(html.match(/<pre[^>]*>/gi)||[]).length,\n  raw_html:html}}];\n"
+        },
+        "id": "fp",
+        "name": "Extract Fingerprint",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": "zDg9JS6pco9fiHTk",
+          "mode": "passThrough",
+          "options": {}
+        },
+        "id": "pre",
+        "name": "Call Pre-Processor",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          960,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": "H88p5deRTIHpQ7S8",
+          "mode": "passThrough",
+          "options": {}
+        },
+        "id": "g1",
+        "name": "Glossary Load 1 (pre-A1)",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          1200,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "hNdY7a7cIqY1aLIm",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a1",
+        "name": "Call A1",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1680,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst a1s=$input.all();\nconst domains=a1s.map(i=>i.json.agent_output?.detected_domain).filter(Boolean);\nconst cnt={}; domains.forEach(d=>cnt[d]=(cnt[d]||0)+1);\nconst det=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||'Tech';\nreturn [{json:{detected_domain:det,a1_outputs:a1s.map(i=>i.json.agent_output).filter(Boolean),\n  course_id:a1s[0]?.json.course_id, target_course_id:a1s[0]?.json.target_course_id||'',\n  source_language:a1s[0]?.json.source_language||'fr',\n  target_language:a1s[0]?.json.target_language||'en-US', score_target:90}}];\n"
+        },
+        "id": "det",
+        "name": "Detect Domain",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1920,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": "H88p5deRTIHpQ7S8",
+          "mode": "passThrough",
+          "options": {}
+        },
+        "id": "g2",
+        "name": "Glossary Load 2 (post-A1)",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1,
+        "position": [
+          2160,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "BKminhI3j8D4ybs1",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a2",
+        "name": "Call A2",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          2400,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "rfWAld7K9VOXvPrE",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "pt",
+        "name": "Call Pre-Translation",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          2880,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "expression",
+          "output": "={{ $json.source_language === 'fr' ? 0 : 1 }}"
+        },
+        "id": "dir",
+        "name": "Direction?",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          3120,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "JLDchUnpFLdgHbkn",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a3fr",
+        "name": "Call A3 FR-EN",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          3360,
+          288
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "Eq5Bk0IbKstJMr4P",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a3en",
+        "name": "Call A3 EN-FR",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          3360,
+          528
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "cHTqFQHBnEkeRAJB",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a4",
+        "name": "Call A4",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          3600,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "De0vqzEM9LlJ0wVB",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a5",
+        "name": "Call A5",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          3840,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst a5=$input.first().json.agent_output||{};\nconst iter=($input.first().json.iteration||1);\nconst score=a5.score_total||0;\nconst pass=score>=90; const maxed=iter>=3;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':(maxed?'ESCALATE':'REVISE'),\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"
+        },
+        "id": "qa1",
+        "name": "QA Check iter1",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          4080,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "expression",
+          "output": "={{ $json.qa_status==='PASS'?0:$json.qa_status==='ESCALATE'?2:1 }}"
+        },
+        "id": "sw1",
+        "name": "Score >= 90?",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          4320,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "JLDchUnpFLdgHbkn",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a3i2",
+        "name": "Call A3 iter2",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          4560,
+          640
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "cHTqFQHBnEkeRAJB",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a4i2",
+        "name": "Call A4 iter2",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          4800,
+          640
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "De0vqzEM9LlJ0wVB",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a5i2",
+        "name": "Call A5 iter2",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          5040,
+          640
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst a5=$input.first().json.agent_output||{};\nconst iter=2;\nconst score=a5.score_total||0; const pass=score>=90;\nreturn [{json:{...$input.first().json, iteration:iter, score_total:score,\n  qa_status:pass?'PASS':'REVISE',\n  failing_segments:pass?[]:(a5.critical_blockers||[]),\n  previous_qa_report:a5, a5_qa_report:a5}}];\n"
+        },
+        "id": "qa2",
+        "name": "QA Check iter2",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5280,
+          640
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "expression",
+          "output": "={{ $json.qa_status==='PASS'?0:1 }}"
+        },
+        "id": "sw2",
+        "name": "Score >= 90 iter2?",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          5520,
+          544
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "JLDchUnpFLdgHbkn",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a3i3",
+        "name": "Call A3 iter3",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          5760,
+          672
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "cHTqFQHBnEkeRAJB",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a4i3",
+        "name": "Call A4 iter3",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          6000,
+          672
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "De0vqzEM9LlJ0wVB",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a5i3",
+        "name": "Call A5 iter3",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          6240,
+          672
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "MQObMb9lhovhBBs8",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "a6",
+        "name": "Call A6",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          6464,
+          80
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst chunks=$input.all();\nconst translated=chunks.map(c=>({\n  chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n  translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n  type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n  a6_issue_log:c.json.agent_output?.issue_log||[],\n  naturalness_score:c.json.agent_output?.naturalness_score||null,\n  course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n  source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n  score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n}));\nreturn translated.map(t=>({json:t}));\n"
+        },
+        "id": "mrg",
+        "name": "Merge Phase 1",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          6720,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "odMhJgxadf3RPAHp",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "rea",
+        "name": "Call Reassembler",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          6960,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "expression",
+          "output": "={{ $json.structural_integrity?0:1 }}"
+        },
+        "id": "str",
+        "name": "Structural OK?",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          7200,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "fBgHok8kQUPxlTAT",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "del",
+        "name": "Call Deliver Output",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          7440,
+          288
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{json:{status:'BLOCKED',error:'Structural integrity check failed',...$input.first().json}}];"
+        },
+        "id": "blk",
+        "name": "Flag BLOCKED",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          7440,
+          528
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const d=$input.first().json; return [{json:{status:d.status||'DONE',course_id:d.course_id,target_course_id:d.target_course_id,deliverables:d.deliverables||{},completed_at:new Date().toISOString()}}];"
+        },
+        "id": "fin",
+        "name": "Final Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          7680,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $('Init Params').first().json.enabled_modules.audit_only }}",
+                      "rightValue": true,
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "equals"
+                      }
+                    },
+                    {
+                      "leftValue": "={{ $('Init Params').first().json.enabled_modules.localize_html }}",
+                      "rightValue": false,
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "options": {}
+                },
+                "renameOutput": true,
+                "outputKey": "audit_only"
+              },
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $('Init Params').first().json.enabled_modules.score_loc }}",
+                      "rightValue": true,
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "equals"
+                      }
+                    },
+                    {
+                      "leftValue": "={{ $('Init Params').first().json.enabled_modules.localize_html }}",
+                      "rightValue": false,
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "equals"
+                      }
+                    },
+                    {
+                      "leftValue": "={{ $('Init Params').first().json.enabled_modules.audit_only }}",
+                      "rightValue": false,
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "options": {}
+                },
+                "renameOutput": true,
+                "outputKey": "score_only"
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra"
+          }
+        },
+        "id": "post-a1-switch",
+        "name": "Post-A1 Mode?",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          2144,
+          96
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nreturn [{json:{\n  status:'AUDIT_COMPLETE', mode:'audit_only',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  chunks_audited:a1.length,\n  a1_results:a1,\n  summary:`A1 audit complete — ${a1.length} chunk(s) analysed`\n}}];\n"
+        },
+        "id": "audit-summary",
+        "name": "Audit Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2480,
+          208
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a1.map(r => r.localizability_score || 0).filter(s=>s>0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;\nconst blockers = a1.flatMap(r => r.blockers || []);\nreturn [{json:{\n  status:'SCORE_COMPLETE', mode:'score_loc',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  localizability_score:avg,\n  blockers_count:blockers.length,\n  blockers:blockers,\n  summary:`Localizability score: ${avg}/100 — ${blockers.length} blocker(s)`\n}}];\n"
+        },
+        "id": "score-summary",
+        "name": "Score Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2480,
+          608
+        ]
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $('Init Params').first().json.enabled_modules.qa_check }}",
+                      "rightValue": true,
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "equals"
+                      }
+                    },
+                    {
+                      "leftValue": "={{ $('Init Params').first().json.enabled_modules.localize_html }}",
+                      "rightValue": false,
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "equals"
+                      }
+                    }
+                  ],
+                  "options": {}
+                },
+                "renameOutput": true,
+                "outputKey": "qa_only"
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra"
+          }
+        },
+        "id": "post-qa-switch",
+        "name": "Post-QA Mode?",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          6528,
+          672
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst a5 = $('Call A5 iter3').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a5.map(r=>r.score||0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;\nreturn [{json:{\n  status:'QA_COMPLETE', mode:'qa_check',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  qa_score:avg,\n  pass: avg>=90,\n  chunks:a5.length,\n  summary:`QA score: ${avg}/100 — ${avg>=90?'PASS':'FAIL'}`\n}}];\n"
+        },
+        "id": "qa-summary",
+        "name": "QA Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          6800,
+          528
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e467b19b-1547-4eff-8dc0-5c38b4e18240",
+                "name": "Course ID",
+                "value": "={{ $('Init Params').first().json.course_id }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "c49a2c2b-2d5a-4d77-8f54-80fb711aaa1d",
+        "name": "Prepare Course ID",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          256,
+          208
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst html     = $('Call HTML Extraction').first().json.html || '';\nconst params   = $('Init Params').first().json;\nconst fp       = $('Extract Fingerprint').first().json;\n\nreturn [{json: {\n  html:              html,\n  course_id:         params.course_id,\n  target_course_id:  params.target_course_id,\n  source_language:   params.source_language,\n  target_language:   params.target_language,\n  enabled_modules:   params.enabled_modules,\n  fingerprint: {\n    urls:              fp.urls,\n    claire_semantics:  fp.claire_semantics,\n    code_blocks_count: fp.code_blocks_count\n  }\n}}];\n"
+        },
+        "id": "3bb4f370-6b44-45ed-ba30-f5a081759da7",
+        "name": "Prepare Pre-Processor Input",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          688,
+          224
+        ]
+      },
+      {
+        "id": "bf5d989f-b1d3-44e9-b66d-282e9b1a9ded",
+        "name": "Format Audit Report",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2730,
+          208
+        ],
+        "parameters": {
+          "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Audit Report — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  'Chunks analysed: ' + d.chunks_audited, '',\n  '## A1 Results',\n];\n(d.a1_results || []).forEach((r,i) => {\n  const score = r.localizability_score ?? 'N/A';\n  const blockers = (r.blockers || []).map(b => '- ' + b).join('\\n') || '- None';\n  lines.push('### Chunk ' + (i+1) + '\\nScore: ' + score + '/100\\nBlockers:\\n' + blockers + '\\n');\n});\nreturn [{json:{md:lines.join('\\n'), filename:'audit_'+d.course_id+'.md', email:ip.email, course_id:d.course_id}}];\n"
+        }
+      },
+      {
+        "id": "6c26ec05-1888-433b-86fd-0be935e5ad65",
+        "name": "Send Audit Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          2980,
+          208
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        },
+        "parameters": {
+          "fromEmail": "learning.automations@openclassrooms.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "=[CLS] Audit — {{ $json.course_id }}",
+          "message": "=Audit report for course {{ $json.course_id }} is attached.",
+          "options": {
+            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
+          }
+        }
+      },
+      {
+        "id": "41d53159-be83-47d1-a3f3-4cd0f26fa93f",
+        "name": "Format Score Report",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2730,
+          608
+        ],
+        "parameters": {
+          "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Localizability Score — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**Score: ' + d.localizability_score + '/100**',\n  'Blockers: ' + d.blockers_count, '',\n  '## Blockers',\n  ...(d.blockers||[]).map(b=>'- '+b)\n];\nreturn [{json:{md:lines.join('\\n'), filename:'score_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.localizability_score}}];\n"
+        }
+      },
+      {
+        "id": "1379ee06-4a9b-4411-867c-3167491acc66",
+        "name": "Send Score Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          2980,
+          608
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        },
+        "parameters": {
+          "fromEmail": "learning.automations@openclassrooms.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "=[CLS] Score — {{ $json.course_id }} — {{ $json.score }}/100",
+          "message": "=Localizability score {{ $json.score }}/100. See attachment.",
+          "options": {
+            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
+          }
+        }
+      },
+      {
+        "id": "6a37c026-4e7c-4f82-9532-8984dc80476c",
+        "name": "Format QA Report",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          7050,
+          528
+        ],
+        "parameters": {
+          "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Quality Check — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**QA Score: ' + d.qa_score + '/100 — ' + (d.pass ? 'PASS ✓' : 'FAIL ✗') + '**',\n  'Chunks evaluated: ' + d.chunks\n];\nreturn [{json:{md:lines.join('\\n'), filename:'qa_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.qa_score, pass:d.pass}}];\n"
+        }
+      },
+      {
+        "id": "c504b3c2-1188-43d1-b5b7-9ac32ceaaa67",
+        "name": "Send QA Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          7300,
+          528
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        },
+        "parameters": {
+          "fromEmail": "learning.automations@openclassrooms.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "=[CLS] QA — {{ $json.course_id }} — {{ $json.score }}/100 {{ $json.pass ? 'PASS' : 'FAIL' }}",
+          "message": "=QA score {{ $json.score }}/100. See attachment.",
+          "options": {
+            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
+          }
+        }
+      },
+      {
+        "id": "eb64727e-7267-43d1-bd10-979ab9e278fd",
+        "name": "Format HTML Delivery",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          7690,
+          288
+        ],
+        "parameters": {
+          "jsCode": "\nconst ip = $('Init Params').first().json;\nconst reassembler = $('Call Reassembler').first().json;\nconst html = reassembler.final_html || '';\nconst course_id = ip.course_id;\nreturn [{json:{\n  html: html,\n  filename: course_id + '_localized.html',\n  email: ip.email,\n  course_id: course_id\n}}];\n"
+        }
+      },
+      {
+        "id": "3824b805-e54c-429d-ad3b-cb8a88376e0d",
+        "name": "Send HTML Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          7940,
+          288
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        },
+        "parameters": {
+          "fromEmail": "learning.automations@openclassrooms.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "=[CLS] Localized HTML — {{ $json.course_id }}",
+          "message": "=Localized HTML file for course {{ $json.course_id }} is attached.",
+          "options": {
+            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.html).toString('base64'), type: 'text/html', encoding: 'base64'}] }}"
+          }
+        }
+      },
+      {
+        "id": "merge-glossary-chunks",
+        "name": "Merge Glossary into Chunks",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1440,
+          400
+        ],
+        "parameters": {
+          "jsCode": "const glossary = $('Glossary Load 1 (pre-A1)').first().json;\nconst chunks = $('Call Pre-Processor').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    common_glossary: glossary.common_glossary || [],\n    domain_validated_tm: glossary.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary.domain_unvalidated_tm || []\n  }\n}));"
+        }
+      },
+      {
+        "id": "merge-domain-chunks",
+        "name": "Merge Domain into Chunks",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2060,
+          400
+        ],
+        "parameters": {
+          "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
+        }
+      }
+    ],
+    "connections": {
+      "CLS v3 Form": {
+        "main": [
+          [
+            {
+              "node": "Init Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Init Params": {
+        "main": [
+          [
+            {
+              "node": "Prepare Course ID",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call HTML Extraction": {
+        "main": [
+          [
+            {
+              "node": "Extract Fingerprint",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Fingerprint": {
+        "main": [
+          [
+            {
+              "node": "Prepare Pre-Processor Input",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Pre-Processor": {
+        "main": [
+          [
+            {
+              "node": "Glossary Load 1 (pre-A1)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Glossary Load 1 (pre-A1)": {
+        "main": [
+          [
+            {
+              "node": "Merge Glossary into Chunks",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A1": {
+        "main": [
+          [
+            {
+              "node": "Detect Domain",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Detect Domain": {
+        "main": [
+          [
+            {
+              "node": "Post-A1 Mode?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Glossary Load 2 (post-A1)": {
+        "main": [
+          [
+            {
+              "node": "Merge Domain into Chunks",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A2": {
+        "main": [
+          [
+            {
+              "node": "Call Pre-Translation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Pre-Translation": {
+        "main": [
+          [
+            {
+              "node": "Direction?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Direction?": {
+        "main": [
+          [
+            {
+              "node": "Call A3 FR-EN",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call A3 EN-FR",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A3 FR-EN": {
+        "main": [
+          [
+            {
+              "node": "Call A4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A3 EN-FR": {
+        "main": [
+          [
+            {
+              "node": "Call A4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A4": {
+        "main": [
+          [
+            {
+              "node": "Call A5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A5": {
+        "main": [
+          [
+            {
+              "node": "QA Check iter1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "QA Check iter1": {
+        "main": [
+          [
+            {
+              "node": "Score >= 90?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Score >= 90?": {
+        "main": [
+          [
+            {
+              "node": "Call A6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call A3 iter2",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call A6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A3 iter2": {
+        "main": [
+          [
+            {
+              "node": "Call A4 iter2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A4 iter2": {
+        "main": [
+          [
+            {
+              "node": "Call A5 iter2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A5 iter2": {
+        "main": [
+          [
+            {
+              "node": "QA Check iter2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "QA Check iter2": {
+        "main": [
+          [
+            {
+              "node": "Score >= 90 iter2?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Score >= 90 iter2?": {
+        "main": [
+          [
+            {
+              "node": "Call A6",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call A3 iter3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A3 iter3": {
+        "main": [
+          [
+            {
+              "node": "Call A4 iter3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A4 iter3": {
+        "main": [
+          [
+            {
+              "node": "Call A5 iter3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A5 iter3": {
+        "main": [
+          [
+            {
+              "node": "Post-QA Mode?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A6": {
+        "main": [
+          [
+            {
+              "node": "Merge Phase 1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Phase 1": {
+        "main": [
+          [
+            {
+              "node": "Call Reassembler",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Reassembler": {
+        "main": [
+          [
+            {
+              "node": "Structural OK?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structural OK?": {
+        "main": [
+          [
+            {
+              "node": "Call Deliver Output",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Flag BLOCKED",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Deliver Output": {
+        "main": [
+          [
+            {
+              "node": "Format HTML Delivery",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Flag BLOCKED": {
+        "main": [
+          [
+            {
+              "node": "Final Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Post-A1 Mode?": {
+        "main": [
+          [
+            {
+              "node": "Audit Summary",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Score Summary",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Glossary Load 2 (post-A1)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Audit Summary": {
+        "main": [
+          [
+            {
+              "node": "Format Audit Report",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Score Summary": {
+        "main": [
+          [
+            {
+              "node": "Format Score Report",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Post-QA Mode?": {
+        "main": [
+          [
+            {
+              "node": "QA Summary",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Call A6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "QA Summary": {
+        "main": [
+          [
+            {
+              "node": "Format QA Report",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Course ID": {
+        "main": [
+          [
+            {
+              "node": "Call HTML Extraction",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Pre-Processor Input": {
+        "main": [
+          [
+            {
+              "node": "Call Pre-Processor",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Audit Report": {
+        "main": [
+          [
+            {
+              "node": "Send Audit Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Audit Email": {
+        "main": [
+          [
+            {
+              "node": "Final Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format Score Report": {
+        "main": [
+          [
+            {
+              "node": "Send Score Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Score Email": {
+        "main": [
+          [
+            {
+              "node": "Final Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format QA Report": {
+        "main": [
+          [
+            {
+              "node": "Send QA Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send QA Email": {
+        "main": [
+          [
+            {
+              "node": "Final Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Format HTML Delivery": {
+        "main": [
+          [
+            {
+              "node": "Send HTML Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send HTML Email": {
+        "main": [
+          [
+            {
+              "node": "Final Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Glossary into Chunks": {
+        "main": [
+          [
+            {
+              "node": "Call A1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Domain into Chunks": {
+        "main": [
+          [
+            {
+              "node": "Call A2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-05T07:03:34.932Z",
+        "id": 397,
+        "workflowId": "ApjYq9sdM5LKRVlq",
+        "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-05T07:03:34.917Z",
+        "id": 396,
+        "workflowId": "ApjYq9sdM5LKRVlq",
+        "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}
