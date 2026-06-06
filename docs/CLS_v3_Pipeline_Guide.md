@@ -67,7 +67,7 @@ Detect Domain          ← consolide le domaine détecté (Tech|Data|Business|..
   ↓
   ├── audit_only   → voir Scénario 1
   ├── score_loc    → voir Scénario 2
-  └── fallback     → Glossary Load 2 → A2 → Pre-Trad → A3 → A4 → A5 iter1-3
+  └── fallback     → Glossary Load 2 → A2 → A3 → A4 → A5 iter1-3
                           ↓
                     [Post-QA Mode?]
                       ├── qa_check   → voir Scénario 3
@@ -194,9 +194,7 @@ Merge Domain into Chunks
   ↓
 Call A2 (×N chunks)    ← AGENT : Terminology Architect — construit le glossaire de run
   ↓
-Call Pre-Translation   ← AGENT : GPT-4o pré-trad brute (moins cher, 1ère passe)
-  ↓
-Call A3 (×N chunks)    ← AGENT : MTPE Specialist — traduction post-éditée
+Call A3 (×N chunks)    ← AGENT : A3 Translation Specialist — traduction gpt-5.2 from scratch (v5.0)
   ↓
 Call A4 (×N chunks)    ← AGENT : Cultural Adapter — swaps culturels (SIRET→EIN, RTT→PTO...)
   ↓
@@ -296,14 +294,13 @@ Après chaque run : A2 + A4 poussent leurs `domain_tm_patch[]` → merge dans le
 
 | Agent | Modèle | Coût / run One Part (~83k tokens) |
 |---|---|---|
-| GPT-4o Pre-Translation | gpt-4o | ~$0.54 |
 | A1 Audit | gpt-5.2 | ~$1.20 |
 | A2 Terminology | gpt-5.2 | ~$0.18 |
 | A3 MTPE | gpt-5.2 | ~$3.10 |
 | A4 Cultural | gpt-5.2 | ~$3.20 |
 | A5 QA ×2 iter | gpt-5.2 | ~$2.80 |
 | A6 Proofreader | gpt-5.2 | ~$2.50 |
-| **TOTAL** | | **~$13.52** |
+| **TOTAL** | | **~$12.98** |
 
 Budget $50 → **3–4 runs complets One Part** (ou ~10 runs audit seul).
 
@@ -320,3 +317,4 @@ Budget $50 → **3–4 runs complets One Part** (ou ~10 runs audit seul).
 | `body: {}` expressions non évaluées | Clés manquantes dans Create Batch | Utiliser `bodyParameters.parameters` keypairs |
 | Email sans HTML | Tags HTML visibles en texte brut | `emailFormat: "html"` + champ `html:` (pas `message:`) dans emailSend v2.1 |
 | Chunks perdus après Glossary Load | 1 item au lieu de N | Nœud `Merge X into Chunks` obligatoire après chaque SUB qui retourne 1 item |
+| `pretranslation_draft` vide | A3 mode from scratch | Intentionnel — tous les agents alignés sur gpt-5.2. A3 v5.0 gère les 2 modes. |
