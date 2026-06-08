@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-06-08T15:04:10.772Z",
-  "createdAt": "2026-06-08T15:04:10.772Z",
-  "id": "UmjbwzKKFVeVpTni",
+  "updatedAt": "2026-06-08T15:13:34.084Z",
+  "createdAt": "2026-06-08T15:13:34.084Z",
+  "id": "ylWWrAQROywV2Kbo",
   "name": "[SUB] CLS v3 — Iconik Init Collections",
   "description": null,
   "active": true,
@@ -28,7 +28,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const inp = $input.first().json;\nreturn [{json:{\n  target_course_id: inp.target_course_id,\n  iconik_app_id:    $vars.ICONIK_APP_ID   || 'MISSING_APP_ID',\n  iconik_auth_token:$vars.ICONIK_AUTH_TOKEN || 'MISSING_AUTH_TOKEN',\n  root_collection_name: '0000_LOCALISATION'\n}}];"
+        "jsCode": "// ── ICONIK CREDENTIALS ──────────────────────────────────────────\n// Replace the two values below with your Iconik App-ID and Auth-Token\n// Open this node in n8n UI → paste the values → Ctrl+S to save\nconst ICONIK_APP_ID     = 'PASTE_YOUR_APP_ID_HERE';\nconst ICONIK_AUTH_TOKEN = 'PASTE_YOUR_AUTH_TOKEN_HERE';\n// ─────────────────────────────────────────────────────────────────\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id: inp.target_course_id,\n  iconik_app_id:    ICONIK_APP_ID,\n  iconik_auth_token:ICONIK_AUTH_TOKEN,\n  root_collection_name: '0000_LOCALISATION'\n}}];"
       }
     },
     {
@@ -78,7 +78,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst objects = res.objects || [];\n// Find exact match on title\nconst match = objects.find(o => (o.title||'').trim() === '0000_LOCALISATION');\nconst root_id = match ? match.id : null;\nreturn [{json:{\n  ...auth,\n  root_collection_id: root_id,\n  root_found: !!root_id\n}}];"
+        "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst objects = res.objects || [];\nconst match = objects.find(o => (o.title||'').trim() === '0000_LOCALISATION');\nreturn [{json:{\n  ...auth,\n  root_collection_id: match ? match.id : null,\n  root_found: !!match\n}}];"
       }
     },
     {
@@ -125,7 +125,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst target_coll_id = res.id || res.collection_id || null;\nreturn [{json:{\n  ...auth,\n  root_collection_id:   $('Extract Root ID').first().json.root_collection_id,\n  target_collection_id: target_coll_id\n}}];"
+        "jsCode": "const auth = $('Build Auth').first().json;\nreturn [{json:{\n  ...auth,\n  root_collection_id:   $('Extract Root ID').first().json.root_collection_id,\n  target_collection_id: $input.first().json.id || null\n}}];"
       }
     },
     {
@@ -240,7 +240,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const auth = $('Build Auth').first().json;\nconst etgt = $('Extract Target ID').first().json;\nconst g_id = (() => { try { return $('Create static_graphics').first().json.id||null; } catch{return null;} })();\nconst f_id = (() => { try { return $('Create external_files').first().json.id||null; } catch{return null;} })();\nconst t_id = (() => { try { return $('Create transcripts').first().json.id||null; } catch{return null;} })();\nreturn [{json:{\n  target_course_id:        auth.target_course_id,\n  root_collection_id:      etgt.root_collection_id,\n  target_collection_id:    etgt.target_collection_id,\n  graphics_collection_id:  g_id,\n  files_collection_id:     f_id,\n  transcripts_collection_id: t_id,\n  iconik_ready: !!(g_id && f_id && t_id)\n}}];"
+        "jsCode": "const etgt = $('Extract Target ID').first().json;\nconst g_id = (() => { try { return $('Create static_graphics').first().json.id||null; } catch{return null;} })();\nconst f_id = (() => { try { return $('Create external_files').first().json.id||null; } catch{return null;} })();\nconst t_id = (() => { try { return $('Create transcripts').first().json.id||null; } catch{return null;} })();\nreturn [{json:{\n  target_course_id:          etgt.target_course_id,\n  root_collection_id:        etgt.root_collection_id,\n  target_collection_id:      etgt.target_collection_id,\n  graphics_collection_id:    g_id,\n  files_collection_id:       f_id,\n  transcripts_collection_id: t_id,\n  iconik_ready: !!(g_id && f_id && t_id)\n}}];"
       }
     }
   ],
@@ -367,16 +367,16 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "ab031b06-f04b-45ad-ad9d-b8fafa727a56",
-  "activeVersionId": "ab031b06-f04b-45ad-ad9d-b8fafa727a56",
+  "versionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
+  "activeVersionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
   "versionCounter": 3,
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2026-06-08T15:04:10.804Z",
-      "createdAt": "2026-06-08T15:04:10.804Z",
+      "updatedAt": "2026-06-08T15:13:34.088Z",
+      "createdAt": "2026-06-08T15:13:34.088Z",
       "role": "workflow:owner",
-      "workflowId": "UmjbwzKKFVeVpTni",
+      "workflowId": "ylWWrAQROywV2Kbo",
       "projectId": "7y0kZCkeSDugmpzP",
       "project": {
         "updatedAt": "2026-03-12T16:05:16.582Z",
@@ -392,10 +392,10 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-08T15:04:10.819Z",
-    "createdAt": "2026-06-08T15:04:10.819Z",
-    "versionId": "ab031b06-f04b-45ad-ad9d-b8fafa727a56",
-    "workflowId": "UmjbwzKKFVeVpTni",
+    "updatedAt": "2026-06-08T15:13:34.092Z",
+    "createdAt": "2026-06-08T15:13:34.092Z",
+    "versionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
+    "workflowId": "ylWWrAQROywV2Kbo",
     "nodes": [
       {
         "id": "trigger",
@@ -418,7 +418,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const inp = $input.first().json;\nreturn [{json:{\n  target_course_id: inp.target_course_id,\n  iconik_app_id:    $vars.ICONIK_APP_ID   || 'MISSING_APP_ID',\n  iconik_auth_token:$vars.ICONIK_AUTH_TOKEN || 'MISSING_AUTH_TOKEN',\n  root_collection_name: '0000_LOCALISATION'\n}}];"
+          "jsCode": "// ── ICONIK CREDENTIALS ──────────────────────────────────────────\n// Replace the two values below with your Iconik App-ID and Auth-Token\n// Open this node in n8n UI → paste the values → Ctrl+S to save\nconst ICONIK_APP_ID     = 'PASTE_YOUR_APP_ID_HERE';\nconst ICONIK_AUTH_TOKEN = 'PASTE_YOUR_AUTH_TOKEN_HERE';\n// ─────────────────────────────────────────────────────────────────\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id: inp.target_course_id,\n  iconik_app_id:    ICONIK_APP_ID,\n  iconik_auth_token:ICONIK_AUTH_TOKEN,\n  root_collection_name: '0000_LOCALISATION'\n}}];"
         }
       },
       {
@@ -468,7 +468,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst objects = res.objects || [];\n// Find exact match on title\nconst match = objects.find(o => (o.title||'').trim() === '0000_LOCALISATION');\nconst root_id = match ? match.id : null;\nreturn [{json:{\n  ...auth,\n  root_collection_id: root_id,\n  root_found: !!root_id\n}}];"
+          "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst objects = res.objects || [];\nconst match = objects.find(o => (o.title||'').trim() === '0000_LOCALISATION');\nreturn [{json:{\n  ...auth,\n  root_collection_id: match ? match.id : null,\n  root_found: !!match\n}}];"
         }
       },
       {
@@ -515,7 +515,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst target_coll_id = res.id || res.collection_id || null;\nreturn [{json:{\n  ...auth,\n  root_collection_id:   $('Extract Root ID').first().json.root_collection_id,\n  target_collection_id: target_coll_id\n}}];"
+          "jsCode": "const auth = $('Build Auth').first().json;\nreturn [{json:{\n  ...auth,\n  root_collection_id:   $('Extract Root ID').first().json.root_collection_id,\n  target_collection_id: $input.first().json.id || null\n}}];"
         }
       },
       {
@@ -630,7 +630,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const auth = $('Build Auth').first().json;\nconst etgt = $('Extract Target ID').first().json;\nconst g_id = (() => { try { return $('Create static_graphics').first().json.id||null; } catch{return null;} })();\nconst f_id = (() => { try { return $('Create external_files').first().json.id||null; } catch{return null;} })();\nconst t_id = (() => { try { return $('Create transcripts').first().json.id||null; } catch{return null;} })();\nreturn [{json:{\n  target_course_id:        auth.target_course_id,\n  root_collection_id:      etgt.root_collection_id,\n  target_collection_id:    etgt.target_collection_id,\n  graphics_collection_id:  g_id,\n  files_collection_id:     f_id,\n  transcripts_collection_id: t_id,\n  iconik_ready: !!(g_id && f_id && t_id)\n}}];"
+          "jsCode": "const etgt = $('Extract Target ID').first().json;\nconst g_id = (() => { try { return $('Create static_graphics').first().json.id||null; } catch{return null;} })();\nconst f_id = (() => { try { return $('Create external_files').first().json.id||null; } catch{return null;} })();\nconst t_id = (() => { try { return $('Create transcripts').first().json.id||null; } catch{return null;} })();\nreturn [{json:{\n  target_course_id:          etgt.target_course_id,\n  root_collection_id:        etgt.root_collection_id,\n  target_collection_id:      etgt.target_collection_id,\n  graphics_collection_id:    g_id,\n  files_collection_id:       f_id,\n  transcripts_collection_id: t_id,\n  iconik_ready: !!(g_id && f_id && t_id)\n}}];"
         }
       }
     ],
@@ -755,10 +755,10 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-08T15:06:43.295Z",
-        "id": 496,
-        "workflowId": "UmjbwzKKFVeVpTni",
-        "versionId": "ab031b06-f04b-45ad-ad9d-b8fafa727a56",
+        "createdAt": "2026-06-08T15:13:56.847Z",
+        "id": 498,
+        "workflowId": "ylWWrAQROywV2Kbo",
+        "versionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
