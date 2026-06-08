@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-06-08T15:13:34.084Z",
-  "createdAt": "2026-06-08T15:13:34.084Z",
-  "id": "ylWWrAQROywV2Kbo",
+  "updatedAt": "2026-06-08T15:26:40.898Z",
+  "createdAt": "2026-06-08T15:26:40.898Z",
+  "id": "P97ds2vbSmklYbnP",
   "name": "[SUB] CLS v3 — Iconik Init Collections",
   "description": null,
   "active": true,
@@ -28,11 +28,11 @@
         300
       ],
       "parameters": {
-        "jsCode": "// ── ICONIK CREDENTIALS ──────────────────────────────────────────\n// Replace the two values below with your Iconik App-ID and Auth-Token\n// Open this node in n8n UI → paste the values → Ctrl+S to save\nconst ICONIK_APP_ID     = 'PASTE_YOUR_APP_ID_HERE';\nconst ICONIK_AUTH_TOKEN = 'PASTE_YOUR_AUTH_TOKEN_HERE';\n// ─────────────────────────────────────────────────────────────────\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id: inp.target_course_id,\n  iconik_app_id:    ICONIK_APP_ID,\n  iconik_auth_token:ICONIK_AUTH_TOKEN,\n  root_collection_name: '0000_LOCALISATION'\n}}];"
+        "jsCode": "// ICONIK CREDENTIALS — configured 2026-06-08\nconst ICONIK_APP_ID     = 'feff994e-1a46-11ee-9965-6a0b57ea0a0e';\nconst ICONIK_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJjZDFiZmE4OC02MzJlLTExZjEtOWY0YS1jMjcyZWFmNmM3OGQiLCJpZCI6ImQxOWE1MDAwLTYzMmUtMTFmMS1iYTM0LTZhZWQyYmZiYWMyZSIsImV4cCI6MjA5NjM3ODgxNiwic3lzIjoiaWNvbmlrLWV1In0.c3o8DxZbAjiOakN_uiKKeixwZLU2l104B_xkyBx7vnc';\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id:    inp.target_course_id,\n  iconik_app_id:       ICONIK_APP_ID,\n  iconik_auth_token:   ICONIK_AUTH_TOKEN,\n  root_collection_name:'0000_LOCALISATION'\n}}];"
       }
     },
     {
-      "id": "search_root",
+      "id": "search",
       "name": "Search Root Collection",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -69,7 +69,7 @@
       }
     },
     {
-      "id": "find_root",
+      "id": "find",
       "name": "Extract Root ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -78,11 +78,11 @@
         300
       ],
       "parameters": {
-        "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst objects = res.objects || [];\nconst match = objects.find(o => (o.title||'').trim() === '0000_LOCALISATION');\nreturn [{json:{\n  ...auth,\n  root_collection_id: match ? match.id : null,\n  root_found: !!match\n}}];"
+        "jsCode": "const auth=$('Build Auth').first().json;\nconst res=$input.first().json;\nconst match=(res.objects||[]).find(o=>(o.title||'').trim()==='0000_LOCALISATION');\nreturn [{json:{...auth,root_collection_id:match?match.id:null,root_found:!!match}}];"
       }
     },
     {
-      "id": "create_target",
+      "id": "c_tgt",
       "name": "Create Target Collection",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -116,7 +116,7 @@
       }
     },
     {
-      "id": "extract_target",
+      "id": "ext",
       "name": "Extract Target ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -125,11 +125,11 @@
         300
       ],
       "parameters": {
-        "jsCode": "const auth = $('Build Auth').first().json;\nreturn [{json:{\n  ...auth,\n  root_collection_id:   $('Extract Root ID').first().json.root_collection_id,\n  target_collection_id: $input.first().json.id || null\n}}];"
+        "jsCode": "const a=$('Build Auth').first().json;\nreturn [{json:{...a,root_collection_id:$('Extract Root ID').first().json.root_collection_id,target_collection_id:$input.first().json.id||null}}];"
       }
     },
     {
-      "id": "create_graphics",
+      "id": "c_g",
       "name": "Create static_graphics",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -163,7 +163,7 @@
       }
     },
     {
-      "id": "create_files",
+      "id": "c_f",
       "name": "Create external_files",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -197,7 +197,7 @@
       }
     },
     {
-      "id": "create_transcripts",
+      "id": "c_t",
       "name": "Create transcripts",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -231,7 +231,7 @@
       }
     },
     {
-      "id": "return_ids",
+      "id": "ret",
       "name": "Return Collection IDs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -240,7 +240,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const etgt = $('Extract Target ID').first().json;\nconst g_id = (() => { try { return $('Create static_graphics').first().json.id||null; } catch{return null;} })();\nconst f_id = (() => { try { return $('Create external_files').first().json.id||null; } catch{return null;} })();\nconst t_id = (() => { try { return $('Create transcripts').first().json.id||null; } catch{return null;} })();\nreturn [{json:{\n  target_course_id:          etgt.target_course_id,\n  root_collection_id:        etgt.root_collection_id,\n  target_collection_id:      etgt.target_collection_id,\n  graphics_collection_id:    g_id,\n  files_collection_id:       f_id,\n  transcripts_collection_id: t_id,\n  iconik_ready: !!(g_id && f_id && t_id)\n}}];"
+        "jsCode": "const e=$('Extract Target ID').first().json;\nconst g=()=>{try{return $('Create static_graphics').first().json.id||null;}catch{return null;}};\nconst f=()=>{try{return $('Create external_files').first().json.id||null;}catch{return null;}};\nconst t=()=>{try{return $('Create transcripts').first().json.id||null;}catch{return null;}};\nreturn [{json:{target_course_id:e.target_course_id,root_collection_id:e.root_collection_id,target_collection_id:e.target_collection_id,graphics_collection_id:g(),files_collection_id:f(),transcripts_collection_id:t(),iconik_ready:!!(g()&&f()&&t())}}];"
       }
     }
   ],
@@ -367,16 +367,16 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
-  "activeVersionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
+  "versionId": "9f3991d0-1699-4d7d-a08f-2b4a137950a1",
+  "activeVersionId": "9f3991d0-1699-4d7d-a08f-2b4a137950a1",
   "versionCounter": 3,
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2026-06-08T15:13:34.088Z",
-      "createdAt": "2026-06-08T15:13:34.088Z",
+      "updatedAt": "2026-06-08T15:26:40.900Z",
+      "createdAt": "2026-06-08T15:26:40.900Z",
       "role": "workflow:owner",
-      "workflowId": "ylWWrAQROywV2Kbo",
+      "workflowId": "P97ds2vbSmklYbnP",
       "projectId": "7y0kZCkeSDugmpzP",
       "project": {
         "updatedAt": "2026-03-12T16:05:16.582Z",
@@ -392,10 +392,10 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-08T15:13:34.092Z",
-    "createdAt": "2026-06-08T15:13:34.092Z",
-    "versionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
-    "workflowId": "ylWWrAQROywV2Kbo",
+    "updatedAt": "2026-06-08T15:26:40.906Z",
+    "createdAt": "2026-06-08T15:26:40.906Z",
+    "versionId": "9f3991d0-1699-4d7d-a08f-2b4a137950a1",
+    "workflowId": "P97ds2vbSmklYbnP",
     "nodes": [
       {
         "id": "trigger",
@@ -418,11 +418,11 @@
           300
         ],
         "parameters": {
-          "jsCode": "// ── ICONIK CREDENTIALS ──────────────────────────────────────────\n// Replace the two values below with your Iconik App-ID and Auth-Token\n// Open this node in n8n UI → paste the values → Ctrl+S to save\nconst ICONIK_APP_ID     = 'PASTE_YOUR_APP_ID_HERE';\nconst ICONIK_AUTH_TOKEN = 'PASTE_YOUR_AUTH_TOKEN_HERE';\n// ─────────────────────────────────────────────────────────────────\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id: inp.target_course_id,\n  iconik_app_id:    ICONIK_APP_ID,\n  iconik_auth_token:ICONIK_AUTH_TOKEN,\n  root_collection_name: '0000_LOCALISATION'\n}}];"
+          "jsCode": "// ICONIK CREDENTIALS — configured 2026-06-08\nconst ICONIK_APP_ID     = 'feff994e-1a46-11ee-9965-6a0b57ea0a0e';\nconst ICONIK_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJjZDFiZmE4OC02MzJlLTExZjEtOWY0YS1jMjcyZWFmNmM3OGQiLCJpZCI6ImQxOWE1MDAwLTYzMmUtMTFmMS1iYTM0LTZhZWQyYmZiYWMyZSIsImV4cCI6MjA5NjM3ODgxNiwic3lzIjoiaWNvbmlrLWV1In0.c3o8DxZbAjiOakN_uiKKeixwZLU2l104B_xkyBx7vnc';\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id:    inp.target_course_id,\n  iconik_app_id:       ICONIK_APP_ID,\n  iconik_auth_token:   ICONIK_AUTH_TOKEN,\n  root_collection_name:'0000_LOCALISATION'\n}}];"
         }
       },
       {
-        "id": "search_root",
+        "id": "search",
         "name": "Search Root Collection",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4,
@@ -459,7 +459,7 @@
         }
       },
       {
-        "id": "find_root",
+        "id": "find",
         "name": "Extract Root ID",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -468,11 +468,11 @@
           300
         ],
         "parameters": {
-          "jsCode": "const auth = $('Build Auth').first().json;\nconst res  = $input.first().json;\nconst objects = res.objects || [];\nconst match = objects.find(o => (o.title||'').trim() === '0000_LOCALISATION');\nreturn [{json:{\n  ...auth,\n  root_collection_id: match ? match.id : null,\n  root_found: !!match\n}}];"
+          "jsCode": "const auth=$('Build Auth').first().json;\nconst res=$input.first().json;\nconst match=(res.objects||[]).find(o=>(o.title||'').trim()==='0000_LOCALISATION');\nreturn [{json:{...auth,root_collection_id:match?match.id:null,root_found:!!match}}];"
         }
       },
       {
-        "id": "create_target",
+        "id": "c_tgt",
         "name": "Create Target Collection",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4,
@@ -506,7 +506,7 @@
         }
       },
       {
-        "id": "extract_target",
+        "id": "ext",
         "name": "Extract Target ID",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -515,11 +515,11 @@
           300
         ],
         "parameters": {
-          "jsCode": "const auth = $('Build Auth').first().json;\nreturn [{json:{\n  ...auth,\n  root_collection_id:   $('Extract Root ID').first().json.root_collection_id,\n  target_collection_id: $input.first().json.id || null\n}}];"
+          "jsCode": "const a=$('Build Auth').first().json;\nreturn [{json:{...a,root_collection_id:$('Extract Root ID').first().json.root_collection_id,target_collection_id:$input.first().json.id||null}}];"
         }
       },
       {
-        "id": "create_graphics",
+        "id": "c_g",
         "name": "Create static_graphics",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4,
@@ -553,7 +553,7 @@
         }
       },
       {
-        "id": "create_files",
+        "id": "c_f",
         "name": "Create external_files",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4,
@@ -587,7 +587,7 @@
         }
       },
       {
-        "id": "create_transcripts",
+        "id": "c_t",
         "name": "Create transcripts",
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4,
@@ -621,7 +621,7 @@
         }
       },
       {
-        "id": "return_ids",
+        "id": "ret",
         "name": "Return Collection IDs",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -630,7 +630,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const etgt = $('Extract Target ID').first().json;\nconst g_id = (() => { try { return $('Create static_graphics').first().json.id||null; } catch{return null;} })();\nconst f_id = (() => { try { return $('Create external_files').first().json.id||null; } catch{return null;} })();\nconst t_id = (() => { try { return $('Create transcripts').first().json.id||null; } catch{return null;} })();\nreturn [{json:{\n  target_course_id:          etgt.target_course_id,\n  root_collection_id:        etgt.root_collection_id,\n  target_collection_id:      etgt.target_collection_id,\n  graphics_collection_id:    g_id,\n  files_collection_id:       f_id,\n  transcripts_collection_id: t_id,\n  iconik_ready: !!(g_id && f_id && t_id)\n}}];"
+          "jsCode": "const e=$('Extract Target ID').first().json;\nconst g=()=>{try{return $('Create static_graphics').first().json.id||null;}catch{return null;}};\nconst f=()=>{try{return $('Create external_files').first().json.id||null;}catch{return null;}};\nconst t=()=>{try{return $('Create transcripts').first().json.id||null;}catch{return null;}};\nreturn [{json:{target_course_id:e.target_course_id,root_collection_id:e.root_collection_id,target_collection_id:e.target_collection_id,graphics_collection_id:g(),files_collection_id:f(),transcripts_collection_id:t(),iconik_ready:!!(g()&&f()&&t())}}];"
         }
       }
     ],
@@ -755,10 +755,10 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-08T15:13:56.847Z",
-        "id": 498,
-        "workflowId": "ylWWrAQROywV2Kbo",
-        "versionId": "48bf2500-c7af-4e93-9e2c-8ab5ef92b162",
+        "createdAt": "2026-06-08T15:26:40.959Z",
+        "id": 502,
+        "workflowId": "P97ds2vbSmklYbnP",
+        "versionId": "9f3991d0-1699-4d7d-a08f-2b4a137950a1",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
