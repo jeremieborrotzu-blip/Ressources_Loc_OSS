@@ -1,0 +1,815 @@
+{
+  "updatedAt": "2026-06-08T15:21:32.503Z",
+  "createdAt": "2026-06-08T15:21:32.503Z",
+  "id": "uS9xhXsA3gt1WNfF",
+  "name": "[SUB] CLS v3 — A7 Caption Localizer",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger",
+      "name": "Input from MAIN",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "cfg",
+      "name": "Vimeo Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// ── VIMEO TOKEN ───────────────────────────────────────────────\nconst VIMEO_TOKEN = '1b9d7ff9117d2258a0ed0728406403d7';\n// ─────────────────────────────────────────────────────────────\nconst inp = $input.first().json;\nfunction extractVimeoId(val) {\n  if (!val) return null;\n  const m = String(val).match(/(?:vimeo\\.com\\/(?:video\\/)?)(\\d+)|^(\\d+)$/);\n  return m ? (m[1] || m[2]) : null;\n}\nconst vimeo_id = extractVimeoId(inp.vimeo_id || inp.source_value || '');\nreturn [{json:{\n  ...inp,\n  vimeo_token:  VIMEO_TOKEN,\n  vimeo_id,\n  sys_url:  'https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/01_prompts/a7_caption_localizer_system.txt',\n  user_url: 'https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/01_prompts/srt_agent_user_template.txt'\n}}];"
+      }
+    },
+    {
+      "id": "load_sys",
+      "name": "Load System Prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        440,
+        180
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.sys_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "content"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "load_usr",
+      "name": "Load User Template",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        440,
+        420
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Vimeo Config').first().json.user_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "content"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "get_tracks",
+      "name": "Get Text Tracks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        660,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.vimeo.com/videos/{{ $('Vimeo Config').first().json.vimeo_id }}/texttracks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Vimeo Config').first().json.vimeo_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/vnd.vimeo.*+json;version=3.4"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "find_track",
+      "name": "Find Source Track",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const inp = $('Vimeo Config').first().json;\nconst res = $input.first().json;\nconst tracks = res.data || [];\nconst srcLang = (inp.source_language || 'fr').toLowerCase().substring(0,2);\nconst track = tracks.find(t => (t.language||'').toLowerCase().startsWith(srcLang) && ['subtitles','captions'].includes(t.type))\n           || tracks.find(t => (t.language||'').toLowerCase().startsWith(srcLang))\n           || tracks[0];\nif (!track) return [{json:{...inp, track_found:false, error_msg:`No ${srcLang} track. Available: ${tracks.map(t=>t.language).join(',')||'none'}`}}];\nreturn [{json:{...inp, track_found:true, track_link:track.link, track_language:track.language, track_type:track.type}}];"
+      }
+    },
+    {
+      "id": "dl_srt",
+      "name": "Download SRT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1100,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.track_link }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Vimeo Config').first().json.vimeo_token }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "srt_raw"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "build_msg",
+      "name": "Build Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const inp       = $('Vimeo Config').first().json;\nconst sys_prompt= $('Load System Prompt').first().json.content || '';\nconst usr_tpl   = $('Load User Template').first().json.content || '';\nconst srt_raw   = $input.first().json.srt_raw || '';\nconst ft        = $('Find Source Track').first().json;\n\n// Parse SRT/VTT\nfunction parseSubtitles(raw) {\n  const clean = raw.replace(/^WEBVTT[^\\n]*/,'').trim();\n  const blocks = clean.split(/\\n\\n+/);\n  const segs = [];\n  for (const block of blocks) {\n    const lines = block.trim().split('\\n').filter(l=>l.trim());\n    if (lines.length < 2) continue;\n    let idx = segs.length+1, timecode='', texts=[];\n    for (const line of lines) {\n      if (/-->/.test(line)) timecode = line.trim();\n      else if (/^\\d+$/.test(line) && !timecode) idx = parseInt(line);\n      else if (timecode) texts.push(line.trim());\n    }\n    if (timecode && texts.length) segs.push({index:idx, timecode, text:texts.join(' ')});\n  }\n  return segs;\n}\n\nconst segments = parseSubtitles(srt_raw);\nconst glossary_arr = (inp.a2_glossary || []).slice(0,30).map(g=>`${g.source_term||g.term}→${g.target_term||g.translation}`);\n\n// Fill user template\nconst decision_log_summary = inp.decision_log\n  ? JSON.stringify(Object.entries(inp.decision_log).slice(0,10)).substring(0,500)\n  : '{}';\n\nconst user_msg = usr_tpl\n  .replace('{{course_id}}',       inp.source_course_id||'')\n  .replace('{{video_id}}',        inp.vimeo_id||'')\n  .replace('{{source_language}}', inp.source_language||'fr')\n  .replace('{{target_language}}', inp.target_language||'en-US')\n  .replace('{{domain}}',          inp.detected_domain||'Tech')\n  .replace('{{source_srt}}',      srt_raw.substring(0,6000))\n  .replace('{{target_srt_draft}}','')\n  .replace('{{common_glossary}}', glossary_arr.slice(0,15).join('; '))\n  .replace('{{domain_glossary}}', glossary_arr.slice(15).join('; '))\n  .replace('{{temp_glossary}}',   '')\n  .replace('{{html_decision_log}}', decision_log_summary)\n  .replace('{{score_target}}',    '90');\n\nreturn [{json:{\n  ...inp,\n  parsed_segments: segments,\n  segment_count: segments.length,\n  srt_raw,\n  system_prompt: sys_prompt,\n  user_message:  user_msg,\n  openai_payload: {\n    model: 'gpt-5.2-2025-12-11',\n    messages: [{role:'system',content:sys_prompt},{role:'user',content:user_msg}],\n    max_completion_tokens: Math.min(16000, Math.max(2000, segments.length * 100)),\n    temperature: 0.1\n  }\n}}];"
+      }
+    },
+    {
+      "id": "openai",
+      "name": "Call OpenAI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1540,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ $json.openai_payload }}",
+        "options": {}
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "oWQq1j5RXiUXQXHK",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "id": "reassemble",
+      "name": "Reassemble SRT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const inp    = $('Build Message').first().json;\nconst openai = $input.first().json;\nif (openai.error) return [{json:{...inp, srt_error:'OpenAI: '+(openai.error.message||openai.error)}}];\n\nconst content = openai?.choices?.[0]?.message?.content || '';\nlet a7_out = {};\ntry {\n  const m = content.match(/\\{[\\s\\S]*\\}/);\n  a7_out = JSON.parse(m ? m[0] : content);\n} catch(e) { return [{json:{...inp, srt_error:'JSON parse failed', raw:content.substring(0,300)}}]; }\n\n// Rebuild SRT from revised_srt (if A7 returned it) or from segments\nlet srt_final = '';\nif (a7_out.revised_srt) {\n  srt_final = a7_out.revised_srt;\n} else if (a7_out.segments) {\n  const orig = inp.parsed_segments || [];\n  srt_final = orig.map((seg,i) => {\n    const t = a7_out.segments.find(s=>s.index===seg.index)||a7_out.segments[i];\n    return `${seg.index}\\n${seg.timecode}\\n${t?t.text:seg.text}`;\n  }).join('\\n\\n') + '\\n';\n}\n\nconst dir   = inp.direction || 'fr_enUS';\nconst fname = `${inp.target_course_id}_sub_${inp.vimeo_id}_${dir}.srt`;\nconst gh_path = `07_runs/${inp.source_course_id}/output/transcripts/${fname}`;\n\nreturn [{json:{\n  ...inp,\n  srt_final,\n  srt_b64:   Buffer.from(srt_final).toString('base64'),\n  gh_path,  fname,\n  a7_status: a7_out.status || 'pass',\n  a7_score:  a7_out.score_total || null,\n  lip_sync_flags: a7_out.lip_sync_flags || [],\n  decision_log_srt: a7_out.decision_log || [],\n  tokens_used: openai?.usage?.total_tokens || 0\n}}];"
+      }
+    },
+    {
+      "id": "push_srt",
+      "name": "Push SRT to GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1980,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{ $json.gh_path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=feat: translated SRT {{ $json.fname }}",
+          "content": "={{ $json.srt_b64 }}"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "ret",
+      "name": "Return Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const inp = $('Reassemble SRT').first().json;\nconst gh  = $input.first().json;\nreturn [{json:{\n  vimeo_id:          inp.vimeo_id,\n  target_course_id:  inp.target_course_id,\n  chapter_index:     inp.chapter_index,\n  srt_file:          inp.fname,\n  gh_path:           inp.gh_path,\n  gh_url:            gh.content?.html_url || null,\n  a7_status:         inp.a7_status,\n  a7_score:          inp.a7_score,\n  lip_sync_flags:    inp.lip_sync_flags?.length || 0,\n  segments_count:    inp.segment_count || 0,\n  tokens_used:       inp.tokens_used,\n  status:            gh.content?.html_url ? 'DELIVERED' : 'ERROR',\n  error:             inp.srt_error || null\n}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Input from MAIN": {
+      "main": [
+        [
+          {
+            "node": "Vimeo Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vimeo Config": {
+      "main": [
+        [
+          {
+            "node": "Load System Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Load User Template",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Text Tracks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load System Prompt": {
+      "main": [
+        [
+          {
+            "node": "Build Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load User Template": {
+      "main": [
+        [
+          {
+            "node": "Build Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Text Tracks": {
+      "main": [
+        [
+          {
+            "node": "Find Source Track",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Source Track": {
+      "main": [
+        [
+          {
+            "node": "Download SRT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download SRT": {
+      "main": [
+        [
+          {
+            "node": "Build Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Message": {
+      "main": [
+        [
+          {
+            "node": "Call OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Reassemble SRT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reassemble SRT": {
+      "main": [
+        [
+          {
+            "node": "Push SRT to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push SRT to GitHub": {
+      "main": [
+        [
+          {
+            "node": "Return Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
+  "activeVersionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
+  "versionCounter": 3,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-08T15:21:32.506Z",
+      "createdAt": "2026-06-08T15:21:32.506Z",
+      "role": "workflow:owner",
+      "workflowId": "uS9xhXsA3gt1WNfF",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-08T15:21:32.513Z",
+    "createdAt": "2026-06-08T15:21:32.513Z",
+    "versionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
+    "workflowId": "uS9xhXsA3gt1WNfF",
+    "nodes": [
+      {
+        "id": "trigger",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "cfg",
+        "name": "Vimeo Config",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          300
+        ],
+        "parameters": {
+          "jsCode": "// ── VIMEO TOKEN ───────────────────────────────────────────────\nconst VIMEO_TOKEN = '1b9d7ff9117d2258a0ed0728406403d7';\n// ─────────────────────────────────────────────────────────────\nconst inp = $input.first().json;\nfunction extractVimeoId(val) {\n  if (!val) return null;\n  const m = String(val).match(/(?:vimeo\\.com\\/(?:video\\/)?)(\\d+)|^(\\d+)$/);\n  return m ? (m[1] || m[2]) : null;\n}\nconst vimeo_id = extractVimeoId(inp.vimeo_id || inp.source_value || '');\nreturn [{json:{\n  ...inp,\n  vimeo_token:  VIMEO_TOKEN,\n  vimeo_id,\n  sys_url:  'https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/01_prompts/a7_caption_localizer_system.txt',\n  user_url: 'https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/01_prompts/srt_agent_user_template.txt'\n}}];"
+        }
+      },
+      {
+        "id": "load_sys",
+        "name": "Load System Prompt",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          440,
+          180
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $json.sys_url }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "text",
+                "outputPropertyName": "content"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "load_usr",
+        "name": "Load User Template",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          440,
+          420
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Vimeo Config').first().json.user_url }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "text",
+                "outputPropertyName": "content"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "get_tracks",
+        "name": "Get Text Tracks",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          660,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.vimeo.com/videos/{{ $('Vimeo Config').first().json.vimeo_id }}/texttracks",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Vimeo Config').first().json.vimeo_token }}"
+              },
+              {
+                "name": "Accept",
+                "value": "application/vnd.vimeo.*+json;version=3.4"
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "find_track",
+        "name": "Find Source Track",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          880,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const inp = $('Vimeo Config').first().json;\nconst res = $input.first().json;\nconst tracks = res.data || [];\nconst srcLang = (inp.source_language || 'fr').toLowerCase().substring(0,2);\nconst track = tracks.find(t => (t.language||'').toLowerCase().startsWith(srcLang) && ['subtitles','captions'].includes(t.type))\n           || tracks.find(t => (t.language||'').toLowerCase().startsWith(srcLang))\n           || tracks[0];\nif (!track) return [{json:{...inp, track_found:false, error_msg:`No ${srcLang} track. Available: ${tracks.map(t=>t.language).join(',')||'none'}`}}];\nreturn [{json:{...inp, track_found:true, track_link:track.link, track_language:track.language, track_type:track.type}}];"
+        }
+      },
+      {
+        "id": "dl_srt",
+        "name": "Download SRT",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          1100,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $json.track_link }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Vimeo Config').first().json.vimeo_token }}"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "text",
+                "outputPropertyName": "srt_raw"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "build_msg",
+        "name": "Build Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1320,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const inp       = $('Vimeo Config').first().json;\nconst sys_prompt= $('Load System Prompt').first().json.content || '';\nconst usr_tpl   = $('Load User Template').first().json.content || '';\nconst srt_raw   = $input.first().json.srt_raw || '';\nconst ft        = $('Find Source Track').first().json;\n\n// Parse SRT/VTT\nfunction parseSubtitles(raw) {\n  const clean = raw.replace(/^WEBVTT[^\\n]*/,'').trim();\n  const blocks = clean.split(/\\n\\n+/);\n  const segs = [];\n  for (const block of blocks) {\n    const lines = block.trim().split('\\n').filter(l=>l.trim());\n    if (lines.length < 2) continue;\n    let idx = segs.length+1, timecode='', texts=[];\n    for (const line of lines) {\n      if (/-->/.test(line)) timecode = line.trim();\n      else if (/^\\d+$/.test(line) && !timecode) idx = parseInt(line);\n      else if (timecode) texts.push(line.trim());\n    }\n    if (timecode && texts.length) segs.push({index:idx, timecode, text:texts.join(' ')});\n  }\n  return segs;\n}\n\nconst segments = parseSubtitles(srt_raw);\nconst glossary_arr = (inp.a2_glossary || []).slice(0,30).map(g=>`${g.source_term||g.term}→${g.target_term||g.translation}`);\n\n// Fill user template\nconst decision_log_summary = inp.decision_log\n  ? JSON.stringify(Object.entries(inp.decision_log).slice(0,10)).substring(0,500)\n  : '{}';\n\nconst user_msg = usr_tpl\n  .replace('{{course_id}}',       inp.source_course_id||'')\n  .replace('{{video_id}}',        inp.vimeo_id||'')\n  .replace('{{source_language}}', inp.source_language||'fr')\n  .replace('{{target_language}}', inp.target_language||'en-US')\n  .replace('{{domain}}',          inp.detected_domain||'Tech')\n  .replace('{{source_srt}}',      srt_raw.substring(0,6000))\n  .replace('{{target_srt_draft}}','')\n  .replace('{{common_glossary}}', glossary_arr.slice(0,15).join('; '))\n  .replace('{{domain_glossary}}', glossary_arr.slice(15).join('; '))\n  .replace('{{temp_glossary}}',   '')\n  .replace('{{html_decision_log}}', decision_log_summary)\n  .replace('{{score_target}}',    '90');\n\nreturn [{json:{\n  ...inp,\n  parsed_segments: segments,\n  segment_count: segments.length,\n  srt_raw,\n  system_prompt: sys_prompt,\n  user_message:  user_msg,\n  openai_payload: {\n    model: 'gpt-5.2-2025-12-11',\n    messages: [{role:'system',content:sys_prompt},{role:'user',content:user_msg}],\n    max_completion_tokens: Math.min(16000, Math.max(2000, segments.length * 100)),\n    temperature: 0.1\n  }\n}}];"
+        }
+      },
+      {
+        "id": "openai",
+        "name": "Call OpenAI",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          1540,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.openai.com/v1/chat/completions",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "openAiApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": "={{ $json.openai_payload }}",
+          "options": {}
+        },
+        "credentials": {
+          "openAiApi": {
+            "id": "oWQq1j5RXiUXQXHK",
+            "name": "OpenAI API Key"
+          }
+        }
+      },
+      {
+        "id": "reassemble",
+        "name": "Reassemble SRT",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1760,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const inp    = $('Build Message').first().json;\nconst openai = $input.first().json;\nif (openai.error) return [{json:{...inp, srt_error:'OpenAI: '+(openai.error.message||openai.error)}}];\n\nconst content = openai?.choices?.[0]?.message?.content || '';\nlet a7_out = {};\ntry {\n  const m = content.match(/\\{[\\s\\S]*\\}/);\n  a7_out = JSON.parse(m ? m[0] : content);\n} catch(e) { return [{json:{...inp, srt_error:'JSON parse failed', raw:content.substring(0,300)}}]; }\n\n// Rebuild SRT from revised_srt (if A7 returned it) or from segments\nlet srt_final = '';\nif (a7_out.revised_srt) {\n  srt_final = a7_out.revised_srt;\n} else if (a7_out.segments) {\n  const orig = inp.parsed_segments || [];\n  srt_final = orig.map((seg,i) => {\n    const t = a7_out.segments.find(s=>s.index===seg.index)||a7_out.segments[i];\n    return `${seg.index}\\n${seg.timecode}\\n${t?t.text:seg.text}`;\n  }).join('\\n\\n') + '\\n';\n}\n\nconst dir   = inp.direction || 'fr_enUS';\nconst fname = `${inp.target_course_id}_sub_${inp.vimeo_id}_${dir}.srt`;\nconst gh_path = `07_runs/${inp.source_course_id}/output/transcripts/${fname}`;\n\nreturn [{json:{\n  ...inp,\n  srt_final,\n  srt_b64:   Buffer.from(srt_final).toString('base64'),\n  gh_path,  fname,\n  a7_status: a7_out.status || 'pass',\n  a7_score:  a7_out.score_total || null,\n  lip_sync_flags: a7_out.lip_sync_flags || [],\n  decision_log_srt: a7_out.decision_log || [],\n  tokens_used: openai?.usage?.total_tokens || 0\n}}];"
+        }
+      },
+      {
+        "id": "push_srt",
+        "name": "Push SRT to GitHub",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          1980,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{ $json.gh_path }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=feat: translated SRT {{ $json.fname }}",
+            "content": "={{ $json.srt_b64 }}"
+          },
+          "options": {}
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "ret",
+        "name": "Return Result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2200,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const inp = $('Reassemble SRT').first().json;\nconst gh  = $input.first().json;\nreturn [{json:{\n  vimeo_id:          inp.vimeo_id,\n  target_course_id:  inp.target_course_id,\n  chapter_index:     inp.chapter_index,\n  srt_file:          inp.fname,\n  gh_path:           inp.gh_path,\n  gh_url:            gh.content?.html_url || null,\n  a7_status:         inp.a7_status,\n  a7_score:          inp.a7_score,\n  lip_sync_flags:    inp.lip_sync_flags?.length || 0,\n  segments_count:    inp.segment_count || 0,\n  tokens_used:       inp.tokens_used,\n  status:            gh.content?.html_url ? 'DELIVERED' : 'ERROR',\n  error:             inp.srt_error || null\n}}];"
+        }
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Vimeo Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vimeo Config": {
+        "main": [
+          [
+            {
+              "node": "Load System Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Load User Template",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get Text Tracks",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load System Prompt": {
+        "main": [
+          [
+            {
+              "node": "Build Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load User Template": {
+        "main": [
+          [
+            {
+              "node": "Build Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Text Tracks": {
+        "main": [
+          [
+            {
+              "node": "Find Source Track",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Source Track": {
+        "main": [
+          [
+            {
+              "node": "Download SRT",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Download SRT": {
+        "main": [
+          [
+            {
+              "node": "Build Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Message": {
+        "main": [
+          [
+            {
+              "node": "Call OpenAI",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call OpenAI": {
+        "main": [
+          [
+            {
+              "node": "Reassemble SRT",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reassemble SRT": {
+        "main": [
+          [
+            {
+              "node": "Push SRT to GitHub",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Push SRT to GitHub": {
+        "main": [
+          [
+            {
+              "node": "Return Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-08T15:23:10.826Z",
+        "id": 501,
+        "workflowId": "uS9xhXsA3gt1WNfF",
+        "versionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}
