@@ -1,0 +1,16 @@
+{
+  "_comment": "File routing config for CLS v3 Phase 2 AWS Downloader. To add a new format: add one entry. collection = Iconik sub-collection name. action = localize_a9 (sent to A9 agent) | download_only (stored as-is, manual treatment). agent = which agent handles it (null if download_only).",
+  "routing": {
+    "xlsx": { "collection": "external_files",       "action": "localize_a9",   "agent": "A9" },
+    "docx": { "collection": "external_files",       "action": "localize_a9",   "agent": "A9" },
+    "pptx": { "collection": "external_files",       "action": "localize_a9",   "agent": "A9" },
+    "csv":  { "collection": "external_files",       "action": "localize_a9",   "agent": "A9" },
+    "pdf":  { "collection": "pdf_to_be_localized",  "action": "download_only", "agent": null }
+  },
+  "fallback": {
+    "collection": "external_files",
+    "action": "download_only",
+    "agent": null,
+    "_note": "Unknown extension → store in external_files without processing, flag for manual review"
+  }
+}
