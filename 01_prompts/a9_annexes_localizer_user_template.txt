@@ -1,0 +1,79 @@
+INPUTS
+- course_id: {{course_id}}
+- target_course_id: {{target_course_id}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- domain: {{domain}}
+- file_name: {{file_name}}
+- file_type: {{file_type}}
+- file_content: {{file_content}}
+- html_chapter_context: {{html_chapter_context}}
+- a4_decision_log: {{a4_decision_log}}
+- common_glossary: {{common_glossary}}
+- domain_glossary: {{domain_glossary}}
+
+TASK
+1) Read a4_decision_log first. Extract all Concept Swaps, validated terms, and forbidden terms. These are non-negotiable in the annex — any contradiction with the HTML is a CRITICAL blocker.
+2) Parse the file_content according to file_type. Identify every text element requiring localization: headers, labels, text cells, paragraphs, worked examples.
+3) For each element, apply the authority chain: common_glossary → domain_glossary → a4_decision_log. Then apply format rules (dates, currency, decimals, phone, address) for the target language.
+4) Adapt all worked examples: people names, company names, addresses, regulatory references → target culture equivalents. Never leave a French person or company in an EN-localized annex.
+5) Flag all MANUAL_REQUIRED elements (legal article references, French forms requiring retake, content pending A8). These do not block delivery — they go to pending_manual[].
+6) Flag any CRITICAL blocker (glossary violation, structural change, A4 swap not applied). Status → BLOCKED.
+7) Score annex_quality_score out of 20.
+8) Output STRICT JSON only.
+
+OUTPUT SCHEMA:
+{
+  "course_id": "",
+  "target_course_id": "",
+  "file_name": "",
+  "file_type": "xlsx|csv|pdf|docx",
+  "direction": "",
+  "domain": "",
+  "annex_quality_score": 0,
+  "status": "PASS|PARTIAL|BLOCKED",
+  "localized_content": [
+    {
+      "location": "",
+      "source_text": "",
+      "target_text": "",
+      "action": "TRANSLATE|SWAP|CONSERVE_EXPLAIN|PRESERVE|FORMAT_ADAPT",
+      "a4_reference": "",
+      "note": ""
+    }
+  ],
+  "format_adaptations": [
+    {
+      "location": "",
+      "type": "date|currency|decimal|phone|address",
+      "source_value": "",
+      "target_value": ""
+    }
+  ],
+  "cultural_adaptations": [
+    {
+      "location": "",
+      "source_value": "",
+      "target_value": "",
+      "adaptation_type": "person_name|company|address|regulatory|example_data",
+      "note": ""
+    }
+  ],
+  "critical_blockers": [
+    {
+      "location": "",
+      "issue": "",
+      "fix": ""
+    }
+  ],
+  "pending_manual": [
+    {
+      "location": "",
+      "flag_type": "LEGAL_REFERENCE|FORM_RETAKE|NO_EN_EQUIVALENT|PENDING_A8",
+      "source_value": "",
+      "description": "",
+      "recommended_action": ""
+    }
+  ],
+  "a9_summary": ""
+}

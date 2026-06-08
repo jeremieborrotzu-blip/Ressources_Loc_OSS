@@ -1,0 +1,62 @@
+INPUTS
+- course_id: {{course_id}}
+- target_course_id: {{target_course_id}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- domain: {{domain}}
+- image_url: {{image_url}}
+- alt_text: {{alt_text}}
+- html_context: {{html_context}}
+- a4_decision_log: {{a4_decision_log}}
+- common_glossary: {{common_glossary}}
+- domain_glossary: {{domain_glossary}}
+
+TASK
+1) Examine the image at image_url. Identify every visible text element, cultural reference, and format that requires localization.
+2) For each element, apply the authority chain: common_glossary → domain_glossary → a4_decision_log. Any term already decided in a4_decision_log MUST appear identically in the image.
+3) Check for cultural locks: UI language mismatches, French administrative forms, person/company examples, format inconsistencies (dates, currency, phone).
+4) Evaluate expansion risk for every text element where target_text is longer than source_text. Flag if >20% and provide shorter_alternative.
+5) Produce edit_instructions as a single, precise natural language string ready for gpt-image-1 edit endpoint. Spatially anchor every change. If no changes needed → status: VISUAL_ONLY, edit_instructions: null.
+6) Score image_quality_score out of 20.
+7) Output STRICT JSON only.
+
+OUTPUT SCHEMA:
+{
+  "course_id": "",
+  "target_course_id": "",
+  "image_url": "",
+  "direction": "",
+  "domain": "",
+  "image_quality_score": 0,
+  "status": "READY_FOR_EDIT|PARTIAL|MANUAL_REQUIRED|VISUAL_ONLY",
+  "edit_instructions": "",
+  "text_elements": [
+    {
+      "element_id": "IMG-001",
+      "element_type": "label|ui_text|form_field|name|url|code|data|annotation",
+      "source_text": "",
+      "target_text": "",
+      "action": "TRANSLATE|SWAP|CONSERVE_EXPLAIN|PRESERVE|MANUAL",
+      "cultural_note": "",
+      "expansion_risk": false,
+      "shorter_alternative": ""
+    }
+  ],
+  "decision_log": [
+    {
+      "element_id": "IMG-001",
+      "decision": "TRANSLATE|SWAP|CONSERVE+EXPLAIN|PRESERVE|MANUAL_REQUIRED",
+      "a4_reference": "",
+      "decision_note": ""
+    }
+  ],
+  "manual_flags": [
+    {
+      "element_id": "",
+      "flag_type": "UI_MISMATCH|FORM_RETAKE|NO_EN_EQUIVALENT|EXPANSION",
+      "description": "",
+      "recommended_action": ""
+    }
+  ],
+  "a8_summary": ""
+}
