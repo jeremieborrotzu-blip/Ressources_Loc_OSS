@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T15:58:00.772Z",
+  "updatedAt": "2026-06-08T21:47:22.093Z",
   "createdAt": "2026-05-29T14:04:53.024Z",
   "id": "fBgHok8kQUPxlTAT",
   "name": "[SUB] CLS v3 — Deliver Output",
@@ -32,112 +32,6 @@
       }
     },
     {
-      "id": "n2",
-      "name": "Push HTML",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        520,
-        160
-      ],
-      "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.htmlPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=feat: add localized HTML for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.htmlB64}}"
-        }
-      },
-      "credentials": {
-        "githubApi": {
-          "id": "yd8ufDV54XqNLA3P",
-          "name": "GitHub — Ressources_Loc_OSS"
-        }
-      }
-    },
-    {
-      "id": "n3",
-      "name": "Push Decision Log",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        520,
-        300
-      ],
-      "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.logPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=feat: add decision log for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.logB64}}"
-        }
-      },
-      "credentials": {
-        "githubApi": {
-          "id": "yd8ufDV54XqNLA3P",
-          "name": "GitHub — Ressources_Loc_OSS"
-        }
-      }
-    },
-    {
-      "id": "n4",
-      "name": "Push TM Patch",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        520,
-        440
-      ],
-      "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.tmPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=tm: add TM patch for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.tmB64}}"
-        }
-      },
-      "credentials": {
-        "githubApi": {
-          "id": "yd8ufDV54XqNLA3P",
-          "name": "GitHub — Ressources_Loc_OSS"
-        }
-      }
-    },
-    {
-      "id": "push-review-md-001",
-      "name": "Push Review MD",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
-      "position": [
-        520,
-        580
-      ],
-      "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.mdPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=docs: add review MD for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.mdB64}}"
-        }
-      }
-    },
-    {
       "id": "n6",
       "name": "Build Delivery Summary",
       "type": "n8n-nodes-base.code",
@@ -151,90 +45,234 @@
       }
     },
     {
-      "id": "push-todo-graphics-001",
-      "name": "Push Graphics CSV",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "id": "gh_html",
+      "name": "Push HTML",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
       "position": [
-        520,
-        720
+        860,
+        100
       ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
       "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.graphicsPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=docs: add static graphics todo for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.graphicsB64}}"
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.htmlPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.htmlB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'feat: localized HTML — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
         }
       }
     },
     {
-      "id": "push-todo-links-001",
-      "name": "Push Links CSV",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "id": "gh_log",
+      "name": "Push Decision Log",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
       "position": [
-        520,
-        860
+        860,
+        220
       ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
       "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.linksPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=docs: add external links todo for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.linksB64}}"
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.logPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.logB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'feat: decision log — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
         }
       }
     },
     {
-      "id": "push-todo-videos-001",
-      "name": "Push Videos CSV",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "id": "gh_tm",
+      "name": "Push TM Patch",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
       "position": [
-        520,
-        1000
+        860,
+        340
       ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
       "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.videosPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=docs: add videos todo for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.videosB64}}"
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.tmPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.tmB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'tm: TM patch — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
         }
       }
     },
     {
-      "id": "push-qa-report-001",
+      "id": "gh_md",
+      "name": "Push Review MD",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        860,
+        460
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.mdPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.mdB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'docs: review MD — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
+        }
+      }
+    },
+    {
+      "id": "gh_qa",
       "name": "Push QA Report",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.1,
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
       "position": [
-        520,
-        440
+        860,
+        580
       ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
       "parameters": {
-        "method": "PUT",
-        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.qaPath}}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "message": "=docs: add QA report for {{$('Prepare Files').item.json.target_course_id}}",
-          "content": "={{$('Prepare Files').item.json.qaB64}}"
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.qaPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.qaB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'docs: QA report — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
+        }
+      }
+    },
+    {
+      "id": "gh_gr",
+      "name": "Push Graphics CSV",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        100
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.graphicsPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.graphicsB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'docs: graphics todo — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
+        }
+      }
+    },
+    {
+      "id": "gh_lk",
+      "name": "Push Links CSV",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        220
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.linksPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.linksB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'docs: links todo — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
+        }
+      }
+    },
+    {
+      "id": "gh_vd",
+      "name": "Push Videos CSV",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        340
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      },
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "jeremieborrotzu-blip",
+        "repository": "Ressources_Loc_OSS",
+        "filePath": "={{ $('Prepare Files').first().json.videosPath }}",
+        "fileContent": "={{ Buffer.from($('Prepare Files').first().json.videosB64, 'base64').toString('utf-8') }}",
+        "commitMessage": "={{ 'docs: videos todo — ' + $('Prepare Files').first().json.target_course_id }}",
+        "additionalParameters": {
+          "branch": "main"
         }
       }
     }
@@ -275,6 +313,11 @@
             "index": 0
           },
           {
+            "node": "Push QA Report",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Push Graphics CSV",
             "type": "main",
             "index": 0
@@ -286,11 +329,6 @@
           },
           {
             "node": "Push Videos CSV",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Push QA Report",
             "type": "main",
             "index": 0
           }
@@ -341,6 +379,17 @@
         ]
       ]
     },
+    "Push QA Report": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Push Graphics CSV": {
       "main": [
         [
@@ -373,17 +422,6 @@
           }
         ]
       ]
-    },
-    "Push QA Report": {
-      "main": [
-        [
-          {
-            "node": "Build Delivery Summary",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -394,9 +432,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "5a96b4c4-e2ed-4d77-90e1-491461f03c8d",
-  "activeVersionId": "5a96b4c4-e2ed-4d77-90e1-491461f03c8d",
-  "versionCounter": 32,
+  "versionId": "05a89b56-8ba8-46ab-9116-4a3e971f3175",
+  "activeVersionId": "05a89b56-8ba8-46ab-9116-4a3e971f3175",
+  "versionCounter": 35,
   "triggerCount": 0,
   "shared": [
     {
@@ -419,9 +457,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-08T15:58:00.777Z",
-    "createdAt": "2026-06-08T15:58:00.777Z",
-    "versionId": "5a96b4c4-e2ed-4d77-90e1-491461f03c8d",
+    "updatedAt": "2026-06-08T21:47:22.097Z",
+    "createdAt": "2026-06-08T21:47:22.097Z",
+    "versionId": "05a89b56-8ba8-46ab-9116-4a3e971f3175",
     "workflowId": "fBgHok8kQUPxlTAT",
     "nodes": [
       {
@@ -449,112 +487,6 @@
         }
       },
       {
-        "id": "n2",
-        "name": "Push HTML",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          520,
-          160
-        ],
-        "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.htmlPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=feat: add localized HTML for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.htmlB64}}"
-          }
-        },
-        "credentials": {
-          "githubApi": {
-            "id": "yd8ufDV54XqNLA3P",
-            "name": "GitHub — Ressources_Loc_OSS"
-          }
-        }
-      },
-      {
-        "id": "n3",
-        "name": "Push Decision Log",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          520,
-          300
-        ],
-        "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.logPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=feat: add decision log for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.logB64}}"
-          }
-        },
-        "credentials": {
-          "githubApi": {
-            "id": "yd8ufDV54XqNLA3P",
-            "name": "GitHub — Ressources_Loc_OSS"
-          }
-        }
-      },
-      {
-        "id": "n4",
-        "name": "Push TM Patch",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          520,
-          440
-        ],
-        "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.tmPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=tm: add TM patch for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.tmB64}}"
-          }
-        },
-        "credentials": {
-          "githubApi": {
-            "id": "yd8ufDV54XqNLA3P",
-            "name": "GitHub — Ressources_Loc_OSS"
-          }
-        }
-      },
-      {
-        "id": "push-review-md-001",
-        "name": "Push Review MD",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.1,
-        "position": [
-          520,
-          580
-        ],
-        "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.mdPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=docs: add review MD for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.mdB64}}"
-          }
-        }
-      },
-      {
         "id": "n6",
         "name": "Build Delivery Summary",
         "type": "n8n-nodes-base.code",
@@ -568,90 +500,234 @@
         }
       },
       {
-        "id": "push-todo-graphics-001",
-        "name": "Push Graphics CSV",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.1,
+        "id": "gh_html",
+        "name": "Push HTML",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
         "position": [
-          520,
-          720
+          860,
+          100
         ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
         "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.graphicsPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=docs: add static graphics todo for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.graphicsB64}}"
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.htmlPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.htmlB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'feat: localized HTML — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
           }
         }
       },
       {
-        "id": "push-todo-links-001",
-        "name": "Push Links CSV",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.1,
+        "id": "gh_log",
+        "name": "Push Decision Log",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
         "position": [
-          520,
-          860
+          860,
+          220
         ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
         "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.linksPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=docs: add external links todo for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.linksB64}}"
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.logPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.logB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'feat: decision log — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
           }
         }
       },
       {
-        "id": "push-todo-videos-001",
-        "name": "Push Videos CSV",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.1,
+        "id": "gh_tm",
+        "name": "Push TM Patch",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
         "position": [
-          520,
-          1000
+          860,
+          340
         ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
         "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.videosPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=docs: add videos todo for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.videosB64}}"
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.tmPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.tmB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'tm: TM patch — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
           }
         }
       },
       {
-        "id": "push-qa-report-001",
+        "id": "gh_md",
+        "name": "Push Review MD",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          860,
+          460
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
+        "parameters": {
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.mdPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.mdB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'docs: review MD — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
+          }
+        }
+      },
+      {
+        "id": "gh_qa",
         "name": "Push QA Report",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.1,
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
         "position": [
-          520,
-          440
+          860,
+          580
         ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
         "parameters": {
-          "method": "PUT",
-          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.qaPath}}",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "githubApi",
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "message": "=docs: add QA report for {{$('Prepare Files').item.json.target_course_id}}",
-            "content": "={{$('Prepare Files').item.json.qaB64}}"
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.qaPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.qaB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'docs: QA report — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
+          }
+        }
+      },
+      {
+        "id": "gh_gr",
+        "name": "Push Graphics CSV",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          1080,
+          100
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
+        "parameters": {
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.graphicsPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.graphicsB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'docs: graphics todo — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
+          }
+        }
+      },
+      {
+        "id": "gh_lk",
+        "name": "Push Links CSV",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          1080,
+          220
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
+        "parameters": {
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.linksPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.linksB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'docs: links todo — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
+          }
+        }
+      },
+      {
+        "id": "gh_vd",
+        "name": "Push Videos CSV",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          1080,
+          340
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        },
+        "parameters": {
+          "resource": "file",
+          "operation": "edit",
+          "owner": "jeremieborrotzu-blip",
+          "repository": "Ressources_Loc_OSS",
+          "filePath": "={{ $('Prepare Files').first().json.videosPath }}",
+          "fileContent": "={{ Buffer.from($('Prepare Files').first().json.videosB64, 'base64').toString('utf-8') }}",
+          "commitMessage": "={{ 'docs: videos todo — ' + $('Prepare Files').first().json.target_course_id }}",
+          "additionalParameters": {
+            "branch": "main"
           }
         }
       }
@@ -692,6 +768,11 @@
               "index": 0
             },
             {
+              "node": "Push QA Report",
+              "type": "main",
+              "index": 0
+            },
+            {
               "node": "Push Graphics CSV",
               "type": "main",
               "index": 0
@@ -703,11 +784,6 @@
             },
             {
               "node": "Push Videos CSV",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Push QA Report",
               "type": "main",
               "index": 0
             }
@@ -758,6 +834,17 @@
           ]
         ]
       },
+      "Push QA Report": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
       "Push Graphics CSV": {
         "main": [
           [
@@ -790,17 +877,6 @@
             }
           ]
         ]
-      },
-      "Push QA Report": {
-        "main": [
-          [
-            {
-              "node": "Build Delivery Summary",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
       }
     },
     "authors": "Jérémie Borrotzu",
@@ -809,18 +885,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-08T15:58:00.906Z",
-        "id": 506,
+        "createdAt": "2026-06-08T21:47:22.165Z",
+        "id": 510,
         "workflowId": "fBgHok8kQUPxlTAT",
-        "versionId": "5a96b4c4-e2ed-4d77-90e1-491461f03c8d",
+        "versionId": "05a89b56-8ba8-46ab-9116-4a3e971f3175",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-08T15:58:00.872Z",
-        "id": 505,
+        "createdAt": "2026-06-08T21:47:22.154Z",
+        "id": 509,
         "workflowId": "fBgHok8kQUPxlTAT",
-        "versionId": "5a96b4c4-e2ed-4d77-90e1-491461f03c8d",
+        "versionId": "05a89b56-8ba8-46ab-9116-4a3e971f3175",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
