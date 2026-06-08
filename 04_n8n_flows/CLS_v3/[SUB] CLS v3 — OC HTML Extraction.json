@@ -1,0 +1,1424 @@
+{
+  "updatedAt": "2026-06-08T07:52:12.844Z",
+  "createdAt": "2026-06-04T20:52:06.781Z",
+  "id": "RtYARZLkIJyKeoWz",
+  "name": "[CLS] OC HTML Extraction — SUB",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "return {\n  \"domain\": \"api-staging.openclassrooms.tech\",\n  \"grant_type\": \"client_credentials\",\n  \"scope\": \"user_learning_activity\",\n  \"ocBasic\": \"WkZiMFlHZXZPeEhrUVJSTnVQVllHZ2tES0tUT3J4cnk6ZmJJTis0a3JGL1BWYlYybWNhL09JOXJSWW96VEJzcTFFbzgvRzB3ekV6WT0=\",\n  \"cfId\": \"b282d3a4164a1f71c9860bba141b9f26.access\",\n  \"cfSecret\": \"d3a59d1d9bddcbdff249819b8d091c416a731a44eb5143f7f616b2adb92e6f94\"\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2000,
+        96
+      ],
+      "id": "7c5b0e07-b4ba-420d-a0a8-47c761bb3220",
+      "name": "Credentials"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://{{ $('Credentials').item.json.domain }}/oauth2/token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Basic {{ $('Credentials').item.json.ocBasic }}"
+            },
+            {
+              "name": "CF-Access-Client-Id",
+              "value": "={{ $('Credentials').item.json.cfId }}"
+            },
+            {
+              "name": "CF-Access-Client-Secret",
+              "value": "={{ $('Credentials').item.json.cfSecret }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"grant_type\": \"{{ $('Credentials').item.json.grant_type }}\",\n  \"scope\": \"{{ $('Credentials').item.json.scope }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1808,
+        96
+      ],
+      "id": "24c4cdef-7c43-47bf-849d-06e98fbf3f39",
+      "name": "Get token",
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+            },
+            {
+              "name": "CF-Access-Client-Id",
+              "value": "={{ $('Credentials').item.json.cfId }}"
+            },
+            {
+              "name": "CF-Access-Client-Secret",
+              "value": "={{ $('Credentials').item.json.cfSecret }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1216,
+        96
+      ],
+      "id": "21d4fa53-f39a-40ef-9300-4cf552ea52c9",
+      "name": "Get course",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b2fd47a8-f254-46f4-abc2-cd387b549de0",
+              "leftValue": "={{ $json.isSinglePage }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -960,
+        96
+      ],
+      "id": "dad3b2b6-a82b-4e6f-8496-cc378fb6b1af",
+      "name": "If not single page"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}/table-of-content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+            },
+            {
+              "name": "CF-Access-Client-Id",
+              "value": "={{ $('Credentials').item.json.cfId }}"
+            },
+            {
+              "name": "CF-Access-Client-Secret",
+              "value": "={{ $('Credentials').item.json.cfSecret }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -656,
+        96
+      ],
+      "id": "a6168cff-1d3c-4f7b-b2aa-8c4e4698cb37",
+      "name": "Get TOC"
+    },
+    {
+      "parameters": {
+        "jsCode": "// partIndex, partId, partName, chapterIndex, chapterId, chapterName\nlet collection = []\ncollection.push({\n  partIndex: 0,\n  partId: 0,\n  partName: \"Introduction\",\n  chapterIndex: 0,\n  chapterId: 0,\n  chapterName: \"Introduction\"\n})\n\n$(\"Get TOC\").first().json.children.forEach((part,pI)=>{\n  part.children.forEach((chapter, cI)=>{\n    if(chapter.type == \"title-2\"){\n        collection.push({\n        partIndex: pI + 1,\n        partId: part.id,\n        partName: part.title,\n        chapterIndex: cI + 1,\n        chapterId: chapter.id,\n        chapterName: chapter.title\n      })\n    }\n\n  })\n})\nreturn collection"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        96
+      ],
+      "id": "9c0f38b4-653c-486d-9d29-f260a61e6a0a",
+      "name": "Parse TOC"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "1108c348-2d5d-438b-b628-251ad8b7a598",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8fcab5ec-ccf8-45a4-97da-bd19b0491742",
+              "leftValue": "={{ $('Loop Over Items').item.json.partIndex }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "6fe37bd3-73ff-465f-8770-729909a2981d",
+              "leftValue": "={{ $('Loop Over Items').item.json.chapterIndex }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        288
+      ],
+      "id": "7e77263a-eac8-4001-b8af-2557577c9ede",
+      "name": "If intro"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}/chapters/{{ $('Loop Over Items').item.json.chapterId }}/content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+            },
+            {
+              "name": "CF-Access-Client-Id",
+              "value": "={{ $('Credentials').item.json.cfId }}"
+            },
+            {
+              "name": "CF-Access-Client-Secret",
+              "value": "={{ $('Credentials').item.json.cfSecret }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        160,
+        400
+      ],
+      "id": "f954b75b-e648-47a9-9d9d-b8fe0d3ee084",
+      "name": "Get chapter"
+    },
+    {
+      "parameters": {
+        "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}/introduction",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+            },
+            {
+              "name": "CF-Access-Client-Id",
+              "value": "={{ $('Credentials').item.json.cfId }}"
+            },
+            {
+              "name": "CF-Access-Client-Secret",
+              "value": "={{ $('Credentials').item.json.cfSecret }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        160,
+        192
+      ],
+      "id": "3f99ee1d-1114-47a7-bb60-85ca4c603449",
+      "name": "Get Intro"
+    },
+    {
+      "parameters": {
+        "jsCode": "$('Loop Over Items').first().json['html'] = $input.first().json.data\nreturn $('Loop Over Items').first()"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        400
+      ],
+      "id": "16943ea8-9b78-455b-9618-0d9ec64c205c",
+      "name": "Save html"
+    },
+    {
+      "parameters": {
+        "jsCode": "let htmlBuffer = ''\nlet lastPartIndex = null\n$('Loop Over Items').all().forEach(item=>{\n  if(lastPartIndex !== item.json.partIndex && item.json.partIndex !== 0){\n    // Add part header to html\n    htmlBuffer += `\\n<h2>${item.json.partName}</h2>\\n`\n  }\n  lastPartIndex = item.json.partIndex\n  // Add chapter header to html\n  if(item.json.partIndex !== 0){\n    htmlBuffer += `\\n<h3>${item.json.chapterName}</h3>\\n`\n  }\n  \n  // Add chapter body to html\n  htmlBuffer += item.json.html.replace(/<h3\\b([^>]*)>/gi, '<h4$1>').replace(/<\\/h3>/gi, '</h4>');\n})\nhtmlBuffer += ''\nreturn {\"html\":htmlBuffer}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bf88cb42-32ce-4907-9d06-b9a0d5c93a4a",
+      "name": "Merge HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputHTML = $('Merge HTML').first().json.html\n\nconst sanitized = inputHTML\n    .replace(/\\s+id=([\"'])(.*?)\\1/g, '')\n    .replace(/\\s+data-claire-element-id=([\"'])(.*?)\\1/g, '');\n\nreturn {'html': sanitized}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        0
+      ],
+      "id": "dae86f05-a72b-412b-8167-2d6a92337aa8",
+      "name": "Sanitize HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "if($input.first().json.access_token){\n  return {'check':1}\n} else {\n  return {'check':2}\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1600,
+        96
+      ],
+      "id": "87f56ea7-ef44-45b3-a867-e3b58b4fab35",
+      "name": "Check token"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.check }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    },
+                    "id": "6171f3a6-4c88-4d6c-8c03-9e982807d09a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Valid"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -1440,
+        96
+      ],
+      "id": "59023800-2ab6-4ead-8576-c6d0162de457",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "Course ID"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2368,
+        96
+      ],
+      "id": "878bcb32-2292-423e-84ee-a00dc506bc46",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\"Course ID\":$input.first().json['Course ID']}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2160,
+        96
+      ],
+      "id": "193d376f-b79e-46ea-a6be-3943b39b2afe",
+      "name": "Params"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Cannot authenticate to OC API, please contact @maxime.rancon"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1264,
+        272
+      ],
+      "id": "a6d44b3d-d34c-45b3-825f-7cc038e025ba",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Cannot find a course with this ID"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        272
+      ],
+      "id": "4e3f3889-fefe-48c9-bbab-2df24f3945e2",
+      "name": "Stop and Error1"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Single page courses are not supported"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        272
+      ],
+      "id": "4d4e1acc-5635-406a-82ba-5165e0ed9794",
+      "name": "Stop and Error2"
+    },
+    {
+      "parameters": {
+        "errorMessage": "Cannot authenticate to OC API, please contact @maxime.rancon"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        -1552,
+        272
+      ],
+      "id": "cfce0c74-cda9-4115-9076-e3e2bad41cd7",
+      "name": "Stop and Error3"
+    }
+  ],
+  "connections": {
+    "Credentials": {
+      "main": [
+        [
+          {
+            "node": "Get token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get token": {
+      "main": [
+        [
+          {
+            "node": "Check token",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get course": {
+      "main": [
+        [
+          {
+            "node": "If not single page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If not single page": {
+      "main": [
+        [
+          {
+            "node": "Get TOC",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get TOC": {
+      "main": [
+        [
+          {
+            "node": "Parse TOC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse TOC": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Merge HTML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If intro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If intro": {
+      "main": [
+        [
+          {
+            "node": "Get Intro",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get chapter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get chapter": {
+      "main": [
+        [
+          {
+            "node": "Save html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Intro": {
+      "main": [
+        [
+          {
+            "node": "Save html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save html": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge HTML": {
+      "main": [
+        [
+          {
+            "node": "Sanitize HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check token": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get course",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Params": {
+      "main": [
+        [
+          {
+            "node": "Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "9f742786-109c-40f0-bd68-a0da6b27ac6a",
+  "activeVersionId": "9f742786-109c-40f0-bd68-a0da6b27ac6a",
+  "versionCounter": 15,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-04T20:52:06.784Z",
+      "createdAt": "2026-06-04T20:52:06.784Z",
+      "role": "workflow:owner",
+      "workflowId": "RtYARZLkIJyKeoWz",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-08T07:21:11.768Z",
+    "createdAt": "2026-06-08T07:21:11.768Z",
+    "versionId": "9f742786-109c-40f0-bd68-a0da6b27ac6a",
+    "workflowId": "RtYARZLkIJyKeoWz",
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "return {\n  \"domain\": \"api-staging.openclassrooms.tech\",\n  \"grant_type\": \"client_credentials\",\n  \"scope\": \"user_learning_activity\",\n  \"ocBasic\": \"WkZiMFlHZXZPeEhrUVJSTnVQVllHZ2tES0tUT3J4cnk6ZmJJTis0a3JGL1BWYlYybWNhL09JOXJSWW96VEJzcTFFbzgvRzB3ekV6WT0=\",\n  \"cfId\": \"b282d3a4164a1f71c9860bba141b9f26.access\",\n  \"cfSecret\": \"d3a59d1d9bddcbdff249819b8d091c416a731a44eb5143f7f616b2adb92e6f94\"\n}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -2000,
+          96
+        ],
+        "id": "7c5b0e07-b4ba-420d-a0a8-47c761bb3220",
+        "name": "Credentials"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "=https://{{ $('Credentials').item.json.domain }}/oauth2/token",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Basic {{ $('Credentials').item.json.ocBasic }}"
+              },
+              {
+                "name": "CF-Access-Client-Id",
+                "value": "={{ $('Credentials').item.json.cfId }}"
+              },
+              {
+                "name": "CF-Access-Client-Secret",
+                "value": "={{ $('Credentials').item.json.cfSecret }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"grant_type\": \"{{ $('Credentials').item.json.grant_type }}\",\n  \"scope\": \"{{ $('Credentials').item.json.scope }}\"\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          -1808,
+          96
+        ],
+        "id": "24c4cdef-7c43-47bf-849d-06e98fbf3f39",
+        "name": "Get token",
+        "retryOnFail": false,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+              },
+              {
+                "name": "CF-Access-Client-Id",
+                "value": "={{ $('Credentials').item.json.cfId }}"
+              },
+              {
+                "name": "CF-Access-Client-Secret",
+                "value": "={{ $('Credentials').item.json.cfSecret }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          -1216,
+          96
+        ],
+        "id": "21d4fa53-f39a-40ef-9300-4cf552ea52c9",
+        "name": "Get course",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "b2fd47a8-f254-46f4-abc2-cd387b549de0",
+                "leftValue": "={{ $json.isSinglePage }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -960,
+          96
+        ],
+        "id": "dad3b2b6-a82b-4e6f-8496-cc378fb6b1af",
+        "name": "If not single page"
+      },
+      {
+        "parameters": {
+          "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}/table-of-content",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+              },
+              {
+                "name": "CF-Access-Client-Id",
+                "value": "={{ $('Credentials').item.json.cfId }}"
+              },
+              {
+                "name": "CF-Access-Client-Secret",
+                "value": "={{ $('Credentials').item.json.cfSecret }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          -656,
+          96
+        ],
+        "id": "a6168cff-1d3c-4f7b-b2aa-8c4e4698cb37",
+        "name": "Get TOC"
+      },
+      {
+        "parameters": {
+          "jsCode": "// partIndex, partId, partName, chapterIndex, chapterId, chapterName\nlet collection = []\ncollection.push({\n  partIndex: 0,\n  partId: 0,\n  partName: \"Introduction\",\n  chapterIndex: 0,\n  chapterId: 0,\n  chapterName: \"Introduction\"\n})\n\n$(\"Get TOC\").first().json.children.forEach((part,pI)=>{\n  part.children.forEach((chapter, cI)=>{\n    if(chapter.type == \"title-2\"){\n        collection.push({\n        partIndex: pI + 1,\n        partId: part.id,\n        partName: part.title,\n        chapterIndex: cI + 1,\n        chapterId: chapter.id,\n        chapterName: chapter.title\n      })\n    }\n\n  })\n})\nreturn collection"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -416,
+          96
+        ],
+        "id": "9c0f38b4-653c-486d-9d29-f260a61e6a0a",
+        "name": "Parse TOC"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -208,
+          96
+        ],
+        "id": "1108c348-2d5d-438b-b628-251ad8b7a598",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "8fcab5ec-ccf8-45a4-97da-bd19b0491742",
+                "leftValue": "={{ $('Loop Over Items').item.json.partIndex }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              },
+              {
+                "id": "6fe37bd3-73ff-465f-8770-729909a2981d",
+                "leftValue": "={{ $('Loop Over Items').item.json.chapterIndex }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -48,
+          288
+        ],
+        "id": "7e77263a-eac8-4001-b8af-2557577c9ede",
+        "name": "If intro"
+      },
+      {
+        "parameters": {
+          "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}/chapters/{{ $('Loop Over Items').item.json.chapterId }}/content",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+              },
+              {
+                "name": "CF-Access-Client-Id",
+                "value": "={{ $('Credentials').item.json.cfId }}"
+              },
+              {
+                "name": "CF-Access-Client-Secret",
+                "value": "={{ $('Credentials').item.json.cfSecret }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          160,
+          400
+        ],
+        "id": "f954b75b-e648-47a9-9d9d-b8fe0d3ee084",
+        "name": "Get chapter"
+      },
+      {
+        "parameters": {
+          "url": "=https://{{ $('Credentials').item.json.domain }}/courses/{{ $('Params').item.json['Course ID'] }}/introduction",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Get token').item.json.access_token }}"
+              },
+              {
+                "name": "CF-Access-Client-Id",
+                "value": "={{ $('Credentials').item.json.cfId }}"
+              },
+              {
+                "name": "CF-Access-Client-Secret",
+                "value": "={{ $('Credentials').item.json.cfSecret }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          160,
+          192
+        ],
+        "id": "3f99ee1d-1114-47a7-bb60-85ca4c603449",
+        "name": "Get Intro"
+      },
+      {
+        "parameters": {
+          "jsCode": "$('Loop Over Items').first().json['html'] = $input.first().json.data\nreturn $('Loop Over Items').first()"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          352,
+          400
+        ],
+        "id": "16943ea8-9b78-455b-9618-0d9ec64c205c",
+        "name": "Save html"
+      },
+      {
+        "parameters": {
+          "jsCode": "let htmlBuffer = ''\nlet lastPartIndex = null\n$('Loop Over Items').all().forEach(item=>{\n  if(lastPartIndex !== item.json.partIndex && item.json.partIndex !== 0){\n    // Add part header to html\n    htmlBuffer += `\\n<h2>${item.json.partName}</h2>\\n`\n  }\n  lastPartIndex = item.json.partIndex\n  // Add chapter header to html\n  if(item.json.partIndex !== 0){\n    htmlBuffer += `\\n<h3>${item.json.chapterName}</h3>\\n`\n  }\n  \n  // Add chapter body to html\n  htmlBuffer += item.json.html.replace(/<h3\\b([^>]*)>/gi, '<h4$1>').replace(/<\\/h3>/gi, '</h4>');\n})\nhtmlBuffer += ''\nreturn {\"html\":htmlBuffer}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "id": "bf88cb42-32ce-4907-9d06-b9a0d5c93a4a",
+        "name": "Merge HTML"
+      },
+      {
+        "parameters": {
+          "jsCode": "const inputHTML = $('Merge HTML').first().json.html\n\nconst sanitized = inputHTML\n    .replace(/\\s+id=([\"'])(.*?)\\1/g, '')\n    .replace(/\\s+data-claire-element-id=([\"'])(.*?)\\1/g, '');\n\nreturn {'html': sanitized}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          160,
+          0
+        ],
+        "id": "dae86f05-a72b-412b-8167-2d6a92337aa8",
+        "name": "Sanitize HTML"
+      },
+      {
+        "parameters": {
+          "jsCode": "if($input.first().json.access_token){\n  return {'check':1}\n} else {\n  return {'check':2}\n}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1600,
+          96
+        ],
+        "id": "87f56ea7-ef44-45b3-a867-e3b58b4fab35",
+        "name": "Check token"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 2
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.check }}",
+                      "rightValue": 1,
+                      "operator": {
+                        "type": "number",
+                        "operation": "equals"
+                      },
+                      "id": "6171f3a6-4c88-4d6c-8c03-9e982807d09a"
+                    }
+                  ],
+                  "combinator": "and"
+                },
+                "renameOutput": true,
+                "outputKey": "Valid"
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra"
+          }
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.3,
+        "position": [
+          -1440,
+          96
+        ],
+        "id": "59023800-2ab6-4ead-8576-c6d0162de457",
+        "name": "Switch"
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "Course ID"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -2368,
+          96
+        ],
+        "id": "878bcb32-2292-423e-84ee-a00dc506bc46",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "jsCode": "return {\"Course ID\":$input.first().json['Course ID']}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -2160,
+          96
+        ],
+        "id": "193d376f-b79e-46ea-a6be-3943b39b2afe",
+        "name": "Params"
+      },
+      {
+        "parameters": {
+          "errorMessage": "Cannot authenticate to OC API, please contact @maxime.rancon"
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          -1264,
+          272
+        ],
+        "id": "a6d44b3d-d34c-45b3-825f-7cc038e025ba",
+        "name": "Stop and Error"
+      },
+      {
+        "parameters": {
+          "errorMessage": "Cannot find a course with this ID"
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          -1072,
+          272
+        ],
+        "id": "4e3f3889-fefe-48c9-bbab-2df24f3945e2",
+        "name": "Stop and Error1"
+      },
+      {
+        "parameters": {
+          "errorMessage": "Single page courses are not supported"
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          -784,
+          272
+        ],
+        "id": "4d4e1acc-5635-406a-82ba-5165e0ed9794",
+        "name": "Stop and Error2"
+      },
+      {
+        "parameters": {
+          "errorMessage": "Cannot authenticate to OC API, please contact @maxime.rancon"
+        },
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          -1552,
+          272
+        ],
+        "id": "cfce0c74-cda9-4115-9076-e3e2bad41cd7",
+        "name": "Stop and Error3"
+      }
+    ],
+    "connections": {
+      "Credentials": {
+        "main": [
+          [
+            {
+              "node": "Get token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get token": {
+        "main": [
+          [
+            {
+              "node": "Check token",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Stop and Error3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get course": {
+        "main": [
+          [
+            {
+              "node": "If not single page",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Stop and Error1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If not single page": {
+        "main": [
+          [
+            {
+              "node": "Get TOC",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Stop and Error2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get TOC": {
+        "main": [
+          [
+            {
+              "node": "Parse TOC",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse TOC": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [
+            {
+              "node": "Merge HTML",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "If intro",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If intro": {
+        "main": [
+          [
+            {
+              "node": "Get Intro",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get chapter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get chapter": {
+        "main": [
+          [
+            {
+              "node": "Save html",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Intro": {
+        "main": [
+          [
+            {
+              "node": "Save html",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save html": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge HTML": {
+        "main": [
+          [
+            {
+              "node": "Sanitize HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check token": {
+        "main": [
+          [
+            {
+              "node": "Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch": {
+        "main": [
+          [
+            {
+              "node": "Get course",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Stop and Error",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Params": {
+        "main": [
+          [
+            {
+              "node": "Credentials",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": true,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-08T07:52:12.893Z",
+        "id": 477,
+        "workflowId": "RtYARZLkIJyKeoWz",
+        "versionId": "9f742786-109c-40f0-bd68-a0da6b27ac6a",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-08T07:52:12.879Z",
+        "id": 476,
+        "workflowId": "RtYARZLkIJyKeoWz",
+        "versionId": "9f742786-109c-40f0-bd68-a0da6b27ac6a",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}
