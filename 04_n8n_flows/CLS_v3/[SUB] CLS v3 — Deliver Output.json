@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T09:16:38.142Z",
+  "updatedAt": "2026-06-08T13:15:46.873Z",
   "createdAt": "2026-05-29T14:04:53.024Z",
   "id": "fBgHok8kQUPxlTAT",
   "name": "[SUB] CLS v3 — Deliver Output",
@@ -28,7 +28,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const inp = $input.first().json;\n\n// Helpers\nfunction b64(str) { return Buffer.from(str, 'utf-8').toString('base64'); }\nfunction pad(n)   { return String(n).padStart(2,'0'); }\n\nconst src  = inp.course_id        || 'unknown_src';\nconst tgt  = inp.target_course_id || 'unknown_tgt';\nconst sl   = inp.source_language  || 'fr';\nconst tl   = (inp.target_language || 'en-US').split('-')[0];\nconst dir  = `${sl}>${tl}`;\nconst now  = new Date();\nconst date = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;\nconst base = `07_runs/${src}/output`;\n\n// 1. Final HTML\nconst htmlContent = inp.final_html || '';\nconst htmlPath    = `${base}/${tgt}_localized_${dir}.html`;\nconst htmlB64     = b64(htmlContent);\n\n// 2. Decision log (A4 + A5 + A6 merged)\nconst logObj = {\n  meta: { course_id: src, target_course_id: tgt, direction: dir, date, score_total: inp.score_total || null },\n  a4_swap_log:       inp.a4_swap_log   || [],\n  a5_qa_report:      inp.a5_qa_report  || {},\n  a6_issue_log:      inp.a6_issue_log  || [],\n  structural_checks: inp.structural_checks || []\n};\nconst logPath = `${base}/${tgt}_decision_log_${dir}.json`;\nconst logB64  = b64(JSON.stringify(logObj, null, 2));\n\n// 3. TM patch CSV\nconst tmEntries = inp.domain_tm_patch || [];\nlet csvRows = 'source_term,target_term,direction,domain,category,context_note,do_not_translate,validated,first_seen_course,last_updated\\n';\nfor (const e of tmEntries) {\n  csvRows += [\n    e.source_term||'', e.target_term||'', dir,\n    e.domain||inp.detected_domain||'', e.category||'',\n    (e.context_note||'').replace(/,/g,'；'),\n    e.do_not_translate||false, 'false', src, date\n  ].join(',') + '\\n';\n}\nconst tmPath = `${base}/${tgt}_tm_patch_${dir}.csv`;\nconst tmB64  = b64(csvRows);\n\n// 4. Review Markdown — HTML mirror (Notion-importable, preserves all HTML tags)\nconst qaScore  = inp.score_total ? `${inp.score_total}/100` : 'N/A';\nconst struct   = inp.structural_integrity ? '✅ OK' : '❌ BLOCKED';\nconst a6Issues = (inp.a6_issue_log || [])\n  .map(i => `- **[${i.severity}]** \\`${i.location || 'unknown'}\\`: ${i.issue}`)\n  .join('\\n') || 'None.';\n\n// Section 1: metadata table\nconst mdHeader = `# Course Localization Review — ${tgt}\n\n| Field | Value |\n|---|---|\n| Source ID | \\`${src}\\` |\n| Target ID | \\`${tgt}\\` |\n| Direction | ${dir} |\n| Date | ${date} |\n| QA Score | ${qaScore} |\n| Structural integrity | ${struct} |\n\n## GitHub Outputs\n\n- [Localized HTML](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${htmlPath})\n- [Decision Log](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${logPath})\n- [TM Patch](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${tmPath})\n\n## A5 QA Summary\n\n${inp.a5_summary || 'No QA summary available.'}\n\n## A6 Issues\n\n${a6Issues}\n\n---\n\n## Localized Content (HTML mirror)\n\n`;\n\n// Section 2: full HTML content as-is (GitHub + Notion both render embedded HTML in .md)\nconst mdContent = mdHeader + (htmlContent || '<!-- no HTML content -->');\nconst mdPath    = `${base}/${tgt}_review_${dir}.md`;\nconst mdB64     = b64(mdContent);\n\nreturn [{ json: {\n  htmlPath, htmlB64,\n  logPath,  logB64,\n  tmPath,   tmB64,\n  mdPath,   mdB64,\n  repo: 'jeremieborrotzu-blip/Ressources_Loc_OSS',\n  course_id: src, target_course_id: tgt,\n  direction: dir, date,\n  score_total:           inp.score_total,\n  structural_integrity:  inp.structural_integrity,\n  enabled_modules:       inp.enabled_modules || []\n}}];\n"
+        "jsCode": "const inp = $input.first().json;\n\nfunction b64(str) { return Buffer.from(str, 'utf-8').toString('base64'); }\nfunction pad(n)   { return String(n).padStart(2,'0'); }\n\nconst src  = inp.course_id        || 'unknown_src';\nconst tgt  = inp.target_course_id || 'unknown_tgt';\nconst sl   = inp.source_language  || 'fr';\nconst tl   = (inp.target_language || 'en-US').split('-')[0];\nconst dir  = `${sl}>${tl}`;\nconst now  = new Date();\nconst date = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;\nconst base = `07_runs/${src}/output`;\n\n// 1. Final HTML\nconst htmlContent = inp.final_html || '';\nconst htmlPath    = `${base}/${tgt}_localized_${dir}.html`;\nconst htmlB64     = b64(htmlContent);\n\n// 2. Decision log\nconst logObj = {\n  meta: { course_id: src, target_course_id: tgt, direction: dir, date, score_total: inp.score_total || null },\n  a4_swap_log:       inp.a4_swap_log   || [],\n  a5_qa_report:      inp.a5_qa_report  || {},\n  a6_issue_log:      inp.a6_issue_log  || [],\n  structural_checks: inp.structural_checks || []\n};\nconst logPath = `${base}/${tgt}_decision_log_${dir}.json`;\nconst logB64  = b64(JSON.stringify(logObj, null, 2));\n\n// 3. TM patch CSV\nconst tmEntries = inp.domain_tm_patch || [];\nlet csvTM = 'source_term,target_term,direction,domain,category,context_note,do_not_translate,validated,first_seen_course,last_updated\\n';\nfor (const e of tmEntries) {\n  csvTM += [\n    e.source_term||'', e.target_term||'', dir,\n    e.domain||inp.detected_domain||'', e.category||'',\n    (e.context_note||'').replace(/,/g,'；'),\n    e.do_not_translate||false, 'false', src, date\n  ].join(',') + '\\n';\n}\nconst tmPath = `${base}/${tgt}_tm_patch_${dir}.csv`;\nconst tmB64  = b64(csvTM);\n\n// 4. Pending Phase 2 — collect from all A5 QA reports across chunks\nconst pending = inp.pending_phase2 || [];\nconst byType = { static_graphic: [], oc_course_link: [], video: [], external_link: [] };\nfor (const item of pending) {\n  const t = item.type || 'external_link';\n  if (byType[t]) byType[t].push(item);\n}\n\n// CSV header\nconst csvHeader = 'type,chapter_index,chunk_index,location,source_value,anchor_text,action_required\\n';\nfunction itemToRow(item) {\n  return [\n    item.type||'', item.chapter_index||0, item.chunk_index||0,\n    (item.location||'').replace(/,/g,'；'),\n    (item.source_value||'').replace(/,/g,'；'),\n    (item.anchor_text||'').replace(/,/g,'；'),\n    (item.action_required||'').replace(/,/g,'；')\n  ].join(',');\n}\n\n// 4a. Static graphics CSV\nconst csvGraphics = csvHeader + byType.static_graphic.map(itemToRow).join('\\n');\nconst graphicsPath = `${base}/${tgt}_todo_static_graphics_${dir}.csv`;\nconst graphicsB64  = b64(csvGraphics);\n\n// 4b. External links CSV (OC course links + external links)\nconst linksItems = [...byType.oc_course_link, ...byType.external_link];\nconst csvLinks = csvHeader + linksItems.map(itemToRow).join('\\n');\nconst linksPath = `${base}/${tgt}_todo_external_links_${dir}.csv`;\nconst linksB64  = b64(csvLinks);\n\n// 4c. Videos CSV\nconst csvVideos = csvHeader + byType.video.map(itemToRow).join('\\n');\nconst videosPath = `${base}/${tgt}_todo_videos_${dir}.csv`;\nconst videosB64  = b64(csvVideos);\n\n// 5. Review Markdown with ToDo section\nconst qaScore = inp.score_total ? `${inp.score_total}/100` : 'N/A';\nconst struct  = inp.structural_integrity ? '✅ OK' : '❌ BLOCKED';\nconst a6Issues = (inp.a6_issue_log || [])\n  .map(i => `- **[${i.severity}]** \\`${i.location || 'unknown'}\\`: ${i.issue}`)\n  .join('\\n') || 'None.';\n\n// ToDo table\nfunction todoTable(items, cols) {\n  if (!items.length) return '_None detected._';\n  const header = '| ' + cols.join(' | ') + ' |';\n  const sep    = '| ' + cols.map(() => '---').join(' | ') + ' |';\n  const rows   = items.map(item =>\n    '| ' + cols.map(c => (String(item[c] || '')).replace(/\\|/g,'\\\\|').slice(0,80)) .join(' | ') + ' |'\n  );\n  return [header, sep, ...rows].join('\\n');\n}\n\nconst mdContent = `# Course Localization Review — ${tgt}\n\n| Field | Value |\n|---|---|\n| Source ID | \\`${src}\\` |\n| Target ID | \\`${tgt}\\` |\n| Direction | ${dir} |\n| Date | ${date} |\n| QA Score | ${qaScore} |\n| Structural integrity | ${struct} |\n\n## GitHub Outputs\n\n- [Localized HTML](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${htmlPath})\n- [Decision Log](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${logPath})\n- [TM Patch](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${tmPath})\n\n## A5 QA Summary\n\n${inp.a5_summary || 'No QA summary available.'}\n\n## A6 Issues\n\n${a6Issues}\n\n---\n\n## Reste à faire — Phase 2\n\n### 🖼 Static Graphics (pending A8 — Image Localizer)\n\n${todoTable(byType.static_graphic, ['location','source_value','anchor_text','action_required'])}\n\n→ [Full CSV](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${graphicsPath})\n\n### 🔗 External Links & OC Course Links\n\n${todoTable(linksItems, ['type','location','source_value','anchor_text','action_required'])}\n\n→ [Full CSV](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${linksPath})\n\n### 🎬 Videos (pending A7 — AV & Caption)\n\n${todoTable(byType.video, ['location','source_value','action_required'])}\n\n→ [Full CSV](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${videosPath})\n\n---\n\n## Localized Content (HTML mirror)\n\n${htmlContent || '<!-- no HTML content -->'}\n`;\n\nconst mdPath = `${base}/${tgt}_review_${dir}.md`;\nconst mdB64  = b64(mdContent);\n\nreturn [{ json: {\n  htmlPath, htmlB64,\n  logPath,  logB64,\n  tmPath,   tmB64,\n  graphicsPath, graphicsB64,\n  linksPath,    linksB64,\n  videosPath,   videosB64,\n  mdPath,   mdB64,\n  repo: 'jeremieborrotzu-blip/Ressources_Loc_OSS',\n  course_id: src, target_course_id: tgt,\n  direction: dir, date,\n  score_total:           inp.score_total,\n  structural_integrity:  inp.structural_integrity,\n  enabled_modules:       inp.enabled_modules || [],\n  pending_counts: {\n    static_graphics: byType.static_graphic.length,\n    oc_course_links: byType.oc_course_link.length,\n    external_links:  byType.external_link.length,\n    videos:          byType.video.length\n  }\n}}];\n"
       }
     },
     {
@@ -147,7 +147,73 @@
         300
       ],
       "parameters": {
-        "jsCode": "const prep   = $('Prepare Files').first().json;\nconst ghHtml = $('Push HTML').first().json;\nconst ghLog  = $('Push Decision Log').first().json;\nconst ghTm   = $('Push TM Patch').first().json;\nconst ghMd   = $('Push Review MD').first().json;\n\nconst ghBase = `https://github.com/${prep.repo}/blob/main/`;\n\nreturn [{ json: {\n  status: 'DELIVERED',\n  course_id:            prep.course_id,\n  target_course_id:     prep.target_course_id,\n  direction:            prep.direction,\n  date:                 prep.date,\n  score_total:          prep.score_total,\n  structural_integrity: prep.structural_integrity,\n  deliverables: {\n    html_github: ghBase + prep.htmlPath,\n    log_github:  ghBase + prep.logPath,\n    tm_patch:    ghBase + prep.tmPath,\n    review_md:   ghBase + prep.mdPath\n  },\n  next_steps: [\n    'Import review .md into Notion for human QA',\n    'Merge TM patch CSV into domain translation memory after validation',\n    'Re-inject HTML under target course ID on OC platform'\n  ]\n}}];\n"
+        "jsCode": "const prep = $('Prepare Files').first().json;\nconst ghBase = `https://github.com/${prep.repo}/blob/main/`;\n\nreturn [{ json: {\n  status: 'DELIVERED',\n  course_id:            prep.course_id,\n  target_course_id:     prep.target_course_id,\n  direction:            prep.direction,\n  date:                 prep.date,\n  score_total:          prep.score_total,\n  structural_integrity: prep.structural_integrity,\n  pending_phase2_counts: prep.pending_counts || {},\n  deliverables: {\n    html_github:      ghBase + prep.htmlPath,\n    log_github:       ghBase + prep.logPath,\n    tm_patch:         ghBase + prep.tmPath,\n    review_md:        ghBase + prep.mdPath,\n    todo_graphics:    ghBase + prep.graphicsPath,\n    todo_links:       ghBase + prep.linksPath,\n    todo_videos:      ghBase + prep.videosPath\n  },\n  next_steps: [\n    'Import review .md into Notion for human QA',\n    'Phase 2: localize static_graphics with A8 using todo_graphics CSV',\n    'Phase 2: update OC course links once target courses are published',\n    'Phase 2: localize video captions with A7',\n    'Merge TM patch CSV into domain translation memory after validation',\n    'Re-inject HTML under target course ID on OC platform'\n  ]\n}}];\n"
+      }
+    },
+    {
+      "id": "push-todo-graphics-001",
+      "name": "Push Graphics CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        520,
+        720
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.graphicsPath}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=docs: add static graphics todo for {{$('Prepare Files').item.json.target_course_id}}",
+          "content": "={{$('Prepare Files').item.json.graphicsB64}}"
+        }
+      }
+    },
+    {
+      "id": "push-todo-links-001",
+      "name": "Push Links CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        520,
+        860
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.linksPath}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=docs: add external links todo for {{$('Prepare Files').item.json.target_course_id}}",
+          "content": "={{$('Prepare Files').item.json.linksB64}}"
+        }
+      }
+    },
+    {
+      "id": "push-todo-videos-001",
+      "name": "Push Videos CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        520,
+        1000
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.videosPath}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=docs: add videos todo for {{$('Prepare Files').item.json.target_course_id}}",
+          "content": "={{$('Prepare Files').item.json.videosB64}}"
+        }
       }
     }
   ],
@@ -183,6 +249,21 @@
           },
           {
             "node": "Push Review MD",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Push Graphics CSV",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Push Links CSV",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Push Videos CSV",
             "type": "main",
             "index": 0
           }
@@ -232,6 +313,39 @@
           }
         ]
       ]
+    },
+    "Push Graphics CSV": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push Links CSV": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push Videos CSV": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -242,9 +356,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
-  "activeVersionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
-  "versionCounter": 23,
+  "versionId": "dc8f35fe-3195-4b55-9ee2-628310cab930",
+  "activeVersionId": "dc8f35fe-3195-4b55-9ee2-628310cab930",
+  "versionCounter": 26,
   "triggerCount": 0,
   "shared": [
     {
@@ -267,9 +381,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-08T09:16:38.143Z",
-    "createdAt": "2026-06-08T09:16:38.143Z",
-    "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+    "updatedAt": "2026-06-08T13:15:46.891Z",
+    "createdAt": "2026-06-08T13:15:46.891Z",
+    "versionId": "dc8f35fe-3195-4b55-9ee2-628310cab930",
     "workflowId": "fBgHok8kQUPxlTAT",
     "nodes": [
       {
@@ -293,7 +407,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const inp = $input.first().json;\n\n// Helpers\nfunction b64(str) { return Buffer.from(str, 'utf-8').toString('base64'); }\nfunction pad(n)   { return String(n).padStart(2,'0'); }\n\nconst src  = inp.course_id        || 'unknown_src';\nconst tgt  = inp.target_course_id || 'unknown_tgt';\nconst sl   = inp.source_language  || 'fr';\nconst tl   = (inp.target_language || 'en-US').split('-')[0];\nconst dir  = `${sl}>${tl}`;\nconst now  = new Date();\nconst date = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;\nconst base = `07_runs/${src}/output`;\n\n// 1. Final HTML\nconst htmlContent = inp.final_html || '';\nconst htmlPath    = `${base}/${tgt}_localized_${dir}.html`;\nconst htmlB64     = b64(htmlContent);\n\n// 2. Decision log (A4 + A5 + A6 merged)\nconst logObj = {\n  meta: { course_id: src, target_course_id: tgt, direction: dir, date, score_total: inp.score_total || null },\n  a4_swap_log:       inp.a4_swap_log   || [],\n  a5_qa_report:      inp.a5_qa_report  || {},\n  a6_issue_log:      inp.a6_issue_log  || [],\n  structural_checks: inp.structural_checks || []\n};\nconst logPath = `${base}/${tgt}_decision_log_${dir}.json`;\nconst logB64  = b64(JSON.stringify(logObj, null, 2));\n\n// 3. TM patch CSV\nconst tmEntries = inp.domain_tm_patch || [];\nlet csvRows = 'source_term,target_term,direction,domain,category,context_note,do_not_translate,validated,first_seen_course,last_updated\\n';\nfor (const e of tmEntries) {\n  csvRows += [\n    e.source_term||'', e.target_term||'', dir,\n    e.domain||inp.detected_domain||'', e.category||'',\n    (e.context_note||'').replace(/,/g,'；'),\n    e.do_not_translate||false, 'false', src, date\n  ].join(',') + '\\n';\n}\nconst tmPath = `${base}/${tgt}_tm_patch_${dir}.csv`;\nconst tmB64  = b64(csvRows);\n\n// 4. Review Markdown — HTML mirror (Notion-importable, preserves all HTML tags)\nconst qaScore  = inp.score_total ? `${inp.score_total}/100` : 'N/A';\nconst struct   = inp.structural_integrity ? '✅ OK' : '❌ BLOCKED';\nconst a6Issues = (inp.a6_issue_log || [])\n  .map(i => `- **[${i.severity}]** \\`${i.location || 'unknown'}\\`: ${i.issue}`)\n  .join('\\n') || 'None.';\n\n// Section 1: metadata table\nconst mdHeader = `# Course Localization Review — ${tgt}\n\n| Field | Value |\n|---|---|\n| Source ID | \\`${src}\\` |\n| Target ID | \\`${tgt}\\` |\n| Direction | ${dir} |\n| Date | ${date} |\n| QA Score | ${qaScore} |\n| Structural integrity | ${struct} |\n\n## GitHub Outputs\n\n- [Localized HTML](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${htmlPath})\n- [Decision Log](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${logPath})\n- [TM Patch](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${tmPath})\n\n## A5 QA Summary\n\n${inp.a5_summary || 'No QA summary available.'}\n\n## A6 Issues\n\n${a6Issues}\n\n---\n\n## Localized Content (HTML mirror)\n\n`;\n\n// Section 2: full HTML content as-is (GitHub + Notion both render embedded HTML in .md)\nconst mdContent = mdHeader + (htmlContent || '<!-- no HTML content -->');\nconst mdPath    = `${base}/${tgt}_review_${dir}.md`;\nconst mdB64     = b64(mdContent);\n\nreturn [{ json: {\n  htmlPath, htmlB64,\n  logPath,  logB64,\n  tmPath,   tmB64,\n  mdPath,   mdB64,\n  repo: 'jeremieborrotzu-blip/Ressources_Loc_OSS',\n  course_id: src, target_course_id: tgt,\n  direction: dir, date,\n  score_total:           inp.score_total,\n  structural_integrity:  inp.structural_integrity,\n  enabled_modules:       inp.enabled_modules || []\n}}];\n"
+          "jsCode": "const inp = $input.first().json;\n\nfunction b64(str) { return Buffer.from(str, 'utf-8').toString('base64'); }\nfunction pad(n)   { return String(n).padStart(2,'0'); }\n\nconst src  = inp.course_id        || 'unknown_src';\nconst tgt  = inp.target_course_id || 'unknown_tgt';\nconst sl   = inp.source_language  || 'fr';\nconst tl   = (inp.target_language || 'en-US').split('-')[0];\nconst dir  = `${sl}>${tl}`;\nconst now  = new Date();\nconst date = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;\nconst base = `07_runs/${src}/output`;\n\n// 1. Final HTML\nconst htmlContent = inp.final_html || '';\nconst htmlPath    = `${base}/${tgt}_localized_${dir}.html`;\nconst htmlB64     = b64(htmlContent);\n\n// 2. Decision log\nconst logObj = {\n  meta: { course_id: src, target_course_id: tgt, direction: dir, date, score_total: inp.score_total || null },\n  a4_swap_log:       inp.a4_swap_log   || [],\n  a5_qa_report:      inp.a5_qa_report  || {},\n  a6_issue_log:      inp.a6_issue_log  || [],\n  structural_checks: inp.structural_checks || []\n};\nconst logPath = `${base}/${tgt}_decision_log_${dir}.json`;\nconst logB64  = b64(JSON.stringify(logObj, null, 2));\n\n// 3. TM patch CSV\nconst tmEntries = inp.domain_tm_patch || [];\nlet csvTM = 'source_term,target_term,direction,domain,category,context_note,do_not_translate,validated,first_seen_course,last_updated\\n';\nfor (const e of tmEntries) {\n  csvTM += [\n    e.source_term||'', e.target_term||'', dir,\n    e.domain||inp.detected_domain||'', e.category||'',\n    (e.context_note||'').replace(/,/g,'；'),\n    e.do_not_translate||false, 'false', src, date\n  ].join(',') + '\\n';\n}\nconst tmPath = `${base}/${tgt}_tm_patch_${dir}.csv`;\nconst tmB64  = b64(csvTM);\n\n// 4. Pending Phase 2 — collect from all A5 QA reports across chunks\nconst pending = inp.pending_phase2 || [];\nconst byType = { static_graphic: [], oc_course_link: [], video: [], external_link: [] };\nfor (const item of pending) {\n  const t = item.type || 'external_link';\n  if (byType[t]) byType[t].push(item);\n}\n\n// CSV header\nconst csvHeader = 'type,chapter_index,chunk_index,location,source_value,anchor_text,action_required\\n';\nfunction itemToRow(item) {\n  return [\n    item.type||'', item.chapter_index||0, item.chunk_index||0,\n    (item.location||'').replace(/,/g,'；'),\n    (item.source_value||'').replace(/,/g,'；'),\n    (item.anchor_text||'').replace(/,/g,'；'),\n    (item.action_required||'').replace(/,/g,'；')\n  ].join(',');\n}\n\n// 4a. Static graphics CSV\nconst csvGraphics = csvHeader + byType.static_graphic.map(itemToRow).join('\\n');\nconst graphicsPath = `${base}/${tgt}_todo_static_graphics_${dir}.csv`;\nconst graphicsB64  = b64(csvGraphics);\n\n// 4b. External links CSV (OC course links + external links)\nconst linksItems = [...byType.oc_course_link, ...byType.external_link];\nconst csvLinks = csvHeader + linksItems.map(itemToRow).join('\\n');\nconst linksPath = `${base}/${tgt}_todo_external_links_${dir}.csv`;\nconst linksB64  = b64(csvLinks);\n\n// 4c. Videos CSV\nconst csvVideos = csvHeader + byType.video.map(itemToRow).join('\\n');\nconst videosPath = `${base}/${tgt}_todo_videos_${dir}.csv`;\nconst videosB64  = b64(csvVideos);\n\n// 5. Review Markdown with ToDo section\nconst qaScore = inp.score_total ? `${inp.score_total}/100` : 'N/A';\nconst struct  = inp.structural_integrity ? '✅ OK' : '❌ BLOCKED';\nconst a6Issues = (inp.a6_issue_log || [])\n  .map(i => `- **[${i.severity}]** \\`${i.location || 'unknown'}\\`: ${i.issue}`)\n  .join('\\n') || 'None.';\n\n// ToDo table\nfunction todoTable(items, cols) {\n  if (!items.length) return '_None detected._';\n  const header = '| ' + cols.join(' | ') + ' |';\n  const sep    = '| ' + cols.map(() => '---').join(' | ') + ' |';\n  const rows   = items.map(item =>\n    '| ' + cols.map(c => (String(item[c] || '')).replace(/\\|/g,'\\\\|').slice(0,80)) .join(' | ') + ' |'\n  );\n  return [header, sep, ...rows].join('\\n');\n}\n\nconst mdContent = `# Course Localization Review — ${tgt}\n\n| Field | Value |\n|---|---|\n| Source ID | \\`${src}\\` |\n| Target ID | \\`${tgt}\\` |\n| Direction | ${dir} |\n| Date | ${date} |\n| QA Score | ${qaScore} |\n| Structural integrity | ${struct} |\n\n## GitHub Outputs\n\n- [Localized HTML](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${htmlPath})\n- [Decision Log](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${logPath})\n- [TM Patch](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${tmPath})\n\n## A5 QA Summary\n\n${inp.a5_summary || 'No QA summary available.'}\n\n## A6 Issues\n\n${a6Issues}\n\n---\n\n## Reste à faire — Phase 2\n\n### 🖼 Static Graphics (pending A8 — Image Localizer)\n\n${todoTable(byType.static_graphic, ['location','source_value','anchor_text','action_required'])}\n\n→ [Full CSV](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${graphicsPath})\n\n### 🔗 External Links & OC Course Links\n\n${todoTable(linksItems, ['type','location','source_value','anchor_text','action_required'])}\n\n→ [Full CSV](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${linksPath})\n\n### 🎬 Videos (pending A7 — AV & Caption)\n\n${todoTable(byType.video, ['location','source_value','action_required'])}\n\n→ [Full CSV](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${videosPath})\n\n---\n\n## Localized Content (HTML mirror)\n\n${htmlContent || '<!-- no HTML content -->'}\n`;\n\nconst mdPath = `${base}/${tgt}_review_${dir}.md`;\nconst mdB64  = b64(mdContent);\n\nreturn [{ json: {\n  htmlPath, htmlB64,\n  logPath,  logB64,\n  tmPath,   tmB64,\n  graphicsPath, graphicsB64,\n  linksPath,    linksB64,\n  videosPath,   videosB64,\n  mdPath,   mdB64,\n  repo: 'jeremieborrotzu-blip/Ressources_Loc_OSS',\n  course_id: src, target_course_id: tgt,\n  direction: dir, date,\n  score_total:           inp.score_total,\n  structural_integrity:  inp.structural_integrity,\n  enabled_modules:       inp.enabled_modules || [],\n  pending_counts: {\n    static_graphics: byType.static_graphic.length,\n    oc_course_links: byType.oc_course_link.length,\n    external_links:  byType.external_link.length,\n    videos:          byType.video.length\n  }\n}}];\n"
         }
       },
       {
@@ -412,7 +526,73 @@
           300
         ],
         "parameters": {
-          "jsCode": "const prep   = $('Prepare Files').first().json;\nconst ghHtml = $('Push HTML').first().json;\nconst ghLog  = $('Push Decision Log').first().json;\nconst ghTm   = $('Push TM Patch').first().json;\nconst ghMd   = $('Push Review MD').first().json;\n\nconst ghBase = `https://github.com/${prep.repo}/blob/main/`;\n\nreturn [{ json: {\n  status: 'DELIVERED',\n  course_id:            prep.course_id,\n  target_course_id:     prep.target_course_id,\n  direction:            prep.direction,\n  date:                 prep.date,\n  score_total:          prep.score_total,\n  structural_integrity: prep.structural_integrity,\n  deliverables: {\n    html_github: ghBase + prep.htmlPath,\n    log_github:  ghBase + prep.logPath,\n    tm_patch:    ghBase + prep.tmPath,\n    review_md:   ghBase + prep.mdPath\n  },\n  next_steps: [\n    'Import review .md into Notion for human QA',\n    'Merge TM patch CSV into domain translation memory after validation',\n    'Re-inject HTML under target course ID on OC platform'\n  ]\n}}];\n"
+          "jsCode": "const prep = $('Prepare Files').first().json;\nconst ghBase = `https://github.com/${prep.repo}/blob/main/`;\n\nreturn [{ json: {\n  status: 'DELIVERED',\n  course_id:            prep.course_id,\n  target_course_id:     prep.target_course_id,\n  direction:            prep.direction,\n  date:                 prep.date,\n  score_total:          prep.score_total,\n  structural_integrity: prep.structural_integrity,\n  pending_phase2_counts: prep.pending_counts || {},\n  deliverables: {\n    html_github:      ghBase + prep.htmlPath,\n    log_github:       ghBase + prep.logPath,\n    tm_patch:         ghBase + prep.tmPath,\n    review_md:        ghBase + prep.mdPath,\n    todo_graphics:    ghBase + prep.graphicsPath,\n    todo_links:       ghBase + prep.linksPath,\n    todo_videos:      ghBase + prep.videosPath\n  },\n  next_steps: [\n    'Import review .md into Notion for human QA',\n    'Phase 2: localize static_graphics with A8 using todo_graphics CSV',\n    'Phase 2: update OC course links once target courses are published',\n    'Phase 2: localize video captions with A7',\n    'Merge TM patch CSV into domain translation memory after validation',\n    'Re-inject HTML under target course ID on OC platform'\n  ]\n}}];\n"
+        }
+      },
+      {
+        "id": "push-todo-graphics-001",
+        "name": "Push Graphics CSV",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          520,
+          720
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.graphicsPath}}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=docs: add static graphics todo for {{$('Prepare Files').item.json.target_course_id}}",
+            "content": "={{$('Prepare Files').item.json.graphicsB64}}"
+          }
+        }
+      },
+      {
+        "id": "push-todo-links-001",
+        "name": "Push Links CSV",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          520,
+          860
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.linksPath}}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=docs: add external links todo for {{$('Prepare Files').item.json.target_course_id}}",
+            "content": "={{$('Prepare Files').item.json.linksB64}}"
+          }
+        }
+      },
+      {
+        "id": "push-todo-videos-001",
+        "name": "Push Videos CSV",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          520,
+          1000
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.videosPath}}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=docs: add videos todo for {{$('Prepare Files').item.json.target_course_id}}",
+            "content": "={{$('Prepare Files').item.json.videosB64}}"
+          }
         }
       }
     ],
@@ -448,6 +628,21 @@
             },
             {
               "node": "Push Review MD",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Push Graphics CSV",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Push Links CSV",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Push Videos CSV",
               "type": "main",
               "index": 0
             }
@@ -497,6 +692,39 @@
             }
           ]
         ]
+      },
+      "Push Graphics CSV": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Push Links CSV": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Push Videos CSV": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Jérémie Borrotzu",
@@ -505,18 +733,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-08T09:16:38.169Z",
-        "id": 481,
+        "createdAt": "2026-06-08T13:15:47.262Z",
+        "id": 487,
         "workflowId": "fBgHok8kQUPxlTAT",
-        "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+        "versionId": "dc8f35fe-3195-4b55-9ee2-628310cab930",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-08T09:16:38.162Z",
-        "id": 480,
+        "createdAt": "2026-06-08T13:15:47.200Z",
+        "id": 486,
         "workflowId": "fBgHok8kQUPxlTAT",
-        "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+        "versionId": "dc8f35fe-3195-4b55-9ee2-628310cab930",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
