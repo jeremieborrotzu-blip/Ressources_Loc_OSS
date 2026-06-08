@@ -1,0 +1,1297 @@
+{
+  "updatedAt": "2026-06-08T15:05:44.264Z",
+  "createdAt": "2026-06-08T15:05:44.264Z",
+  "id": "iTIkatL9FJ57zLLd",
+  "name": "[MAIN] CLS v3 — Media & Annexes",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "form",
+      "name": "Media & Annexes Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "path": "cls-v3-media-assets",
+        "formTitle": "CLS v3 — Media & Annexes",
+        "formDescription": "Phase 2 asset localization. Phase 1 HTML must be complete (score ≥ 90) before running.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Source Course ID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Course ID",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Source Language",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "fr"
+                  },
+                  {
+                    "option": "en"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Target Language",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "en-US"
+                  },
+                  {
+                    "option": "fr-FR"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Process Static Images (PNG/JPG)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Process Sheets (XLSX/CSV)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Process Transcripts (SRT/Vimeo)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "UI Context (optional)",
+              "placeholder": "e.g. Windows 11 EN — only for UI screenshots"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "respondWith": "text",
+          "responseText": "Media & Annexes job submitted. Results will be emailed to you."
+        }
+      }
+    },
+    {
+      "id": "init",
+      "name": "Init Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const f   = $input.first().json;\nconst src = (f['Source Course ID']||'').trim();\nconst tgt = (f['Target Course ID']||'').trim();\nconst srcL = (f['Source Language']||'fr').trim();\nconst tgtL = (f['Target Language']||'en-US').trim();\nconst dir  = srcL.toLowerCase() + '_' + tgtL.toLowerCase().replace('-','');\n\nconst chk = key => !!(Array.isArray(f[key]) ? f[key].length : f[key]);\nconst REPO = 'https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents';\nconst out  = '07_runs/' + src + '/output';\n\nreturn [{json:{\n  source_course_id:    src,\n  target_course_id:    tgt,\n  source_language:     srcL,\n  target_language:     tgtL,\n  direction:           dir,\n  email:               f['Email'],\n  process_images:      chk('Process Static Images (PNG/JPG)'),\n  process_sheets:      chk('Process Sheets (XLSX/CSV)'),\n  process_transcripts: chk('Process Transcripts (SRT/Vimeo)'),\n  ui_context:          f['UI Context (optional)']||'',\n  html_path:     out + '/' + tgt + '_localized_'        + dir + '.html',\n  graphics_path: out + '/' + tgt + '_todo_static_graphics_' + dir + '.csv',\n  videos_path:   out + '/' + tgt + '_todo_videos_'      + dir + '.csv',\n  log_path:      out + '/' + tgt + '_decision_log_'     + dir + '.json',\n  REPO: REPO,\n  run_ts: new Date().toISOString()\n}}];"
+      }
+    },
+    {
+      "id": "gate",
+      "name": "Gate: Check Phase 1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        480,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.html_path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "p1ready",
+      "name": "Phase 1 Ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "p1miss",
+      "name": "Phase 1 Missing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        80
+      ],
+      "parameters": {
+        "jsCode": "const ip = $('Init Params').first().json;\nreturn [{json:{\n  email: ip.email,\n  subject: 'CLS v3 Media & Annexes — Phase 1 not complete for ' + ip.source_course_id,\n  message: 'Phase 1 HTML localization must be complete before running Media & Annexes.\\n\\n'\n    + 'Expected file not found on GitHub:\\n' + ip.html_path + '\\n\\n'\n    + 'Steps to fix:\\n'\n    + '1. Run [MAIN] CLS v3 — Course Localisation with \"Localiser le cours (HTML)\" checked\\n'\n    + '2. Wait for PASS status (score ≥ 90) and email confirmation\\n'\n    + '3. Then relaunch Media & Annexes'\n}}];"
+      }
+    },
+    {
+      "id": "err_mail",
+      "name": "Send Error Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1200,
+        80
+      ],
+      "parameters": {
+        "fromEmail": "learning.automations@openclassrooms.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.message }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "id": "load_g",
+      "name": "Load Graphics CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        960,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.graphics_path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "load_v",
+      "name": "Load Videos CSV",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1200,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.videos_path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "load_log",
+      "name": "Load Decision Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1440,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.log_path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "merge_p1",
+      "name": "Merge P1 Outputs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const ip = $('Init Params').first().json;\n\nfunction decodeGH(nodeName) {\n  try {\n    const b64 = $(nodeName).first().json.content;\n    if (!b64) return '';\n    return Buffer.from(b64.replace(/\\n/g,''), 'base64').toString('utf-8');\n  } catch(e) { return ''; }\n}\n\nfunction parseCSV(csv) {\n  if (!csv.trim()) return [];\n  const lines = csv.trim().split('\\n');\n  if (lines.length < 2) return [];\n  const headers = lines[0].split(',').map(h => h.trim().replace(/^\"|\"$/g,''));\n  return lines.slice(1).filter(l => l.trim()).map(line => {\n    const vals = line.split(',').map(v => v.trim().replace(/^\"|\"$/g,''));\n    const o = {};\n    headers.forEach((h,i) => o[h] = vals[i]||'');\n    return o;\n  });\n}\n\nconst html_b64 = (() => { try { return $('Gate: Check Phase 1').first().json.content||''; } catch{return '';} })();\nconst html_content = Buffer.from(html_b64.replace(/\\n/g,''), 'base64').toString('utf-8');\n\nconst graphics_csv = decodeGH('Load Graphics CSV');\nconst videos_csv   = decodeGH('Load Videos CSV');\nconst log_raw      = decodeGH('Load Decision Log');\n\nlet decision_log = {};\ntry { decision_log = JSON.parse(log_raw); } catch {}\n\nconst graphics_rows = parseCSV(graphics_csv);\nconst videos_rows   = parseCSV(videos_csv);\n\nreturn [{json:{\n  ...ip,\n  html_content,\n  graphics_rows,\n  videos_rows,\n  decision_log,\n  a2_glossary:     decision_log.a2_glossary || decision_log.unified_terms || [],\n  graphics_count:  graphics_rows.length,\n  videos_count:    videos_rows.length\n}}];"
+      }
+    },
+    {
+      "id": "iconik_init",
+      "name": "Iconik: Init Collections",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        300
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "value": "UmjbwzKKFVeVpTni"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "if_img",
+      "name": "Process Images?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Init Params').first().json.process_images }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "leftValue": "={{ $('Merge P1 Outputs').first().json.graphics_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "prep_img",
+      "name": "Prepare Image Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        180
+      ],
+      "parameters": {
+        "jsCode": "const ip  = $('Init Params').first().json;\nconst mp1 = $('Merge P1 Outputs').first().json;\nconst rows = mp1.graphics_rows || [];\n\n// Extract chapter HTML for context (split by h2)\nfunction chapterContext(html, idx) {\n  try {\n    const sections = html.split(/<h2[^>]*>/i);\n    const sec = sections[parseInt(idx)||0 + 1];\n    return sec ? ('<h2>' + sec.split(/<h2[^>]*>/i)[0]).substring(0, 4000) : html.substring(0, 2000);\n  } catch { return html.substring(0, 2000); }\n}\n\nreturn rows.map(row => ({json:{\n  source_course_id:  ip.source_course_id,\n  target_course_id:  ip.target_course_id,\n  direction:         ip.direction,\n  source_language:   ip.source_language,\n  target_language:   ip.target_language,\n  ui_context:        ip.ui_context,\n  a2_glossary:       mp1.a2_glossary,\n  img_src:           row.img_src || row.source_value || '',\n  alt_text:          row.alt_text || row.anchor_text || '',\n  chapter_index:     row.chapter_index || '0',\n  image_type:        row.image_type || 'static_graphic',\n  action_required:   row.action_required || '',\n  chapter_context:   chapterContext(mp1.html_content, row.chapter_index)\n}}));"
+      }
+    },
+    {
+      "id": "a8_noop",
+      "name": "A8: Image Localizer (TODO)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        180
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "skip_img",
+      "name": "Skip Images",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        440
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "collect",
+      "name": "Collect Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const ip  = $('Init Params').first().json;\nconst mp1 = $('Merge P1 Outputs').first().json;\nlet a8_results = [];\ntry { a8_results = $('A8: Image Localizer (TODO)').all().map(i => i.json); } catch {}\nreturn [{json:{\n  ...ip,\n  graphics_count:  mp1.graphics_count,\n  videos_count:    mp1.videos_count,\n  a8_results,\n  images_processed: a8_results.length\n}}];"
+      }
+    },
+    {
+      "id": "summary",
+      "name": "Build Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst iconik = (() => {\n  try { return $('Iconik: Init Collections').first().json; } catch { return {}; }\n})();\n\nconst imgStatus = d.process_images\n  ? (d.graphics_count === 0\n      ? '⚠️ No images found in CSV (Phase 1 run may not have extracted any)'\n      : `🚧 ${d.graphics_count} images ready — A8 SUB not yet wired (placeholder)`)\n  : '⏭ Skipped';\n\nconst tplStatus = d.process_transcripts\n  ? '🚧 Pending Vimeo API credentials from OC team'\n  : '⏭ Skipped';\n\nconst sheetStatus = d.process_sheets\n  ? '🚧 A9 Spreadsheet Localizer not yet built'\n  : '⏭ Skipped';\n\nconst iconikStatus = iconik.iconik_ready\n  ? `✅ Iconik collections ready (target: ${iconik.target_collection_id})`\n  : '⚠️ Iconik init incomplete — check App-ID / Auth-Token in n8n Variables';\n\nconst lines = [\n  `# CLS v3 Media & Annexes — Run Summary`,\n  ``,\n  `| Field | Value |`,\n  `|---|---|`,\n  `| Source ID | ${d.source_course_id} |`,\n  `| Target ID | ${d.target_course_id} |`,\n  `| Direction | ${d.direction} |`,\n  `| Run at | ${d.run_ts} |`,\n  ``,\n  `## Module Status`,\n  ``,\n  `| Module | Status |`,\n  `|---|---|`,\n  `| Iconik Collections | ${iconikStatus} |`,\n  `| Static Images (A8) | ${imgStatus} |`,\n  `| Sheets (A9) | ${sheetStatus} |`,\n  `| Transcripts (A7) | ${tplStatus} |`,\n  ``,\n  `## Phase 1 Inventory (from CSV)`,\n  ``,\n  `| Asset type | Count |`,\n  `|---|---|`,\n  `| Static images (PNG/JPG) | ${d.graphics_count} |`,\n  `| Videos (Vimeo) | ${d.videos_count} |`,\n];\n\nreturn [{json:{\n  summary_md: lines.join('\\n'),\n  email:   d.email,\n  subject: `CLS v3 Media & Annexes — ${d.target_course_id} (${d.direction})`,\n  iconik_target_id: iconik.target_collection_id || null,\n  images_processed: d.images_processed\n}}];"
+      }
+    },
+    {
+      "id": "done_mail",
+      "name": "Send Completion Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        300
+      ],
+      "parameters": {
+        "fromEmail": "learning.automations@openclassrooms.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.summary_md }}"
+      },
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Media & Annexes Form": {
+      "main": [
+        [
+          {
+            "node": "Init Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Params": {
+      "main": [
+        [
+          {
+            "node": "Gate: Check Phase 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate: Check Phase 1": {
+      "main": [
+        [
+          {
+            "node": "Phase 1 Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Phase 1 Ready?": {
+      "main": [
+        [
+          {
+            "node": "Load Graphics CSV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Phase 1 Missing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Phase 1 Missing": {
+      "main": [
+        [
+          {
+            "node": "Send Error Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Graphics CSV": {
+      "main": [
+        [
+          {
+            "node": "Load Videos CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Videos CSV": {
+      "main": [
+        [
+          {
+            "node": "Load Decision Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Decision Log": {
+      "main": [
+        [
+          {
+            "node": "Merge P1 Outputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge P1 Outputs": {
+      "main": [
+        [
+          {
+            "node": "Iconik: Init Collections",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iconik: Init Collections": {
+      "main": [
+        [
+          {
+            "node": "Process Images?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Images?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Image Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Image Items": {
+      "main": [
+        [
+          {
+            "node": "A8: Image Localizer (TODO)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A8: Image Localizer (TODO)": {
+      "main": [
+        [
+          {
+            "node": "Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Images": {
+      "main": [
+        [
+          {
+            "node": "Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Results": {
+      "main": [
+        [
+          {
+            "node": "Build Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Summary": {
+      "main": [
+        [
+          {
+            "node": "Send Completion Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
+  "activeVersionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
+  "versionCounter": 3,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-08T15:05:44.268Z",
+      "createdAt": "2026-06-08T15:05:44.268Z",
+      "role": "workflow:owner",
+      "workflowId": "iTIkatL9FJ57zLLd",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-08T15:05:44.277Z",
+    "createdAt": "2026-06-08T15:05:44.277Z",
+    "versionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
+    "workflowId": "iTIkatL9FJ57zLLd",
+    "nodes": [
+      {
+        "id": "form",
+        "name": "Media & Annexes Form",
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {
+          "path": "cls-v3-media-assets",
+          "formTitle": "CLS v3 — Media & Annexes",
+          "formDescription": "Phase 2 asset localization. Phase 1 HTML must be complete (score ≥ 90) before running.",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Source Course ID",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Target Course ID",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Source Language",
+                "fieldType": "dropdown",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "fr"
+                    },
+                    {
+                      "option": "en"
+                    }
+                  ]
+                },
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Target Language",
+                "fieldType": "dropdown",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "en-US"
+                    },
+                    {
+                      "option": "fr-FR"
+                    }
+                  ]
+                },
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Process Static Images (PNG/JPG)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Process Sheets (XLSX/CSV)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Process Transcripts (SRT/Vimeo)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "UI Context (optional)",
+                "placeholder": "e.g. Windows 11 EN — only for UI screenshots"
+              },
+              {
+                "fieldLabel": "Email",
+                "fieldType": "email",
+                "requiredField": true
+              }
+            ]
+          },
+          "options": {
+            "respondWith": "text",
+            "responseText": "Media & Annexes job submitted. Results will be emailed to you."
+          }
+        }
+      },
+      {
+        "id": "init",
+        "name": "Init Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const f   = $input.first().json;\nconst src = (f['Source Course ID']||'').trim();\nconst tgt = (f['Target Course ID']||'').trim();\nconst srcL = (f['Source Language']||'fr').trim();\nconst tgtL = (f['Target Language']||'en-US').trim();\nconst dir  = srcL.toLowerCase() + '_' + tgtL.toLowerCase().replace('-','');\n\nconst chk = key => !!(Array.isArray(f[key]) ? f[key].length : f[key]);\nconst REPO = 'https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents';\nconst out  = '07_runs/' + src + '/output';\n\nreturn [{json:{\n  source_course_id:    src,\n  target_course_id:    tgt,\n  source_language:     srcL,\n  target_language:     tgtL,\n  direction:           dir,\n  email:               f['Email'],\n  process_images:      chk('Process Static Images (PNG/JPG)'),\n  process_sheets:      chk('Process Sheets (XLSX/CSV)'),\n  process_transcripts: chk('Process Transcripts (SRT/Vimeo)'),\n  ui_context:          f['UI Context (optional)']||'',\n  html_path:     out + '/' + tgt + '_localized_'        + dir + '.html',\n  graphics_path: out + '/' + tgt + '_todo_static_graphics_' + dir + '.csv',\n  videos_path:   out + '/' + tgt + '_todo_videos_'      + dir + '.csv',\n  log_path:      out + '/' + tgt + '_decision_log_'     + dir + '.json',\n  REPO: REPO,\n  run_ts: new Date().toISOString()\n}}];"
+        }
+      },
+      {
+        "id": "gate",
+        "name": "Gate: Check Phase 1",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          480,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.html_path }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "options": {}
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "p1ready",
+        "name": "Phase 1 Ready?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.content }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "isNotEmpty"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "p1miss",
+        "name": "Phase 1 Missing",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          960,
+          80
+        ],
+        "parameters": {
+          "jsCode": "const ip = $('Init Params').first().json;\nreturn [{json:{\n  email: ip.email,\n  subject: 'CLS v3 Media & Annexes — Phase 1 not complete for ' + ip.source_course_id,\n  message: 'Phase 1 HTML localization must be complete before running Media & Annexes.\\n\\n'\n    + 'Expected file not found on GitHub:\\n' + ip.html_path + '\\n\\n'\n    + 'Steps to fix:\\n'\n    + '1. Run [MAIN] CLS v3 — Course Localisation with \"Localiser le cours (HTML)\" checked\\n'\n    + '2. Wait for PASS status (score ≥ 90) and email confirmation\\n'\n    + '3. Then relaunch Media & Annexes'\n}}];"
+        }
+      },
+      {
+        "id": "err_mail",
+        "name": "Send Error Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1200,
+          80
+        ],
+        "parameters": {
+          "fromEmail": "learning.automations@openclassrooms.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "={{ $json.subject }}",
+          "emailFormat": "text",
+          "text": "={{ $json.message }}"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        }
+      },
+      {
+        "id": "load_g",
+        "name": "Load Graphics CSV",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          960,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.graphics_path }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "options": {}
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "load_v",
+        "name": "Load Videos CSV",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          1200,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.videos_path }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "options": {}
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "load_log",
+        "name": "Load Decision Log",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          1440,
+          300
+        ],
+        "onError": "continueRegularOutput",
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $('Init Params').first().json.REPO }}/{{ $('Init Params').first().json.log_path }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "options": {}
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "merge_p1",
+        "name": "Merge P1 Outputs",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1680,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const ip = $('Init Params').first().json;\n\nfunction decodeGH(nodeName) {\n  try {\n    const b64 = $(nodeName).first().json.content;\n    if (!b64) return '';\n    return Buffer.from(b64.replace(/\\n/g,''), 'base64').toString('utf-8');\n  } catch(e) { return ''; }\n}\n\nfunction parseCSV(csv) {\n  if (!csv.trim()) return [];\n  const lines = csv.trim().split('\\n');\n  if (lines.length < 2) return [];\n  const headers = lines[0].split(',').map(h => h.trim().replace(/^\"|\"$/g,''));\n  return lines.slice(1).filter(l => l.trim()).map(line => {\n    const vals = line.split(',').map(v => v.trim().replace(/^\"|\"$/g,''));\n    const o = {};\n    headers.forEach((h,i) => o[h] = vals[i]||'');\n    return o;\n  });\n}\n\nconst html_b64 = (() => { try { return $('Gate: Check Phase 1').first().json.content||''; } catch{return '';} })();\nconst html_content = Buffer.from(html_b64.replace(/\\n/g,''), 'base64').toString('utf-8');\n\nconst graphics_csv = decodeGH('Load Graphics CSV');\nconst videos_csv   = decodeGH('Load Videos CSV');\nconst log_raw      = decodeGH('Load Decision Log');\n\nlet decision_log = {};\ntry { decision_log = JSON.parse(log_raw); } catch {}\n\nconst graphics_rows = parseCSV(graphics_csv);\nconst videos_rows   = parseCSV(videos_csv);\n\nreturn [{json:{\n  ...ip,\n  html_content,\n  graphics_rows,\n  videos_rows,\n  decision_log,\n  a2_glossary:     decision_log.a2_glossary || decision_log.unified_terms || [],\n  graphics_count:  graphics_rows.length,\n  videos_count:    videos_rows.length\n}}];"
+        }
+      },
+      {
+        "id": "iconik_init",
+        "name": "Iconik: Init Collections",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1920,
+          300
+        ],
+        "parameters": {
+          "source": "database",
+          "workflowId": {
+            "value": "UmjbwzKKFVeVpTni"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        }
+      },
+      {
+        "id": "if_img",
+        "name": "Process Images?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          2160,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $('Init Params').first().json.process_images }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              },
+              {
+                "leftValue": "={{ $('Merge P1 Outputs').first().json.graphics_count }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "prep_img",
+        "name": "Prepare Image Items",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2400,
+          180
+        ],
+        "parameters": {
+          "jsCode": "const ip  = $('Init Params').first().json;\nconst mp1 = $('Merge P1 Outputs').first().json;\nconst rows = mp1.graphics_rows || [];\n\n// Extract chapter HTML for context (split by h2)\nfunction chapterContext(html, idx) {\n  try {\n    const sections = html.split(/<h2[^>]*>/i);\n    const sec = sections[parseInt(idx)||0 + 1];\n    return sec ? ('<h2>' + sec.split(/<h2[^>]*>/i)[0]).substring(0, 4000) : html.substring(0, 2000);\n  } catch { return html.substring(0, 2000); }\n}\n\nreturn rows.map(row => ({json:{\n  source_course_id:  ip.source_course_id,\n  target_course_id:  ip.target_course_id,\n  direction:         ip.direction,\n  source_language:   ip.source_language,\n  target_language:   ip.target_language,\n  ui_context:        ip.ui_context,\n  a2_glossary:       mp1.a2_glossary,\n  img_src:           row.img_src || row.source_value || '',\n  alt_text:          row.alt_text || row.anchor_text || '',\n  chapter_index:     row.chapter_index || '0',\n  image_type:        row.image_type || 'static_graphic',\n  action_required:   row.action_required || '',\n  chapter_context:   chapterContext(mp1.html_content, row.chapter_index)\n}}));"
+        }
+      },
+      {
+        "id": "a8_noop",
+        "name": "A8: Image Localizer (TODO)",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          2640,
+          180
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "skip_img",
+        "name": "Skip Images",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          2400,
+          440
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "collect",
+        "name": "Collect Results",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2880,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const ip  = $('Init Params').first().json;\nconst mp1 = $('Merge P1 Outputs').first().json;\nlet a8_results = [];\ntry { a8_results = $('A8: Image Localizer (TODO)').all().map(i => i.json); } catch {}\nreturn [{json:{\n  ...ip,\n  graphics_count:  mp1.graphics_count,\n  videos_count:    mp1.videos_count,\n  a8_results,\n  images_processed: a8_results.length\n}}];"
+        }
+      },
+      {
+        "id": "summary",
+        "name": "Build Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3120,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst iconik = (() => {\n  try { return $('Iconik: Init Collections').first().json; } catch { return {}; }\n})();\n\nconst imgStatus = d.process_images\n  ? (d.graphics_count === 0\n      ? '⚠️ No images found in CSV (Phase 1 run may not have extracted any)'\n      : `🚧 ${d.graphics_count} images ready — A8 SUB not yet wired (placeholder)`)\n  : '⏭ Skipped';\n\nconst tplStatus = d.process_transcripts\n  ? '🚧 Pending Vimeo API credentials from OC team'\n  : '⏭ Skipped';\n\nconst sheetStatus = d.process_sheets\n  ? '🚧 A9 Spreadsheet Localizer not yet built'\n  : '⏭ Skipped';\n\nconst iconikStatus = iconik.iconik_ready\n  ? `✅ Iconik collections ready (target: ${iconik.target_collection_id})`\n  : '⚠️ Iconik init incomplete — check App-ID / Auth-Token in n8n Variables';\n\nconst lines = [\n  `# CLS v3 Media & Annexes — Run Summary`,\n  ``,\n  `| Field | Value |`,\n  `|---|---|`,\n  `| Source ID | ${d.source_course_id} |`,\n  `| Target ID | ${d.target_course_id} |`,\n  `| Direction | ${d.direction} |`,\n  `| Run at | ${d.run_ts} |`,\n  ``,\n  `## Module Status`,\n  ``,\n  `| Module | Status |`,\n  `|---|---|`,\n  `| Iconik Collections | ${iconikStatus} |`,\n  `| Static Images (A8) | ${imgStatus} |`,\n  `| Sheets (A9) | ${sheetStatus} |`,\n  `| Transcripts (A7) | ${tplStatus} |`,\n  ``,\n  `## Phase 1 Inventory (from CSV)`,\n  ``,\n  `| Asset type | Count |`,\n  `|---|---|`,\n  `| Static images (PNG/JPG) | ${d.graphics_count} |`,\n  `| Videos (Vimeo) | ${d.videos_count} |`,\n];\n\nreturn [{json:{\n  summary_md: lines.join('\\n'),\n  email:   d.email,\n  subject: `CLS v3 Media & Annexes — ${d.target_course_id} (${d.direction})`,\n  iconik_target_id: iconik.target_collection_id || null,\n  images_processed: d.images_processed\n}}];"
+        }
+      },
+      {
+        "id": "done_mail",
+        "name": "Send Completion Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          3360,
+          300
+        ],
+        "parameters": {
+          "fromEmail": "learning.automations@openclassrooms.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "={{ $json.subject }}",
+          "emailFormat": "text",
+          "text": "={{ $json.summary_md }}"
+        },
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Media & Annexes Form": {
+        "main": [
+          [
+            {
+              "node": "Init Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Init Params": {
+        "main": [
+          [
+            {
+              "node": "Gate: Check Phase 1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gate: Check Phase 1": {
+        "main": [
+          [
+            {
+              "node": "Phase 1 Ready?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Phase 1 Ready?": {
+        "main": [
+          [
+            {
+              "node": "Load Graphics CSV",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Phase 1 Missing",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Phase 1 Missing": {
+        "main": [
+          [
+            {
+              "node": "Send Error Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Graphics CSV": {
+        "main": [
+          [
+            {
+              "node": "Load Videos CSV",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Videos CSV": {
+        "main": [
+          [
+            {
+              "node": "Load Decision Log",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Decision Log": {
+        "main": [
+          [
+            {
+              "node": "Merge P1 Outputs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge P1 Outputs": {
+        "main": [
+          [
+            {
+              "node": "Iconik: Init Collections",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Iconik: Init Collections": {
+        "main": [
+          [
+            {
+              "node": "Process Images?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Process Images?": {
+        "main": [
+          [
+            {
+              "node": "Prepare Image Items",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Skip Images",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Image Items": {
+        "main": [
+          [
+            {
+              "node": "A8: Image Localizer (TODO)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "A8: Image Localizer (TODO)": {
+        "main": [
+          [
+            {
+              "node": "Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Skip Images": {
+        "main": [
+          [
+            {
+              "node": "Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Collect Results": {
+        "main": [
+          [
+            {
+              "node": "Build Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Summary": {
+        "main": [
+          [
+            {
+              "node": "Send Completion Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-08T15:06:43.354Z",
+        "id": 497,
+        "workflowId": "iTIkatL9FJ57zLLd",
+        "versionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}
