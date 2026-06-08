@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-06T17:00:28.357Z",
+  "updatedAt": "2026-06-08T13:12:13.050Z",
   "createdAt": "2026-05-29T14:16:26.563Z",
   "id": "ApjYq9sdM5LKRVlq",
   "name": "[MAIN] CLS v3 — Course Localisation",
@@ -939,6 +939,19 @@
       "parameters": {
         "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
       }
+    },
+    {
+      "id": "merge-a2-into-chunks-001",
+      "name": "Merge A2 into Chunks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2760,
+        400
+      ],
+      "parameters": {
+        "jsCode": "// Reinjecting A2 terminology into the 4 HTML chunks\n// so A3 receives both the source HTML and the A2 glossary\nconst a2item = $('Call A2').first().json;\nconst a2out  = a2item.agent_output || {};\nconst chunks = $('Merge Domain into Chunks').all();\n\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    a2_glossary:           a2out,\n    unified_terms:         a2out.unified_terms         || [],\n    translation_decisions: a2out.translation_decisions || [],\n    domain_tm_patch:       a2out.domain_tm_patch        || []\n  }\n}));\n"
+      }
     }
   ],
   "connections": {
@@ -1045,7 +1058,7 @@
       "main": [
         [
           {
-            "node": "Direction?",
+            "node": "Merge A2 into Chunks",
             "type": "main",
             "index": 0
           }
@@ -1525,6 +1538,17 @@
           }
         ]
       ]
+    },
+    "Merge A2 into Chunks": {
+      "main": [
+        [
+          {
+            "node": "Direction?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1537,9 +1561,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "00601b2f-d00c-444f-abaa-08e7107424d1",
-  "activeVersionId": "00601b2f-d00c-444f-abaa-08e7107424d1",
-  "versionCounter": 134,
+  "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
+  "activeVersionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
+  "versionCounter": 137,
   "triggerCount": 1,
   "shared": [
     {
@@ -1562,9 +1586,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-06T17:00:28.361Z",
-    "createdAt": "2026-06-06T17:00:28.361Z",
-    "versionId": "00601b2f-d00c-444f-abaa-08e7107424d1",
+    "updatedAt": "2026-06-08T13:12:13.127Z",
+    "createdAt": "2026-06-08T13:12:13.127Z",
+    "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
     "workflowId": "ApjYq9sdM5LKRVlq",
     "nodes": [
       {
@@ -2499,6 +2523,19 @@
         "parameters": {
           "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
         }
+      },
+      {
+        "id": "merge-a2-into-chunks-001",
+        "name": "Merge A2 into Chunks",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2760,
+          400
+        ],
+        "parameters": {
+          "jsCode": "// Reinjecting A2 terminology into the 4 HTML chunks\n// so A3 receives both the source HTML and the A2 glossary\nconst a2item = $('Call A2').first().json;\nconst a2out  = a2item.agent_output || {};\nconst chunks = $('Merge Domain into Chunks').all();\n\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    a2_glossary:           a2out,\n    unified_terms:         a2out.unified_terms         || [],\n    translation_decisions: a2out.translation_decisions || [],\n    domain_tm_patch:       a2out.domain_tm_patch        || []\n  }\n}));\n"
+        }
       }
     ],
     "connections": {
@@ -2605,7 +2642,7 @@
         "main": [
           [
             {
-              "node": "Direction?",
+              "node": "Merge A2 into Chunks",
               "type": "main",
               "index": 0
             }
@@ -3085,6 +3122,17 @@
             }
           ]
         ]
+      },
+      "Merge A2 into Chunks": {
+        "main": [
+          [
+            {
+              "node": "Direction?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Jérémie Borrotzu",
@@ -3093,18 +3141,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-06T17:00:28.498Z",
-        "id": 475,
+        "createdAt": "2026-06-08T13:12:19.933Z",
+        "id": 485,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "00601b2f-d00c-444f-abaa-08e7107424d1",
+        "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-06T17:00:28.476Z",
-        "id": 474,
+        "createdAt": "2026-06-08T13:12:19.459Z",
+        "id": 484,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "00601b2f-d00c-444f-abaa-08e7107424d1",
+        "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
