@@ -62,5 +62,6 @@ OUTPUT SCHEMA:
     "no_equivalent_found": 0,
     "oc_course_links": 0
   },
+  "links_report_csv": "link_id,chapter,location,anchor_text,original_url,pedagogical_purpose,type,action,proposed_url,confidence,alignment_justification,quality_gap,notes\n...",
   "a10_summary": ""
 }
