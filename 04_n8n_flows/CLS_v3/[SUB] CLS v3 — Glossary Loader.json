@@ -1,0 +1,339 @@
+{
+  "updatedAt": "2026-06-05T07:26:59.026Z",
+  "createdAt": "2026-05-29T14:02:33.373Z",
+  "id": "H88p5deRTIHpQ7S8",
+  "name": "[SUB] CLS v3 — Glossary Loader",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "node-trigger",
+      "name": "Input from MAIN",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "node-common",
+      "name": "Load Common Glossary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        280,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/02_glossaires/common_glossary.json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "node-domain",
+      "name": "Load Domain TM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        280,
+        420
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/02_glossaires/translation_memory/{{$('Input from MAIN').item.json.detected_domain}}.csv",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "node-merge",
+      "name": "Parse & Merge",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\n// Input: mode ('pre_a1' | 'post_a1'), detected_domain (if post_a1)\n// + raw GitHub API responses from HTTP Request nodes\nconst mode           = $input.first().json.mode || 'pre_a1';\nconst detected_domain = $input.first().json.detected_domain || null;\nconst common_raw     = $('Load Common Glossary').first().json;\nconst domain_raw     = mode === 'post_a1' ? $('Load Domain TM').first().json : null;\n\n// Decode common glossary (base64 content from GitHub API)\nlet common_glossary = [];\ntry {\n  const decoded = Buffer.from(common_raw.content, 'base64').toString('utf-8');\n  const parsed  = JSON.parse(decoded);\n  common_glossary = parsed.terms || [];\n} catch(e) {\n  common_glossary = [];\n}\n\n// Decode domain TM CSV (if post_a1)\nlet domain_tm = [];\nif (domain_raw && domain_raw.content) {\n  try {\n    const csv = Buffer.from(domain_raw.content, 'base64').toString('utf-8');\n    const lines = csv.trim().split('\\n');\n    if (lines.length > 1) {\n      const headers = lines[0].split(',');\n      for (let i = 1; i < lines.length; i++) {\n        const vals = lines[i].split(',');\n        if (vals[0]) {  // source_term not empty\n          const entry = {};\n          headers.forEach((h,idx) => entry[h.trim()] = (vals[idx]||'').trim());\n          domain_tm.push(entry);\n        }\n      }\n    }\n  } catch(e) {\n    domain_tm = [];\n  }\n}\n\n// Separate validated vs agent-generated in domain TM\nconst domain_validated  = domain_tm.filter(t => t.validated === 'true');\nconst domain_unvalidated = domain_tm.filter(t => t.validated !== 'true');\n\nreturn [{ json: {\n  mode,\n  detected_domain,\n  common_glossary,           // 79 terms — absolute authority\n  domain_validated_tm: domain_validated,    // human-reviewed — impose without re-decision\n  domain_unvalidated_tm: domain_unvalidated, // agent-generated — A2 must confirm\n  total_common: common_glossary.length,\n  total_domain: domain_tm.length,\n  glossary_loaded_at: new Date().toISOString()\n}}];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Input from MAIN": {
+      "main": [
+        [
+          {
+            "node": "Load Common Glossary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Load Domain TM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Common Glossary": {
+      "main": [
+        [
+          {
+            "node": "Parse & Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Domain TM": {
+      "main": [
+        [
+          {
+            "node": "Parse & Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "be34cdb1-1b51-4249-af0a-4423e685fe2f",
+  "activeVersionId": "be34cdb1-1b51-4249-af0a-4423e685fe2f",
+  "versionCounter": 17,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T14:02:33.376Z",
+      "createdAt": "2026-05-29T14:02:33.376Z",
+      "role": "workflow:owner",
+      "workflowId": "H88p5deRTIHpQ7S8",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-05T07:26:59.026Z",
+    "createdAt": "2026-06-05T07:26:59.026Z",
+    "versionId": "be34cdb1-1b51-4249-af0a-4423e685fe2f",
+    "workflowId": "H88p5deRTIHpQ7S8",
+    "nodes": [
+      {
+        "id": "node-trigger",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "node-common",
+        "name": "Load Common Glossary",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          280,
+          200
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/02_glossaires/common_glossary.json",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/vnd.github.v3+json"
+              }
+            ]
+          }
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "node-domain",
+        "name": "Load Domain TM",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          280,
+          420
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/02_glossaires/translation_memory/{{$('Input from MAIN').item.json.detected_domain}}.csv",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Accept",
+                "value": "application/vnd.github.v3+json"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "node-merge",
+        "name": "Parse & Merge",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          560,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\n// Input: mode ('pre_a1' | 'post_a1'), detected_domain (if post_a1)\n// + raw GitHub API responses from HTTP Request nodes\nconst mode           = $input.first().json.mode || 'pre_a1';\nconst detected_domain = $input.first().json.detected_domain || null;\nconst common_raw     = $('Load Common Glossary').first().json;\nconst domain_raw     = mode === 'post_a1' ? $('Load Domain TM').first().json : null;\n\n// Decode common glossary (base64 content from GitHub API)\nlet common_glossary = [];\ntry {\n  const decoded = Buffer.from(common_raw.content, 'base64').toString('utf-8');\n  const parsed  = JSON.parse(decoded);\n  common_glossary = parsed.terms || [];\n} catch(e) {\n  common_glossary = [];\n}\n\n// Decode domain TM CSV (if post_a1)\nlet domain_tm = [];\nif (domain_raw && domain_raw.content) {\n  try {\n    const csv = Buffer.from(domain_raw.content, 'base64').toString('utf-8');\n    const lines = csv.trim().split('\\n');\n    if (lines.length > 1) {\n      const headers = lines[0].split(',');\n      for (let i = 1; i < lines.length; i++) {\n        const vals = lines[i].split(',');\n        if (vals[0]) {  // source_term not empty\n          const entry = {};\n          headers.forEach((h,idx) => entry[h.trim()] = (vals[idx]||'').trim());\n          domain_tm.push(entry);\n        }\n      }\n    }\n  } catch(e) {\n    domain_tm = [];\n  }\n}\n\n// Separate validated vs agent-generated in domain TM\nconst domain_validated  = domain_tm.filter(t => t.validated === 'true');\nconst domain_unvalidated = domain_tm.filter(t => t.validated !== 'true');\n\nreturn [{ json: {\n  mode,\n  detected_domain,\n  common_glossary,           // 79 terms — absolute authority\n  domain_validated_tm: domain_validated,    // human-reviewed — impose without re-decision\n  domain_unvalidated_tm: domain_unvalidated, // agent-generated — A2 must confirm\n  total_common: common_glossary.length,\n  total_domain: domain_tm.length,\n  glossary_loaded_at: new Date().toISOString()\n}}];\n"
+        }
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Load Common Glossary",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Load Domain TM",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Common Glossary": {
+        "main": [
+          [
+            {
+              "node": "Parse & Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Domain TM": {
+        "main": [
+          [
+            {
+              "node": "Parse & Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-05T07:26:59.059Z",
+        "id": 425,
+        "workflowId": "H88p5deRTIHpQ7S8",
+        "versionId": "be34cdb1-1b51-4249-af0a-4423e685fe2f",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-05T07:26:59.051Z",
+        "id": 424,
+        "workflowId": "H88p5deRTIHpQ7S8",
+        "versionId": "be34cdb1-1b51-4249-af0a-4423e685fe2f",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}

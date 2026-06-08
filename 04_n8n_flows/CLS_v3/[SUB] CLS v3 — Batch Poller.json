@@ -1,0 +1,549 @@
+{
+  "updatedAt": "2026-06-05T14:14:27.979Z",
+  "createdAt": "2026-05-29T14:08:42.553Z",
+  "id": "HDdfFxAIS1qnLUEe",
+  "name": "[SUB] CLS v3 — Batch Poller",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "Input from MAIN",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "n1",
+      "name": "Init Polling",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\n// Initialise le polling avec compteur d'itérations\nconst inp = $input.first().json;\nreturn [{ json: {\n  batch_id:      inp.batch_id,\n  agent_name:    inp.agent_name,\n  custom_id:     inp.custom_id,\n  course_id:     inp.course_id,\n  chapter_index: inp.chapter_index,\n  chunk_index:   inp.chunk_index,\n  pipeline_meta: inp.pipeline_meta || {},\n  poll_count:    0,\n  max_polls:     96,   // 96 × 15min = 24h max\n  poll_interval_ms: 900000  // 15 minutes\n}}];\n"
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Get Batch Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://api.openai.com/v1/batches/' + $json.batch_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "notes": "⚠️ Credential 'OpenAI API Key' à connecter",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oWQq1j5RXiUXQXHK",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Check & Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\nconst resp      = $('Get Batch Status').first().json;\nconst init      = $('Init Polling').first().json;\nconst pollCount = ($input.first().json.poll_count || 0) + 1;\n\nconst status = resp.status; // queued | in_progress | completed | failed | expired | cancelled\n\nreturn [{ json: {\n  batch_id:          resp.id,\n  status,\n  poll_count:        pollCount,\n  max_polls:         init.max_polls,\n  output_file_id:    resp.output_file_id  || null,\n  error_file_id:     resp.error_file_id   || null,\n  request_counts:    resp.request_counts  || {},\n  agent_name:        init.agent_name,\n  custom_id:         init.custom_id,\n  course_id:         init.course_id,\n  chapter_index:     init.chapter_index,\n  chunk_index:       init.chunk_index,\n  pipeline_meta:     init.pipeline_meta,\n  timed_out:         pollCount >= init.max_polls\n}}];\n"
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Status Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        300
+      ],
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ $json.status === 'completed' && $json.output_file_id ? 0 : ($json.status === 'failed' || $json.status === 'expired' || $json.status === 'cancelled' || $json.timed_out || ($json.status === 'completed' && !$json.output_file_id)) ? 2 : 1 }}"
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Wait 15 min",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        460
+      ],
+      "parameters": {
+        "unit": "minutes",
+        "amount": 15
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Get Output File",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1300,
+        160
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ 'https://api.openai.com/v1/files/' + $json.output_file_id + '/content' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "notes": "⚠️ Credential 'OpenAI API Key' à connecter",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "oWQq1j5RXiUXQXHK",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "id": "n7",
+      "name": "Parse Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        160
+      ],
+      "parameters": {
+        "jsCode": "\n// Parse the JSONL output from OpenAI Batch API\nconst rawContent = $('Get Output File').first().json;\nconst meta = $('Check & Route').first().json;\n\n// OpenAI returns the file content directly\nconst content = rawContent.body || rawContent;\nlet resultText = '';\n\nif (typeof content === 'string') {\n  resultText = content;\n} else if (content && content.data) {\n  resultText = Buffer.from(content.data).toString('utf-8');\n}\n\n// Parse JSONL (one JSON object per line)\nconst lines = resultText.trim().split('\\n').filter(l => l.trim());\nconst results = lines.map(line => {\n  try { return JSON.parse(line); } catch(e) { return null; }\n}).filter(Boolean);\n\n// Extract the actual response content\nconst parsed = results.map(r => {\n  const choice = r?.response?.body?.choices?.[0];\n  const content = choice?.message?.content || '';\n  let parsed_content = null;\n  try { parsed_content = JSON.parse(content); } catch(e) { parsed_content = content; }\n  return {\n    custom_id:      r.custom_id,\n    parsed_content,\n    finish_reason:  choice?.finish_reason,\n    usage:          r?.response?.body?.usage || {}\n  };\n});\n\nreturn [{ json: {\n  status:        'completed',\n  batch_id:      meta.batch_id,\n  agent_name:    meta.agent_name,\n  custom_id:     meta.custom_id,\n  course_id:     meta.course_id,\n  chapter_index: meta.chapter_index,\n  chunk_index:   meta.chunk_index,\n  pipeline_meta: meta.pipeline_meta,\n  results:       parsed,\n  agent_output:  parsed[0]?.parsed_content || null,  // shortcut for single-request batches\n  usage:         parsed[0]?.usage || {},\n  poll_count:    meta.poll_count\n}}];\n"
+      }
+    },
+    {
+      "id": "n8",
+      "name": "Handle Failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        580
+      ],
+      "parameters": {
+        "jsCode": "const meta = $input.first().json;\nconst rc = meta.request_counts || {};\nconst allFailed = rc.total > 0 && rc.completed === 0;\nreturn [{ json: {\n  status:        meta.timed_out ? 'timed_out' : 'failed',\n  batch_id:      meta.batch_id,\n  agent_name:    meta.agent_name,\n  course_id:     meta.course_id,\n  chapter_index: meta.chapter_index,\n  chunk_index:   meta.chunk_index,\n  error:         meta.timed_out\n                   ? `Batch did not complete within 24h (${meta.poll_count} polls)`\n                   : allFailed\n                   ? `Batch completed but ALL ${rc.total} requests failed — check error_file_id: ${meta.error_file_id}`\n                   : `Batch status: ${meta.status}`,\n  error_file_id: meta.error_file_id || null,\n  request_counts: rc,\n  escalation: true\n}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Input from MAIN": {
+      "main": [
+        [
+          {
+            "node": "Init Polling",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Polling": {
+      "main": [
+        [
+          {
+            "node": "Get Batch Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Batch Status": {
+      "main": [
+        [
+          {
+            "node": "Check & Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check & Route": {
+      "main": [
+        [
+          {
+            "node": "Status Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Switch": {
+      "main": [
+        [
+          {
+            "node": "Get Output File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 15 min",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 15 min": {
+      "main": [
+        [
+          {
+            "node": "Get Batch Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Output File": {
+      "main": [
+        [
+          {
+            "node": "Parse Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "f14e5f06-394c-4bc8-8a9f-b7e2dde7b53d",
+  "activeVersionId": "f14e5f06-394c-4bc8-8a9f-b7e2dde7b53d",
+  "versionCounter": 24,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T14:08:42.555Z",
+      "createdAt": "2026-05-29T14:08:42.555Z",
+      "role": "workflow:owner",
+      "workflowId": "HDdfFxAIS1qnLUEe",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-05T14:14:27.981Z",
+    "createdAt": "2026-06-05T14:14:27.981Z",
+    "versionId": "f14e5f06-394c-4bc8-8a9f-b7e2dde7b53d",
+    "workflowId": "HDdfFxAIS1qnLUEe",
+    "nodes": [
+      {
+        "id": "n0",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "n1",
+        "name": "Init Polling",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          260,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\n// Initialise le polling avec compteur d'itérations\nconst inp = $input.first().json;\nreturn [{ json: {\n  batch_id:      inp.batch_id,\n  agent_name:    inp.agent_name,\n  custom_id:     inp.custom_id,\n  course_id:     inp.course_id,\n  chapter_index: inp.chapter_index,\n  chunk_index:   inp.chunk_index,\n  pipeline_meta: inp.pipeline_meta || {},\n  poll_count:    0,\n  max_polls:     96,   // 96 × 15min = 24h max\n  poll_interval_ms: 900000  // 15 minutes\n}}];\n"
+        }
+      },
+      {
+        "id": "n2",
+        "name": "Get Batch Status",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          520,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://api.openai.com/v1/batches/' + $json.batch_id }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth"
+        },
+        "notes": "⚠️ Credential 'OpenAI API Key' à connecter",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oWQq1j5RXiUXQXHK",
+            "name": "OpenAI API Key"
+          }
+        }
+      },
+      {
+        "id": "n3",
+        "name": "Check & Route",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          780,
+          300
+        ],
+        "parameters": {
+          "jsCode": "\nconst resp      = $('Get Batch Status').first().json;\nconst init      = $('Init Polling').first().json;\nconst pollCount = ($input.first().json.poll_count || 0) + 1;\n\nconst status = resp.status; // queued | in_progress | completed | failed | expired | cancelled\n\nreturn [{ json: {\n  batch_id:          resp.id,\n  status,\n  poll_count:        pollCount,\n  max_polls:         init.max_polls,\n  output_file_id:    resp.output_file_id  || null,\n  error_file_id:     resp.error_file_id   || null,\n  request_counts:    resp.request_counts  || {},\n  agent_name:        init.agent_name,\n  custom_id:         init.custom_id,\n  course_id:         init.course_id,\n  chapter_index:     init.chapter_index,\n  chunk_index:       init.chunk_index,\n  pipeline_meta:     init.pipeline_meta,\n  timed_out:         pollCount >= init.max_polls\n}}];\n"
+        }
+      },
+      {
+        "id": "n4",
+        "name": "Status Switch",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [
+          1040,
+          300
+        ],
+        "parameters": {
+          "mode": "expression",
+          "output": "={{ $json.status === 'completed' && $json.output_file_id ? 0 : ($json.status === 'failed' || $json.status === 'expired' || $json.status === 'cancelled' || $json.timed_out || ($json.status === 'completed' && !$json.output_file_id)) ? 2 : 1 }}"
+        }
+      },
+      {
+        "id": "n5",
+        "name": "Wait 15 min",
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1,
+        "position": [
+          1300,
+          460
+        ],
+        "parameters": {
+          "unit": "minutes",
+          "amount": 15
+        }
+      },
+      {
+        "id": "n6",
+        "name": "Get Output File",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          1300,
+          160
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ 'https://api.openai.com/v1/files/' + $json.output_file_id + '/content' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "responseFormat": "text"
+              }
+            }
+          }
+        },
+        "notes": "⚠️ Credential 'OpenAI API Key' à connecter",
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "oWQq1j5RXiUXQXHK",
+            "name": "OpenAI API Key"
+          }
+        }
+      },
+      {
+        "id": "n7",
+        "name": "Parse Output",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1560,
+          160
+        ],
+        "parameters": {
+          "jsCode": "\n// Parse the JSONL output from OpenAI Batch API\nconst rawContent = $('Get Output File').first().json;\nconst meta = $('Check & Route').first().json;\n\n// OpenAI returns the file content directly\nconst content = rawContent.body || rawContent;\nlet resultText = '';\n\nif (typeof content === 'string') {\n  resultText = content;\n} else if (content && content.data) {\n  resultText = Buffer.from(content.data).toString('utf-8');\n}\n\n// Parse JSONL (one JSON object per line)\nconst lines = resultText.trim().split('\\n').filter(l => l.trim());\nconst results = lines.map(line => {\n  try { return JSON.parse(line); } catch(e) { return null; }\n}).filter(Boolean);\n\n// Extract the actual response content\nconst parsed = results.map(r => {\n  const choice = r?.response?.body?.choices?.[0];\n  const content = choice?.message?.content || '';\n  let parsed_content = null;\n  try { parsed_content = JSON.parse(content); } catch(e) { parsed_content = content; }\n  return {\n    custom_id:      r.custom_id,\n    parsed_content,\n    finish_reason:  choice?.finish_reason,\n    usage:          r?.response?.body?.usage || {}\n  };\n});\n\nreturn [{ json: {\n  status:        'completed',\n  batch_id:      meta.batch_id,\n  agent_name:    meta.agent_name,\n  custom_id:     meta.custom_id,\n  course_id:     meta.course_id,\n  chapter_index: meta.chapter_index,\n  chunk_index:   meta.chunk_index,\n  pipeline_meta: meta.pipeline_meta,\n  results:       parsed,\n  agent_output:  parsed[0]?.parsed_content || null,  // shortcut for single-request batches\n  usage:         parsed[0]?.usage || {},\n  poll_count:    meta.poll_count\n}}];\n"
+        }
+      },
+      {
+        "id": "n8",
+        "name": "Handle Failure",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1300,
+          580
+        ],
+        "parameters": {
+          "jsCode": "const meta = $input.first().json;\nconst rc = meta.request_counts || {};\nconst allFailed = rc.total > 0 && rc.completed === 0;\nreturn [{ json: {\n  status:        meta.timed_out ? 'timed_out' : 'failed',\n  batch_id:      meta.batch_id,\n  agent_name:    meta.agent_name,\n  course_id:     meta.course_id,\n  chapter_index: meta.chapter_index,\n  chunk_index:   meta.chunk_index,\n  error:         meta.timed_out\n                   ? `Batch did not complete within 24h (${meta.poll_count} polls)`\n                   : allFailed\n                   ? `Batch completed but ALL ${rc.total} requests failed — check error_file_id: ${meta.error_file_id}`\n                   : `Batch status: ${meta.status}`,\n  error_file_id: meta.error_file_id || null,\n  request_counts: rc,\n  escalation: true\n}}];"
+        }
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Init Polling",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Init Polling": {
+        "main": [
+          [
+            {
+              "node": "Get Batch Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Batch Status": {
+        "main": [
+          [
+            {
+              "node": "Check & Route",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check & Route": {
+        "main": [
+          [
+            {
+              "node": "Status Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Status Switch": {
+        "main": [
+          [
+            {
+              "node": "Get Output File",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Wait 15 min",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Handle Failure",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait 15 min": {
+        "main": [
+          [
+            {
+              "node": "Get Batch Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Output File": {
+        "main": [
+          [
+            {
+              "node": "Parse Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-05T14:14:28.018Z",
+        "id": 457,
+        "workflowId": "HDdfFxAIS1qnLUEe",
+        "versionId": "f14e5f06-394c-4bc8-8a9f-b7e2dde7b53d",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-05T14:14:28.009Z",
+        "id": 456,
+        "workflowId": "HDdfFxAIS1qnLUEe",
+        "versionId": "f14e5f06-394c-4bc8-8a9f-b7e2dde7b53d",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}

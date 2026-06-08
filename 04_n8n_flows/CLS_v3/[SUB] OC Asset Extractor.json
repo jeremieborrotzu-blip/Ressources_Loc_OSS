@@ -1,0 +1,593 @@
+{
+  "updatedAt": "2026-06-04T17:00:01.140Z",
+  "createdAt": "2026-06-04T17:00:01.140Z",
+  "id": "XtF1ec3MgRLNDqBz",
+  "name": "OC Static Asset Extractor",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "oc-extractor",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        200
+      ],
+      "id": "w1",
+      "name": "GET Form",
+      "webhookId": "oc-form-v6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const h=$input.first().json.headers||{};\nconst host=h['x-forwarded-host']||h['host']||'localhost:5678';\nconst proto=h['x-forwarded-proto']||'http';\nconst b=`${proto}://${host}`;\nconst html=\"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"UTF-8\\\"><meta name=\\\"viewport\\\" content=\\\"width=device-width,initial-scale=1\\\">\\n<title>OC Asset Extractor</title>\\n<style>\\n*{box-sizing:border-box;margin:0;padding:0}\\nbody{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;display:flex;align-items:center;justify-content:center;min-height:100vh}\\n.card{background:#fff;border-radius:16px;padding:40px;max-width:480px;width:100%;margin:20px;box-shadow:0 4px 24px rgba(0,0,0,.08)}\\nh1{font-size:1.4rem;color:#1a1a1a;margin-bottom:8px}\\n.sub{color:#888;font-size:.88rem;line-height:1.6;margin-bottom:28px}\\n.drop{border:2px dashed #e0e0e0;border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:18px}\\n.drop:hover,.drop.hover{border-color:#ff6d5a;background:#fff8f7}\\n.drop input{display:none}\\n.drop-icon{font-size:2rem;margin-bottom:8px}\\n.drop-text{color:#aaa;font-size:.88rem}\\n.drop-text b{color:#ff6d5a}\\n.badge{margin-top:10px;display:inline-block;background:#f0f2f5;padding:4px 14px;border-radius:20px;font-size:.8rem;color:#444}\\n.btn-go{width:100%;padding:13px;border-radius:10px;border:none;font-size:1rem;font-weight:600;cursor:pointer;background:#e5e7eb;color:#9ca3af;transition:all .2s}\\n.btn-go.on{background:#ff6d5a;color:#fff}.btn-go.on:hover{background:#e55a47}\\n#prog{display:none}\\n.steps{margin:24px 0 28px}\\n.step{display:flex;align-items:center;gap:14px;padding:10px 0;color:#d1d5db;font-size:.92rem;position:relative}\\n.step:not(:last-child)::after{content:'';position:absolute;left:11px;top:36px;height:12px;width:2px;background:#e5e7eb;transition:background .4s}\\n.step.done:not(:last-child)::after{background:#22c55e}\\n.dot{width:24px;height:24px;border-radius:50%;background:#e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .35s}\\n.step.active{color:#1a1a1a;font-weight:600}\\n.step.active .dot{background:#ff6d5a;animation:pulse 1.2s ease-in-out infinite}\\n.step.done{color:#16a34a}.step.done .dot{background:#22c55e}\\n.step.done .dot::after{content:\\\"\\\\2713\\\";color:#fff;font-weight:700;font-size:13px}\\n@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,109,90,.4)}50%{box-shadow:0 0 0 8px rgba(255,109,90,0)}}\\n.lbl{flex:1}.counter{font-size:.8rem;font-family:monospace;color:#aaa;min-width:70px;text-align:right}\\n.step.active .counter{color:#ff6d5a;font-weight:700}\\n.step.done .counter{color:#22c55e}\\n.num{font-size:.75rem;color:#d1d5db;margin-left:6px}\\n.step.active .num{color:#ff6d5a}.step.done .num{color:#22c55e}\\n.btn-dl{width:100%;padding:14px;border-radius:10px;border:none;font-size:1rem;font-weight:700;cursor:pointer;background:#22c55e;color:#fff;animation:pop .4s cubic-bezier(.175,.885,.32,1.275)}\\n.btn-dl:hover{background:#16a34a}\\n@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}\\n.err{color:#ef4444;font-size:.83rem;margin-top:12px;padding:10px;background:#fef2f2;border-radius:8px}\\n</style>\\n</head>\\n<body>\\n<div class=\\\"card\\\">\\n  <div id=\\\"upload\\\">\\n    <h1>OC Asset Extractor</h1>\\n    <p class=\\\"sub\\\">Upload the HTML of an OpenClassrooms course to extract all <code>user.oc-static.com</code> assets as a ZIP.</p>\\n    <div class=\\\"drop\\\" id=\\\"dz\\\">\\n      <input type=\\\"file\\\" id=\\\"fi\\\" accept=\\\".html,.htm,.txt\\\">\\n      <div class=\\\"drop-icon\\\">&#128194;</div>\\n      <p class=\\\"drop-text\\\"><b>Choose a file</b> or drag &amp; drop</p>\\n      <div id=\\\"fb\\\"></div>\\n    </div>\\n    <button class=\\\"btn-go\\\" id=\\\"go\\\" disabled>Select a file first</button>\\n  </div>\\n  <div id=\\\"prog\\\">\\n    <h1 id=\\\"ptitle\\\">Processing...</h1>\\n    <p class=\\\"sub\\\" id=\\\"psub\\\">Collecting assets from user.oc-static.com</p>\\n    <div class=\\\"steps\\\">\\n      <div class=\\\"step\\\" id=\\\"s1\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Collecting assets</span><span class=\\\"counter\\\" id=\\\"cnt\\\"></span><span class=\\\"num\\\">1/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s2\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Collection complete</span><span class=\\\"num\\\">2/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s3\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Compressing</span><span class=\\\"num\\\">3/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s4\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Compression complete</span><span class=\\\"num\\\">4/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s5\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Ready to download</span><span class=\\\"num\\\">5/5</span></div>\\n    </div>\\n    <button class=\\\"btn-dl\\\" id=\\\"dl\\\" style=\\\"display:none\\\">&#11015; Download ZIP</button>\\n    <div class=\\\"err\\\" id=\\\"em\\\" style=\\\"display:none\\\"></div>\\n  </div>\\n</div>\\n<script>\\nconst POST_URL='POST_URL_PH',STATUS_URL='STATUS_URL_PH',DOWNLOAD_URL='DOWNLOAD_URL_PH';\\nlet file=null,uploadId=null,poll=null;\\nconst dz=document.getElementById('dz'),fi=document.getElementById('fi'),fb=document.getElementById('fb'),go=document.getElementById('go');\\nfunction setFile(f){if(!f)return;file=f;fb.innerHTML='<span class=\\\"badge\\\">'+f.name+'</span>';go.disabled=false;go.className='btn-go on';go.textContent='Extract Assets';}\\ndz.addEventListener('click',()=>fi.click());\\nfi.addEventListener('change',()=>setFile(fi.files[0]));\\ndz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('hover')});\\ndz.addEventListener('dragleave',()=>dz.classList.remove('hover'));\\ndz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('hover');setFile(e.dataTransfer.files[0])});\\nconst delay=ms=>new Promise(r=>setTimeout(r,ms));\\nfunction st(id,cls){document.getElementById(id).className='step '+cls;}\\nfunction pad(n,len){return String(n).padStart(len,'0');}\\ngo.addEventListener('click',async()=>{\\n  if(!file)return;\\n  uploadId=crypto.randomUUID();\\n  document.getElementById('upload').style.display='none';\\n  document.getElementById('prog').style.display='block';\\n  st('s1','active');\\n  document.getElementById('cnt').textContent='...';\\n  const fd=new FormData();\\n  fd.append('htmlFile',file);\\n  fd.append('uploadId',uploadId);\\n  fetch(POST_URL,{method:'POST',body:fd}).catch(()=>{});\\n  let allDone=false;\\n  poll=setInterval(async()=>{\\n    try{\\n      const r=await fetch(STATUS_URL+'?id='+uploadId);\\n      if(!r.ok)return;\\n      const d=await r.json();\\n      if(d.notReady)return;\\n      const cur=d.current||0,tot=d.total||0;\\n      if(tot>0){\\n        const w=String(tot).length;\\n        document.getElementById('cnt').textContent=pad(cur,w)+' / '+pad(tot,w);\\n      }\\n      if(cur>0&&cur<tot){st('s1','active');}\\n      if(cur>=tot&&tot>0&&!d.done){st('s1','done');st('s2','done');st('s3','active');document.getElementById('cnt').textContent=pad(tot,String(tot).length)+' / '+pad(tot,String(tot).length);}\\n      if(d.done&&!allDone){\\n        allDone=true;\\n        clearInterval(poll);\\n        st('s1','done');st('s2','done');st('s3','done');st('s4','done');\\n        await delay(300);\\n        st('s5','done');\\n        document.getElementById('ptitle').textContent='Your ZIP is ready!';\\n        document.getElementById('psub').textContent='All assets collected and compressed.';\\n        document.getElementById('dl').style.display='block';\\n      }\\n    }catch(e){}\\n  },500);\\n});\\ndocument.getElementById('dl').addEventListener('click',()=>{window.location.href=DOWNLOAD_URL+'?id='+uploadId;});\\n</script>\\n</body>\\n</html>\"\n  .replace('POST_URL_PH',`${b}/webhook/oc-upload`)\n  .replace('STATUS_URL_PH',`${b}/webhook/oc-status`)\n  .replace('DOWNLOAD_URL_PH',`${b}/webhook/oc-download`);\nreturn [{json:{html}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        200
+      ],
+      "id": "w2",
+      "name": "Gen HTML"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        200
+      ],
+      "id": "w3",
+      "name": "Serve Form"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "oc-upload",
+        "responseMode": "onReceived",
+        "options": {
+          "binaryData": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        500
+      ],
+      "id": "w4",
+      "name": "POST Upload",
+      "webhookId": "oc-upload-v6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst bk = Object.keys(item.binary)[0];\nconst rel = item.binary[bk].id.replace('filesystem-v2:', '');\nconst fs = require('fs'), zlib = require('zlib');\nconst https = require('https'), http = require('http');\nconst ST = '/home/node/.n8n/.n8n/storage';\nconst html = fs.readFileSync(`${ST}/${rel}`, 'utf-8');\nconst uid = item.json.body?.uploadId || ('' + Date.now());\n\nconst urls = [...new Set((html.match(/https?:\\/\\/user\\.oc-static\\.com\\/[^\\s\"'<>]+/g)) || [])];\nconst total = urls.length;\nif (!total) throw new Error('No user.oc-static.com assets found.');\n\nfs.writeFileSync(`${ST}/current_id.txt`, uid);\nfs.writeFileSync(`${ST}/progress_${uid}.json`, JSON.stringify({current:0,total,done:false,errors:[]}));\n\nfunction dlUrl(url, hops) {\n  if ((hops||0)>5) return Promise.reject(new Error('Too many redirects'));\n  return new Promise((res,rej)=>{\n    const lib=url.startsWith('https')?https:http;\n    const req=lib.get(url,{rejectUnauthorized:false},r=>{\n      if(r.statusCode===301||r.statusCode===302) return dlUrl(r.headers.location,(hops||0)+1).then(res).catch(rej);\n      const c=[];r.on('data',d=>c.push(d));r.on('end',()=>res(Buffer.concat(c)));r.on('error',rej);\n    });\n    req.on('error',rej);\n    req.setTimeout(30000,()=>{req.destroy();rej(new Error('timeout'));});\n  });\n}\n\nfunction crc32(buf){\n  let c=0xFFFFFFFF;\n  for(let i=0;i<buf.length;i++){c^=buf[i];for(let j=0;j<8;j++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);}\n  return(c^0xFFFFFFFF)>>>0;\n}\n\nfunction buildZip(files){\n  const parts=[],cds=[];let off=0;\n  for(const{name,buf}of files){\n    const nb=Buffer.from(name,'utf8');\n    const comp=zlib.deflateRawSync(buf,{level:6});\n    const crc=crc32(buf);\n    const lh=Buffer.alloc(30+nb.length);\n    lh.writeUInt32LE(0x04034b50,0);lh.writeUInt16LE(20,4);lh.writeUInt16LE(0,6);\n    lh.writeUInt16LE(8,8);lh.writeUInt16LE(0,10);lh.writeUInt16LE(0,12);\n    lh.writeUInt32LE(crc,14);lh.writeUInt32LE(comp.length,18);lh.writeUInt32LE(buf.length,22);\n    lh.writeUInt16LE(nb.length,26);lh.writeUInt16LE(0,28);nb.copy(lh,30);\n    const cd=Buffer.alloc(46+nb.length);\n    cd.writeUInt32LE(0x02014b50,0);cd.writeUInt16LE(20,4);cd.writeUInt16LE(20,6);\n    cd.writeUInt16LE(0,8);cd.writeUInt16LE(8,10);cd.writeUInt16LE(0,12);cd.writeUInt16LE(0,14);\n    cd.writeUInt32LE(crc,16);cd.writeUInt32LE(comp.length,20);cd.writeUInt32LE(buf.length,24);\n    cd.writeUInt16LE(nb.length,28);cd.writeUInt16LE(0,30);cd.writeUInt16LE(0,32);\n    cd.writeUInt16LE(0,34);cd.writeUInt16LE(0,36);cd.writeUInt32LE(0,38);\n    cd.writeUInt32LE(off,42);nb.copy(cd,46);\n    parts.push(lh,comp);cds.push(cd);off+=lh.length+comp.length;\n  }\n  const cdBuf=Buffer.concat(cds);\n  const eocd=Buffer.alloc(22);\n  eocd.writeUInt32LE(0x06054b50,0);eocd.writeUInt16LE(0,4);eocd.writeUInt16LE(0,6);\n  eocd.writeUInt16LE(files.length,8);eocd.writeUInt16LE(files.length,10);\n  eocd.writeUInt32LE(cdBuf.length,12);eocd.writeUInt32LE(off,16);eocd.writeUInt16LE(0,20);\n  return Buffer.concat([...parts,cdBuf,eocd]);\n}\n\nconst files=[],errors=[];\nfor(let i=0;i<urls.length;i++){\n  const url=urls[i];\n  const filename=decodeURIComponent(url.split('/').pop().split('?')[0]);\n  try{\n    const buf=await dlUrl(url);\n    files.push({name:filename,buf});\n  }catch(e){errors.push({url,err:e.message});}\n  fs.writeFileSync(`${ST}/progress_${uid}.json`,JSON.stringify({current:i+1,total,done:false,errors}));\n}\n\nif(files.length===0) throw new Error(`All ${total} downloads failed. First: ${errors[0]?.err||'?'}`);\n\nconst zipBuf=buildZip(files);\nfs.writeFileSync(`${ST}/oc_${uid}.zip`,zipBuf);\nfs.writeFileSync(`${ST}/progress_${uid}.json`,JSON.stringify({current:total,total,done:true,errors,fileCount:files.length}));\n\nreturn [{json:{done:true,uid,fileCount:files.length,zipSize:zipBuf.length}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        500
+      ],
+      "id": "w5",
+      "name": "Download All"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "oc-status",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        800
+      ],
+      "id": "w8",
+      "name": "GET Status",
+      "webhookId": "oc-status-v6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs=require('fs');\nconst id=$input.first().json.query?.id;\nif(!id)return [{json:{error:'no id'}}];\nconst p=`/home/node/.n8n/.n8n/storage/progress_${id}.json`;\ntry{return [{json:JSON.parse(fs.readFileSync(p,'utf-8'))}];}\ncatch(e){return [{json:{current:0,total:0,done:false,notReady:true}}];}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        800
+      ],
+      "id": "w9",
+      "name": "Read Status"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        800
+      ],
+      "id": "w10",
+      "name": "Serve Status"
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "oc-download",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        1100
+      ],
+      "id": "w11",
+      "name": "GET Download",
+      "webhookId": "oc-dl-v6"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs=require('fs');\nconst id=$input.first().json.query?.id;\nif(!id)return [{json:{error:'no id'}}];\nconst zp=`/home/node/.n8n/.n8n/storage/oc_${id}.zip`;\nconst pp=`/home/node/.n8n/.n8n/storage/progress_${id}.json`;\nif(!fs.existsSync(zp))return [{json:{error:'not found'}}];\nconst b64=fs.readFileSync(zp).toString('base64');\n// Cleanup after read\ntry{fs.unlinkSync(zp);}catch(e){}\ntry{fs.unlinkSync(pp);}catch(e){}\nreturn [{json:{id},binary:{data:{data:b64,mimeType:'application/zip',fileName:'oc_assets.zip',fileExtension:'zip'}}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        1100
+      ],
+      "id": "w12",
+      "name": "Read ZIP"
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "options": {
+          "binaryProperty": "data",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Disposition",
+                "value": "attachment; filename=\"oc_assets.zip\""
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        1100
+      ],
+      "id": "w13",
+      "name": "Return ZIP"
+    }
+  ],
+  "connections": {
+    "GET Form": {
+      "main": [
+        [
+          {
+            "node": "Gen HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gen HTML": {
+      "main": [
+        [
+          {
+            "node": "Serve Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST Upload": {
+      "main": [
+        [
+          {
+            "node": "Download All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Status": {
+      "main": [
+        [
+          {
+            "node": "Read Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Status": {
+      "main": [
+        [
+          {
+            "node": "Serve Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Download": {
+      "main": [
+        [
+          {
+            "node": "Read ZIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read ZIP": {
+      "main": [
+        [
+          {
+            "node": "Return ZIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "4f046cdf-9016-4067-91d6-7c79a4ca0715",
+  "activeVersionId": "4f046cdf-9016-4067-91d6-7c79a4ca0715",
+  "versionCounter": 10,
+  "triggerCount": 4,
+  "shared": [
+    {
+      "updatedAt": "2026-06-04T17:00:01.145Z",
+      "createdAt": "2026-06-04T17:00:01.145Z",
+      "role": "workflow:owner",
+      "workflowId": "XtF1ec3MgRLNDqBz",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-04T17:00:01.148Z",
+    "createdAt": "2026-06-04T17:00:01.148Z",
+    "versionId": "4f046cdf-9016-4067-91d6-7c79a4ca0715",
+    "workflowId": "XtF1ec3MgRLNDqBz",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "oc-extractor",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          200
+        ],
+        "id": "w1",
+        "name": "GET Form",
+        "webhookId": "oc-form-v6"
+      },
+      {
+        "parameters": {
+          "jsCode": "const h=$input.first().json.headers||{};\nconst host=h['x-forwarded-host']||h['host']||'localhost:5678';\nconst proto=h['x-forwarded-proto']||'http';\nconst b=`${proto}://${host}`;\nconst html=\"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"UTF-8\\\"><meta name=\\\"viewport\\\" content=\\\"width=device-width,initial-scale=1\\\">\\n<title>OC Asset Extractor</title>\\n<style>\\n*{box-sizing:border-box;margin:0;padding:0}\\nbody{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;display:flex;align-items:center;justify-content:center;min-height:100vh}\\n.card{background:#fff;border-radius:16px;padding:40px;max-width:480px;width:100%;margin:20px;box-shadow:0 4px 24px rgba(0,0,0,.08)}\\nh1{font-size:1.4rem;color:#1a1a1a;margin-bottom:8px}\\n.sub{color:#888;font-size:.88rem;line-height:1.6;margin-bottom:28px}\\n.drop{border:2px dashed #e0e0e0;border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:18px}\\n.drop:hover,.drop.hover{border-color:#ff6d5a;background:#fff8f7}\\n.drop input{display:none}\\n.drop-icon{font-size:2rem;margin-bottom:8px}\\n.drop-text{color:#aaa;font-size:.88rem}\\n.drop-text b{color:#ff6d5a}\\n.badge{margin-top:10px;display:inline-block;background:#f0f2f5;padding:4px 14px;border-radius:20px;font-size:.8rem;color:#444}\\n.btn-go{width:100%;padding:13px;border-radius:10px;border:none;font-size:1rem;font-weight:600;cursor:pointer;background:#e5e7eb;color:#9ca3af;transition:all .2s}\\n.btn-go.on{background:#ff6d5a;color:#fff}.btn-go.on:hover{background:#e55a47}\\n#prog{display:none}\\n.steps{margin:24px 0 28px}\\n.step{display:flex;align-items:center;gap:14px;padding:10px 0;color:#d1d5db;font-size:.92rem;position:relative}\\n.step:not(:last-child)::after{content:'';position:absolute;left:11px;top:36px;height:12px;width:2px;background:#e5e7eb;transition:background .4s}\\n.step.done:not(:last-child)::after{background:#22c55e}\\n.dot{width:24px;height:24px;border-radius:50%;background:#e5e7eb;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .35s}\\n.step.active{color:#1a1a1a;font-weight:600}\\n.step.active .dot{background:#ff6d5a;animation:pulse 1.2s ease-in-out infinite}\\n.step.done{color:#16a34a}.step.done .dot{background:#22c55e}\\n.step.done .dot::after{content:\\\"\\\\2713\\\";color:#fff;font-weight:700;font-size:13px}\\n@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,109,90,.4)}50%{box-shadow:0 0 0 8px rgba(255,109,90,0)}}\\n.lbl{flex:1}.counter{font-size:.8rem;font-family:monospace;color:#aaa;min-width:70px;text-align:right}\\n.step.active .counter{color:#ff6d5a;font-weight:700}\\n.step.done .counter{color:#22c55e}\\n.num{font-size:.75rem;color:#d1d5db;margin-left:6px}\\n.step.active .num{color:#ff6d5a}.step.done .num{color:#22c55e}\\n.btn-dl{width:100%;padding:14px;border-radius:10px;border:none;font-size:1rem;font-weight:700;cursor:pointer;background:#22c55e;color:#fff;animation:pop .4s cubic-bezier(.175,.885,.32,1.275)}\\n.btn-dl:hover{background:#16a34a}\\n@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}\\n.err{color:#ef4444;font-size:.83rem;margin-top:12px;padding:10px;background:#fef2f2;border-radius:8px}\\n</style>\\n</head>\\n<body>\\n<div class=\\\"card\\\">\\n  <div id=\\\"upload\\\">\\n    <h1>OC Asset Extractor</h1>\\n    <p class=\\\"sub\\\">Upload the HTML of an OpenClassrooms course to extract all <code>user.oc-static.com</code> assets as a ZIP.</p>\\n    <div class=\\\"drop\\\" id=\\\"dz\\\">\\n      <input type=\\\"file\\\" id=\\\"fi\\\" accept=\\\".html,.htm,.txt\\\">\\n      <div class=\\\"drop-icon\\\">&#128194;</div>\\n      <p class=\\\"drop-text\\\"><b>Choose a file</b> or drag &amp; drop</p>\\n      <div id=\\\"fb\\\"></div>\\n    </div>\\n    <button class=\\\"btn-go\\\" id=\\\"go\\\" disabled>Select a file first</button>\\n  </div>\\n  <div id=\\\"prog\\\">\\n    <h1 id=\\\"ptitle\\\">Processing...</h1>\\n    <p class=\\\"sub\\\" id=\\\"psub\\\">Collecting assets from user.oc-static.com</p>\\n    <div class=\\\"steps\\\">\\n      <div class=\\\"step\\\" id=\\\"s1\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Collecting assets</span><span class=\\\"counter\\\" id=\\\"cnt\\\"></span><span class=\\\"num\\\">1/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s2\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Collection complete</span><span class=\\\"num\\\">2/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s3\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Compressing</span><span class=\\\"num\\\">3/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s4\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Compression complete</span><span class=\\\"num\\\">4/5</span></div>\\n      <div class=\\\"step\\\" id=\\\"s5\\\"><div class=\\\"dot\\\"></div><span class=\\\"lbl\\\">Ready to download</span><span class=\\\"num\\\">5/5</span></div>\\n    </div>\\n    <button class=\\\"btn-dl\\\" id=\\\"dl\\\" style=\\\"display:none\\\">&#11015; Download ZIP</button>\\n    <div class=\\\"err\\\" id=\\\"em\\\" style=\\\"display:none\\\"></div>\\n  </div>\\n</div>\\n<script>\\nconst POST_URL='POST_URL_PH',STATUS_URL='STATUS_URL_PH',DOWNLOAD_URL='DOWNLOAD_URL_PH';\\nlet file=null,uploadId=null,poll=null;\\nconst dz=document.getElementById('dz'),fi=document.getElementById('fi'),fb=document.getElementById('fb'),go=document.getElementById('go');\\nfunction setFile(f){if(!f)return;file=f;fb.innerHTML='<span class=\\\"badge\\\">'+f.name+'</span>';go.disabled=false;go.className='btn-go on';go.textContent='Extract Assets';}\\ndz.addEventListener('click',()=>fi.click());\\nfi.addEventListener('change',()=>setFile(fi.files[0]));\\ndz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('hover')});\\ndz.addEventListener('dragleave',()=>dz.classList.remove('hover'));\\ndz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('hover');setFile(e.dataTransfer.files[0])});\\nconst delay=ms=>new Promise(r=>setTimeout(r,ms));\\nfunction st(id,cls){document.getElementById(id).className='step '+cls;}\\nfunction pad(n,len){return String(n).padStart(len,'0');}\\ngo.addEventListener('click',async()=>{\\n  if(!file)return;\\n  uploadId=crypto.randomUUID();\\n  document.getElementById('upload').style.display='none';\\n  document.getElementById('prog').style.display='block';\\n  st('s1','active');\\n  document.getElementById('cnt').textContent='...';\\n  const fd=new FormData();\\n  fd.append('htmlFile',file);\\n  fd.append('uploadId',uploadId);\\n  fetch(POST_URL,{method:'POST',body:fd}).catch(()=>{});\\n  let allDone=false;\\n  poll=setInterval(async()=>{\\n    try{\\n      const r=await fetch(STATUS_URL+'?id='+uploadId);\\n      if(!r.ok)return;\\n      const d=await r.json();\\n      if(d.notReady)return;\\n      const cur=d.current||0,tot=d.total||0;\\n      if(tot>0){\\n        const w=String(tot).length;\\n        document.getElementById('cnt').textContent=pad(cur,w)+' / '+pad(tot,w);\\n      }\\n      if(cur>0&&cur<tot){st('s1','active');}\\n      if(cur>=tot&&tot>0&&!d.done){st('s1','done');st('s2','done');st('s3','active');document.getElementById('cnt').textContent=pad(tot,String(tot).length)+' / '+pad(tot,String(tot).length);}\\n      if(d.done&&!allDone){\\n        allDone=true;\\n        clearInterval(poll);\\n        st('s1','done');st('s2','done');st('s3','done');st('s4','done');\\n        await delay(300);\\n        st('s5','done');\\n        document.getElementById('ptitle').textContent='Your ZIP is ready!';\\n        document.getElementById('psub').textContent='All assets collected and compressed.';\\n        document.getElementById('dl').style.display='block';\\n      }\\n    }catch(e){}\\n  },500);\\n});\\ndocument.getElementById('dl').addEventListener('click',()=>{window.location.href=DOWNLOAD_URL+'?id='+uploadId;});\\n</script>\\n</body>\\n</html>\"\n  .replace('POST_URL_PH',`${b}/webhook/oc-upload`)\n  .replace('STATUS_URL_PH',`${b}/webhook/oc-status`)\n  .replace('DOWNLOAD_URL_PH',`${b}/webhook/oc-download`);\nreturn [{json:{html}}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          460,
+          200
+        ],
+        "id": "w2",
+        "name": "Gen HTML"
+      },
+      {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "={{ $json.html }}",
+          "options": {
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "text/html; charset=utf-8"
+                }
+              ]
+            }
+          }
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          680,
+          200
+        ],
+        "id": "w3",
+        "name": "Serve Form"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "oc-upload",
+          "responseMode": "onReceived",
+          "options": {
+            "binaryData": true
+          }
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          500
+        ],
+        "id": "w4",
+        "name": "POST Upload",
+        "webhookId": "oc-upload-v6"
+      },
+      {
+        "parameters": {
+          "jsCode": "const item = $input.first();\nconst bk = Object.keys(item.binary)[0];\nconst rel = item.binary[bk].id.replace('filesystem-v2:', '');\nconst fs = require('fs'), zlib = require('zlib');\nconst https = require('https'), http = require('http');\nconst ST = '/home/node/.n8n/.n8n/storage';\nconst html = fs.readFileSync(`${ST}/${rel}`, 'utf-8');\nconst uid = item.json.body?.uploadId || ('' + Date.now());\n\nconst urls = [...new Set((html.match(/https?:\\/\\/user\\.oc-static\\.com\\/[^\\s\"'<>]+/g)) || [])];\nconst total = urls.length;\nif (!total) throw new Error('No user.oc-static.com assets found.');\n\nfs.writeFileSync(`${ST}/current_id.txt`, uid);\nfs.writeFileSync(`${ST}/progress_${uid}.json`, JSON.stringify({current:0,total,done:false,errors:[]}));\n\nfunction dlUrl(url, hops) {\n  if ((hops||0)>5) return Promise.reject(new Error('Too many redirects'));\n  return new Promise((res,rej)=>{\n    const lib=url.startsWith('https')?https:http;\n    const req=lib.get(url,{rejectUnauthorized:false},r=>{\n      if(r.statusCode===301||r.statusCode===302) return dlUrl(r.headers.location,(hops||0)+1).then(res).catch(rej);\n      const c=[];r.on('data',d=>c.push(d));r.on('end',()=>res(Buffer.concat(c)));r.on('error',rej);\n    });\n    req.on('error',rej);\n    req.setTimeout(30000,()=>{req.destroy();rej(new Error('timeout'));});\n  });\n}\n\nfunction crc32(buf){\n  let c=0xFFFFFFFF;\n  for(let i=0;i<buf.length;i++){c^=buf[i];for(let j=0;j<8;j++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);}\n  return(c^0xFFFFFFFF)>>>0;\n}\n\nfunction buildZip(files){\n  const parts=[],cds=[];let off=0;\n  for(const{name,buf}of files){\n    const nb=Buffer.from(name,'utf8');\n    const comp=zlib.deflateRawSync(buf,{level:6});\n    const crc=crc32(buf);\n    const lh=Buffer.alloc(30+nb.length);\n    lh.writeUInt32LE(0x04034b50,0);lh.writeUInt16LE(20,4);lh.writeUInt16LE(0,6);\n    lh.writeUInt16LE(8,8);lh.writeUInt16LE(0,10);lh.writeUInt16LE(0,12);\n    lh.writeUInt32LE(crc,14);lh.writeUInt32LE(comp.length,18);lh.writeUInt32LE(buf.length,22);\n    lh.writeUInt16LE(nb.length,26);lh.writeUInt16LE(0,28);nb.copy(lh,30);\n    const cd=Buffer.alloc(46+nb.length);\n    cd.writeUInt32LE(0x02014b50,0);cd.writeUInt16LE(20,4);cd.writeUInt16LE(20,6);\n    cd.writeUInt16LE(0,8);cd.writeUInt16LE(8,10);cd.writeUInt16LE(0,12);cd.writeUInt16LE(0,14);\n    cd.writeUInt32LE(crc,16);cd.writeUInt32LE(comp.length,20);cd.writeUInt32LE(buf.length,24);\n    cd.writeUInt16LE(nb.length,28);cd.writeUInt16LE(0,30);cd.writeUInt16LE(0,32);\n    cd.writeUInt16LE(0,34);cd.writeUInt16LE(0,36);cd.writeUInt32LE(0,38);\n    cd.writeUInt32LE(off,42);nb.copy(cd,46);\n    parts.push(lh,comp);cds.push(cd);off+=lh.length+comp.length;\n  }\n  const cdBuf=Buffer.concat(cds);\n  const eocd=Buffer.alloc(22);\n  eocd.writeUInt32LE(0x06054b50,0);eocd.writeUInt16LE(0,4);eocd.writeUInt16LE(0,6);\n  eocd.writeUInt16LE(files.length,8);eocd.writeUInt16LE(files.length,10);\n  eocd.writeUInt32LE(cdBuf.length,12);eocd.writeUInt32LE(off,16);eocd.writeUInt16LE(0,20);\n  return Buffer.concat([...parts,cdBuf,eocd]);\n}\n\nconst files=[],errors=[];\nfor(let i=0;i<urls.length;i++){\n  const url=urls[i];\n  const filename=decodeURIComponent(url.split('/').pop().split('?')[0]);\n  try{\n    const buf=await dlUrl(url);\n    files.push({name:filename,buf});\n  }catch(e){errors.push({url,err:e.message});}\n  fs.writeFileSync(`${ST}/progress_${uid}.json`,JSON.stringify({current:i+1,total,done:false,errors}));\n}\n\nif(files.length===0) throw new Error(`All ${total} downloads failed. First: ${errors[0]?.err||'?'}`);\n\nconst zipBuf=buildZip(files);\nfs.writeFileSync(`${ST}/oc_${uid}.zip`,zipBuf);\nfs.writeFileSync(`${ST}/progress_${uid}.json`,JSON.stringify({current:total,total,done:true,errors,fileCount:files.length}));\n\nreturn [{json:{done:true,uid,fileCount:files.length,zipSize:zipBuf.length}}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          460,
+          500
+        ],
+        "id": "w5",
+        "name": "Download All"
+      },
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "oc-status",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          800
+        ],
+        "id": "w8",
+        "name": "GET Status",
+        "webhookId": "oc-status-v6"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs=require('fs');\nconst id=$input.first().json.query?.id;\nif(!id)return [{json:{error:'no id'}}];\nconst p=`/home/node/.n8n/.n8n/storage/progress_${id}.json`;\ntry{return [{json:JSON.parse(fs.readFileSync(p,'utf-8'))}];}\ncatch(e){return [{json:{current:0,total:0,done:false,notReady:true}}];}"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          460,
+          800
+        ],
+        "id": "w9",
+        "name": "Read Status"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          680,
+          800
+        ],
+        "id": "w10",
+        "name": "Serve Status"
+      },
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "oc-download",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          1100
+        ],
+        "id": "w11",
+        "name": "GET Download",
+        "webhookId": "oc-dl-v6"
+      },
+      {
+        "parameters": {
+          "jsCode": "const fs=require('fs');\nconst id=$input.first().json.query?.id;\nif(!id)return [{json:{error:'no id'}}];\nconst zp=`/home/node/.n8n/.n8n/storage/oc_${id}.zip`;\nconst pp=`/home/node/.n8n/.n8n/storage/progress_${id}.json`;\nif(!fs.existsSync(zp))return [{json:{error:'not found'}}];\nconst b64=fs.readFileSync(zp).toString('base64');\n// Cleanup after read\ntry{fs.unlinkSync(zp);}catch(e){}\ntry{fs.unlinkSync(pp);}catch(e){}\nreturn [{json:{id},binary:{data:{data:b64,mimeType:'application/zip',fileName:'oc_assets.zip',fileExtension:'zip'}}}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          460,
+          1100
+        ],
+        "id": "w12",
+        "name": "Read ZIP"
+      },
+      {
+        "parameters": {
+          "respondWith": "binary",
+          "options": {
+            "binaryProperty": "data",
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Disposition",
+                  "value": "attachment; filename=\"oc_assets.zip\""
+                }
+              ]
+            }
+          }
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          680,
+          1100
+        ],
+        "id": "w13",
+        "name": "Return ZIP"
+      }
+    ],
+    "connections": {
+      "GET Form": {
+        "main": [
+          [
+            {
+              "node": "Gen HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gen HTML": {
+        "main": [
+          [
+            {
+              "node": "Serve Form",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "POST Upload": {
+        "main": [
+          [
+            {
+              "node": "Download All",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GET Status": {
+        "main": [
+          [
+            {
+              "node": "Read Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Status": {
+        "main": [
+          [
+            {
+              "node": "Serve Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GET Download": {
+        "main": [
+          [
+            {
+              "node": "Read ZIP",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read ZIP": {
+        "main": [
+          [
+            {
+              "node": "Return ZIP",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-04T17:00:01.241Z",
+        "id": 268,
+        "workflowId": "XtF1ec3MgRLNDqBz",
+        "versionId": "4f046cdf-9016-4067-91d6-7c79a4ca0715",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}

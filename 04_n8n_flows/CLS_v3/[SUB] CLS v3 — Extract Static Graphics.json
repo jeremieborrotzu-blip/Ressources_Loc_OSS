@@ -1,0 +1,81 @@
+{
+  "updatedAt": "2026-06-08T08:50:54.272Z",
+  "createdAt": "2026-06-08T08:50:54.272Z",
+  "id": "pmL2Eq6hLxiR912i",
+  "name": "[SUB] CLS v3 — Extract Static Graphics",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trigger-esg",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "extract-esg",
+      "name": "Extract & Filter Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\nconst inp = $input.first().json;\nconst html = inp.html || '';\nconst course_id = inp.course_id || '';\nconst source_language = inp.source_language || 'fr';\n\n// 1. Extraire toutes les URLs user.oc-static.com\nconst allUrls = [...new Set(\n  (html.match(/https?:\\/\\/user\\.oc-static\\.com\\/[^\\s\"'<>\\)]+/g) || [])\n)];\n\n// 2. Filtrer : garder seulement les images (PNG, JPG, JPEG, GIF, WEBP, SVG)\nconst imageExts = /\\.(png|jpg|jpeg|gif|webp|svg)(\\?[^\"'\\s]*)?$/i;\nconst imageUrls = allUrls.filter(u => imageExts.test(u));\n\n// 3. Exclure les banners\n// Patterns OC banners : \"banner\" dans l'URL, \"/covers/\", \"/backgrounds/\", \n// ou images très larges (pattern _NNNNx dans le nom de fichier où NNNN >= 800)\nconst bannerPatterns = [\n  /banner/i,\n  /\\/covers\\//i,\n  /\\/backgrounds?\\//i,\n  /\\/header/i,\n  /_\\d{4,}x/i,  // ex: _1200x, _1280x\n  /hero/i\n];\nconst isBanner = url => bannerPatterns.some(p => p.test(url));\nconst filtered = imageUrls.filter(u => !isBanner(u));\n\n// 4. Enrichir avec métadonnées\nconst assets = filtered.map((url, i) => {\n  const filename = url.split('/').pop().split('?')[0];\n  const extMatch = filename.match(/\\.(\\w+)$/i);\n  const ext = extMatch ? extMatch[1].toLowerCase() : 'unknown';\n  \n  // Détecter le type d'image (heuristique sur le contexte HTML)\n  const urlContext = html.substring(\n    Math.max(0, html.indexOf(url) - 200),\n    html.indexOf(url) + url.length + 200\n  );\n  let image_type = 'unknown';\n  if (/code|snippet|terminal|console/i.test(urlContext)) image_type = 'code_snippet';\n  else if (/schema|diagram|architecture|flow/i.test(urlContext)) image_type = 'diagram';\n  else if (/tableau|table|spreadsheet/i.test(urlContext)) image_type = 'table';\n  else if (/screenshot|capture|interface|ui\\b/i.test(urlContext)) image_type = 'ui_screenshot';\n  else if (/logo/i.test(urlContext)) image_type = 'logo';\n  else image_type = 'static_graphic';\n\n  return {\n    index: i + 1,\n    url,\n    filename,\n    ext,\n    image_type,\n    needs_localization: source_language !== 'en' // FR→EN = besoin de localisation\n  };\n});\n\nreturn [{\n  json: {\n    course_id,\n    source_language,\n    total_images: allUrls.length,\n    total_after_filter: filtered.length,\n    excluded_banners: imageUrls.length - filtered.length,\n    assets,\n    extracted_at: new Date().toISOString()\n  }\n}];\n"
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Extract & Filter Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "867badb6-7147-4392-8f74-a1ecf7fdea47",
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-08T08:50:54.276Z",
+      "createdAt": "2026-06-08T08:50:54.276Z",
+      "role": "workflow:owner",
+      "workflowId": "pmL2Eq6hLxiR912i",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}
