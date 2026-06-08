@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T13:12:13.050Z",
+  "updatedAt": "2026-06-08T13:29:24.757Z",
   "createdAt": "2026-05-29T14:16:26.563Z",
   "id": "ApjYq9sdM5LKRVlq",
   "name": "[MAIN] CLS v3 — Course Localisation",
@@ -20,7 +20,7 @@
             },
             {
               "fieldLabel": "Target Course ID",
-              "requiredField": true
+              "requiredField": false
             },
             {
               "fieldLabel": "Source Language",
@@ -112,7 +112,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
+        "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilite']) ? f['Score de localisabilite'].length : f['Score de localisabilite']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
       },
       "id": "init",
       "name": "Init Params",
@@ -1561,9 +1561,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
-  "activeVersionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
-  "versionCounter": 137,
+  "versionId": "90647c13-b7de-4cb2-992b-4918b374fc4e",
+  "activeVersionId": "90647c13-b7de-4cb2-992b-4918b374fc4e",
+  "versionCounter": 146,
   "triggerCount": 1,
   "shared": [
     {
@@ -1586,9 +1586,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-08T13:12:13.127Z",
-    "createdAt": "2026-06-08T13:12:13.127Z",
-    "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
+    "updatedAt": "2026-06-08T13:29:24.762Z",
+    "createdAt": "2026-06-08T13:29:24.762Z",
+    "versionId": "90647c13-b7de-4cb2-992b-4918b374fc4e",
     "workflowId": "ApjYq9sdM5LKRVlq",
     "nodes": [
       {
@@ -1604,7 +1604,7 @@
               },
               {
                 "fieldLabel": "Target Course ID",
-                "requiredField": true
+                "requiredField": false
               },
               {
                 "fieldLabel": "Source Language",
@@ -1696,7 +1696,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
+          "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilite']) ? f['Score de localisabilite'].length : f['Score de localisabilite']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
         },
         "id": "init",
         "name": "Init Params",
@@ -3141,18 +3141,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-08T13:12:19.933Z",
-        "id": 485,
+        "createdAt": "2026-06-08T13:29:25.130Z",
+        "id": 493,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
+        "versionId": "90647c13-b7de-4cb2-992b-4918b374fc4e",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-08T13:12:19.459Z",
-        "id": 484,
+        "createdAt": "2026-06-08T13:29:25.044Z",
+        "id": 492,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "301ccb0d-912c-42d8-a37e-386ea2f1afdf",
+        "versionId": "90647c13-b7de-4cb2-992b-4918b374fc4e",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
