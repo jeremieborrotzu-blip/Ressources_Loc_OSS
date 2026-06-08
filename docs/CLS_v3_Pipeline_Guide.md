@@ -318,3 +318,46 @@ Budget $50 → **3–4 runs complets One Part** (ou ~10 runs audit seul).
 | Email sans HTML | Tags HTML visibles en texte brut | `emailFormat: "html"` + champ `html:` (pas `message:`) dans emailSend v2.1 |
 | Chunks perdus après Glossary Load | 1 item au lieu de N | Nœud `Merge X into Chunks` obligatoire après chaque SUB qui retourne 1 item |
 | `pretranslation_draft` vide | A3 mode from scratch | Intentionnel — tous les agents alignés sur gpt-5.2. A3 v5.0 gère les 2 modes. |
+
+---
+
+## 11. Maintenance — Renouvellement token OC API (hebdomadaire)
+
+Le token OC API Stage expire chaque semaine. Le renouvellement nécessite une manipulation directe de la DB SQLite (le PUT via l'API n8n écrit dans le WAL sans checkpoint → l'exécution utilise encore l'ancien token).
+
+**Procédure complète :**
+```bash
+# 1. Arrêter n8n
+docker stop n8n
+
+# 2. Copier la DB hors du container
+docker cp n8n:/home/node/.n8n/.n8n/database.sqlite /tmp/n8n_rw.sqlite
+docker cp n8n:/home/node/.n8n/.n8n/database.sqlite-wal /tmp/n8n_rw.sqlite-wal
+docker cp n8n:/home/node/.n8n/.n8n/database.sqlite-shm /tmp/n8n_rw.sqlite-shm
+
+# 3. Modifier le token (Python)
+python3 update_oc_token.py NOUVEAU_OC_BASIC
+
+# 4. Repousser + redémarrer
+docker cp /tmp/n8n_rw.sqlite n8n:/home/node/.n8n/.n8n/database.sqlite
+docker start n8n
+docker exec --user root n8n chown node:node /home/node/.n8n/.n8n/database.sqlite
+docker exec --user root n8n sh -c "truncate -s 0 /home/node/.n8n/.n8n/database.sqlite-wal && truncate -s 0 /home/node/.n8n/.n8n/database.sqlite-shm"
+docker restart n8n
+```
+
+Les deux workflows à mettre à jour : `RtYARZLkIJyKeoWz` (CLS SUB clone) + `7FmkshRYxsvF4tCj` (SUB original).
+
+---
+
+## 12. Roadmap Phase 2 (après validation pilote HTML)
+
+### Form — ID cible optionnel
+Pour Audit / Score / QA Check, seul l'ID source est nécessaire. L'ID cible (cours traduit) n'est utilisé que pour la livraison finale (Scénario 4). À implémenter : rendre le champ optionnel dans le Form trigger + valider sa présence uniquement dans le SUB Deliver Output.
+
+### Agents SRT / Vimeo
+- **SUB Get Captions** — API Vimeo : récupération des `.srt` d'une vidéo par ID
+- **A7 AV & Caption** — localisation des fichiers `.srt` + synchro timecodes
+- **SUB Copy Videos to Iconik** — copie des assets vidéo vers la MAM d'OC (Iconik)
+
+Dépendances : credential Vimeo API + accès Iconik (fourni par OC). Hors scope pilote.
