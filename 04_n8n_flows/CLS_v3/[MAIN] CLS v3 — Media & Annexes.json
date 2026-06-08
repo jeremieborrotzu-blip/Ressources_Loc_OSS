@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T15:05:44.264Z",
+  "updatedAt": "2026-06-08T15:13:56.920Z",
   "createdAt": "2026-06-08T15:05:44.264Z",
   "id": "iTIkatL9FJ57zLLd",
   "name": "[MAIN] CLS v3 — Media & Annexes",
@@ -303,7 +303,7 @@
       "parameters": {
         "source": "database",
         "workflowId": {
-          "value": "UmjbwzKKFVeVpTni"
+          "value": "ylWWrAQROywV2Kbo"
         },
         "options": {
           "waitForSubWorkflow": true
@@ -632,9 +632,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
-  "activeVersionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
-  "versionCounter": 3,
+  "versionId": "e48f2edc-98c8-4540-b031-0550ba8427e5",
+  "activeVersionId": "e48f2edc-98c8-4540-b031-0550ba8427e5",
+  "versionCounter": 6,
   "triggerCount": 0,
   "shared": [
     {
@@ -657,9 +657,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-08T15:05:44.277Z",
-    "createdAt": "2026-06-08T15:05:44.277Z",
-    "versionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
+    "updatedAt": "2026-06-08T15:13:56.922Z",
+    "createdAt": "2026-06-08T15:13:56.922Z",
+    "versionId": "e48f2edc-98c8-4540-b031-0550ba8427e5",
     "workflowId": "iTIkatL9FJ57zLLd",
     "nodes": [
       {
@@ -958,7 +958,7 @@
         "parameters": {
           "source": "database",
           "workflowId": {
-            "value": "UmjbwzKKFVeVpTni"
+            "value": "ylWWrAQROywV2Kbo"
           },
           "options": {
             "waitForSubWorkflow": true
@@ -1285,11 +1285,19 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-08T15:06:43.354Z",
-        "id": 497,
+        "createdAt": "2026-06-08T15:13:57.051Z",
+        "id": 500,
         "workflowId": "iTIkatL9FJ57zLLd",
-        "versionId": "eacf89a0-ef7a-442e-aeaf-bc608000f35e",
+        "versionId": "e48f2edc-98c8-4540-b031-0550ba8427e5",
         "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-08T15:13:57.036Z",
+        "id": 499,
+        "workflowId": "iTIkatL9FJ57zLLd",
+        "versionId": "e48f2edc-98c8-4540-b031-0550ba8427e5",
+        "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
     ]
