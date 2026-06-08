@@ -1,0 +1,66 @@
+INPUTS
+- course_id: {{course_id}}
+- target_course_id: {{target_course_id}}
+- source_language: {{source_language}}
+- target_language: {{target_language}}
+- domain: {{domain}}
+- links: {{links}}
+- a4_decision_log: {{a4_decision_log}}
+
+TASK
+1) Process each link in the links[] array.
+2) FIRST: check if the link is an OC course link (openclassrooms.com/fr/ or /fr/courses/). If yes → MANUAL_REVIEW, add to manual_oc_links[], move to next link immediately.
+3) For every non-OC link:
+   a. Classify: type, pedagogical_purpose, authority_level.
+   b. Read the html_context for this link — understand WHY this link is here and what the learner expects to find.
+   c. Check the a4_decision_log — if A4 already swapped a related institution (e.g. CNIL→FTC), the replacement link must point to that swapped institution's site.
+   d. Apply the replacement strategy for this type (government, wikipedia, technical doc, tool, article, etc.).
+   e. Propose the best EN equivalent URL. Apply the quality gate — if it fails on any criterion, do not propose. Output NO_EQUIVALENT_FOUND with explanation.
+   f. Assign confidence: HIGH, MEDIUM, or LOW.
+4) Never invent URLs. Only propose URLs you are confident exist and are accessible.
+5) Output the summary counts.
+6) Output STRICT JSON only.
+
+OUTPUT SCHEMA:
+{
+  "course_id": "",
+  "direction": "",
+  "domain": "",
+  "links_processed": 0,
+  "links": [
+    {
+      "link_id": "A10-001",
+      "original_url": "",
+      "anchor_text": "",
+      "html_context": "",
+      "type": "official_doc|government|tool|tutorial|article|dataset|wikipedia|forum|video|academic|other",
+      "pedagogical_purpose": "primary_reference|tool_to_install|supplementary_reading|downloadable_resource|example_dataset|legal_reference|community_resource",
+      "authority_level": "official|established|community|unknown",
+      "action": "REPLACE|PARTIAL|MANUAL_REVIEW|NO_EQUIVALENT_FOUND",
+      "proposed_url": "",
+      "confidence": "HIGH|MEDIUM|LOW",
+      "quality_gate_passed": true,
+      "alignment_justification": "",
+      "quality_gap": false,
+      "quality_gap_note": ""
+    }
+  ],
+  "manual_oc_links": [
+    {
+      "link_id": "A10-OC-001",
+      "original_url": "",
+      "anchor_text": "",
+      "html_context": "",
+      "action": "MANUAL_REVIEW",
+      "note": "OC course link — requires human mapping to target-language course ID"
+    }
+  ],
+  "summary": {
+    "resolved": 0,
+    "partial": 0,
+    "manual_review": 0,
+    "no_equivalent_found": 0,
+    "oc_course_links": 0
+  },
+  "a10_summary": ""
+}
