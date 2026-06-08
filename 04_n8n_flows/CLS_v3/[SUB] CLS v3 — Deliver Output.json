@@ -1,0 +1,525 @@
+{
+  "updatedAt": "2026-06-08T09:16:38.142Z",
+  "createdAt": "2026-05-29T14:04:53.024Z",
+  "id": "fBgHok8kQUPxlTAT",
+  "name": "[SUB] CLS v3 — Deliver Output",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "n0",
+      "name": "Input from MAIN",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "n1",
+      "name": "Prepare Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const inp = $input.first().json;\n\n// Helpers\nfunction b64(str) { return Buffer.from(str, 'utf-8').toString('base64'); }\nfunction pad(n)   { return String(n).padStart(2,'0'); }\n\nconst src  = inp.course_id        || 'unknown_src';\nconst tgt  = inp.target_course_id || 'unknown_tgt';\nconst sl   = inp.source_language  || 'fr';\nconst tl   = (inp.target_language || 'en-US').split('-')[0];\nconst dir  = `${sl}>${tl}`;\nconst now  = new Date();\nconst date = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;\nconst base = `07_runs/${src}/output`;\n\n// 1. Final HTML\nconst htmlContent = inp.final_html || '';\nconst htmlPath    = `${base}/${tgt}_localized_${dir}.html`;\nconst htmlB64     = b64(htmlContent);\n\n// 2. Decision log (A4 + A5 + A6 merged)\nconst logObj = {\n  meta: { course_id: src, target_course_id: tgt, direction: dir, date, score_total: inp.score_total || null },\n  a4_swap_log:       inp.a4_swap_log   || [],\n  a5_qa_report:      inp.a5_qa_report  || {},\n  a6_issue_log:      inp.a6_issue_log  || [],\n  structural_checks: inp.structural_checks || []\n};\nconst logPath = `${base}/${tgt}_decision_log_${dir}.json`;\nconst logB64  = b64(JSON.stringify(logObj, null, 2));\n\n// 3. TM patch CSV\nconst tmEntries = inp.domain_tm_patch || [];\nlet csvRows = 'source_term,target_term,direction,domain,category,context_note,do_not_translate,validated,first_seen_course,last_updated\\n';\nfor (const e of tmEntries) {\n  csvRows += [\n    e.source_term||'', e.target_term||'', dir,\n    e.domain||inp.detected_domain||'', e.category||'',\n    (e.context_note||'').replace(/,/g,'；'),\n    e.do_not_translate||false, 'false', src, date\n  ].join(',') + '\\n';\n}\nconst tmPath = `${base}/${tgt}_tm_patch_${dir}.csv`;\nconst tmB64  = b64(csvRows);\n\n// 4. Review Markdown — HTML mirror (Notion-importable, preserves all HTML tags)\nconst qaScore  = inp.score_total ? `${inp.score_total}/100` : 'N/A';\nconst struct   = inp.structural_integrity ? '✅ OK' : '❌ BLOCKED';\nconst a6Issues = (inp.a6_issue_log || [])\n  .map(i => `- **[${i.severity}]** \\`${i.location || 'unknown'}\\`: ${i.issue}`)\n  .join('\\n') || 'None.';\n\n// Section 1: metadata table\nconst mdHeader = `# Course Localization Review — ${tgt}\n\n| Field | Value |\n|---|---|\n| Source ID | \\`${src}\\` |\n| Target ID | \\`${tgt}\\` |\n| Direction | ${dir} |\n| Date | ${date} |\n| QA Score | ${qaScore} |\n| Structural integrity | ${struct} |\n\n## GitHub Outputs\n\n- [Localized HTML](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${htmlPath})\n- [Decision Log](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${logPath})\n- [TM Patch](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${tmPath})\n\n## A5 QA Summary\n\n${inp.a5_summary || 'No QA summary available.'}\n\n## A6 Issues\n\n${a6Issues}\n\n---\n\n## Localized Content (HTML mirror)\n\n`;\n\n// Section 2: full HTML content as-is (GitHub + Notion both render embedded HTML in .md)\nconst mdContent = mdHeader + (htmlContent || '<!-- no HTML content -->');\nconst mdPath    = `${base}/${tgt}_review_${dir}.md`;\nconst mdB64     = b64(mdContent);\n\nreturn [{ json: {\n  htmlPath, htmlB64,\n  logPath,  logB64,\n  tmPath,   tmB64,\n  mdPath,   mdB64,\n  repo: 'jeremieborrotzu-blip/Ressources_Loc_OSS',\n  course_id: src, target_course_id: tgt,\n  direction: dir, date,\n  score_total:           inp.score_total,\n  structural_integrity:  inp.structural_integrity,\n  enabled_modules:       inp.enabled_modules || []\n}}];\n"
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Push HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        520,
+        160
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.htmlPath}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=feat: add localized HTML for {{$('Prepare Files').item.json.target_course_id}}",
+          "content": "={{$('Prepare Files').item.json.htmlB64}}"
+        }
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Push Decision Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.logPath}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=feat: add decision log for {{$('Prepare Files').item.json.target_course_id}}",
+          "content": "={{$('Prepare Files').item.json.logB64}}"
+        }
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Push TM Patch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        520,
+        440
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.tmPath}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=tm: add TM patch for {{$('Prepare Files').item.json.target_course_id}}",
+          "content": "={{$('Prepare Files').item.json.tmB64}}"
+        }
+      },
+      "credentials": {
+        "githubApi": {
+          "id": "yd8ufDV54XqNLA3P",
+          "name": "GitHub — Ressources_Loc_OSS"
+        }
+      }
+    },
+    {
+      "id": "push-review-md-001",
+      "name": "Push Review MD",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        520,
+        580
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.mdPath}}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "message": "=docs: add review MD for {{$('Prepare Files').item.json.target_course_id}}",
+          "content": "={{$('Prepare Files').item.json.mdB64}}"
+        }
+      }
+    },
+    {
+      "id": "n6",
+      "name": "Build Delivery Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const prep   = $('Prepare Files').first().json;\nconst ghHtml = $('Push HTML').first().json;\nconst ghLog  = $('Push Decision Log').first().json;\nconst ghTm   = $('Push TM Patch').first().json;\nconst ghMd   = $('Push Review MD').first().json;\n\nconst ghBase = `https://github.com/${prep.repo}/blob/main/`;\n\nreturn [{ json: {\n  status: 'DELIVERED',\n  course_id:            prep.course_id,\n  target_course_id:     prep.target_course_id,\n  direction:            prep.direction,\n  date:                 prep.date,\n  score_total:          prep.score_total,\n  structural_integrity: prep.structural_integrity,\n  deliverables: {\n    html_github: ghBase + prep.htmlPath,\n    log_github:  ghBase + prep.logPath,\n    tm_patch:    ghBase + prep.tmPath,\n    review_md:   ghBase + prep.mdPath\n  },\n  next_steps: [\n    'Import review .md into Notion for human QA',\n    'Merge TM patch CSV into domain translation memory after validation',\n    'Re-inject HTML under target course ID on OC platform'\n  ]\n}}];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Input from MAIN": {
+      "main": [
+        [
+          {
+            "node": "Prepare Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Files": {
+      "main": [
+        [
+          {
+            "node": "Push HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Push Decision Log",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Push TM Patch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Push Review MD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push HTML": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push Decision Log": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push TM Patch": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push Review MD": {
+      "main": [
+        [
+          {
+            "node": "Build Delivery Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+  "activeVersionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+  "versionCounter": 23,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T14:04:53.025Z",
+      "createdAt": "2026-05-29T14:04:53.025Z",
+      "role": "workflow:owner",
+      "workflowId": "fBgHok8kQUPxlTAT",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-08T09:16:38.143Z",
+    "createdAt": "2026-06-08T09:16:38.143Z",
+    "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+    "workflowId": "fBgHok8kQUPxlTAT",
+    "nodes": [
+      {
+        "id": "n0",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          300
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "n1",
+        "name": "Prepare Files",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          260,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const inp = $input.first().json;\n\n// Helpers\nfunction b64(str) { return Buffer.from(str, 'utf-8').toString('base64'); }\nfunction pad(n)   { return String(n).padStart(2,'0'); }\n\nconst src  = inp.course_id        || 'unknown_src';\nconst tgt  = inp.target_course_id || 'unknown_tgt';\nconst sl   = inp.source_language  || 'fr';\nconst tl   = (inp.target_language || 'en-US').split('-')[0];\nconst dir  = `${sl}>${tl}`;\nconst now  = new Date();\nconst date = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;\nconst base = `07_runs/${src}/output`;\n\n// 1. Final HTML\nconst htmlContent = inp.final_html || '';\nconst htmlPath    = `${base}/${tgt}_localized_${dir}.html`;\nconst htmlB64     = b64(htmlContent);\n\n// 2. Decision log (A4 + A5 + A6 merged)\nconst logObj = {\n  meta: { course_id: src, target_course_id: tgt, direction: dir, date, score_total: inp.score_total || null },\n  a4_swap_log:       inp.a4_swap_log   || [],\n  a5_qa_report:      inp.a5_qa_report  || {},\n  a6_issue_log:      inp.a6_issue_log  || [],\n  structural_checks: inp.structural_checks || []\n};\nconst logPath = `${base}/${tgt}_decision_log_${dir}.json`;\nconst logB64  = b64(JSON.stringify(logObj, null, 2));\n\n// 3. TM patch CSV\nconst tmEntries = inp.domain_tm_patch || [];\nlet csvRows = 'source_term,target_term,direction,domain,category,context_note,do_not_translate,validated,first_seen_course,last_updated\\n';\nfor (const e of tmEntries) {\n  csvRows += [\n    e.source_term||'', e.target_term||'', dir,\n    e.domain||inp.detected_domain||'', e.category||'',\n    (e.context_note||'').replace(/,/g,'；'),\n    e.do_not_translate||false, 'false', src, date\n  ].join(',') + '\\n';\n}\nconst tmPath = `${base}/${tgt}_tm_patch_${dir}.csv`;\nconst tmB64  = b64(csvRows);\n\n// 4. Review Markdown — HTML mirror (Notion-importable, preserves all HTML tags)\nconst qaScore  = inp.score_total ? `${inp.score_total}/100` : 'N/A';\nconst struct   = inp.structural_integrity ? '✅ OK' : '❌ BLOCKED';\nconst a6Issues = (inp.a6_issue_log || [])\n  .map(i => `- **[${i.severity}]** \\`${i.location || 'unknown'}\\`: ${i.issue}`)\n  .join('\\n') || 'None.';\n\n// Section 1: metadata table\nconst mdHeader = `# Course Localization Review — ${tgt}\n\n| Field | Value |\n|---|---|\n| Source ID | \\`${src}\\` |\n| Target ID | \\`${tgt}\\` |\n| Direction | ${dir} |\n| Date | ${date} |\n| QA Score | ${qaScore} |\n| Structural integrity | ${struct} |\n\n## GitHub Outputs\n\n- [Localized HTML](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${htmlPath})\n- [Decision Log](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${logPath})\n- [TM Patch](https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/${tmPath})\n\n## A5 QA Summary\n\n${inp.a5_summary || 'No QA summary available.'}\n\n## A6 Issues\n\n${a6Issues}\n\n---\n\n## Localized Content (HTML mirror)\n\n`;\n\n// Section 2: full HTML content as-is (GitHub + Notion both render embedded HTML in .md)\nconst mdContent = mdHeader + (htmlContent || '<!-- no HTML content -->');\nconst mdPath    = `${base}/${tgt}_review_${dir}.md`;\nconst mdB64     = b64(mdContent);\n\nreturn [{ json: {\n  htmlPath, htmlB64,\n  logPath,  logB64,\n  tmPath,   tmB64,\n  mdPath,   mdB64,\n  repo: 'jeremieborrotzu-blip/Ressources_Loc_OSS',\n  course_id: src, target_course_id: tgt,\n  direction: dir, date,\n  score_total:           inp.score_total,\n  structural_integrity:  inp.structural_integrity,\n  enabled_modules:       inp.enabled_modules || []\n}}];\n"
+        }
+      },
+      {
+        "id": "n2",
+        "name": "Push HTML",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          520,
+          160
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.htmlPath}}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=feat: add localized HTML for {{$('Prepare Files').item.json.target_course_id}}",
+            "content": "={{$('Prepare Files').item.json.htmlB64}}"
+          }
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "n3",
+        "name": "Push Decision Log",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          520,
+          300
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.logPath}}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=feat: add decision log for {{$('Prepare Files').item.json.target_course_id}}",
+            "content": "={{$('Prepare Files').item.json.logB64}}"
+          }
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "n4",
+        "name": "Push TM Patch",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [
+          520,
+          440
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.tmPath}}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=tm: add TM patch for {{$('Prepare Files').item.json.target_course_id}}",
+            "content": "={{$('Prepare Files').item.json.tmB64}}"
+          }
+        },
+        "credentials": {
+          "githubApi": {
+            "id": "yd8ufDV54XqNLA3P",
+            "name": "GitHub — Ressources_Loc_OSS"
+          }
+        }
+      },
+      {
+        "id": "push-review-md-001",
+        "name": "Push Review MD",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.1,
+        "position": [
+          520,
+          580
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/{{$('Prepare Files').item.json.mdPath}}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "githubApi",
+          "sendBody": true,
+          "contentType": "json",
+          "body": {
+            "message": "=docs: add review MD for {{$('Prepare Files').item.json.target_course_id}}",
+            "content": "={{$('Prepare Files').item.json.mdB64}}"
+          }
+        }
+      },
+      {
+        "id": "n6",
+        "name": "Build Delivery Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          800,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const prep   = $('Prepare Files').first().json;\nconst ghHtml = $('Push HTML').first().json;\nconst ghLog  = $('Push Decision Log').first().json;\nconst ghTm   = $('Push TM Patch').first().json;\nconst ghMd   = $('Push Review MD').first().json;\n\nconst ghBase = `https://github.com/${prep.repo}/blob/main/`;\n\nreturn [{ json: {\n  status: 'DELIVERED',\n  course_id:            prep.course_id,\n  target_course_id:     prep.target_course_id,\n  direction:            prep.direction,\n  date:                 prep.date,\n  score_total:          prep.score_total,\n  structural_integrity: prep.structural_integrity,\n  deliverables: {\n    html_github: ghBase + prep.htmlPath,\n    log_github:  ghBase + prep.logPath,\n    tm_patch:    ghBase + prep.tmPath,\n    review_md:   ghBase + prep.mdPath\n  },\n  next_steps: [\n    'Import review .md into Notion for human QA',\n    'Merge TM patch CSV into domain translation memory after validation',\n    'Re-inject HTML under target course ID on OC platform'\n  ]\n}}];\n"
+        }
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Prepare Files",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Files": {
+        "main": [
+          [
+            {
+              "node": "Push HTML",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Push Decision Log",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Push TM Patch",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Push Review MD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Push HTML": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Push Decision Log": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Push TM Patch": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Push Review MD": {
+        "main": [
+          [
+            {
+              "node": "Build Delivery Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-08T09:16:38.169Z",
+        "id": 481,
+        "workflowId": "fBgHok8kQUPxlTAT",
+        "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-08T09:16:38.162Z",
+        "id": 480,
+        "workflowId": "fBgHok8kQUPxlTAT",
+        "versionId": "24e1dbc1-3180-4cd3-9612-19903500ba1d",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}
