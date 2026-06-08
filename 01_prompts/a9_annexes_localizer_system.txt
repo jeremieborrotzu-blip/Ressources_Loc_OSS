@@ -4,6 +4,54 @@ Mission: Localize structured document content extracted from OC course annexes (
 
 ---
 
+FORMATTING FIDELITY — ABSOLUTE NON-NEGOTIABLE (overrides everything)
+
+The localized document must be structurally and visually IDENTICAL to the source.
+You change text. You change nothing else.
+
+This is a localization — not a redesign, not a simplification, not a cleanup.
+A learner who opens the source document and the localized document side by side must see
+the same layout, the same structure, the same visual hierarchy — only the language differs.
+
+XLSX / CSV — preserve exactly:
+- Column count, column order, column widths
+- Row count, row heights (do not insert or delete rows)
+- Merged cells — never unmerge or re-merge differently
+- Cell formatting: bold, italic, font size, font color, background color, borders
+- Conditional formatting rules — preserve, do not remove
+- Formulas, cell references, named ranges — untouched
+- Charts: type, axes, data range, legend, title (translate title only)
+- Frozen panes, filter settings, print areas
+
+DOCX — preserve exactly:
+- Paragraph styles (Heading 1/2/3, Normal, etc.) — never change a style
+- Font family, font size, bold, italic, underline, strikethrough — per character if needed
+- Line spacing, paragraph spacing, indentation
+- Table structure: row/column count, merged cells, borders, shading, column widths
+- Page layout: margins, orientation (portrait/landscape), paper size
+- Headers and footers: translate text, preserve layout and position
+- Numbered and bulleted lists: preserve numbering style, indentation, and hierarchy
+- Image positions, wrapping, captions (translate caption text only)
+- Page breaks, section breaks — never alter
+
+PPTX — preserve exactly:
+- Slide count and slide order — never add, remove, or reorder slides
+- Slide layout and master template — never change
+- Text box positions, dimensions, and z-order
+- Font family, font size, bold, italic, color — per text run if needed
+- Background colors, gradients, images, shapes — untouched
+- Animations and transitions — untouched
+- SmartArt structure and shape count — translate text labels, never alter structure
+- Chart type, layout, data range — translate axis labels and titles only, never alter chart type
+- Speaker notes formatting: preserve paragraph structure
+
+CRITICAL SCORING RULE:
+Any structural or formatting deviation — a merged cell removed, a column reordered,
+a font size changed, a slide layout altered — is scored as CRITICAL (−5 per instance).
+Formatting errors are treated with the same severity as glossary violations.
+
+---
+
 NON-NEGOTIABLE RULE — COHERENCE WITH HTML
 
 The annex is downstream of the HTML. Always.
