@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-05T07:26:58.949Z",
+  "updatedAt": "2026-06-08T13:04:33.477Z",
   "createdAt": "2026-05-29T14:00:17.085Z",
   "id": "odMhJgxadf3RPAHp",
   "name": "[SUB] CLS v3 — Reassembler + Validator",
@@ -28,7 +28,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "\n// Input : array of processed chunks + original_html fingerprint\n// Each chunk has: chapter_index, chunk_index, part_index, part_name,\n//                 chapter_name, translated_html (output from agents),\n//                 was_chunked, preceding_context\n\nconst items = $input.all();\n\n// Separate fingerprint from chunks\n// Convention: the MAIN passes fingerprint as first item with type='fingerprint'\nconst fingerprint = items.find(i => i.json.type === 'fingerprint')?.json || null;\nconst chunks = items.filter(i => i.json.type !== 'fingerprint');\n\n// Sort: by chapter_index asc, then chunk_index asc\nchunks.sort((a, b) => {\n  if (a.json.chapter_index !== b.json.chapter_index)\n    return a.json.chapter_index - b.json.chapter_index;\n  return a.json.chunk_index - b.json.chunk_index;\n});\n\n// Group by chapter\nconst byChapter = {};\nfor (const item of chunks) {\n  const ci = item.json.chapter_index;\n  if (!byChapter[ci]) byChapter[ci] = [];\n  byChapter[ci].push(item.json);\n}\n\n// Reassemble\nlet reassembled = '';\nlet lastPartIndex = -1;\nconst chaptersOrdered = Object.keys(byChapter).map(Number).sort((a,b)=>a-b);\n\nfor (const ci of chaptersOrdered) {\n  const chapterChunks = byChapter[ci];\n  const first = chapterChunks[0];\n\n  // Re-insert h2 part separator if new part\n  if (first.part_index > 0 && first.part_index !== lastPartIndex) {\n    reassembled += `\\n<h2>${first.part_name}</h2>\\n`;\n    lastPartIndex = first.part_index;\n  }\n\n  // Join chunks of this chapter\n  // Use translated_html if available (post-pipeline), else original html\n  for (const chunk of chapterChunks) {\n    const content = chunk.translated_html || chunk.html || '';\n    reassembled += content + '\\n';\n  }\n}\n\nreturn [{ json: {\n  reassembled_html: reassembled.trim(),\n  fingerprint,\n  course_id:        chunks[0]?.json.course_id,\n  target_course_id: chunks[0]?.json.target_course_id,\n  source_language:  chunks[0]?.json.source_language,\n  target_language:  chunks[0]?.json.target_language,\n  total_chapters:   chaptersOrdered.length,\n  enabled_modules:  chunks[0]?.json.enabled_modules || []\n}}];\n"
+        "jsCode": "// Input : array of processed chunks + original_html fingerprint\n// Each chunk has: chapter_index, chunk_index, part_index, part_name,\n//                 chapter_name, translated_html (output from agents),\n//                 was_chunked, preceding_context\n\nconst items = $input.all();\n\n// Separate fingerprint from chunks\nconst fingerprint = items.find(i => i.json.type === 'fingerprint')?.json || null;\nconst chunks = items.filter(i => i.json.type !== 'fingerprint');\n\n// Sort: by chapter_index asc, then chunk_index asc\nchunks.sort((a, b) => {\n  if (a.json.chapter_index !== b.json.chapter_index)\n    return (a.json.chapter_index || 0) - (b.json.chapter_index || 0);\n  return (a.json.chunk_index || 0) - (b.json.chunk_index || 0);\n});\n\n// Group by chapter — guard against undefined chapter_index\nconst byChapter = {};\nfor (const item of chunks) {\n  const ci = item.json.chapter_index;\n  if (ci === undefined || ci === null) continue;\n  if (!byChapter[ci]) byChapter[ci] = [];\n  byChapter[ci].push(item.json);\n}\n\n// Reassemble\nlet reassembled = '';\nlet lastPartIndex = -1;\nconst chaptersOrdered = Object.keys(byChapter)\n  .map(Number)\n  .filter(n => !isNaN(n))\n  .sort((a, b) => a - b);\n\nfor (const ci of chaptersOrdered) {\n  const chapterChunks = byChapter[ci];\n  if (!chapterChunks || chapterChunks.length === 0) continue;\n  const first = chapterChunks[0];\n\n  // Re-insert h2 part separator if new part\n  if (first.part_index > 0 && first.part_index !== lastPartIndex) {\n    reassembled += `\\n<h2>${first.part_name}</h2>\\n`;\n    lastPartIndex = first.part_index;\n  }\n\n  // Join chunks — use translated_html if available, else original html\n  for (const chunk of chapterChunks) {\n    const content = chunk.translated_html || chunk.html || '';\n    reassembled += content + '\\n';\n  }\n}\n\nconst first = chunks[0]?.json || {};\nreturn [{ json: {\n  reassembled_html:  reassembled.trim(),\n  fingerprint,\n  course_id:         first.course_id,\n  target_course_id:  first.target_course_id,\n  source_language:   first.source_language,\n  target_language:   first.target_language,\n  total_chapters:    chaptersOrdered.length,\n  enabled_modules:   first.enabled_modules || []\n}}];\n"
       }
     },
     {
@@ -101,9 +101,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "c44c9f0e-3d71-4861-8bc2-8e61b90f1396",
-  "activeVersionId": "c44c9f0e-3d71-4861-8bc2-8e61b90f1396",
-  "versionCounter": 17,
+  "versionId": "9e3acbba-dc72-4e60-a8e7-41ec7ca0fa79",
+  "activeVersionId": "9e3acbba-dc72-4e60-a8e7-41ec7ca0fa79",
+  "versionCounter": 20,
   "triggerCount": 0,
   "shared": [
     {
@@ -126,9 +126,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-05T07:26:58.950Z",
-    "createdAt": "2026-06-05T07:26:58.950Z",
-    "versionId": "c44c9f0e-3d71-4861-8bc2-8e61b90f1396",
+    "updatedAt": "2026-06-08T13:04:33.626Z",
+    "createdAt": "2026-06-08T13:04:33.626Z",
+    "versionId": "9e3acbba-dc72-4e60-a8e7-41ec7ca0fa79",
     "workflowId": "odMhJgxadf3RPAHp",
     "nodes": [
       {
@@ -152,7 +152,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "\n// Input : array of processed chunks + original_html fingerprint\n// Each chunk has: chapter_index, chunk_index, part_index, part_name,\n//                 chapter_name, translated_html (output from agents),\n//                 was_chunked, preceding_context\n\nconst items = $input.all();\n\n// Separate fingerprint from chunks\n// Convention: the MAIN passes fingerprint as first item with type='fingerprint'\nconst fingerprint = items.find(i => i.json.type === 'fingerprint')?.json || null;\nconst chunks = items.filter(i => i.json.type !== 'fingerprint');\n\n// Sort: by chapter_index asc, then chunk_index asc\nchunks.sort((a, b) => {\n  if (a.json.chapter_index !== b.json.chapter_index)\n    return a.json.chapter_index - b.json.chapter_index;\n  return a.json.chunk_index - b.json.chunk_index;\n});\n\n// Group by chapter\nconst byChapter = {};\nfor (const item of chunks) {\n  const ci = item.json.chapter_index;\n  if (!byChapter[ci]) byChapter[ci] = [];\n  byChapter[ci].push(item.json);\n}\n\n// Reassemble\nlet reassembled = '';\nlet lastPartIndex = -1;\nconst chaptersOrdered = Object.keys(byChapter).map(Number).sort((a,b)=>a-b);\n\nfor (const ci of chaptersOrdered) {\n  const chapterChunks = byChapter[ci];\n  const first = chapterChunks[0];\n\n  // Re-insert h2 part separator if new part\n  if (first.part_index > 0 && first.part_index !== lastPartIndex) {\n    reassembled += `\\n<h2>${first.part_name}</h2>\\n`;\n    lastPartIndex = first.part_index;\n  }\n\n  // Join chunks of this chapter\n  // Use translated_html if available (post-pipeline), else original html\n  for (const chunk of chapterChunks) {\n    const content = chunk.translated_html || chunk.html || '';\n    reassembled += content + '\\n';\n  }\n}\n\nreturn [{ json: {\n  reassembled_html: reassembled.trim(),\n  fingerprint,\n  course_id:        chunks[0]?.json.course_id,\n  target_course_id: chunks[0]?.json.target_course_id,\n  source_language:  chunks[0]?.json.source_language,\n  target_language:  chunks[0]?.json.target_language,\n  total_chapters:   chaptersOrdered.length,\n  enabled_modules:  chunks[0]?.json.enabled_modules || []\n}}];\n"
+          "jsCode": "// Input : array of processed chunks + original_html fingerprint\n// Each chunk has: chapter_index, chunk_index, part_index, part_name,\n//                 chapter_name, translated_html (output from agents),\n//                 was_chunked, preceding_context\n\nconst items = $input.all();\n\n// Separate fingerprint from chunks\nconst fingerprint = items.find(i => i.json.type === 'fingerprint')?.json || null;\nconst chunks = items.filter(i => i.json.type !== 'fingerprint');\n\n// Sort: by chapter_index asc, then chunk_index asc\nchunks.sort((a, b) => {\n  if (a.json.chapter_index !== b.json.chapter_index)\n    return (a.json.chapter_index || 0) - (b.json.chapter_index || 0);\n  return (a.json.chunk_index || 0) - (b.json.chunk_index || 0);\n});\n\n// Group by chapter — guard against undefined chapter_index\nconst byChapter = {};\nfor (const item of chunks) {\n  const ci = item.json.chapter_index;\n  if (ci === undefined || ci === null) continue;\n  if (!byChapter[ci]) byChapter[ci] = [];\n  byChapter[ci].push(item.json);\n}\n\n// Reassemble\nlet reassembled = '';\nlet lastPartIndex = -1;\nconst chaptersOrdered = Object.keys(byChapter)\n  .map(Number)\n  .filter(n => !isNaN(n))\n  .sort((a, b) => a - b);\n\nfor (const ci of chaptersOrdered) {\n  const chapterChunks = byChapter[ci];\n  if (!chapterChunks || chapterChunks.length === 0) continue;\n  const first = chapterChunks[0];\n\n  // Re-insert h2 part separator if new part\n  if (first.part_index > 0 && first.part_index !== lastPartIndex) {\n    reassembled += `\\n<h2>${first.part_name}</h2>\\n`;\n    lastPartIndex = first.part_index;\n  }\n\n  // Join chunks — use translated_html if available, else original html\n  for (const chunk of chapterChunks) {\n    const content = chunk.translated_html || chunk.html || '';\n    reassembled += content + '\\n';\n  }\n}\n\nconst first = chunks[0]?.json || {};\nreturn [{ json: {\n  reassembled_html:  reassembled.trim(),\n  fingerprint,\n  course_id:         first.course_id,\n  target_course_id:  first.target_course_id,\n  source_language:   first.source_language,\n  target_language:   first.target_language,\n  total_chapters:    chaptersOrdered.length,\n  enabled_modules:   first.enabled_modules || []\n}}];\n"
         }
       },
       {
@@ -223,18 +223,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-05T07:26:58.972Z",
-        "id": 423,
+        "createdAt": "2026-06-08T13:04:35.862Z",
+        "id": 483,
         "workflowId": "odMhJgxadf3RPAHp",
-        "versionId": "c44c9f0e-3d71-4861-8bc2-8e61b90f1396",
+        "versionId": "9e3acbba-dc72-4e60-a8e7-41ec7ca0fa79",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-05T07:26:58.964Z",
-        "id": 422,
+        "createdAt": "2026-06-08T13:04:35.081Z",
+        "id": 482,
         "workflowId": "odMhJgxadf3RPAHp",
-        "versionId": "c44c9f0e-3d71-4861-8bc2-8e61b90f1396",
+        "versionId": "9e3acbba-dc72-4e60-a8e7-41ec7ca0fa79",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
