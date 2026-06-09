@@ -22,7 +22,7 @@ Pre-Processor ──────── Découpage en chapitres/chunks
 Glossary Loader ─────── common_glossary + TM de domaine (GitHub)
         │
         ▼
-GPT-4o Pre-Translation ─ Draft brut (rapide, glossaire enforced)
+Pre-Translation ────────── Draft brut (reasoning, glossaire enforced)
         │
         ▼
 A1 Source Analyst ──────── Audit culturel + structural du HTML source
@@ -31,7 +31,7 @@ A1 Source Analyst ──────── Audit culturel + structural du HTML s
 A2 Terminology Architect ── Glossaire de traduction + décisions terminologiques
         │
         ▼
-A3 MTPE (FR→EN | EN→FR) ─── Post-editing du draft GPT-4o → gold master
+A3 MTPE (FR→EN | EN→FR) ─── Post-editing du draft → gold master
         │
         ▼
 A4 Cultural Adapter ────── Swaps culturels (institutions, exemples, formats)
@@ -69,8 +69,7 @@ Iconik ─────────────────── Stockage assets
 
 | Composant | Modèle | Type | Temperature |
 |---|---|---|---|
-| GPT-4o Pre-Translation | `gpt-4o` | Standard | 0.1 |
-| A1 → A7 | `gpt-5.5-pro-2026-04-23` | Reasoning | — (omise) |
+| Pre-Translation → A7 | `gpt-5.5-pro-2026-04-23` | Reasoning | — (omise) |
 | A8 → A10 *(à venir)* | `gpt-5.5-pro-2026-04-23` | Reasoning | — |
 
 > Les modèles reasoning (`-pro`) n'acceptent pas de valeur `temperature` personnalisée.

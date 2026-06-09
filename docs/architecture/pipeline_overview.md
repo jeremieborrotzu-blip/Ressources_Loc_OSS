@@ -1,6 +1,6 @@
 # Vue d'ensemble du pipeline CLS v3
 
-**Version :** 3.0.0 | **Orchestrateur :** n8n (self-hosted, local) | **Modèles :** GPT-4o + GPT-5.4 | **Mode :** Batch API (livraison J+1)
+**Version :** 3.0.0 | **Orchestrateur :** n8n (self-hosted, local) | **Modèles :** GPT-5.5-pro (tous agents) | **Mode :** Batch API (livraison J+1)
 
 ---
 
@@ -20,13 +20,13 @@
 
 | Composant | Type | Modèle | Rôle |
 |---|---|---|---|
-| GPT-4o Pre-Translation | SUB workflow | GPT-4o Batch | 1ère passe de traduction brute |
-| A1 Source Analyst | Agent SUB | GPT-5.4 Batch | Audit forensic 6 piliers avant traduction |
-| A2 Terminology Architect | Agent SUB | GPT-5.4 Batch | Glossaire unifié (3 sources fusionnées) |
-| A3 MTPE Specialist | Agent SUB | GPT-5.4 Batch | Post-édition → Gold Master |
-| A4 Cultural Adapter | Agent SUB | GPT-5.4 Batch | Concept Swap culturel (swap libraries par domaine) |
-| A5 Quality Gatekeeper | Agent SUB | GPT-5.4 Batch | Score QA /100 + boucle ≤ 3 iter |
-| A6 Final Proofreader | Agent SUB | GPT-5.4 Batch | Relecture en isolation — naturalité |
+| Pre-Translation | SUB workflow | gpt-5.5-pro Batch | 1ère passe de traduction brute |
+| A1 Source Analyst | Agent SUB | gpt-5.5-pro Batch | Audit forensic 6 piliers avant traduction |
+| A2 Terminology Architect | Agent SUB | gpt-5.5-pro Batch | Glossaire unifié (3 sources fusionnées) |
+| A3 MTPE Specialist | Agent SUB | gpt-5.5-pro Batch | Post-édition → Gold Master |
+| A4 Cultural Adapter | Agent SUB | gpt-5.5-pro Batch | Concept Swap culturel (swap libraries par domaine) |
+| A5 Quality Gatekeeper | Agent SUB | gpt-5.5-pro Batch | Score QA /100 + boucle ≤ 3 iter |
+| A6 Final Proofreader | Agent SUB | gpt-5.5-pro Batch | Relecture en isolation — naturalité |
 | SUB Glossary Loader | SUB workflow | — | Charge CSV domaine + common_glossary depuis GitHub |
 
 **Hors scope pilote :** A7 AV & Caption (dépend Vimeo non connecté)
@@ -56,7 +56,7 @@ INPUT  : course_id (source) + course_id (cible) + direction (fr>en / en>fr)
 PHASE 1 (HTML) :
   HTML brut → [Pre-Processor] → chunks
   chunks → [A1] audit → [A2] glossaire
-  chunks → [GPT-4o] pré-trad → [A3] Gold Master → [A4] adapté culturellement
+  chunks → [Pre-Translation] pré-trad → [A3] Gold Master → [A4] adapté culturellement
          → [A5] QA (boucle) → [A6] relu → [Reassembler] HTML validé
 
 PHASE 2 (Assets) :

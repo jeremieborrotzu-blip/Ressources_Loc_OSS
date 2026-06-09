@@ -22,7 +22,7 @@ Documents AWS · Annexes PDF/DOCX/XLSX · Images · Liens externes
 ### Phase 1 — HTML complet en premier
 
 ```
-A1 → A2 → GPT-4o Pré-trad → A3 → A4 → A5 (boucle ≤3) → A6
+A1 → A2 → Pre-Translation → A3 → A4 → A5 (boucle ≤3) → A6
 ```
 
 **Gate de passage :** Phase 2 ne démarre QUE si :

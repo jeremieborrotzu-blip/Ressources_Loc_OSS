@@ -21,7 +21,7 @@ Les deux systèmes partagent la même infrastructure Batch API (Submitter + Poll
 
 ```
 Formulaire → HTML Extraction (OC API) → Pre-Processor → Glossary Load
-→ GPT-4o Pre-Translation → A1 → A2 → A3 (MTPE) → A4 → A5 (QA loop) → A6
+→ Pre-Translation → A1 → A2 → A3 (MTPE) → A4 → A5 (QA loop) → A6
 → Reassembler → Deliver Output (GitHub)
 ```
 
@@ -38,10 +38,10 @@ Formulaire → HTML Extraction (OC API) → Pre-Processor → Glossary Load
 
 ### Agents — détail
 
-#### GPT-4o Pre-Translation *(pré-traduction brute)*
+#### Pre-Translation *(pré-traduction brute)*
 - **Rôle :** Génère un premier jet de traduction brut, non finalisé, qui sert de draft pour A3
-- **Modèle :** `gpt-4o`
-- **Temperature :** 0.1
+- **Modèle :** `gpt-5.5-pro-2026-04-23` *(reasoning)*
+- **Temperature :** aucune (modèle reasoning)
 - **API :** OpenAI Batch API (asynchrone 24h)
 - **Input :** HTML source (chunks par chapitre)
 - **Output :** `pretranslation_draft` injecté dans le contexte A3
@@ -69,7 +69,7 @@ Formulaire → HTML Extraction (OC API) → Pre-Processor → Glossary Load
 ---
 
 #### A3 — MTPE FR→EN / EN→FR *(traduction MTPE)*
-- **Rôle :** Machine Translation Post-Editing — révise le draft GPT-4o à partir des décisions A1/A2. Produit le "gold master" de traduction, fidèle au sens, respectueux de la structure HTML
+- **Rôle :** Machine Translation Post-Editing — révise le draft Pre-Translation à partir des décisions A1/A2. Produit le "gold master" de traduction, fidèle au sens, respectueux de la structure HTML
 - **Modèle :** `gpt-5.5-pro-2026-04-23` *(reasoning)*
 - **Temperature :** aucune
 - **API :** OpenAI Batch API
@@ -168,7 +168,7 @@ Formulaire → AWS Downloader → routing par type de fichier
 
 | Agent | Phase | Modèle | Reasoning | Batch API | Temperature |
 |---|---|---|---|---|---|
-| GPT-4o Pre-Translation | 1 | `gpt-4o` | Non | ✅ | 0.1 |
+| Pre-Translation | 1 | `gpt-5.5-pro-2026-04-23` | ✅ | ✅ | — |
 | A1 Source Analyst | 1 | `gpt-5.5-pro-2026-04-23` | ✅ | ✅ | — |
 | A2 Terminology Architect | 1 | `gpt-5.5-pro-2026-04-23` | ✅ | ✅ | — |
 | A3 MTPE FR-EN | 1 | `gpt-5.5-pro-2026-04-23` | ✅ | ✅ | — |
