@@ -21,7 +21,7 @@
         ↓                                                               │
 [AGENT A2] Terminology Architect — Glossaire unifié                     │
         ↓                                                               │
-[GPT-4o] Pre-Translation        — 1ère passe brute                     │
+[Pre-Translation]               — 1ère passe brute (reasoning)         │
         ↓                                                               │
 [AGENT A3] MTPE Specialist      — Post-édition Gold Master             │
         ↓                                                               │
@@ -56,7 +56,7 @@
 
 | Étape | Modèle | Mode | Coût indicatif |
 |---|---|---|---|
-| Pré-traduction | GPT-4o | Batch API (−50%) | $0.54 / partie |
+| Pré-traduction | gpt-5.5-pro-2026-04-23 | Batch API (−50%) | estimé |
 | Agents A1→A6 | GPT-5.4 | Batch API (−50%) | ~$11 / partie |
 | **Total / partie** | | | **~$13.52** |
 
@@ -74,7 +74,7 @@ Livraison : Batch API OpenAI → résultats sous 24h.
 - [A5 — Quality Gatekeeper](agents/A5_quality_gatekeeper.md)
 - [A6 — Final Proofreader](agents/A6_final_proofreader.md)
 - [A7 — AV & Caption Specialist](agents/A7_av_caption.md) *(hors scope pilote)*
-- [GPT-4o Pre-Translation](agents/GPT4o_pretranslation.md)
+- [Pre-Translation](agents/pretranslation.md)
 
 ### Architecture
 - [Vue d'ensemble du pipeline](architecture/pipeline_overview.md)

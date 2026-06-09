@@ -61,7 +61,7 @@ Les modèles reasoning contrôlent la qualité et la cohérence de leur output v
 ```javascript
 // ❌ AVANT — injectait temperature même si non fournie
 body: {
-  model: inp.model || 'gpt-4o',
+  model: inp.model || 'gpt-5.5-pro-2026-04-23',
   messages: [...],
   max_completion_tokens: inp.max_tokens || 16000,
   temperature: inp.temperature ?? 0.1   // fallback 0.1 → erreur sur reasoning models
@@ -69,7 +69,7 @@ body: {
 
 // ✅ APRÈS — temperature omise si non passée explicitement par l'agent
 const body = {
-  model: inp.model || 'gpt-4o',
+  model: inp.model || 'gpt-5.5-pro-2026-04-23',
   messages: [...],
   max_completion_tokens: inp.max_tokens || 16000
 };
