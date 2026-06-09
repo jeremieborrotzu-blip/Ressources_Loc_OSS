@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T04:33:38.510Z",
+  "updatedAt": "2026-06-09T08:57:21.454Z",
   "createdAt": "2026-05-29T14:13:50.539Z",
   "id": "hNdY7a7cIqY1aLIm",
   "name": "[AGENT] CLS v3 — A1 Source Analyst",
@@ -103,7 +103,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    preceding_context: inp.preceding_context||'', detected_domain: inp.detected_domain||'',\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.2, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a1',\n    agent_name: 'A1 Source Analyst', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    preceding_context: inp.preceding_context||'', detected_domain: inp.detected_domain||'',\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.2', temperature: 0.2, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a1',\n    agent_name: 'A1 Source Analyst', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
       }
     },
     {
@@ -235,9 +235,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "0da55276-1477-41c6-a63b-622a74086456",
-  "activeVersionId": "0da55276-1477-41c6-a63b-622a74086456",
-  "versionCounter": 40,
+  "versionId": "890620f8-42c3-4cbd-a650-a8c0e0a62c2c",
+  "activeVersionId": "890620f8-42c3-4cbd-a650-a8c0e0a62c2c",
+  "versionCounter": 44,
   "triggerCount": 0,
   "shared": [
     {
@@ -260,9 +260,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-09T04:33:38.512Z",
-    "createdAt": "2026-06-09T04:33:38.512Z",
-    "versionId": "0da55276-1477-41c6-a63b-622a74086456",
+    "updatedAt": "2026-06-09T08:57:21.456Z",
+    "createdAt": "2026-06-09T08:57:21.456Z",
+    "versionId": "890620f8-42c3-4cbd-a650-a8c0e0a62c2c",
     "workflowId": "hNdY7a7cIqY1aLIm",
     "nodes": [
       {
@@ -361,7 +361,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    preceding_context: inp.preceding_context||'', detected_domain: inp.detected_domain||'',\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.2, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a1',\n    agent_name: 'A1 Source Analyst', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    preceding_context: inp.preceding_context||'', detected_domain: inp.detected_domain||'',\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.2', temperature: 0.2, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a1',\n    agent_name: 'A1 Source Analyst', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
         }
       },
       {
@@ -491,18 +491,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-09T04:33:38.554Z",
-        "id": 540,
+        "createdAt": "2026-06-09T08:57:21.492Z",
+        "id": 550,
         "workflowId": "hNdY7a7cIqY1aLIm",
-        "versionId": "0da55276-1477-41c6-a63b-622a74086456",
+        "versionId": "890620f8-42c3-4cbd-a650-a8c0e0a62c2c",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-09T04:33:38.545Z",
-        "id": 539,
+        "createdAt": "2026-06-09T08:57:21.483Z",
+        "id": 549,
         "workflowId": "hNdY7a7cIqY1aLIm",
-        "versionId": "0da55276-1477-41c6-a63b-622a74086456",
+        "versionId": "890620f8-42c3-4cbd-a650-a8c0e0a62c2c",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
