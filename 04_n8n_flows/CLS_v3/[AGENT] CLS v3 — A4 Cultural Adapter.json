@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T08:57:21.819Z",
+  "updatedAt": "2026-06-09T09:19:59.323Z",
   "createdAt": "2026-05-29T14:13:50.612Z",
   "id": "cHTqFQHBnEkeRAJB",
   "name": "[AGENT] CLS v3 — A4 Cultural Adapter",
@@ -103,7 +103,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a3out = inp.agent_output||{};\n  const a1out = inp.a1_audit||{};\n  const a2out = inp.a2_glossary||{};\n  const vars = {\n    course_id: inp.course_id||'', source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    audience: inp.audience||'',\n    source_content: inp.html||inp.source_html||'',\n    a3_gold_master: a3out.revised_content||'',\n    a1_cultural_flags: JSON.stringify(a1out.cultural_flags||(inp.a1_outputs||[]).flatMap(a=>a&&a.cultural_flags||[])||[]),\n    a2_terminology_decisions: JSON.stringify(a2out.translation_decisions||inp.translation_decisions||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    constraints: JSON.stringify(inp.constraints||[])\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.4', temperature: 0.3, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a4',\n    agent_name: 'A4 Cultural Adapter', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a3out = inp.agent_output||{};\n  const a1out = inp.a1_audit||{};\n  const a2out = inp.a2_glossary||{};\n  const vars = {\n    course_id: inp.course_id||'', source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    audience: inp.audience||'',\n    source_content: inp.html||inp.source_html||'',\n    a3_gold_master: a3out.revised_content||'',\n    a1_cultural_flags: JSON.stringify(a1out.cultural_flags||(inp.a1_outputs||[]).flatMap(a=>a&&a.cultural_flags||[])||[]),\n    a2_terminology_decisions: JSON.stringify(a2out.translation_decisions||inp.translation_decisions||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    constraints: JSON.stringify(inp.constraints||[])\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-pro-2026-04-23',\n max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a4',\n    agent_name: 'A4 Cultural Adapter', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
       }
     },
     {
@@ -235,9 +235,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "45bb3893-7abe-477e-81a6-41430fa75692",
-  "activeVersionId": "45bb3893-7abe-477e-81a6-41430fa75692",
-  "versionCounter": 36,
+  "versionId": "eae42a45-e66c-40bd-85da-0eff18a59529",
+  "activeVersionId": "eae42a45-e66c-40bd-85da-0eff18a59529",
+  "versionCounter": 45,
   "triggerCount": 0,
   "shared": [
     {
@@ -260,9 +260,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-09T08:57:21.820Z",
-    "createdAt": "2026-06-09T08:57:21.820Z",
-    "versionId": "45bb3893-7abe-477e-81a6-41430fa75692",
+    "updatedAt": "2026-06-09T09:19:59.323Z",
+    "createdAt": "2026-06-09T09:19:59.323Z",
+    "versionId": "eae42a45-e66c-40bd-85da-0eff18a59529",
     "workflowId": "cHTqFQHBnEkeRAJB",
     "nodes": [
       {
@@ -361,7 +361,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a3out = inp.agent_output||{};\n  const a1out = inp.a1_audit||{};\n  const a2out = inp.a2_glossary||{};\n  const vars = {\n    course_id: inp.course_id||'', source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    audience: inp.audience||'',\n    source_content: inp.html||inp.source_html||'',\n    a3_gold_master: a3out.revised_content||'',\n    a1_cultural_flags: JSON.stringify(a1out.cultural_flags||(inp.a1_outputs||[]).flatMap(a=>a&&a.cultural_flags||[])||[]),\n    a2_terminology_decisions: JSON.stringify(a2out.translation_decisions||inp.translation_decisions||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    constraints: JSON.stringify(inp.constraints||[])\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.2', temperature: 0.3, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a4',\n    agent_name: 'A4 Cultural Adapter', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a3out = inp.agent_output||{};\n  const a1out = inp.a1_audit||{};\n  const a2out = inp.a2_glossary||{};\n  const vars = {\n    course_id: inp.course_id||'', source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    audience: inp.audience||'',\n    source_content: inp.html||inp.source_html||'',\n    a3_gold_master: a3out.revised_content||'',\n    a1_cultural_flags: JSON.stringify(a1out.cultural_flags||(inp.a1_outputs||[]).flatMap(a=>a&&a.cultural_flags||[])||[]),\n    a2_terminology_decisions: JSON.stringify(a2out.translation_decisions||inp.translation_decisions||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    constraints: JSON.stringify(inp.constraints||[])\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23',\n max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a4',\n    agent_name: 'A4 Cultural Adapter', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
         }
       },
       {
@@ -491,18 +491,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-09T08:57:21.863Z",
-        "id": 558,
+        "createdAt": "2026-06-09T09:19:59.351Z",
+        "id": 602,
         "workflowId": "cHTqFQHBnEkeRAJB",
-        "versionId": "45bb3893-7abe-477e-81a6-41430fa75692",
+        "versionId": "eae42a45-e66c-40bd-85da-0eff18a59529",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-09T08:57:21.849Z",
-        "id": 557,
+        "createdAt": "2026-06-09T09:19:59.342Z",
+        "id": 601,
         "workflowId": "cHTqFQHBnEkeRAJB",
-        "versionId": "45bb3893-7abe-477e-81a6-41430fa75692",
+        "versionId": "eae42a45-e66c-40bd-85da-0eff18a59529",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }

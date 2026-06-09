@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T08:57:22.039Z",
+  "updatedAt": "2026-06-09T09:19:59.485Z",
   "createdAt": "2026-05-29T14:13:50.647Z",
   "id": "MQObMb9lhovhBBs8",
   "name": "[AGENT] CLS v3 — A6 Final Proofreader",
@@ -103,7 +103,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', target_language: inp.target_language||'en-US',\n    domain: inp.detected_domain||'',\n    adapted_content: inp.translated_html||inp.html||''\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.4', temperature: 0.1, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a6',\n    agent_name: 'A6 Final Proofreader', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', target_language: inp.target_language||'en-US',\n    domain: inp.detected_domain||'',\n    adapted_content: inp.translated_html||inp.html||''\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-pro-2026-04-23',\n max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a6',\n    agent_name: 'A6 Final Proofreader', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
       }
     },
     {
@@ -235,9 +235,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "2f48f5ff-6406-4e63-8740-55f522193ac2",
-  "activeVersionId": "2f48f5ff-6406-4e63-8740-55f522193ac2",
-  "versionCounter": 34,
+  "versionId": "e2f2c503-b1e2-4ac7-a9c5-242b8c9dc979",
+  "activeVersionId": "e2f2c503-b1e2-4ac7-a9c5-242b8c9dc979",
+  "versionCounter": 43,
   "triggerCount": 0,
   "shared": [
     {
@@ -260,9 +260,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-09T08:57:22.040Z",
-    "createdAt": "2026-06-09T08:57:22.040Z",
-    "versionId": "2f48f5ff-6406-4e63-8740-55f522193ac2",
+    "updatedAt": "2026-06-09T09:19:59.486Z",
+    "createdAt": "2026-06-09T09:19:59.486Z",
+    "versionId": "e2f2c503-b1e2-4ac7-a9c5-242b8c9dc979",
     "workflowId": "MQObMb9lhovhBBs8",
     "nodes": [
       {
@@ -361,7 +361,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', target_language: inp.target_language||'en-US',\n    domain: inp.detected_domain||'',\n    adapted_content: inp.translated_html||inp.html||''\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.2', temperature: 0.1, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a6',\n    agent_name: 'A6 Final Proofreader', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', target_language: inp.target_language||'en-US',\n    domain: inp.detected_domain||'',\n    adapted_content: inp.translated_html||inp.html||''\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23',\n max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a6',\n    agent_name: 'A6 Final Proofreader', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
         }
       },
       {
@@ -491,18 +491,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-09T08:57:22.067Z",
-        "id": 562,
+        "createdAt": "2026-06-09T09:19:59.514Z",
+        "id": 606,
         "workflowId": "MQObMb9lhovhBBs8",
-        "versionId": "2f48f5ff-6406-4e63-8740-55f522193ac2",
+        "versionId": "e2f2c503-b1e2-4ac7-a9c5-242b8c9dc979",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-09T08:57:22.060Z",
-        "id": 561,
+        "createdAt": "2026-06-09T09:19:59.507Z",
+        "id": 605,
         "workflowId": "MQObMb9lhovhBBs8",
-        "versionId": "2f48f5ff-6406-4e63-8740-55f522193ac2",
+        "versionId": "e2f2c503-b1e2-4ac7-a9c5-242b8c9dc979",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
