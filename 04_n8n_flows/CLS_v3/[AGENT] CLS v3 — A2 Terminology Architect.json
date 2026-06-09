@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T08:57:21.550Z",
+  "updatedAt": "2026-06-09T09:19:59.062Z",
   "createdAt": "2026-05-29T14:13:50.560Z",
   "id": "BKminhI3j8D4ybs1",
   "name": "[AGENT] CLS v3 — A2 Terminology Architect",
@@ -103,7 +103,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a1out = inp.a1_audit||inp.agent_output||{};\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    detected_domain: inp.detected_domain||'',\n    a1_audit: JSON.stringify(a1out), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n    domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n    domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.4', temperature: 0.2, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a2',\n    agent_name: 'A2 Terminology Architect', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a1out = inp.a1_audit||inp.agent_output||{};\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    detected_domain: inp.detected_domain||'',\n    a1_audit: JSON.stringify(a1out), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n    domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n    domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-pro-2026-04-23',\n max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a2',\n    agent_name: 'A2 Terminology Architect', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
       }
     },
     {
@@ -235,9 +235,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "5944a7bb-c345-414b-95c1-7bfd93c0b197",
-  "activeVersionId": "5944a7bb-c345-414b-95c1-7bfd93c0b197",
-  "versionCounter": 31,
+  "versionId": "4ae31d93-5dca-4a5b-981f-f077116ad4a0",
+  "activeVersionId": "4ae31d93-5dca-4a5b-981f-f077116ad4a0",
+  "versionCounter": 40,
   "triggerCount": 0,
   "shared": [
     {
@@ -260,9 +260,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-09T08:57:21.551Z",
-    "createdAt": "2026-06-09T08:57:21.551Z",
-    "versionId": "5944a7bb-c345-414b-95c1-7bfd93c0b197",
+    "updatedAt": "2026-06-09T09:19:59.063Z",
+    "createdAt": "2026-06-09T09:19:59.063Z",
+    "versionId": "4ae31d93-5dca-4a5b-981f-f077116ad4a0",
     "workflowId": "BKminhI3j8D4ybs1",
     "nodes": [
       {
@@ -361,7 +361,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a1out = inp.a1_audit||inp.agent_output||{};\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    detected_domain: inp.detected_domain||'',\n    a1_audit: JSON.stringify(a1out), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n    domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n    domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.2', temperature: 0.2, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a2',\n    agent_name: 'A2 Terminology Architect', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a1out = inp.a1_audit||inp.agent_output||{};\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', html_content: inp.html||inp.html_content||'',\n    detected_domain: inp.detected_domain||'',\n    a1_audit: JSON.stringify(a1out), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n    domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n    domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23',\n max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a2',\n    agent_name: 'A2 Terminology Architect', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
         }
       },
       {
@@ -491,18 +491,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-09T08:57:21.584Z",
-        "id": 552,
+        "createdAt": "2026-06-09T09:19:59.096Z",
+        "id": 596,
         "workflowId": "BKminhI3j8D4ybs1",
-        "versionId": "5944a7bb-c345-414b-95c1-7bfd93c0b197",
+        "versionId": "4ae31d93-5dca-4a5b-981f-f077116ad4a0",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-09T08:57:21.576Z",
-        "id": 551,
+        "createdAt": "2026-06-09T09:19:59.087Z",
+        "id": 595,
         "workflowId": "BKminhI3j8D4ybs1",
-        "versionId": "5944a7bb-c345-414b-95c1-7bfd93c0b197",
+        "versionId": "4ae31d93-5dca-4a5b-981f-f077116ad4a0",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
