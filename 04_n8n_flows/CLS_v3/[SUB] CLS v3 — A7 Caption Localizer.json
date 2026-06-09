@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T15:21:32.503Z",
+  "updatedAt": "2026-06-09T04:28:35.796Z",
   "createdAt": "2026-06-08T15:21:32.503Z",
   "id": "uS9xhXsA3gt1WNfF",
   "name": "[SUB] CLS v3 — A7 Caption Localizer",
@@ -393,7 +393,7 @@
   "pinData": null,
   "versionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
   "activeVersionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
-  "versionCounter": 3,
+  "versionCounter": 6,
   "triggerCount": 0,
   "shared": [
     {
@@ -808,6 +808,22 @@
         "workflowId": "uS9xhXsA3gt1WNfF",
         "versionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
         "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-09T04:28:35.825Z",
+        "id": 534,
+        "workflowId": "uS9xhXsA3gt1WNfF",
+        "versionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-09T04:28:35.816Z",
+        "id": 533,
+        "workflowId": "uS9xhXsA3gt1WNfF",
+        "versionId": "f6bc834f-0791-4d5d-a32d-a436a5d8ef3b",
+        "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
     ]

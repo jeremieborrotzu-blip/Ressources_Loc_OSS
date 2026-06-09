@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-06-09T04:33:38.690Z",
-  "createdAt": "2026-05-29T14:13:50.612Z",
-  "id": "cHTqFQHBnEkeRAJB",
-  "name": "[AGENT] CLS v3 — A4 Cultural Adapter",
+  "updatedAt": "2026-06-09T04:29:34.837Z",
+  "createdAt": "2026-05-29T14:13:50.597Z",
+  "id": "Eq5Bk0IbKstJMr4P",
+  "name": "[AGENT] CLS v3 — A3 MTPE EN-FR",
   "description": null,
   "active": true,
   "isArchived": false,
@@ -28,7 +28,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "return [{json: {sys_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a4_cultural_adapter_system.txt\", usr_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a4_cultural_adapter_user_template.txt\", ...($input.first().json)}}];"
+        "jsCode": "return [{json: {sys_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a3_mtpe_enfr_system.txt\", usr_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a3_mtpe_enfr_user_template.txt\", ...($input.first().json)}}];"
       }
     },
     {
@@ -103,7 +103,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a3out = inp.agent_output||{};\n  const a1out = inp.a1_audit||{};\n  const a2out = inp.a2_glossary||{};\n  const vars = {\n    course_id: inp.course_id||'', source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    audience: inp.audience||'',\n    source_content: inp.html||inp.source_html||'',\n    a3_gold_master: a3out.revised_content||'',\n    a1_cultural_flags: JSON.stringify(a1out.cultural_flags||(inp.a1_outputs||[]).flatMap(a=>a&&a.cultural_flags||[])||[]),\n    a2_terminology_decisions: JSON.stringify(a2out.translation_decisions||inp.translation_decisions||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    constraints: JSON.stringify(inp.constraints||[])\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.3, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a4',\n    agent_name: 'A4 Cultural Adapter', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', detected_domain: inp.detected_domain||'',\n    html_content: inp.html||inp.html_content||'', source_html: inp.html||inp.source_html||'',\n    pretranslation_draft: inp.pretranslation_draft||inp.translated_html||'',\n    translated_html: inp.translated_html||'',\n    preceding_context: inp.preceding_context||'',\n    a1_audit: JSON.stringify(inp.a1_audit||{}), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n    a2_glossary: JSON.stringify(inp.a2_glossary||{}), a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n    domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n    iteration: inp.iteration||1, failing_segments: JSON.stringify(inp.failing_segments||[]),\n    previous_qa_report: JSON.stringify(inp.previous_qa_report||{}),\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.3, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a3mtpeenfr',\n    agent_name: 'A3 MTPE EN-FR', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
       }
     },
     {
@@ -144,7 +144,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const p = $input.first().json;\nconst origItems = $('Input from MAIN').all().map(i => i.json);\nconst results = p.results || [{custom_id: null, parsed_content: p.agent_output}];\n\nconst rMap = {};\nresults.forEach(r => {\n  const m = (r.custom_id||'').match(/-ch(\\d+)-ck(\\d+)-/);\n  if(m) rMap[m[1]+'-'+m[2]] = r.parsed_content;\n});\n\nif(p.status==='failed'||p.status==='timed_out')\n  return origItems.map(orig => ({json:{\n    status:'error', agent:'A4 Cultural Adapter', error:p.error, escalation:true,\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1\n  }}));\n\nreturn origItems.map(orig => {\n  const key = (orig.chapter_index||0)+'-'+(orig.chunk_index||1);\n  const ao = rMap[key] || results[0]?.parsed_content || null;\n  const a4out = ao||{};\n  return {json:{\n    status:'ok', agent:'A4 Cultural Adapter', agent_output:ao,\n    translated_html: a4out.adapted_content||'',\n    a4_swap_log: a4out.swap_log||[],\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1,\n    pipeline_meta:p.pipeline_meta||{},\n    html:orig.html||orig.source_html||'', source_html:orig.html||orig.source_html||'',\n    a1_audit:orig.a1_audit||{}, a2_glossary:orig.a2_glossary||{},\n    a1_outputs:orig.a1_outputs||[], common_glossary:orig.common_glossary||[],\n    domain_validated_tm:orig.domain_validated_tm||[], domain_unvalidated_tm:orig.domain_unvalidated_tm||[],\n    detected_domain:orig.detected_domain||'', source_language:orig.source_language||'fr',\n    target_language:orig.target_language||'en-US', target_course_id:orig.target_course_id||'',\n    score_target:orig.score_target||90, iteration:orig.iteration||1,\n    preceding_context:orig.preceding_context||'', enabled_modules:orig.enabled_modules||{}\n  }};\n});"
+        "jsCode": "const p = $input.first().json;\nconst origItems = $('Input from MAIN').all().map(i => i.json);\nconst results = p.results || [{custom_id: null, parsed_content: p.agent_output}];\n\n// Build map: 'chX-ckY' → parsed_content\nconst rMap = {};\nresults.forEach(r => {\n  const m = (r.custom_id||'').match(/-ch(\\d+)-ck(\\d+)-/);\n  if(m) rMap[m[1]+'-'+m[2]] = r.parsed_content;\n});\n\nif(p.status==='failed'||p.status==='timed_out')\n  return origItems.map(orig => ({json:{\n    status:'error', agent:'A3 MTPE EN-FR', error:p.error, escalation:true,\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1\n  }}));\n\nreturn origItems.map(orig => {\n  const key = (orig.chapter_index||0)+'-'+(orig.chunk_index||1);\n  const ao = rMap[key] || results[0]?.parsed_content || null;\n  return {json:{\n    status:'ok', agent:'A3 MTPE EN-FR', agent_output:ao,\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1,\n    pipeline_meta:p.pipeline_meta||{},\n    html:orig.html||orig.source_html||'', source_html:orig.html||orig.source_html||'',\n    a1_audit:orig.a1_audit||{}, a2_glossary:orig.a2_glossary||{},\n    a1_outputs:orig.a1_outputs||[], common_glossary:orig.common_glossary||[],\n    domain_validated_tm:orig.domain_validated_tm||[], domain_unvalidated_tm:orig.domain_unvalidated_tm||[],\n    detected_domain:orig.detected_domain||'', source_language:orig.source_language||'fr',\n    target_language:orig.target_language||'en-US', target_course_id:orig.target_course_id||'',\n    score_target:orig.score_target||90, iteration:orig.iteration||1,\n    preceding_context:orig.preceding_context||'', enabled_modules:orig.enabled_modules||{}\n  }};\n});"
       }
     }
   ],
@@ -235,16 +235,16 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "dfe1a148-d83d-44bc-9654-50d882d8a02e",
-  "activeVersionId": "dfe1a148-d83d-44bc-9654-50d882d8a02e",
-  "versionCounter": 32,
+  "versionId": "d433f17f-197d-49c1-927b-83e785649c18",
+  "activeVersionId": "d433f17f-197d-49c1-927b-83e785649c18",
+  "versionCounter": 27,
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2026-05-29T14:13:50.613Z",
-      "createdAt": "2026-05-29T14:13:50.613Z",
+      "updatedAt": "2026-05-29T14:13:50.598Z",
+      "createdAt": "2026-05-29T14:13:50.598Z",
       "role": "workflow:owner",
-      "workflowId": "cHTqFQHBnEkeRAJB",
+      "workflowId": "Eq5Bk0IbKstJMr4P",
       "projectId": "7y0kZCkeSDugmpzP",
       "project": {
         "updatedAt": "2026-03-12T16:05:16.582Z",
@@ -260,10 +260,10 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-09T04:33:38.691Z",
-    "createdAt": "2026-06-09T04:33:38.691Z",
-    "versionId": "dfe1a148-d83d-44bc-9654-50d882d8a02e",
-    "workflowId": "cHTqFQHBnEkeRAJB",
+    "updatedAt": "2026-06-09T04:29:34.838Z",
+    "createdAt": "2026-06-09T04:29:34.838Z",
+    "versionId": "d433f17f-197d-49c1-927b-83e785649c18",
+    "workflowId": "Eq5Bk0IbKstJMr4P",
     "nodes": [
       {
         "id": "n0",
@@ -286,7 +286,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "return [{json: {sys_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a4_cultural_adapter_system.txt\", usr_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a4_cultural_adapter_user_template.txt\", ...($input.first().json)}}];"
+          "jsCode": "return [{json: {sys_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a3_mtpe_enfr_system.txt\", usr_url: \"https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/contents/01_prompts/a3_mtpe_enfr_user_template.txt\", ...($input.first().json)}}];"
         }
       },
       {
@@ -361,7 +361,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const a3out = inp.agent_output||{};\n  const a1out = inp.a1_audit||{};\n  const a2out = inp.a2_glossary||{};\n  const vars = {\n    course_id: inp.course_id||'', source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    audience: inp.audience||'',\n    source_content: inp.html||inp.source_html||'',\n    a3_gold_master: a3out.revised_content||'',\n    a1_cultural_flags: JSON.stringify(a1out.cultural_flags||(inp.a1_outputs||[]).flatMap(a=>a&&a.cultural_flags||[])||[]),\n    a2_terminology_decisions: JSON.stringify(a2out.translation_decisions||inp.translation_decisions||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    constraints: JSON.stringify(inp.constraints||[])\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.3, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a4',\n    agent_name: 'A4 Cultural Adapter', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', detected_domain: inp.detected_domain||'',\n    html_content: inp.html||inp.html_content||'', source_html: inp.html||inp.source_html||'',\n    pretranslation_draft: inp.pretranslation_draft||inp.translated_html||'',\n    translated_html: inp.translated_html||'',\n    preceding_context: inp.preceding_context||'',\n    a1_audit: JSON.stringify(inp.a1_audit||{}), a1_outputs: JSON.stringify(inp.a1_outputs||[]),\n    a2_glossary: JSON.stringify(inp.a2_glossary||{}), a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    domain_validated_tm: JSON.stringify(inp.domain_validated_tm||[]),\n    domain_unvalidated_tm: JSON.stringify(inp.domain_unvalidated_tm||[]),\n    iteration: inp.iteration||1, failing_segments: JSON.stringify(inp.failing_segments||[]),\n    previous_qa_report: JSON.stringify(inp.previous_qa_report||{}),\n    score_target: inp.score_target||90\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.3, max_tokens: 16000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a3mtpeenfr',\n    agent_name: 'A3 MTPE EN-FR', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
         }
       },
       {
@@ -402,7 +402,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const p = $input.first().json;\nconst origItems = $('Input from MAIN').all().map(i => i.json);\nconst results = p.results || [{custom_id: null, parsed_content: p.agent_output}];\n\nconst rMap = {};\nresults.forEach(r => {\n  const m = (r.custom_id||'').match(/-ch(\\d+)-ck(\\d+)-/);\n  if(m) rMap[m[1]+'-'+m[2]] = r.parsed_content;\n});\n\nif(p.status==='failed'||p.status==='timed_out')\n  return origItems.map(orig => ({json:{\n    status:'error', agent:'A4 Cultural Adapter', error:p.error, escalation:true,\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1\n  }}));\n\nreturn origItems.map(orig => {\n  const key = (orig.chapter_index||0)+'-'+(orig.chunk_index||1);\n  const ao = rMap[key] || results[0]?.parsed_content || null;\n  const a4out = ao||{};\n  return {json:{\n    status:'ok', agent:'A4 Cultural Adapter', agent_output:ao,\n    translated_html: a4out.adapted_content||'',\n    a4_swap_log: a4out.swap_log||[],\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1,\n    pipeline_meta:p.pipeline_meta||{},\n    html:orig.html||orig.source_html||'', source_html:orig.html||orig.source_html||'',\n    a1_audit:orig.a1_audit||{}, a2_glossary:orig.a2_glossary||{},\n    a1_outputs:orig.a1_outputs||[], common_glossary:orig.common_glossary||[],\n    domain_validated_tm:orig.domain_validated_tm||[], domain_unvalidated_tm:orig.domain_unvalidated_tm||[],\n    detected_domain:orig.detected_domain||'', source_language:orig.source_language||'fr',\n    target_language:orig.target_language||'en-US', target_course_id:orig.target_course_id||'',\n    score_target:orig.score_target||90, iteration:orig.iteration||1,\n    preceding_context:orig.preceding_context||'', enabled_modules:orig.enabled_modules||{}\n  }};\n});"
+          "jsCode": "const p = $input.first().json;\nconst origItems = $('Input from MAIN').all().map(i => i.json);\nconst results = p.results || [{custom_id: null, parsed_content: p.agent_output}];\n\n// Build map: 'chX-ckY' → parsed_content\nconst rMap = {};\nresults.forEach(r => {\n  const m = (r.custom_id||'').match(/-ch(\\d+)-ck(\\d+)-/);\n  if(m) rMap[m[1]+'-'+m[2]] = r.parsed_content;\n});\n\nif(p.status==='failed'||p.status==='timed_out')\n  return origItems.map(orig => ({json:{\n    status:'error', agent:'A3 MTPE EN-FR', error:p.error, escalation:true,\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1\n  }}));\n\nreturn origItems.map(orig => {\n  const key = (orig.chapter_index||0)+'-'+(orig.chunk_index||1);\n  const ao = rMap[key] || results[0]?.parsed_content || null;\n  return {json:{\n    status:'ok', agent:'A3 MTPE EN-FR', agent_output:ao,\n    course_id:p.course_id||orig.course_id,\n    chapter_index:orig.chapter_index||0, chunk_index:orig.chunk_index||1,\n    pipeline_meta:p.pipeline_meta||{},\n    html:orig.html||orig.source_html||'', source_html:orig.html||orig.source_html||'',\n    a1_audit:orig.a1_audit||{}, a2_glossary:orig.a2_glossary||{},\n    a1_outputs:orig.a1_outputs||[], common_glossary:orig.common_glossary||[],\n    domain_validated_tm:orig.domain_validated_tm||[], domain_unvalidated_tm:orig.domain_unvalidated_tm||[],\n    detected_domain:orig.detected_domain||'', source_language:orig.source_language||'fr',\n    target_language:orig.target_language||'en-US', target_course_id:orig.target_course_id||'',\n    score_target:orig.score_target||90, iteration:orig.iteration||1,\n    preceding_context:orig.preceding_context||'', enabled_modules:orig.enabled_modules||{}\n  }};\n});"
         }
       }
     ],
@@ -491,18 +491,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-09T04:33:38.734Z",
-        "id": 544,
-        "workflowId": "cHTqFQHBnEkeRAJB",
-        "versionId": "dfe1a148-d83d-44bc-9654-50d882d8a02e",
+        "createdAt": "2026-06-09T04:29:34.866Z",
+        "id": 538,
+        "workflowId": "Eq5Bk0IbKstJMr4P",
+        "versionId": "d433f17f-197d-49c1-927b-83e785649c18",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-09T04:33:38.726Z",
-        "id": 543,
-        "workflowId": "cHTqFQHBnEkeRAJB",
-        "versionId": "dfe1a148-d83d-44bc-9654-50d882d8a02e",
+        "createdAt": "2026-06-09T04:29:34.858Z",
+        "id": 537,
+        "workflowId": "Eq5Bk0IbKstJMr4P",
+        "versionId": "d433f17f-197d-49c1-927b-83e785649c18",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
