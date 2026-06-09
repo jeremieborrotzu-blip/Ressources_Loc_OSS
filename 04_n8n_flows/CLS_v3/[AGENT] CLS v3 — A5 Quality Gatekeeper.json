@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T04:33:38.785Z",
+  "updatedAt": "2026-06-09T08:57:21.947Z",
   "createdAt": "2026-05-29T14:13:50.630Z",
   "id": "De0vqzEM9LlJ0wVB",
   "name": "[AGENT] CLS v3 — A5 Quality Gatekeeper",
@@ -103,7 +103,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    translated_html: inp.translated_html||'',\n    source_html: inp.html||inp.source_html||'',\n    a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    a1_audit: JSON.stringify(inp.a1_audit||{}),\n    a2_glossary: JSON.stringify(inp.a2_glossary||{}),\n    score_target: inp.score_target||90,\n    iteration: inp.iteration||1,\n    failing_segments: JSON.stringify(inp.failing_segments||[]),\n    previous_qa_report: JSON.stringify(inp.previous_qa_report||{})\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.1, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a5',\n    agent_name: 'A5 Quality Gatekeeper', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+        "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    translated_html: inp.translated_html||'',\n    source_html: inp.html||inp.source_html||'',\n    a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    a1_audit: JSON.stringify(inp.a1_audit||{}),\n    a2_glossary: JSON.stringify(inp.a2_glossary||{}),\n    score_target: inp.score_target||90,\n    iteration: inp.iteration||1,\n    failing_segments: JSON.stringify(inp.failing_segments||[]),\n    previous_qa_report: JSON.stringify(inp.previous_qa_report||{})\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.2', temperature: 0.1, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a5',\n    agent_name: 'A5 Quality Gatekeeper', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
       }
     },
     {
@@ -235,9 +235,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "7c8868e9-e9a1-4308-bb68-d9881e91f14e",
-  "activeVersionId": "7c8868e9-e9a1-4308-bb68-d9881e91f14e",
-  "versionCounter": 30,
+  "versionId": "c5f9c7c4-009a-4d63-84bb-d293927a4821",
+  "activeVersionId": "c5f9c7c4-009a-4d63-84bb-d293927a4821",
+  "versionCounter": 34,
   "triggerCount": 0,
   "shared": [
     {
@@ -260,9 +260,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-09T04:33:38.786Z",
-    "createdAt": "2026-06-09T04:33:38.786Z",
-    "versionId": "7c8868e9-e9a1-4308-bb68-d9881e91f14e",
+    "updatedAt": "2026-06-09T08:57:21.948Z",
+    "createdAt": "2026-06-09T08:57:21.948Z",
+    "versionId": "c5f9c7c4-009a-4d63-84bb-d293927a4821",
     "workflowId": "De0vqzEM9LlJ0wVB",
     "nodes": [
       {
@@ -361,7 +361,7 @@
           300
         ],
         "parameters": {
-          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    translated_html: inp.translated_html||'',\n    source_html: inp.html||inp.source_html||'',\n    a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    a1_audit: JSON.stringify(inp.a1_audit||{}),\n    a2_glossary: JSON.stringify(inp.a2_glossary||{}),\n    score_target: inp.score_target||90,\n    iteration: inp.iteration||1,\n    failing_segments: JSON.stringify(inp.failing_segments||[]),\n    previous_qa_report: JSON.stringify(inp.previous_qa_report||{})\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.5-2026-04-23', temperature: 0.1, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a5',\n    agent_name: 'A5 Quality Gatekeeper', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
+          "jsCode": "const items = $('Input from MAIN').all().map(i => i.json);\nconst sys = Buffer.from($('Load System').first().json.content,'base64').toString('utf-8');\nconst usrTemplate = Buffer.from($('Load User').first().json.content,'base64').toString('utf-8');\n\nreturn items.map(inp => {\n  let usr = usrTemplate;\n  const vars = {\n    course_id: inp.course_id||'', chapter_index: inp.chapter_index||0,\n    chunk_index: inp.chunk_index||1, source_language: inp.source_language||'fr',\n    target_language: inp.target_language||'en-US', domain: inp.detected_domain||'',\n    translated_html: inp.translated_html||'',\n    source_html: inp.html||inp.source_html||'',\n    a4_swap_log: JSON.stringify(inp.a4_swap_log||[]),\n    common_glossary: JSON.stringify(inp.common_glossary||[]),\n    a1_audit: JSON.stringify(inp.a1_audit||{}),\n    a2_glossary: JSON.stringify(inp.a2_glossary||{}),\n    score_target: inp.score_target||90,\n    iteration: inp.iteration||1,\n    failing_segments: JSON.stringify(inp.failing_segments||[]),\n    previous_qa_report: JSON.stringify(inp.previous_qa_report||{})\n  };\n  Object.entries(vars).forEach(([k,v]) => {\n    usr = usr.replace(new RegExp('\\\\{{'+k+'\\\\}}','g'), String(v));\n  });\n  return {json:{\n    system_prompt: sys, user_message: usr,\n    model: 'gpt-5.2', temperature: 0.1, max_tokens: 8000,\n    custom_id: (inp.course_id||'x')+'-ch'+(inp.chapter_index||0)+'-ck'+(inp.chunk_index||1)+'-a5',\n    agent_name: 'A5 Quality Gatekeeper', course_id: inp.course_id,\n    chapter_index: inp.chapter_index, chunk_index: inp.chunk_index,\n    pipeline_meta: inp.pipeline_meta||{}\n  }};\n});"
         }
       },
       {
@@ -491,18 +491,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-09T04:33:38.813Z",
-        "id": 546,
+        "createdAt": "2026-06-09T08:57:21.978Z",
+        "id": 560,
         "workflowId": "De0vqzEM9LlJ0wVB",
-        "versionId": "7c8868e9-e9a1-4308-bb68-d9881e91f14e",
+        "versionId": "c5f9c7c4-009a-4d63-84bb-d293927a4821",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-09T04:33:38.806Z",
-        "id": 545,
+        "createdAt": "2026-06-09T08:57:21.971Z",
+        "id": 559,
         "workflowId": "De0vqzEM9LlJ0wVB",
-        "versionId": "7c8868e9-e9a1-4308-bb68-d9881e91f14e",
+        "versionId": "c5f9c7c4-009a-4d63-84bb-d293927a4821",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
