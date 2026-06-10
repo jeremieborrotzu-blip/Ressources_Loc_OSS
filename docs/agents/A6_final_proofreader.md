@@ -1,8 +1,8 @@
 # A6 — Final Proofreader
 
 **Position dans le pipeline :** Après A5 PASS (score ≥ 90) | Avant livraison
-**Modèle :** GPT-5.4 — Batch API
-**Température :** 0.2
+**Modèle :** `gpt-5.5-pro-2026-04-23` (reasoning) — Batch API
+**Température :** aucune (modèle reasoning — temperature non supportée)
 **Prompt :** `01_prompts/a6_final_proofreader_system.txt` + `a6_final_proofreader_user_template.txt`
 
 ---

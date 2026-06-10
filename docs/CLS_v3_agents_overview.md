@@ -121,7 +121,7 @@ Formulaire → HTML Extraction (OC API) → Pre-Processor → Glossary Load
 | **Batch Submitter** | Construit le JSONL, upload vers OpenAI Files API, crée le batch |
 | **Batch Poller** | Polling toutes les 15 min, parse les résultats quand batch `completed` |
 | **Reassembler** | Réassemble les chunks traduits en HTML complet, 7 checks structurels |
-| **Deliver Output** | Push HTML + rapport Markdown sur GitHub (branche review) |
+| **Deliver Output** | Push 8 fichiers sur GitHub (branche `main`) : HTML + review .md + qa_report .md (état des lieux HTML de sortie) + decision_log + tm_patch + 3× ToDo CSV |
 
 ---
 
