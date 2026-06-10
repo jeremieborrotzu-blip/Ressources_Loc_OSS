@@ -86,8 +86,27 @@ Iconik ─────────────────── Stockage assets
 |---|---|---|
 | **Audit A1** | Pre-Translation + A1 | Rapport audit par email |
 | **Score de localisabilité** | Pre-Translation + A1 + A2 | Score /100 par email |
-| **Quality Check** | Pre-Translation + A1–A5 | Rapport QA par email |
-| **Localisation complète** | Pre-Translation + A1–A6 + Reassembler | HTML pushé sur GitHub |
+| **Quality Check** | Pre-Translation + A1–A5 | Rapport QA des segments (avant réassemblage) par email |
+| **Localisation complète** | Pre-Translation + A1–A6 + Reassembler | 8 fichiers GitHub + email (liens) |
+
+> Note : « Quality Check » évalue la qualité de **traduction des segments** (score A5), pas le HTML final. L'**état des lieux du HTML de sortie** (7 checks structurels + métriques) est produit en localisation complète, dans `{target}_qa_report_*.md`.
+
+---
+
+## ⚠️ Lancement — toujours via le formulaire (mode production)
+
+**Lancer le pipeline via l'URL du formulaire, jamais via « Execute workflow » (manuel).**
+
+Le pipeline utilise un nœud `Buffer for A6` qui synchronise les chunks via
+`$getWorkflowStaticData` — celui-ci n'est fiable **qu'en exécution de production**
+(workflow actif + déclenché par formulaire/webhook). En lancement manuel, le buffer
+ne peut pas accumuler les chunks → le run se bloque après A5. De plus, une exécution
+manuelle dépend de l'onglet navigateur (elle meurt si on le ferme ou si le poste se met
+en veille), ce qui est incompatible avec un pipeline Batch de plusieurs heures.
+
+```
+URL formulaire : http://localhost:5678/form/f146189f-507c-44da-beb7-6c888a156a3f
+```
 
 ---
 

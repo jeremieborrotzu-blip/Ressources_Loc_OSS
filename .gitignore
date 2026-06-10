@@ -12,3 +12,6 @@
 # Logs / temporaires
 *.log
 *.tmp
+
+# Documents de recherche lourds (gardés en local, non versionnés)
+06_specs/research/*.pdf
