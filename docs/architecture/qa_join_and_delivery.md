@@ -110,9 +110,26 @@ out.push({ json: { type:'fingerprint', urls:fp.urls,
 
 ```
 Call Reassembler → Structural OK?
-   ├─[OK]      → Call Deliver Output → Format HTML Delivery → Send HTML Email
+   ├─[OK]      → Prepare Deliver Input → Call Deliver Output → Format HTML Delivery → Send HTML Email
    └─[blocked] → Flag BLOCKED
 ```
+
+### 4.0 `Prepare Deliver Input` (consolidation)
+Le SUB Deliver est appelé en `passThrough` : sans consolidation, il ne reçoit que
+l'output du Validator (checks structurels + `final_html`) — **pas** le score A5 ni les
+logs A4/A6, qui ne survivent pas au Reassembler. Ce node Code consolide, avant l'appel :
+
+| Champ | Source |
+|---|---|
+| `checks` / `structural_checks` | `Call Reassembler` (output Validator) — les 7 checks du HTML de sortie |
+| `final_html`, `structural_integrity` | `Call Reassembler` |
+| `score_total` (moyenne A5) | `Buffer for A6` (items porteurs de `score_total`) |
+| `a4_swap_log`, `a6_issue_log` | `Merge Phase 1` (agrégés par chunk) |
+| `a5_summary`, `a5_qa_report` | calculés depuis les scores A5 |
+
+> Sans ce node, `decision_log` et `qa_report` étaient livrés **amputés** des logs A4/A6
+> et du score (le Deliver lisait des champs jamais fournis). Corrigé aussi : le Validator
+> sort `checks`, le Deliver lisait `structural_checks` → mapping rétabli.
 
 ### 4.1 `Call Deliver Output` (SUB `fBgHok8kQUPxlTAT`, 11 nœuds)
 Pousse **8 fichiers** sur GitHub via des nœuds **GitHub natifs** (plus de HTTP Request,
@@ -122,7 +139,7 @@ plus de Google Doc) dans `07_runs/{src}/output/` :
 |---|---|
 | `{tgt}_localized_{dir}.html` | HTML localisé final |
 | `{tgt}_review_{dir}.md` | Review (HTML mirror, import Notion) |
-| `{tgt}_qa_report_{dir}.md` | Rapport QA + checklist Phase 2 |
+| `{tgt}_qa_report_{dir}.md` | **État des lieux du HTML de sortie** (voir 4.3) + checklist Phase 2 |
 | `{tgt}_decision_log_{dir}.json` | A4 swap log + A5 QA + A6 issues + checks |
 | `{tgt}_tm_patch_{dir}.csv` | Nouveaux termes pour la TM |
 | `{tgt}_todo_static_graphics_{dir}.csv` | → A8 |
@@ -142,6 +159,24 @@ les liens GitHub. `Send HTML Email` envoie en `emailFormat: html`.
 > **email sans pièce jointe ni lien**. Remplacé par une livraison **par liens GitHub**
 > (pas de pièce jointe). Voir aussi la règle binaires n8n.
 
+### 4.3 `qa_report.md` — état des lieux du HTML de sortie
+Le rapport QA livré n'évalue pas seulement la traduction (score A5 par chunk) mais
+fait un **état des lieux du HTML final réassemblé** :
+
+- **Verdict structurel** : `structural_integrity` + les **7 checks** du Validator listés
+  un par un (PASS/FAIL + détail) — balance des balises, `data-claire-semantic`, blocs
+  atomiques, texte orphelin, hiérarchie h2/h3/h4, URLs, nombre de blocs de code.
+- **Métriques du HTML produit** : nombre de caractères, parties (h2), chapitres (h3),
+  sous-sections (h4), blocs de code, liens, images — calculées depuis `final_html`.
+- **Score linguistique A5** (moyenne + par chunk) et **issues A6** (naturalness).
+- **Checklist Phase 2** (graphics / liens / vidéos).
+
+> Distinction clé : le mode **Quality Check** (case à cocher seule) évalue la qualité
+> de **traduction des segments AVANT réassemblage** (score A5) — il ne voit pas le HTML
+> final. L'**état des lieux du HTML de sortie** n'existe qu'en sortie de localisation
+> complète, dans `qa_report.md`. Un mode « QA du HTML de sortie » autonome reste à
+> construire si on veut re-checker un HTML déjà livré sans relancer tout le pipeline.
+
 ---
 
 ## 5. Récapitulatif des correctifs 2026-06-10
@@ -153,9 +188,12 @@ les liens GitHub. `Send HTML Email` envoie en `emailFormat: html`.
 | `Merge Phase 1` | chapter_index/chunk_index seuls | + part_index/part_name/chapter_name + fingerprint |
 | `Format HTML Delivery` | lisait `Call Reassembler.final_html` | lit `Call Deliver Output.deliverables` (liens) |
 | `Send HTML Email` | PJ via `Buffer.from` (cassée) | corps HTML avec liens GitHub |
+| `Prepare Deliver Input` (nouveau) | — | consolide checks + score A5 + logs A4/A6 avant le Deliver |
+| `qa_report.md` | score A5 + issues seulement | + état des lieux structurel du HTML de sortie (7 checks + métriques) |
+| decision_log `structural_checks` | vide (mauvais nom lu) | mapping `checks`→`structural_checks` rétabli |
 
-MAIN passé de 50 → 51 nœuds. Appliqué via API publique n8n + `wal_checkpoint(TRUNCATE)`
-(persistance après redémarrage Docker).
+MAIN passé de 50 → 52 nœuds (Buffer for A6 + Prepare Deliver Input). Appliqué via API
+publique n8n + `wal_checkpoint(TRUNCATE)` (persistance après redémarrage Docker).
 
 **Reste à valider :** un run complet `8787276` de bout en bout (4 chunks → A6 →
 réassemblage → email avec liens).

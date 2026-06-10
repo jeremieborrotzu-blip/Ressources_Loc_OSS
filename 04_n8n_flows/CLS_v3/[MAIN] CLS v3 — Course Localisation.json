@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-10T09:02:54.787Z",
+  "updatedAt": "2026-06-10T09:44:49.316Z",
   "createdAt": "2026-05-29T14:16:26.563Z",
   "id": "ApjYq9sdM5LKRVlq",
   "name": "[MAIN] CLS v3 — Course Localisation",
@@ -962,6 +962,19 @@
         6420,
         320
       ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consolide tout ce dont le Deliver a besoin pour un état des lieux complet\n// du HTML de SORTIE : checks structurels du Validator + score A5 + logs A4/A6.\nconst v = $('Call Reassembler').first().json;     // output du Validator\n\n// score A5 moyen — depuis Buffer for A6 (items porteurs de score_total)\nlet scores = [];\ntry {\n  $('Buffer for A6').all().forEach(i => {\n    const s = (typeof i.json.score_total === 'number') ? i.json.score_total\n            : (i.json.agent_output && (i.json.agent_output.score_total ?? i.json.agent_output.score));\n    if (typeof s === 'number') scores.push(s);\n  });\n} catch(e){}\nconst score_total = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;\n\n// logs A4 / A6 — agrégés depuis Merge Phase 1\nlet a4=[], a6=[];\ntry {\n  $('Merge Phase 1').all().forEach(i => {\n    if (Array.isArray(i.json.a4_swap_log)) a4 = a4.concat(i.json.a4_swap_log);\n    if (Array.isArray(i.json.a6_issue_log)) a6 = a6.concat(i.json.a6_issue_log);\n  });\n} catch(e){}\n\nreturn [{ json: {\n  ...v,\n  checks:            v.checks || [],\n  structural_checks: v.checks || [],          // nom attendu par le Deliver (decision_log)\n  score_total,\n  a4_swap_log: a4,\n  a6_issue_log: a6,\n  a5_summary: (score_total!=null)\n    ? `Average QA score across ${scores.length} chunk(s): ${score_total}/100. Per-chunk: ${scores.join(', ')}.`\n    : 'No QA score available.',\n  a5_qa_report: { average: score_total, per_chunk: scores }\n}}];"
+      },
+      "id": "a6984f9f-b7bb-48f7-8fa2-9cefe1617e1c",
+      "name": "Prepare Deliver Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7300,
+        288
+      ]
     }
   ],
   "connections": {
@@ -1305,7 +1318,7 @@
       "main": [
         [
           {
-            "node": "Call Deliver Output",
+            "node": "Prepare Deliver Input",
             "type": "main",
             "index": 0
           }
@@ -1570,6 +1583,17 @@
           }
         ]
       ]
+    },
+    "Prepare Deliver Input": {
+      "main": [
+        [
+          {
+            "node": "Call Deliver Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1577,14 +1601,18 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "staticData": null,
+  "staticData": {
+    "global": {
+      "a6buf": []
+    }
+  },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
-  "activeVersionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
-  "versionCounter": 171,
+  "versionId": "c1e4a34d-66f4-493d-858a-fab229c81b3a",
+  "activeVersionId": "c1e4a34d-66f4-493d-858a-fab229c81b3a",
+  "versionCounter": 175,
   "triggerCount": 1,
   "shared": [
     {
@@ -1607,9 +1635,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-10T09:02:54.795Z",
-    "createdAt": "2026-06-10T09:02:54.795Z",
-    "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
+    "updatedAt": "2026-06-10T09:44:49.323Z",
+    "createdAt": "2026-06-10T09:44:49.323Z",
+    "versionId": "c1e4a34d-66f4-493d-858a-fab229c81b3a",
     "workflowId": "ApjYq9sdM5LKRVlq",
     "nodes": [
       {
@@ -2567,6 +2595,19 @@
           6420,
           320
         ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Consolide tout ce dont le Deliver a besoin pour un état des lieux complet\n// du HTML de SORTIE : checks structurels du Validator + score A5 + logs A4/A6.\nconst v = $('Call Reassembler').first().json;     // output du Validator\n\n// score A5 moyen — depuis Buffer for A6 (items porteurs de score_total)\nlet scores = [];\ntry {\n  $('Buffer for A6').all().forEach(i => {\n    const s = (typeof i.json.score_total === 'number') ? i.json.score_total\n            : (i.json.agent_output && (i.json.agent_output.score_total ?? i.json.agent_output.score));\n    if (typeof s === 'number') scores.push(s);\n  });\n} catch(e){}\nconst score_total = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;\n\n// logs A4 / A6 — agrégés depuis Merge Phase 1\nlet a4=[], a6=[];\ntry {\n  $('Merge Phase 1').all().forEach(i => {\n    if (Array.isArray(i.json.a4_swap_log)) a4 = a4.concat(i.json.a4_swap_log);\n    if (Array.isArray(i.json.a6_issue_log)) a6 = a6.concat(i.json.a6_issue_log);\n  });\n} catch(e){}\n\nreturn [{ json: {\n  ...v,\n  checks:            v.checks || [],\n  structural_checks: v.checks || [],          // nom attendu par le Deliver (decision_log)\n  score_total,\n  a4_swap_log: a4,\n  a6_issue_log: a6,\n  a5_summary: (score_total!=null)\n    ? `Average QA score across ${scores.length} chunk(s): ${score_total}/100. Per-chunk: ${scores.join(', ')}.`\n    : 'No QA score available.',\n  a5_qa_report: { average: score_total, per_chunk: scores }\n}}];"
+        },
+        "id": "a6984f9f-b7bb-48f7-8fa2-9cefe1617e1c",
+        "name": "Prepare Deliver Input",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          7300,
+          288
+        ]
       }
     ],
     "connections": {
@@ -2910,7 +2951,7 @@
         "main": [
           [
             {
-              "node": "Call Deliver Output",
+              "node": "Prepare Deliver Input",
               "type": "main",
               "index": 0
             }
@@ -3175,6 +3216,17 @@
             }
           ]
         ]
+      },
+      "Prepare Deliver Input": {
+        "main": [
+          [
+            {
+              "node": "Call Deliver Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Jérémie Borrotzu",
@@ -3183,18 +3235,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-10T09:02:55.009Z",
-        "id": 632,
+        "createdAt": "2026-06-10T09:44:49.440Z",
+        "id": 634,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
+        "versionId": "c1e4a34d-66f4-493d-858a-fab229c81b3a",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-10T09:02:54.978Z",
-        "id": 631,
+        "createdAt": "2026-06-10T09:44:49.421Z",
+        "id": 633,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
+        "versionId": "c1e4a34d-66f4-493d-858a-fab229c81b3a",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
