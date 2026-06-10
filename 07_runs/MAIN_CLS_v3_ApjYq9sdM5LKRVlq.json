@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-05T07:03:34.850Z",
+  "updatedAt": "2026-06-10T09:02:54.787Z",
   "createdAt": "2026-05-29T14:16:26.563Z",
   "id": "ApjYq9sdM5LKRVlq",
   "name": "[MAIN] CLS v3 — Course Localisation",
@@ -9,7 +9,6 @@
   "nodes": [
     {
       "parameters": {
-        "path": "cls-v3-form",
         "formTitle": "CLS v3 — Course Localisation",
         "formDescription": "OpenClassrooms Content Localization System v3",
         "formFields": {
@@ -19,8 +18,7 @@
               "requiredField": true
             },
             {
-              "fieldLabel": "Target Course ID",
-              "requiredField": true
+              "fieldLabel": "Target Course ID"
             },
             {
               "fieldLabel": "Source Language",
@@ -95,10 +93,7 @@
             }
           ]
         },
-        "options": {
-          "respondWith": "text",
-          "responseText": "Your request has been submitted. Results will be sent to your email."
-        }
+        "options": {}
       },
       "id": "form",
       "name": "CLS v3 Form",
@@ -112,7 +107,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
+        "jsCode": "\nconst _s=$getWorkflowStaticData('global'); _s.a6buf=[];\n\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilite']) ? f['Score de localisabilite'].length : f['Score de localisabilite']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
       },
       "id": "init",
       "name": "Init Params",
@@ -188,19 +183,14 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "hNdY7a7cIqY1aLIm",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "hNdY7a7cIqY1aLIm",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a1",
       "name": "Call A1",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         1680,
         400
@@ -215,7 +205,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1920,
+        1888,
         400
       ]
     },
@@ -230,47 +220,22 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1,
       "position": [
-        2160,
-        400
+        2224,
+        496
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "BKminhI3j8D4ybs1",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "BKminhI3j8D4ybs1",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a2",
       "name": "Call A2",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         2400,
-        400
-      ]
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "rfWAld7K9VOXvPrE",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "id": "pt",
-      "name": "Call Pre-Translation",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
-      "position": [
-        2880,
         400
       ]
     },
@@ -284,25 +249,20 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
       "position": [
-        3120,
-        400
+        2992,
+        368
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "JLDchUnpFLdgHbkn",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "JLDchUnpFLdgHbkn",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a3fr",
       "name": "Call A3 FR-EN",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         3360,
         288
@@ -310,19 +270,14 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "Eq5Bk0IbKstJMr4P",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "Eq5Bk0IbKstJMr4P",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a3en",
       "name": "Call A3 EN-FR",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         3360,
         528
@@ -330,19 +285,14 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "cHTqFQHBnEkeRAJB",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "cHTqFQHBnEkeRAJB",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a4",
       "name": "Call A4",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         3600,
         400
@@ -350,19 +300,14 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "De0vqzEM9LlJ0wVB",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "De0vqzEM9LlJ0wVB",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a5",
       "name": "Call A5",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         3840,
         400
@@ -397,19 +342,14 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "JLDchUnpFLdgHbkn",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "JLDchUnpFLdgHbkn",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a3i2",
       "name": "Call A3 iter2",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         4560,
         640
@@ -417,19 +357,14 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "cHTqFQHBnEkeRAJB",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "cHTqFQHBnEkeRAJB",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a4i2",
       "name": "Call A4 iter2",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         4800,
         640
@@ -437,19 +372,14 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "De0vqzEM9LlJ0wVB",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "De0vqzEM9LlJ0wVB",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a5i2",
       "name": "Call A5 iter2",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         5040,
         640
@@ -479,84 +409,64 @@
       "typeVersion": 3,
       "position": [
         5520,
-        544
+        608
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "JLDchUnpFLdgHbkn",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "JLDchUnpFLdgHbkn",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a3i3",
       "name": "Call A3 iter3",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         5760,
-        672
+        624
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "cHTqFQHBnEkeRAJB",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "cHTqFQHBnEkeRAJB",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a4i3",
       "name": "Call A4 iter3",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         6000,
-        672
+        624
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "De0vqzEM9LlJ0wVB",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "De0vqzEM9LlJ0wVB",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a5i3",
       "name": "Call A5 iter3",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         6240,
-        672
+        624
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "MQObMb9lhovhBBs8",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "MQObMb9lhovhBBs8",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "a6",
       "name": "Call A6",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         6464,
         80
@@ -564,7 +474,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst chunks=$input.all();\nconst translated=chunks.map(c=>({\n  chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n  translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n  type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n  a6_issue_log:c.json.agent_output?.issue_log||[],\n  naturalness_score:c.json.agent_output?.naturalness_score||null,\n  course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n  source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n  score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n}));\nreturn translated.map(t=>({json:t}));\n"
+        "jsCode": "\nconst chunks=$input.all();\n// lookup structure metadata depuis le Pre-Processor (part_index/part_name/chapter_name)\nconst pre={};\ntry {\n  $('Call Pre-Processor').all().forEach(p=>{\n    const k=(p.json.chapter_index??0)+'-'+(p.json.chunk_index??1);\n    pre[k]={part_index:p.json.part_index, part_name:p.json.part_name, chapter_name:p.json.chapter_name};\n  });\n} catch(e){}\nconst translated=chunks.map(c=>{\n  const k=(c.json.chapter_index??0)+'-'+(c.json.chunk_index??1);\n  const m=pre[k]||{};\n  return {\n    chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n    part_index:(m.part_index??0), part_name:(m.part_name??''), chapter_name:(m.chapter_name??''),\n    translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n    type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n    a6_issue_log:c.json.agent_output?.issue_log||[],\n    naturalness_score:c.json.agent_output?.naturalness_score||null,\n    course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n    source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n    score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n  };\n});\nconst out=translated.map(t=>({json:t}));\n// injecte le fingerprint pour les 7 checks structurels du Reassembler\nlet fp=null;\ntry { fp=$('Extract Fingerprint').first().json; } catch(e){}\nif (fp) out.push({json:{type:'fingerprint', urls:fp.urls, claire_semantics:fp.claire_semantics, code_blocks_count:fp.code_blocks_count}});\nreturn out;\n"
       },
       "id": "mrg",
       "name": "Merge Phase 1",
@@ -572,27 +482,22 @@
       "typeVersion": 2,
       "position": [
         6720,
-        400
+        176
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "odMhJgxadf3RPAHp",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "odMhJgxadf3RPAHp",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "rea",
       "name": "Call Reassembler",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         6960,
-        400
+        176
       ]
     },
     {
@@ -605,25 +510,20 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
       "position": [
-        7200,
-        400
+        7168,
+        144
       ]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "fBgHok8kQUPxlTAT",
-          "mode": "id"
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
+        "workflowId": "fBgHok8kQUPxlTAT",
+        "mode": "passThrough",
+        "options": {}
       },
       "id": "del",
       "name": "Call Deliver Output",
       "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
+      "typeVersion": 1,
       "position": [
         7440,
         288
@@ -638,8 +538,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7440,
-        528
+        7536,
+        656
       ]
     },
     {
@@ -652,7 +552,7 @@
       "typeVersion": 2,
       "position": [
         7680,
-        400
+        448
       ]
     },
     {
@@ -749,7 +649,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a1.map(r => r.localizability_score || 0).filter(s=>s>0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;\nconst blockers = a1.flatMap(r => r.blockers || []);\nreturn [{json:{\n  status:'SCORE_COMPLETE', mode:'score_loc',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  localizability_score:avg,\n  blockers_count:blockers.length,\n  blockers:blockers,\n  summary:`Localizability score: ${avg}/100 — ${blockers.length} blocker(s)`\n}}];\n"
+        "jsCode": "\nconst a1 = $('Call A1').all().map(i => i.json);\nconst p  = $('Init Params').first().json;\n\nconst scored = a1.filter(r => r.agent_output && r.agent_output.localizability_score != null);\nconst avg = scored.length\n  ? Math.round(scored.reduce((s,r) => s + r.agent_output.localizability_score, 0) / scored.length)\n  : 0;\n\nconst allBlockers = a1.flatMap(r => (r.agent_output||{}).blockers || []);\nconst allFlags    = a1.flatMap(r => (r.agent_output||{}).cultural_flags || []);\nconst domains     = [...new Set(a1.map(r => (r.agent_output||{}).detected_domain).filter(Boolean))];\n\nreturn [{json:{\n  status: 'SCORE_COMPLETE',\n  mode: 'score_loc',\n  course_id: p.course_id,\n  direction: p.direction,\n  completed_at: new Date().toISOString(),\n  localizability_score: avg,\n  chunks_scored: scored.length,\n  blockers_count: allBlockers.length,\n  blockers: allBlockers,\n  cultural_flags_count: allFlags.length,\n  detected_domains: domains,\n  a1_results: a1\n}}];\n"
       },
       "id": "score-summary",
       "name": "Score Summary",
@@ -802,12 +702,12 @@
       "typeVersion": 3,
       "position": [
         6528,
-        672
+        624
       ]
     },
     {
       "parameters": {
-        "jsCode": "\nconst a5 = $('Call A5 iter3').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a5.map(r=>r.score||0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;\nreturn [{json:{\n  status:'QA_COMPLETE', mode:'qa_check',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  qa_score:avg,\n  pass: avg>=90,\n  chunks:a5.length,\n  summary:`QA score: ${avg}/100 — ${avg>=90?'PASS':'FAIL'}`\n}}];\n"
+        "jsCode": "\nconst a5 = $('Call A5 iter3').all().map(i => i.json);\nconst p  = $('Init Params').first().json;\n\nconst scored = a5.filter(r => r.agent_output && r.agent_output.score != null);\nconst avg = scored.length\n  ? Math.round(scored.reduce((s,r) => s + r.agent_output.score, 0) / scored.length)\n  : 0;\nconst pass = avg >= 90;\n\nconst allFailing = a5.flatMap(r => (r.agent_output||{}).critical_blockers || []);\nconst allWarnings = a5.flatMap(r => (r.agent_output||{}).warnings || []);\n\nreturn [{json:{\n  status: 'QA_COMPLETE',\n  mode: 'qa_check',\n  course_id: p.course_id,\n  direction: p.direction,\n  completed_at: new Date().toISOString(),\n  qa_score: avg,\n  pass,\n  chunks_qa: scored.length,\n  failing_segments: allFailing,\n  failing_count: allFailing.length,\n  warnings: allWarnings,\n  warnings_count: allWarnings.length,\n  a5_results: a5\n}}];\n"
       },
       "id": "qa-summary",
       "name": "QA Summary",
@@ -855,158 +755,166 @@
       ]
     },
     {
+      "parameters": {
+        "jsCode": "const d   = $input.first().json;\nconst ip  = $('Init Params').first().json;\n\nconst scoreColor = s => s >= 80 ? '#2e7d32' : s >= 60 ? '#e65100' : '#c62828';\nconst badge = (s,max) => {\n  const pct = Math.round((s/max)*100);\n  const c = scoreColor(pct);\n  return `<span style=\"background:${c};color:#fff;padding:2px 8px;border-radius:10px;font-weight:bold\">${s}/${max}</span>`;\n};\n\nlet body = `\n<div style=\"font-family:Arial,sans-serif;max-width:800px;margin:0 auto;color:#212121\">\n<h1 style=\"border-bottom:3px solid #1565c0;padding-bottom:8px\">\n  🔍 Audit Report — Course ${d.course_id}\n</h1>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n  <tr><td style=\"padding:6px;font-weight:bold;width:160px\">Direction</td><td>${d.direction||'fr→en'}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Date</td><td>${(d.completed_at||'').substring(0,10)}</td></tr>\n  <tr><td style=\"padding:6px;font-weight:bold\">Chunks analysed</td><td>${d.chunks_audited||0}</td></tr>\n</table>`;\n\n(d.a1_results||[]).forEach((r,i) => {\n  const ao = r.agent_output || {};\n  const score = ao.localizability_score ?? null;\n  const pillar = ao.pillar_scores || {};\n  const penalties = ao.penalties || [];\n  const flags = ao.cultural_flags || [];\n  const blockers = ao.blockers || [];\n  const media = ao.media_inventory || [];\n  const terms = ao.proposed_terminology || [];\n\n  body += `<h2 style=\"background:#1565c0;color:#fff;padding:10px 16px;border-radius:6px;margin-top:32px\">\n    Chapter ${r.chapter_index} — Chunk ${r.chunk_index}\n    ${score !== null ? ' &nbsp; ' + badge(score,100) : '<span style=\"color:#fff;opacity:.7\"> (no result)</span>'}\n  </h2>`;\n\n  if (ao.detected_domain) body += `<p><strong>Domain detected:</strong> ${ao.detected_domain} &nbsp; <strong>Source:</strong> ${ao.source_language||'?'} → <strong>Target:</strong> ${ao.target_language||'?'}</p>`;\n\n  // Pillar scores table\n  if (Object.keys(pillar).length > 0) {\n    body += `<h3>📊 Pillar Scores</h3><table style=\"width:100%;border-collapse:collapse;margin-bottom:16px\">`;\n    body += `<tr style=\"background:#e3f2fd\"><th style=\"padding:6px;text-align:left\">Pillar</th><th style=\"padding:6px;text-align:right\">Score</th></tr>`;\n    Object.entries(pillar).forEach(([k,v],idx) => {\n      const bg = idx%2===0 ? '#fff' : '#f9f9f9';\n      body += `<tr style=\"background:${bg}\"><td style=\"padding:6px\">${k.replace(/_/g,' ')}</td><td style=\"padding:6px;text-align:right;font-weight:bold\">${v}</td></tr>`;\n    });\n    body += `</table>`;\n  }\n\n  // Blockers\n  if (blockers.length > 0) {\n    body += `<h3 style=\"color:#c62828\">🚫 Blockers</h3><ul>`;\n    blockers.forEach(b => body += `<li style=\"color:#c62828;margin-bottom:4px\">${typeof b==='string'?b:JSON.stringify(b)}</li>`);\n    body += `</ul>`;\n  }\n\n  // Penalties\n  if (penalties.length > 0) {\n    body += `<h3 style=\"color:#e65100\">⚠️ Penalties</h3><ul>`;\n    penalties.forEach(p => body += `<li><strong>-${p.points||0}pts</strong> ${p.reason||''} — <em>${p.evidence||''}</em></li>`);\n    body += `</ul>`;\n  }\n\n  // Cultural flags\n  if (flags.length > 0) {\n    body += `<h3>🌍 Cultural Flags (${flags.length})</h3><table style=\"width:100%;border-collapse:collapse;margin-bottom:16px\">`;\n    body += `<tr style=\"background:#e8f5e9\"><th style=\"padding:6px;text-align:left\">Category</th><th style=\"padding:6px;text-align:left\">Source term</th><th style=\"padding:6px;text-align:left\">Proposed swap</th><th style=\"padding:6px\">Effort</th><th style=\"padding:6px\">Blocker</th></tr>`;\n    flags.forEach((f,idx) => {\n      const bg = idx%2===0 ? '#fff' : '#f9f9f9';\n      body += `<tr style=\"background:${bg}\">\n        <td style=\"padding:6px\">${f.category||''}</td>\n        <td style=\"padding:6px\"><strong>${f.source_term||''}</strong></td>\n        <td style=\"padding:6px\">${f.proposed_swap||''}</td>\n        <td style=\"padding:6px;text-align:center\">${f.effort||''}</td>\n        <td style=\"padding:6px;text-align:center\">${f.blocker?'🔴':'⚪'}</td>\n      </tr>`;\n    });\n    body += `</table>`;\n  }\n\n  // Media inventory\n  if (media.length > 0) {\n    body += `<h3>🎬 Media & Resources (${media.length})</h3><ul>`;\n    media.forEach(m => body += `<li><strong>[${m.type||'?'}]</strong> <a href=\"${m.url||''}\">${m.url||''}</a> — risk: <em>${m.risk||'?'}</em>${m.proposed_alternative?' → '+m.proposed_alternative:''}</li>`);\n    body += `</ul>`;\n  }\n\n  // Proposed terminology\n  if (terms.length > 0) {\n    body += `<h3>📖 Proposed Terminology (${terms.length})</h3><table style=\"width:100%;border-collapse:collapse\">`;\n    body += `<tr style=\"background:#f3e5f5\"><th style=\"padding:6px;text-align:left\">Source</th><th style=\"padding:6px;text-align:left\">Target</th><th style=\"padding:6px;text-align:left\">Category</th></tr>`;\n    terms.forEach((t,idx) => {\n      const bg = idx%2===0 ? '#fff' : '#f9f9f9';\n      body += `<tr style=\"background:${bg}\"><td style=\"padding:6px\">${t.source_term||''}</td><td style=\"padding:6px\"><strong>${t.proposed_target||''}</strong></td><td style=\"padding:6px\">${t.category||''}</td></tr>`;\n    });\n    body += `</table>`;\n  }\n\n  if (r.status === 'error' || !ao.localizability_score) {\n    body += `<p style=\"color:#888;font-style:italic\">⚠️ No A1 output for this chunk.</p>`;\n  }\n});\n\nbody += `<hr style=\"margin-top:40px;border-color:#ddd\">\n<p style=\"color:#888;font-size:12px\">Generated by CLS v3 — ${d.completed_at||''}</p>\n</div>`;\n\nreturn [{json:{\n  html: body,\n  subject: '[CLS] Audit — ' + d.course_id + ' (' + (d.direction||'') + ')',\n  email: ip.email,\n  course_id: d.course_id\n}}];"
+      },
       "id": "bf5d989f-b1d3-44e9-b66d-282e9b1a9ded",
       "name": "Format Audit Report",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2730,
+        2736,
         208
-      ],
-      "parameters": {
-        "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Audit Report — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  'Chunks analysed: ' + d.chunks_audited, '',\n  '## A1 Results',\n];\n(d.a1_results || []).forEach((r,i) => {\n  const score = r.localizability_score ?? 'N/A';\n  const blockers = (r.blockers || []).map(b => '- ' + b).join('\\n') || '- None';\n  lines.push('### Chunk ' + (i+1) + '\\nScore: ' + score + '/100\\nBlockers:\\n' + blockers + '\\n');\n});\nreturn [{json:{md:lines.join('\\n'), filename:'audit_'+d.course_id+'.md', email:ip.email, course_id:d.course_id}}];\n"
-      }
+      ]
     },
     {
+      "parameters": {
+        "fromEmail": "jborrotzu@gmail.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
       "id": "6c26ec05-1888-433b-86fd-0be935e5ad65",
       "name": "Send Audit Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2980,
+        2992,
         208
       ],
+      "webhookId": "0320a580-8cc0-4ff3-95f7-637adca87809",
       "credentials": {
         "smtp": {
           "id": "g6zrrMLej2ViXu6P",
           "name": "SMTP account"
         }
-      },
-      "parameters": {
-        "fromEmail": "jborrotzu@gmail.com",
-        "toEmail": "={{ $json.email }}",
-        "subject": "=[CLS] Audit — {{ $json.course_id }}",
-        "message": "=Audit report for course {{ $json.course_id }} is attached.",
-        "options": {
-          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
-        }
       }
     },
     {
+      "parameters": {
+        "jsCode": "\nconst d  = $input.first().json;\nconst ip = $('Init Params').first().json;\n\nconst scoreColor = s => s >= 80 ? '#2e7d32' : s >= 60 ? '#e65100' : '#c62828';\nconst badge = s => {\n  const c = scoreColor(s);\n  return `<span style=\"background:${c};color:#fff;padding:3px 12px;border-radius:12px;font-size:1.1em;font-weight:bold\">${s}/100</span>`;\n};\n\nconst verdict = d.localizability_score >= 80\n  ? '<span style=\"color:#2e7d32;font-weight:bold\">✅ GO — Localization recommended</span>'\n  : d.localizability_score >= 60\n  ? '<span style=\"color:#e65100;font-weight:bold\">⚠️ CONDITIONAL GO — Review blockers first</span>'\n  : '<span style=\"color:#c62828;font-weight:bold\">🚫 NO-GO — Major rework required</span>';\n\nlet body = `\n<div style=\"font-family:Arial,sans-serif;max-width:800px;margin:0 auto;color:#212121\">\n<h1 style=\"border-bottom:3px solid #1565c0;padding-bottom:8px\">\n  📊 Localizability Score — Course ${d.course_id}\n</h1>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n  <tr><td style=\"padding:6px;font-weight:bold;width:160px\">Direction</td><td>${d.direction||''}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Date</td><td>${(d.completed_at||'').substring(0,10)}</td></tr>\n  <tr><td style=\"padding:6px;font-weight:bold\">Domains detected</td><td>${(d.detected_domains||[]).join(', ')||'—'}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Chunks scored</td><td>${d.chunks_scored||0}</td></tr>\n</table>\n\n<div style=\"text-align:center;padding:24px;background:#f8f9fa;border-radius:8px;margin-bottom:24px\">\n  <div style=\"font-size:0.9em;color:#666;margin-bottom:8px\">GLOBAL LOCALIZABILITY SCORE</div>\n  <div style=\"font-size:2.5em;margin-bottom:12px\">${badge(d.localizability_score||0)}</div>\n  <div>${verdict}</div>\n</div>`;\n\n// Score par chunk\nif ((d.a1_results||[]).length > 0) {\n  body += `<h2>Score by Chapter</h2>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n<tr style=\"background:#e3f2fd\"><th style=\"padding:8px;text-align:left\">Chapter</th><th style=\"padding:8px;text-align:left\">Domain</th><th style=\"padding:8px;text-align:center\">Score</th><th style=\"padding:8px;text-align:left\">Top flag</th></tr>`;\n  (d.a1_results||[]).forEach((r,i) => {\n    const ao = r.agent_output || {};\n    const s = ao.localizability_score ?? null;\n    const bg = i%2===0?'#fff':'#f9f9f9';\n    const topFlag = (ao.cultural_flags||[])[0];\n    body += `<tr style=\"background:${bg}\">\n      <td style=\"padding:8px\">Ch.${r.chapter_index||0} — Chunk ${r.chunk_index||1}</td>\n      <td style=\"padding:8px\">${ao.detected_domain||'—'}</td>\n      <td style=\"padding:8px;text-align:center\">${s !== null ? badge(s) : '—'}</td>\n      <td style=\"padding:8px;font-size:0.9em\">${topFlag ? topFlag.source_term+' → '+topFlag.proposed_swap : '—'}</td>\n    </tr>`;\n  });\n  body += `</table>`;\n}\n\n// Blockers\nif ((d.blockers||[]).length > 0) {\n  body += `<h2 style=\"color:#c62828\">🚫 Blockers (${d.blockers_count})</h2><ul>`;\n  (d.blockers||[]).forEach(b => body += `<li style=\"color:#c62828;margin-bottom:4px\">${typeof b==='string'?b:JSON.stringify(b)}</li>`);\n  body += `</ul>`;\n} else {\n  body += `<p style=\"color:#2e7d32\">✅ No blockers detected.</p>`;\n}\n\nbody += `<hr style=\"margin-top:40px;border-color:#ddd\">\n<p style=\"color:#888;font-size:12px\">Generated by CLS v3 — ${d.completed_at||''}</p>\n</div>`;\n\nreturn [{json:{\n  html: body,\n  subject: `[CLS] Score — ${d.course_id} — ${d.localizability_score||0}/100 (${d.direction||''})`,\n  email: ip.email,\n  course_id: d.course_id,\n  score: d.localizability_score||0\n}}];\n"
+      },
       "id": "41d53159-be83-47d1-a3f3-4cd0f26fa93f",
       "name": "Format Score Report",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2730,
+        2736,
         608
-      ],
-      "parameters": {
-        "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Localizability Score — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**Score: ' + d.localizability_score + '/100**',\n  'Blockers: ' + d.blockers_count, '',\n  '## Blockers',\n  ...(d.blockers||[]).map(b=>'- '+b)\n];\nreturn [{json:{md:lines.join('\\n'), filename:'score_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.localizability_score}}];\n"
-      }
+      ]
     },
     {
+      "parameters": {
+        "fromEmail": "jborrotzu@gmail.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
       "id": "1379ee06-4a9b-4411-867c-3167491acc66",
       "name": "Send Score Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2980,
+        2992,
         608
       ],
+      "webhookId": "22ba6a99-c8e7-4a5a-8fe3-21f9839ce9df",
       "credentials": {
         "smtp": {
           "id": "g6zrrMLej2ViXu6P",
           "name": "SMTP account"
         }
-      },
-      "parameters": {
-        "fromEmail": "jborrotzu@gmail.com",
-        "toEmail": "={{ $json.email }}",
-        "subject": "=[CLS] Score — {{ $json.course_id }} — {{ $json.score }}/100",
-        "message": "=Localizability score {{ $json.score }}/100. See attachment.",
-        "options": {
-          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
-        }
       }
     },
     {
+      "parameters": {
+        "jsCode": "\nconst d  = $input.first().json;\nconst ip = $('Init Params').first().json;\n\nconst scoreColor = s => s >= 90 ? '#2e7d32' : s >= 75 ? '#e65100' : '#c62828';\nconst badge = s => {\n  const c = scoreColor(s);\n  return `<span style=\"background:${c};color:#fff;padding:3px 12px;border-radius:12px;font-size:1.1em;font-weight:bold\">${s}/100</span>`;\n};\n\nconst verdict = d.pass\n  ? '<span style=\"color:#2e7d32;font-weight:bold\">✅ PASS — Ready for delivery</span>'\n  : '<span style=\"color:#c62828;font-weight:bold\">❌ FAIL — Failing segments require rework</span>';\n\nlet body = `\n<div style=\"font-family:Arial,sans-serif;max-width:800px;margin:0 auto;color:#212121\">\n<h1 style=\"border-bottom:3px solid #1565c0;padding-bottom:8px\">\n  🔎 Quality Check — Course ${d.course_id}\n</h1>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n  <tr><td style=\"padding:6px;font-weight:bold;width:160px\">Direction</td><td>${d.direction||''}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Date</td><td>${(d.completed_at||'').substring(0,10)}</td></tr>\n  <tr><td style=\"padding:6px;font-weight:bold\">Chunks evaluated</td><td>${d.chunks_qa||0}</td></tr>\n</table>\n\n<div style=\"text-align:center;padding:24px;background:#f8f9fa;border-radius:8px;margin-bottom:24px\">\n  <div style=\"font-size:0.9em;color:#666;margin-bottom:8px\">QA SCORE (threshold: 90/100)</div>\n  <div style=\"font-size:2.5em;margin-bottom:12px\">${badge(d.qa_score||0)}</div>\n  <div>${verdict}</div>\n</div>`;\n\n// Score par chunk\nif ((d.a5_results||[]).length > 0) {\n  body += `<h2>Score by Chapter</h2>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n<tr style=\"background:#e3f2fd\"><th style=\"padding:8px;text-align:left\">Chapter</th><th style=\"padding:8px;text-align:center\">Score</th><th style=\"padding:8px;text-align:center\">Status</th><th style=\"padding:8px\">Failing segments</th></tr>`;\n  (d.a5_results||[]).forEach((r,i) => {\n    const ao = r.agent_output || {};\n    const s  = ao.score ?? null;\n    const ok = s !== null && s >= 90;\n    const bg = i%2===0?'#fff':'#f9f9f9';\n    const failing = (ao.critical_blockers||[]).length;\n    body += `<tr style=\"background:${bg}\">\n      <td style=\"padding:8px\">Ch.${r.chapter_index||0} — Chunk ${r.chunk_index||1}</td>\n      <td style=\"padding:8px;text-align:center\">${s !== null ? badge(s) : '—'}</td>\n      <td style=\"padding:8px;text-align:center\">${ok ? '✅ PASS' : '❌ FAIL'}</td>\n      <td style=\"padding:8px\">${failing > 0 ? `${failing} segment(s)` : '—'}</td>\n    </tr>`;\n  });\n  body += `</table>`;\n}\n\n// Failing segments\nif ((d.failing_segments||[]).length > 0) {\n  body += `<h2 style=\"color:#c62828\">❌ Failing Segments (${d.failing_count})</h2><ul>`;\n  (d.failing_segments||[]).forEach(s => {\n    const txt = typeof s === 'string' ? s : (s.segment_id ? `[${s.segment_id}] ${s.issue||''} — <em>${s.source||''}</em>` : JSON.stringify(s));\n    body += `<li style=\"margin-bottom:6px\">${txt}</li>`;\n  });\n  body += `</ul>`;\n}\n\n// Warnings\nif ((d.warnings||[]).length > 0) {\n  body += `<h2 style=\"color:#e65100\">⚠️ Warnings (${d.warnings_count})</h2><ul>`;\n  (d.warnings||[]).forEach(w => body += `<li style=\"margin-bottom:4px\">${typeof w==='string'?w:JSON.stringify(w)}</li>`);\n  body += `</ul>`;\n}\n\nbody += `<hr style=\"margin-top:40px;border-color:#ddd\">\n<p style=\"color:#888;font-size:12px\">Generated by CLS v3 — ${d.completed_at||''}</p>\n</div>`;\n\nreturn [{json:{\n  html: body,\n  subject: `[CLS] QA — ${d.course_id} — ${d.qa_score||0}/100 ${d.pass ? 'PASS ✅' : 'FAIL ❌'} (${d.direction||''})`,\n  email: ip.email,\n  course_id: d.course_id,\n  score: d.qa_score||0,\n  pass: d.pass\n}}];\n"
+      },
       "id": "6a37c026-4e7c-4f82-9532-8984dc80476c",
       "name": "Format QA Report",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7050,
+        7056,
         528
-      ],
-      "parameters": {
-        "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Quality Check — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**QA Score: ' + d.qa_score + '/100 — ' + (d.pass ? 'PASS ✓' : 'FAIL ✗') + '**',\n  'Chunks evaluated: ' + d.chunks\n];\nreturn [{json:{md:lines.join('\\n'), filename:'qa_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.qa_score, pass:d.pass}}];\n"
-      }
+      ]
     },
     {
+      "parameters": {
+        "fromEmail": "jborrotzu@gmail.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
       "id": "c504b3c2-1188-43d1-b5b7-9ac32ceaaa67",
       "name": "Send QA Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        7300,
+        7312,
         528
       ],
+      "webhookId": "6e3297f6-915a-4a48-93f5-74e0439af4a0",
       "credentials": {
         "smtp": {
           "id": "g6zrrMLej2ViXu6P",
           "name": "SMTP account"
         }
-      },
-      "parameters": {
-        "fromEmail": "jborrotzu@gmail.com",
-        "toEmail": "={{ $json.email }}",
-        "subject": "=[CLS] QA — {{ $json.course_id }} — {{ $json.score }}/100 {{ $json.pass ? 'PASS' : 'FAIL' }}",
-        "message": "=QA score {{ $json.score }}/100. See attachment.",
-        "options": {
-          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
-        }
       }
     },
     {
+      "parameters": {
+        "jsCode": "\nconst ip = $('Init Params').first().json;\nconst deliver = $('Call Deliver Output').first().json;\nconst d = deliver.deliverables || {};\nconst li = (label,url)=> url ? `<li><a href=\"${url}\">${label}</a></li>` : '';\nconst html = `\n<h2>CLS v3 — Localisation livrée</h2>\n<p><b>Cours :</b> ${ip.course_id} → ${ip.target_course_id||'(n/a)'}<br>\n<b>Direction :</b> ${deliver.direction||ip.direction||''}<br>\n<b>Score QA :</b> ${deliver.score_total??'n/a'}<br>\n<b>Intégrité structurelle :</b> ${deliver.structural_integrity?'OK ✅':'⚠️ à vérifier'}</p>\n<h3>Livrables GitHub</h3>\n<ul>\n${li('HTML localisé', d.html_github)}\n${li('Review (.md, import Notion)', d.review_md)}\n${li('Rapport QA', d.qa_report)}\n${li('Decision log', d.log_github)}\n${li('TM patch (CSV)', d.tm_patch)}\n${li('ToDo graphics (CSV)', d.todo_graphics)}\n${li('ToDo links (CSV)', d.todo_links)}\n${li('ToDo videos (CSV)', d.todo_videos)}\n</ul>`;\nreturn [{json:{ email: ip.email, course_id: ip.course_id, target_course_id: ip.target_course_id||'', html }}];\n"
+      },
       "id": "eb64727e-7267-43d1-bd10-979ab9e278fd",
       "name": "Format HTML Delivery",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        7690,
+        7696,
         288
-      ],
-      "parameters": {
-        "jsCode": "\nconst ip = $('Init Params').first().json;\nconst reassembler = $('Call Reassembler').first().json;\nconst html = reassembler.final_html || '';\nconst course_id = ip.course_id;\nreturn [{json:{\n  html: html,\n  filename: course_id + '_localized.html',\n  email: ip.email,\n  course_id: course_id\n}}];\n"
-      }
+      ]
     },
     {
+      "parameters": {
+        "fromEmail": "jborrotzu@gmail.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=[CLS] Localisation livrée — {{ $json.course_id }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
       "id": "3824b805-e54c-429d-ad3b-cb8a88376e0d",
       "name": "Send HTML Email",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        7940,
+        7952,
         288
       ],
+      "webhookId": "d13de3fa-b785-4b8a-b93f-d4c75744fccb",
       "credentials": {
         "smtp": {
           "id": "g6zrrMLej2ViXu6P",
           "name": "SMTP account"
         }
-      },
-      "parameters": {
-        "fromEmail": "jborrotzu@gmail.com",
-        "toEmail": "={{ $json.email }}",
-        "subject": "=[CLS] Localized HTML — {{ $json.course_id }}",
-        "message": "=Localized HTML file for course {{ $json.course_id }} is attached.",
-        "options": {
-          "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.html).toString('base64'), type: 'text/html', encoding: 'base64'}] }}"
-        }
       }
     },
     {
+      "parameters": {
+        "jsCode": "const glossary = $('Glossary Load 1 (pre-A1)').first().json;\nconst chunks = $('Call Pre-Processor').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    common_glossary: glossary.common_glossary || [],\n    domain_validated_tm: glossary.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary.domain_unvalidated_tm || []\n  }\n}));"
+      },
       "id": "merge-glossary-chunks",
       "name": "Merge Glossary into Chunks",
       "type": "n8n-nodes-base.code",
@@ -1014,23 +922,46 @@
       "position": [
         1440,
         400
-      ],
-      "parameters": {
-        "jsCode": "const glossary = $('Glossary Load 1 (pre-A1)').first().json;\nconst chunks = $('Call Pre-Processor').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    common_glossary: glossary.common_glossary || [],\n    domain_validated_tm: glossary.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary.domain_unvalidated_tm || []\n  }\n}));"
-      }
+      ]
     },
     {
+      "parameters": {
+        "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
+      },
       "id": "merge-domain-chunks",
       "name": "Merge Domain into Chunks",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2060,
+        2064,
         400
-      ],
+      ]
+    },
+    {
       "parameters": {
-        "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
-      }
+        "jsCode": "// Reinjecting A2 terminology into the 4 HTML chunks\n// so A3 receives both the source HTML and the A2 glossary\nconst a2item = $('Call A2').first().json;\nconst a2out  = a2item.agent_output || {};\nconst chunks = $('Merge Domain into Chunks').all();\n\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    a2_glossary:           a2out,\n    unified_terms:         a2out.unified_terms         || [],\n    translation_decisions: a2out.translation_decisions || [],\n    domain_tm_patch:       a2out.domain_tm_patch        || []\n  }\n}));\n"
+      },
+      "id": "merge-a2-into-chunks-001",
+      "name": "Merge A2 into Chunks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Join barrier: accumule les chunks A5 (toutes itérations) et ne libère\n// vers A6 que quand TOUS les chunks attendus sont arrivés. Évite que A6\n// se déclenche avec 1 seul chunk (chunk PASS iter1 vs chunks en retry).\nconst store = $getWorkflowStaticData('global');\nif (!Array.isArray(store.a6buf)) store.a6buf = [];\nconst incoming = $input.all();\nfor (const it of incoming) store.a6buf.push(it.json);\nlet total = 0;\ntry { total = $('Call Pre-Processor').all().length; } catch(e) {}\nif (!total) total = (incoming[0] && incoming[0].json.pipeline_meta && incoming[0].json.pipeline_meta.total_chunks) || store.a6buf.length;\nif (store.a6buf.length >= total) {\n  const out = store.a6buf.slice();\n  store.a6buf = [];\n  return out.map(j => ({ json: j }));\n}\nreturn [];"
+      },
+      "id": "02d13a85-f586-4a9b-8143-e93a63ef9e65",
+      "name": "Buffer for A6",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6420,
+        320
+      ]
     }
   ],
   "connections": {
@@ -1137,18 +1068,7 @@
       "main": [
         [
           {
-            "node": "Call Pre-Translation",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Call Pre-Translation": {
-      "main": [
-        [
-          {
-            "node": "Direction?",
+            "node": "Merge A2 into Chunks",
             "type": "main",
             "index": 0
           }
@@ -1232,7 +1152,7 @@
       "main": [
         [
           {
-            "node": "Call A6",
+            "node": "Buffer for A6",
             "type": "main",
             "index": 0
           }
@@ -1246,7 +1166,7 @@
         ],
         [
           {
-            "node": "Call A6",
+            "node": "Buffer for A6",
             "type": "main",
             "index": 0
           }
@@ -1301,7 +1221,7 @@
       "main": [
         [
           {
-            "node": "Call A6",
+            "node": "Buffer for A6",
             "type": "main",
             "index": 0
           }
@@ -1479,7 +1399,7 @@
         ],
         [
           {
-            "node": "Call A6",
+            "node": "Buffer for A6",
             "type": "main",
             "index": 0
           }
@@ -1628,6 +1548,28 @@
           }
         ]
       ]
+    },
+    "Merge A2 into Chunks": {
+      "main": [
+        [
+          {
+            "node": "Direction?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buffer for A6": {
+      "main": [
+        [
+          {
+            "node": "Call A6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1640,9 +1582,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
-  "activeVersionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
-  "versionCounter": 111,
+  "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
+  "activeVersionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
+  "versionCounter": 171,
   "triggerCount": 1,
   "shared": [
     {
@@ -1665,14 +1607,13 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-05T07:03:34.852Z",
-    "createdAt": "2026-06-05T07:03:34.852Z",
-    "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+    "updatedAt": "2026-06-10T09:02:54.795Z",
+    "createdAt": "2026-06-10T09:02:54.795Z",
+    "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
     "workflowId": "ApjYq9sdM5LKRVlq",
     "nodes": [
       {
         "parameters": {
-          "path": "cls-v3-form",
           "formTitle": "CLS v3 — Course Localisation",
           "formDescription": "OpenClassrooms Content Localization System v3",
           "formFields": {
@@ -1682,8 +1623,7 @@
                 "requiredField": true
               },
               {
-                "fieldLabel": "Target Course ID",
-                "requiredField": true
+                "fieldLabel": "Target Course ID"
               },
               {
                 "fieldLabel": "Source Language",
@@ -1758,10 +1698,7 @@
               }
             ]
           },
-          "options": {
-            "respondWith": "text",
-            "responseText": "Your request has been submitted. Results will be sent to your email."
-          }
+          "options": {}
         },
         "id": "form",
         "name": "CLS v3 Form",
@@ -1775,7 +1712,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilité']) ? f['Score de localisabilité'].length : f['Score de localisabilité']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
+          "jsCode": "\nconst _s=$getWorkflowStaticData('global'); _s.a6buf=[];\n\nconst f=$input.first().json;\nconst sl=f['Source Language']||'fr';\nconst tl=f['Target Language']||'en-US';\nreturn [{json:{\n  course_id:f['Source Course ID'], target_course_id:f['Target Course ID'],\n  source_language:sl, target_language:tl, direction:sl+'>'+tl.split('-')[0],\n  email:f['Email'],\n  enabled_modules:{\n    localize_html:  !!(Array.isArray(f['Localiser le cours (HTML)']) ? f['Localiser le cours (HTML)'].length : f['Localiser le cours (HTML)']),\n\n    audit_only:     !!(Array.isArray(f['Audit du contenu (A1)']) ? f['Audit du contenu (A1)'].length : f['Audit du contenu (A1)']),\n\n    qa_check:       !!(Array.isArray(f['Quality Check /100']) ? f['Quality Check /100'].length : f['Quality Check /100']),\n\n    score_loc:      !!(Array.isArray(f['Score de localisabilite']) ? f['Score de localisabilite'].length : f['Score de localisabilite']),\n\n  },\n  score_target:90, started_at:new Date().toISOString()\n}}];\n"
         },
         "id": "init",
         "name": "Init Params",
@@ -1851,19 +1788,14 @@
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "hNdY7a7cIqY1aLIm",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "hNdY7a7cIqY1aLIm",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a1",
         "name": "Call A1",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           1680,
           400
@@ -1878,7 +1810,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1920,
+          1888,
           400
         ]
       },
@@ -1893,47 +1825,22 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1,
         "position": [
-          2160,
-          400
+          2224,
+          496
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "BKminhI3j8D4ybs1",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "BKminhI3j8D4ybs1",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a2",
         "name": "Call A2",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           2400,
-          400
-        ]
-      },
-      {
-        "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "rfWAld7K9VOXvPrE",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
-        },
-        "id": "pt",
-        "name": "Call Pre-Translation",
-        "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
-        "position": [
-          2880,
           400
         ]
       },
@@ -1947,25 +1854,20 @@
         "type": "n8n-nodes-base.switch",
         "typeVersion": 3,
         "position": [
-          3120,
-          400
+          2992,
+          368
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "JLDchUnpFLdgHbkn",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "JLDchUnpFLdgHbkn",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a3fr",
         "name": "Call A3 FR-EN",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           3360,
           288
@@ -1973,19 +1875,14 @@
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "Eq5Bk0IbKstJMr4P",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "Eq5Bk0IbKstJMr4P",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a3en",
         "name": "Call A3 EN-FR",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           3360,
           528
@@ -1993,19 +1890,14 @@
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "cHTqFQHBnEkeRAJB",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "cHTqFQHBnEkeRAJB",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a4",
         "name": "Call A4",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           3600,
           400
@@ -2013,19 +1905,14 @@
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "De0vqzEM9LlJ0wVB",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "De0vqzEM9LlJ0wVB",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a5",
         "name": "Call A5",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           3840,
           400
@@ -2060,19 +1947,14 @@
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "JLDchUnpFLdgHbkn",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "JLDchUnpFLdgHbkn",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a3i2",
         "name": "Call A3 iter2",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           4560,
           640
@@ -2080,19 +1962,14 @@
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "cHTqFQHBnEkeRAJB",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "cHTqFQHBnEkeRAJB",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a4i2",
         "name": "Call A4 iter2",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           4800,
           640
@@ -2100,19 +1977,14 @@
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "De0vqzEM9LlJ0wVB",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "De0vqzEM9LlJ0wVB",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a5i2",
         "name": "Call A5 iter2",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           5040,
           640
@@ -2142,84 +2014,64 @@
         "typeVersion": 3,
         "position": [
           5520,
-          544
+          608
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "JLDchUnpFLdgHbkn",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "JLDchUnpFLdgHbkn",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a3i3",
         "name": "Call A3 iter3",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           5760,
-          672
+          624
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "cHTqFQHBnEkeRAJB",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "cHTqFQHBnEkeRAJB",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a4i3",
         "name": "Call A4 iter3",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           6000,
-          672
+          624
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "De0vqzEM9LlJ0wVB",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "De0vqzEM9LlJ0wVB",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a5i3",
         "name": "Call A5 iter3",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           6240,
-          672
+          624
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "MQObMb9lhovhBBs8",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "MQObMb9lhovhBBs8",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "a6",
         "name": "Call A6",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           6464,
           80
@@ -2227,7 +2079,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst chunks=$input.all();\nconst translated=chunks.map(c=>({\n  chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n  translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n  type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n  a6_issue_log:c.json.agent_output?.issue_log||[],\n  naturalness_score:c.json.agent_output?.naturalness_score||null,\n  course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n  source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n  score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n}));\nreturn translated.map(t=>({json:t}));\n"
+          "jsCode": "\nconst chunks=$input.all();\n// lookup structure metadata depuis le Pre-Processor (part_index/part_name/chapter_name)\nconst pre={};\ntry {\n  $('Call Pre-Processor').all().forEach(p=>{\n    const k=(p.json.chapter_index??0)+'-'+(p.json.chunk_index??1);\n    pre[k]={part_index:p.json.part_index, part_name:p.json.part_name, chapter_name:p.json.chapter_name};\n  });\n} catch(e){}\nconst translated=chunks.map(c=>{\n  const k=(c.json.chapter_index??0)+'-'+(c.json.chunk_index??1);\n  const m=pre[k]||{};\n  return {\n    chapter_index:c.json.chapter_index, chunk_index:c.json.chunk_index,\n    part_index:(m.part_index??0), part_name:(m.part_name??''), chapter_name:(m.chapter_name??''),\n    translated_html:c.json.agent_output?.revised_content||c.json.agent_output?.adapted_content||'',\n    type:'chunk', a4_swap_log:c.json.agent_output?.swap_log||[],\n    a6_issue_log:c.json.agent_output?.issue_log||[],\n    naturalness_score:c.json.agent_output?.naturalness_score||null,\n    course_id:chunks[0].json.course_id, target_course_id:chunks[0].json.target_course_id||'',\n    source_language:chunks[0].json.source_language, target_language:chunks[0].json.target_language,\n    score_total:null, enabled_modules:chunks[0].json.enabled_modules||{}\n  };\n});\nconst out=translated.map(t=>({json:t}));\n// injecte le fingerprint pour les 7 checks structurels du Reassembler\nlet fp=null;\ntry { fp=$('Extract Fingerprint').first().json; } catch(e){}\nif (fp) out.push({json:{type:'fingerprint', urls:fp.urls, claire_semantics:fp.claire_semantics, code_blocks_count:fp.code_blocks_count}});\nreturn out;\n"
         },
         "id": "mrg",
         "name": "Merge Phase 1",
@@ -2235,27 +2087,22 @@
         "typeVersion": 2,
         "position": [
           6720,
-          400
+          176
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "odMhJgxadf3RPAHp",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "odMhJgxadf3RPAHp",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "rea",
         "name": "Call Reassembler",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           6960,
-          400
+          176
         ]
       },
       {
@@ -2268,25 +2115,20 @@
         "type": "n8n-nodes-base.switch",
         "typeVersion": 3,
         "position": [
-          7200,
-          400
+          7168,
+          144
         ]
       },
       {
         "parameters": {
-          "workflowId": {
-            "__rl": true,
-            "value": "fBgHok8kQUPxlTAT",
-            "mode": "id"
-          },
-          "options": {
-            "waitForSubWorkflow": true
-          }
+          "workflowId": "fBgHok8kQUPxlTAT",
+          "mode": "passThrough",
+          "options": {}
         },
         "id": "del",
         "name": "Call Deliver Output",
         "type": "n8n-nodes-base.executeWorkflow",
-        "typeVersion": 1.1,
+        "typeVersion": 1,
         "position": [
           7440,
           288
@@ -2301,8 +2143,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          7440,
-          528
+          7536,
+          656
         ]
       },
       {
@@ -2315,7 +2157,7 @@
         "typeVersion": 2,
         "position": [
           7680,
-          400
+          448
         ]
       },
       {
@@ -2412,7 +2254,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst a1 = $('Call A1').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a1.map(r => r.localizability_score || 0).filter(s=>s>0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;\nconst blockers = a1.flatMap(r => r.blockers || []);\nreturn [{json:{\n  status:'SCORE_COMPLETE', mode:'score_loc',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  localizability_score:avg,\n  blockers_count:blockers.length,\n  blockers:blockers,\n  summary:`Localizability score: ${avg}/100 — ${blockers.length} blocker(s)`\n}}];\n"
+          "jsCode": "\nconst a1 = $('Call A1').all().map(i => i.json);\nconst p  = $('Init Params').first().json;\n\nconst scored = a1.filter(r => r.agent_output && r.agent_output.localizability_score != null);\nconst avg = scored.length\n  ? Math.round(scored.reduce((s,r) => s + r.agent_output.localizability_score, 0) / scored.length)\n  : 0;\n\nconst allBlockers = a1.flatMap(r => (r.agent_output||{}).blockers || []);\nconst allFlags    = a1.flatMap(r => (r.agent_output||{}).cultural_flags || []);\nconst domains     = [...new Set(a1.map(r => (r.agent_output||{}).detected_domain).filter(Boolean))];\n\nreturn [{json:{\n  status: 'SCORE_COMPLETE',\n  mode: 'score_loc',\n  course_id: p.course_id,\n  direction: p.direction,\n  completed_at: new Date().toISOString(),\n  localizability_score: avg,\n  chunks_scored: scored.length,\n  blockers_count: allBlockers.length,\n  blockers: allBlockers,\n  cultural_flags_count: allFlags.length,\n  detected_domains: domains,\n  a1_results: a1\n}}];\n"
         },
         "id": "score-summary",
         "name": "Score Summary",
@@ -2465,12 +2307,12 @@
         "typeVersion": 3,
         "position": [
           6528,
-          672
+          624
         ]
       },
       {
         "parameters": {
-          "jsCode": "\nconst a5 = $('Call A5 iter3').all().map(i=>i.json);\nconst p  = $('Init Params').first().json;\nconst scores = a5.map(r=>r.score||0);\nconst avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;\nreturn [{json:{\n  status:'QA_COMPLETE', mode:'qa_check',\n  course_id:p.course_id, direction:p.direction,\n  completed_at:new Date().toISOString(),\n  qa_score:avg,\n  pass: avg>=90,\n  chunks:a5.length,\n  summary:`QA score: ${avg}/100 — ${avg>=90?'PASS':'FAIL'}`\n}}];\n"
+          "jsCode": "\nconst a5 = $('Call A5 iter3').all().map(i => i.json);\nconst p  = $('Init Params').first().json;\n\nconst scored = a5.filter(r => r.agent_output && r.agent_output.score != null);\nconst avg = scored.length\n  ? Math.round(scored.reduce((s,r) => s + r.agent_output.score, 0) / scored.length)\n  : 0;\nconst pass = avg >= 90;\n\nconst allFailing = a5.flatMap(r => (r.agent_output||{}).critical_blockers || []);\nconst allWarnings = a5.flatMap(r => (r.agent_output||{}).warnings || []);\n\nreturn [{json:{\n  status: 'QA_COMPLETE',\n  mode: 'qa_check',\n  course_id: p.course_id,\n  direction: p.direction,\n  completed_at: new Date().toISOString(),\n  qa_score: avg,\n  pass,\n  chunks_qa: scored.length,\n  failing_segments: allFailing,\n  failing_count: allFailing.length,\n  warnings: allWarnings,\n  warnings_count: allWarnings.length,\n  a5_results: a5\n}}];\n"
         },
         "id": "qa-summary",
         "name": "QA Summary",
@@ -2518,158 +2360,166 @@
         ]
       },
       {
+        "parameters": {
+          "jsCode": "const d   = $input.first().json;\nconst ip  = $('Init Params').first().json;\n\nconst scoreColor = s => s >= 80 ? '#2e7d32' : s >= 60 ? '#e65100' : '#c62828';\nconst badge = (s,max) => {\n  const pct = Math.round((s/max)*100);\n  const c = scoreColor(pct);\n  return `<span style=\"background:${c};color:#fff;padding:2px 8px;border-radius:10px;font-weight:bold\">${s}/${max}</span>`;\n};\n\nlet body = `\n<div style=\"font-family:Arial,sans-serif;max-width:800px;margin:0 auto;color:#212121\">\n<h1 style=\"border-bottom:3px solid #1565c0;padding-bottom:8px\">\n  🔍 Audit Report — Course ${d.course_id}\n</h1>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n  <tr><td style=\"padding:6px;font-weight:bold;width:160px\">Direction</td><td>${d.direction||'fr→en'}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Date</td><td>${(d.completed_at||'').substring(0,10)}</td></tr>\n  <tr><td style=\"padding:6px;font-weight:bold\">Chunks analysed</td><td>${d.chunks_audited||0}</td></tr>\n</table>`;\n\n(d.a1_results||[]).forEach((r,i) => {\n  const ao = r.agent_output || {};\n  const score = ao.localizability_score ?? null;\n  const pillar = ao.pillar_scores || {};\n  const penalties = ao.penalties || [];\n  const flags = ao.cultural_flags || [];\n  const blockers = ao.blockers || [];\n  const media = ao.media_inventory || [];\n  const terms = ao.proposed_terminology || [];\n\n  body += `<h2 style=\"background:#1565c0;color:#fff;padding:10px 16px;border-radius:6px;margin-top:32px\">\n    Chapter ${r.chapter_index} — Chunk ${r.chunk_index}\n    ${score !== null ? ' &nbsp; ' + badge(score,100) : '<span style=\"color:#fff;opacity:.7\"> (no result)</span>'}\n  </h2>`;\n\n  if (ao.detected_domain) body += `<p><strong>Domain detected:</strong> ${ao.detected_domain} &nbsp; <strong>Source:</strong> ${ao.source_language||'?'} → <strong>Target:</strong> ${ao.target_language||'?'}</p>`;\n\n  // Pillar scores table\n  if (Object.keys(pillar).length > 0) {\n    body += `<h3>📊 Pillar Scores</h3><table style=\"width:100%;border-collapse:collapse;margin-bottom:16px\">`;\n    body += `<tr style=\"background:#e3f2fd\"><th style=\"padding:6px;text-align:left\">Pillar</th><th style=\"padding:6px;text-align:right\">Score</th></tr>`;\n    Object.entries(pillar).forEach(([k,v],idx) => {\n      const bg = idx%2===0 ? '#fff' : '#f9f9f9';\n      body += `<tr style=\"background:${bg}\"><td style=\"padding:6px\">${k.replace(/_/g,' ')}</td><td style=\"padding:6px;text-align:right;font-weight:bold\">${v}</td></tr>`;\n    });\n    body += `</table>`;\n  }\n\n  // Blockers\n  if (blockers.length > 0) {\n    body += `<h3 style=\"color:#c62828\">🚫 Blockers</h3><ul>`;\n    blockers.forEach(b => body += `<li style=\"color:#c62828;margin-bottom:4px\">${typeof b==='string'?b:JSON.stringify(b)}</li>`);\n    body += `</ul>`;\n  }\n\n  // Penalties\n  if (penalties.length > 0) {\n    body += `<h3 style=\"color:#e65100\">⚠️ Penalties</h3><ul>`;\n    penalties.forEach(p => body += `<li><strong>-${p.points||0}pts</strong> ${p.reason||''} — <em>${p.evidence||''}</em></li>`);\n    body += `</ul>`;\n  }\n\n  // Cultural flags\n  if (flags.length > 0) {\n    body += `<h3>🌍 Cultural Flags (${flags.length})</h3><table style=\"width:100%;border-collapse:collapse;margin-bottom:16px\">`;\n    body += `<tr style=\"background:#e8f5e9\"><th style=\"padding:6px;text-align:left\">Category</th><th style=\"padding:6px;text-align:left\">Source term</th><th style=\"padding:6px;text-align:left\">Proposed swap</th><th style=\"padding:6px\">Effort</th><th style=\"padding:6px\">Blocker</th></tr>`;\n    flags.forEach((f,idx) => {\n      const bg = idx%2===0 ? '#fff' : '#f9f9f9';\n      body += `<tr style=\"background:${bg}\">\n        <td style=\"padding:6px\">${f.category||''}</td>\n        <td style=\"padding:6px\"><strong>${f.source_term||''}</strong></td>\n        <td style=\"padding:6px\">${f.proposed_swap||''}</td>\n        <td style=\"padding:6px;text-align:center\">${f.effort||''}</td>\n        <td style=\"padding:6px;text-align:center\">${f.blocker?'🔴':'⚪'}</td>\n      </tr>`;\n    });\n    body += `</table>`;\n  }\n\n  // Media inventory\n  if (media.length > 0) {\n    body += `<h3>🎬 Media & Resources (${media.length})</h3><ul>`;\n    media.forEach(m => body += `<li><strong>[${m.type||'?'}]</strong> <a href=\"${m.url||''}\">${m.url||''}</a> — risk: <em>${m.risk||'?'}</em>${m.proposed_alternative?' → '+m.proposed_alternative:''}</li>`);\n    body += `</ul>`;\n  }\n\n  // Proposed terminology\n  if (terms.length > 0) {\n    body += `<h3>📖 Proposed Terminology (${terms.length})</h3><table style=\"width:100%;border-collapse:collapse\">`;\n    body += `<tr style=\"background:#f3e5f5\"><th style=\"padding:6px;text-align:left\">Source</th><th style=\"padding:6px;text-align:left\">Target</th><th style=\"padding:6px;text-align:left\">Category</th></tr>`;\n    terms.forEach((t,idx) => {\n      const bg = idx%2===0 ? '#fff' : '#f9f9f9';\n      body += `<tr style=\"background:${bg}\"><td style=\"padding:6px\">${t.source_term||''}</td><td style=\"padding:6px\"><strong>${t.proposed_target||''}</strong></td><td style=\"padding:6px\">${t.category||''}</td></tr>`;\n    });\n    body += `</table>`;\n  }\n\n  if (r.status === 'error' || !ao.localizability_score) {\n    body += `<p style=\"color:#888;font-style:italic\">⚠️ No A1 output for this chunk.</p>`;\n  }\n});\n\nbody += `<hr style=\"margin-top:40px;border-color:#ddd\">\n<p style=\"color:#888;font-size:12px\">Generated by CLS v3 — ${d.completed_at||''}</p>\n</div>`;\n\nreturn [{json:{\n  html: body,\n  subject: '[CLS] Audit — ' + d.course_id + ' (' + (d.direction||'') + ')',\n  email: ip.email,\n  course_id: d.course_id\n}}];"
+        },
         "id": "bf5d989f-b1d3-44e9-b66d-282e9b1a9ded",
         "name": "Format Audit Report",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2730,
+          2736,
           208
-        ],
-        "parameters": {
-          "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Audit Report — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  'Chunks analysed: ' + d.chunks_audited, '',\n  '## A1 Results',\n];\n(d.a1_results || []).forEach((r,i) => {\n  const score = r.localizability_score ?? 'N/A';\n  const blockers = (r.blockers || []).map(b => '- ' + b).join('\\n') || '- None';\n  lines.push('### Chunk ' + (i+1) + '\\nScore: ' + score + '/100\\nBlockers:\\n' + blockers + '\\n');\n});\nreturn [{json:{md:lines.join('\\n'), filename:'audit_'+d.course_id+'.md', email:ip.email, course_id:d.course_id}}];\n"
-        }
+        ]
       },
       {
+        "parameters": {
+          "fromEmail": "jborrotzu@gmail.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "={{ $json.subject }}",
+          "html": "={{ $json.html }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
         "id": "6c26ec05-1888-433b-86fd-0be935e5ad65",
         "name": "Send Audit Email",
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          2980,
+          2992,
           208
         ],
+        "webhookId": "0320a580-8cc0-4ff3-95f7-637adca87809",
         "credentials": {
           "smtp": {
             "id": "g6zrrMLej2ViXu6P",
             "name": "SMTP account"
           }
-        },
-        "parameters": {
-          "fromEmail": "jborrotzu@gmail.com",
-          "toEmail": "={{ $json.email }}",
-          "subject": "=[CLS] Audit — {{ $json.course_id }}",
-          "message": "=Audit report for course {{ $json.course_id }} is attached.",
-          "options": {
-            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
-          }
         }
       },
       {
+        "parameters": {
+          "jsCode": "\nconst d  = $input.first().json;\nconst ip = $('Init Params').first().json;\n\nconst scoreColor = s => s >= 80 ? '#2e7d32' : s >= 60 ? '#e65100' : '#c62828';\nconst badge = s => {\n  const c = scoreColor(s);\n  return `<span style=\"background:${c};color:#fff;padding:3px 12px;border-radius:12px;font-size:1.1em;font-weight:bold\">${s}/100</span>`;\n};\n\nconst verdict = d.localizability_score >= 80\n  ? '<span style=\"color:#2e7d32;font-weight:bold\">✅ GO — Localization recommended</span>'\n  : d.localizability_score >= 60\n  ? '<span style=\"color:#e65100;font-weight:bold\">⚠️ CONDITIONAL GO — Review blockers first</span>'\n  : '<span style=\"color:#c62828;font-weight:bold\">🚫 NO-GO — Major rework required</span>';\n\nlet body = `\n<div style=\"font-family:Arial,sans-serif;max-width:800px;margin:0 auto;color:#212121\">\n<h1 style=\"border-bottom:3px solid #1565c0;padding-bottom:8px\">\n  📊 Localizability Score — Course ${d.course_id}\n</h1>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n  <tr><td style=\"padding:6px;font-weight:bold;width:160px\">Direction</td><td>${d.direction||''}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Date</td><td>${(d.completed_at||'').substring(0,10)}</td></tr>\n  <tr><td style=\"padding:6px;font-weight:bold\">Domains detected</td><td>${(d.detected_domains||[]).join(', ')||'—'}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Chunks scored</td><td>${d.chunks_scored||0}</td></tr>\n</table>\n\n<div style=\"text-align:center;padding:24px;background:#f8f9fa;border-radius:8px;margin-bottom:24px\">\n  <div style=\"font-size:0.9em;color:#666;margin-bottom:8px\">GLOBAL LOCALIZABILITY SCORE</div>\n  <div style=\"font-size:2.5em;margin-bottom:12px\">${badge(d.localizability_score||0)}</div>\n  <div>${verdict}</div>\n</div>`;\n\n// Score par chunk\nif ((d.a1_results||[]).length > 0) {\n  body += `<h2>Score by Chapter</h2>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n<tr style=\"background:#e3f2fd\"><th style=\"padding:8px;text-align:left\">Chapter</th><th style=\"padding:8px;text-align:left\">Domain</th><th style=\"padding:8px;text-align:center\">Score</th><th style=\"padding:8px;text-align:left\">Top flag</th></tr>`;\n  (d.a1_results||[]).forEach((r,i) => {\n    const ao = r.agent_output || {};\n    const s = ao.localizability_score ?? null;\n    const bg = i%2===0?'#fff':'#f9f9f9';\n    const topFlag = (ao.cultural_flags||[])[0];\n    body += `<tr style=\"background:${bg}\">\n      <td style=\"padding:8px\">Ch.${r.chapter_index||0} — Chunk ${r.chunk_index||1}</td>\n      <td style=\"padding:8px\">${ao.detected_domain||'—'}</td>\n      <td style=\"padding:8px;text-align:center\">${s !== null ? badge(s) : '—'}</td>\n      <td style=\"padding:8px;font-size:0.9em\">${topFlag ? topFlag.source_term+' → '+topFlag.proposed_swap : '—'}</td>\n    </tr>`;\n  });\n  body += `</table>`;\n}\n\n// Blockers\nif ((d.blockers||[]).length > 0) {\n  body += `<h2 style=\"color:#c62828\">🚫 Blockers (${d.blockers_count})</h2><ul>`;\n  (d.blockers||[]).forEach(b => body += `<li style=\"color:#c62828;margin-bottom:4px\">${typeof b==='string'?b:JSON.stringify(b)}</li>`);\n  body += `</ul>`;\n} else {\n  body += `<p style=\"color:#2e7d32\">✅ No blockers detected.</p>`;\n}\n\nbody += `<hr style=\"margin-top:40px;border-color:#ddd\">\n<p style=\"color:#888;font-size:12px\">Generated by CLS v3 — ${d.completed_at||''}</p>\n</div>`;\n\nreturn [{json:{\n  html: body,\n  subject: `[CLS] Score — ${d.course_id} — ${d.localizability_score||0}/100 (${d.direction||''})`,\n  email: ip.email,\n  course_id: d.course_id,\n  score: d.localizability_score||0\n}}];\n"
+        },
         "id": "41d53159-be83-47d1-a3f3-4cd0f26fa93f",
         "name": "Format Score Report",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2730,
+          2736,
           608
-        ],
-        "parameters": {
-          "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Localizability Score — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**Score: ' + d.localizability_score + '/100**',\n  'Blockers: ' + d.blockers_count, '',\n  '## Blockers',\n  ...(d.blockers||[]).map(b=>'- '+b)\n];\nreturn [{json:{md:lines.join('\\n'), filename:'score_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.localizability_score}}];\n"
-        }
+        ]
       },
       {
+        "parameters": {
+          "fromEmail": "jborrotzu@gmail.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "={{ $json.subject }}",
+          "html": "={{ $json.html }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
         "id": "1379ee06-4a9b-4411-867c-3167491acc66",
         "name": "Send Score Email",
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          2980,
+          2992,
           608
         ],
+        "webhookId": "22ba6a99-c8e7-4a5a-8fe3-21f9839ce9df",
         "credentials": {
           "smtp": {
             "id": "g6zrrMLej2ViXu6P",
             "name": "SMTP account"
           }
-        },
-        "parameters": {
-          "fromEmail": "jborrotzu@gmail.com",
-          "toEmail": "={{ $json.email }}",
-          "subject": "=[CLS] Score — {{ $json.course_id }} — {{ $json.score }}/100",
-          "message": "=Localizability score {{ $json.score }}/100. See attachment.",
-          "options": {
-            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
-          }
         }
       },
       {
+        "parameters": {
+          "jsCode": "\nconst d  = $input.first().json;\nconst ip = $('Init Params').first().json;\n\nconst scoreColor = s => s >= 90 ? '#2e7d32' : s >= 75 ? '#e65100' : '#c62828';\nconst badge = s => {\n  const c = scoreColor(s);\n  return `<span style=\"background:${c};color:#fff;padding:3px 12px;border-radius:12px;font-size:1.1em;font-weight:bold\">${s}/100</span>`;\n};\n\nconst verdict = d.pass\n  ? '<span style=\"color:#2e7d32;font-weight:bold\">✅ PASS — Ready for delivery</span>'\n  : '<span style=\"color:#c62828;font-weight:bold\">❌ FAIL — Failing segments require rework</span>';\n\nlet body = `\n<div style=\"font-family:Arial,sans-serif;max-width:800px;margin:0 auto;color:#212121\">\n<h1 style=\"border-bottom:3px solid #1565c0;padding-bottom:8px\">\n  🔎 Quality Check — Course ${d.course_id}\n</h1>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n  <tr><td style=\"padding:6px;font-weight:bold;width:160px\">Direction</td><td>${d.direction||''}</td></tr>\n  <tr style=\"background:#f5f5f5\"><td style=\"padding:6px;font-weight:bold\">Date</td><td>${(d.completed_at||'').substring(0,10)}</td></tr>\n  <tr><td style=\"padding:6px;font-weight:bold\">Chunks evaluated</td><td>${d.chunks_qa||0}</td></tr>\n</table>\n\n<div style=\"text-align:center;padding:24px;background:#f8f9fa;border-radius:8px;margin-bottom:24px\">\n  <div style=\"font-size:0.9em;color:#666;margin-bottom:8px\">QA SCORE (threshold: 90/100)</div>\n  <div style=\"font-size:2.5em;margin-bottom:12px\">${badge(d.qa_score||0)}</div>\n  <div>${verdict}</div>\n</div>`;\n\n// Score par chunk\nif ((d.a5_results||[]).length > 0) {\n  body += `<h2>Score by Chapter</h2>\n<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px\">\n<tr style=\"background:#e3f2fd\"><th style=\"padding:8px;text-align:left\">Chapter</th><th style=\"padding:8px;text-align:center\">Score</th><th style=\"padding:8px;text-align:center\">Status</th><th style=\"padding:8px\">Failing segments</th></tr>`;\n  (d.a5_results||[]).forEach((r,i) => {\n    const ao = r.agent_output || {};\n    const s  = ao.score ?? null;\n    const ok = s !== null && s >= 90;\n    const bg = i%2===0?'#fff':'#f9f9f9';\n    const failing = (ao.critical_blockers||[]).length;\n    body += `<tr style=\"background:${bg}\">\n      <td style=\"padding:8px\">Ch.${r.chapter_index||0} — Chunk ${r.chunk_index||1}</td>\n      <td style=\"padding:8px;text-align:center\">${s !== null ? badge(s) : '—'}</td>\n      <td style=\"padding:8px;text-align:center\">${ok ? '✅ PASS' : '❌ FAIL'}</td>\n      <td style=\"padding:8px\">${failing > 0 ? `${failing} segment(s)` : '—'}</td>\n    </tr>`;\n  });\n  body += `</table>`;\n}\n\n// Failing segments\nif ((d.failing_segments||[]).length > 0) {\n  body += `<h2 style=\"color:#c62828\">❌ Failing Segments (${d.failing_count})</h2><ul>`;\n  (d.failing_segments||[]).forEach(s => {\n    const txt = typeof s === 'string' ? s : (s.segment_id ? `[${s.segment_id}] ${s.issue||''} — <em>${s.source||''}</em>` : JSON.stringify(s));\n    body += `<li style=\"margin-bottom:6px\">${txt}</li>`;\n  });\n  body += `</ul>`;\n}\n\n// Warnings\nif ((d.warnings||[]).length > 0) {\n  body += `<h2 style=\"color:#e65100\">⚠️ Warnings (${d.warnings_count})</h2><ul>`;\n  (d.warnings||[]).forEach(w => body += `<li style=\"margin-bottom:4px\">${typeof w==='string'?w:JSON.stringify(w)}</li>`);\n  body += `</ul>`;\n}\n\nbody += `<hr style=\"margin-top:40px;border-color:#ddd\">\n<p style=\"color:#888;font-size:12px\">Generated by CLS v3 — ${d.completed_at||''}</p>\n</div>`;\n\nreturn [{json:{\n  html: body,\n  subject: `[CLS] QA — ${d.course_id} — ${d.qa_score||0}/100 ${d.pass ? 'PASS ✅' : 'FAIL ❌'} (${d.direction||''})`,\n  email: ip.email,\n  course_id: d.course_id,\n  score: d.qa_score||0,\n  pass: d.pass\n}}];\n"
+        },
         "id": "6a37c026-4e7c-4f82-9532-8984dc80476c",
         "name": "Format QA Report",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          7050,
+          7056,
           528
-        ],
-        "parameters": {
-          "jsCode": "\nconst d = $input.first().json;\nconst ip = $('Init Params').first().json;\nconst lines = [\n  '# Quality Check — Course ' + d.course_id,\n  'Direction: ' + d.direction,\n  'Date: ' + d.completed_at,\n  '**QA Score: ' + d.qa_score + '/100 — ' + (d.pass ? 'PASS ✓' : 'FAIL ✗') + '**',\n  'Chunks evaluated: ' + d.chunks\n];\nreturn [{json:{md:lines.join('\\n'), filename:'qa_'+d.course_id+'.md', email:ip.email, course_id:d.course_id, score:d.qa_score, pass:d.pass}}];\n"
-        }
+        ]
       },
       {
+        "parameters": {
+          "fromEmail": "jborrotzu@gmail.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "={{ $json.subject }}",
+          "html": "={{ $json.html }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
         "id": "c504b3c2-1188-43d1-b5b7-9ac32ceaaa67",
         "name": "Send QA Email",
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          7300,
+          7312,
           528
         ],
+        "webhookId": "6e3297f6-915a-4a48-93f5-74e0439af4a0",
         "credentials": {
           "smtp": {
             "id": "g6zrrMLej2ViXu6P",
             "name": "SMTP account"
           }
-        },
-        "parameters": {
-          "fromEmail": "jborrotzu@gmail.com",
-          "toEmail": "={{ $json.email }}",
-          "subject": "=[CLS] QA — {{ $json.course_id }} — {{ $json.score }}/100 {{ $json.pass ? 'PASS' : 'FAIL' }}",
-          "message": "=QA score {{ $json.score }}/100. See attachment.",
-          "options": {
-            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.md).toString('base64'), type: 'text/plain', encoding: 'base64'}] }}"
-          }
         }
       },
       {
+        "parameters": {
+          "jsCode": "\nconst ip = $('Init Params').first().json;\nconst deliver = $('Call Deliver Output').first().json;\nconst d = deliver.deliverables || {};\nconst li = (label,url)=> url ? `<li><a href=\"${url}\">${label}</a></li>` : '';\nconst html = `\n<h2>CLS v3 — Localisation livrée</h2>\n<p><b>Cours :</b> ${ip.course_id} → ${ip.target_course_id||'(n/a)'}<br>\n<b>Direction :</b> ${deliver.direction||ip.direction||''}<br>\n<b>Score QA :</b> ${deliver.score_total??'n/a'}<br>\n<b>Intégrité structurelle :</b> ${deliver.structural_integrity?'OK ✅':'⚠️ à vérifier'}</p>\n<h3>Livrables GitHub</h3>\n<ul>\n${li('HTML localisé', d.html_github)}\n${li('Review (.md, import Notion)', d.review_md)}\n${li('Rapport QA', d.qa_report)}\n${li('Decision log', d.log_github)}\n${li('TM patch (CSV)', d.tm_patch)}\n${li('ToDo graphics (CSV)', d.todo_graphics)}\n${li('ToDo links (CSV)', d.todo_links)}\n${li('ToDo videos (CSV)', d.todo_videos)}\n</ul>`;\nreturn [{json:{ email: ip.email, course_id: ip.course_id, target_course_id: ip.target_course_id||'', html }}];\n"
+        },
         "id": "eb64727e-7267-43d1-bd10-979ab9e278fd",
         "name": "Format HTML Delivery",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          7690,
+          7696,
           288
-        ],
-        "parameters": {
-          "jsCode": "\nconst ip = $('Init Params').first().json;\nconst reassembler = $('Call Reassembler').first().json;\nconst html = reassembler.final_html || '';\nconst course_id = ip.course_id;\nreturn [{json:{\n  html: html,\n  filename: course_id + '_localized.html',\n  email: ip.email,\n  course_id: course_id\n}}];\n"
-        }
+        ]
       },
       {
+        "parameters": {
+          "fromEmail": "jborrotzu@gmail.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "=[CLS] Localisation livrée — {{ $json.course_id }}",
+          "emailFormat": "html",
+          "html": "={{ $json.html }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
         "id": "3824b805-e54c-429d-ad3b-cb8a88376e0d",
         "name": "Send HTML Email",
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          7940,
+          7952,
           288
         ],
+        "webhookId": "d13de3fa-b785-4b8a-b93f-d4c75744fccb",
         "credentials": {
           "smtp": {
             "id": "g6zrrMLej2ViXu6P",
             "name": "SMTP account"
           }
-        },
-        "parameters": {
-          "fromEmail": "jborrotzu@gmail.com",
-          "toEmail": "={{ $json.email }}",
-          "subject": "=[CLS] Localized HTML — {{ $json.course_id }}",
-          "message": "=Localized HTML file for course {{ $json.course_id }} is attached.",
-          "options": {
-            "attachments": "={{ [{name: $json.filename, data: Buffer.from($json.html).toString('base64'), type: 'text/html', encoding: 'base64'}] }}"
-          }
         }
       },
       {
+        "parameters": {
+          "jsCode": "const glossary = $('Glossary Load 1 (pre-A1)').first().json;\nconst chunks = $('Call Pre-Processor').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    common_glossary: glossary.common_glossary || [],\n    domain_validated_tm: glossary.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary.domain_unvalidated_tm || []\n  }\n}));"
+        },
         "id": "merge-glossary-chunks",
         "name": "Merge Glossary into Chunks",
         "type": "n8n-nodes-base.code",
@@ -2677,23 +2527,46 @@
         "position": [
           1440,
           400
-        ],
-        "parameters": {
-          "jsCode": "const glossary = $('Glossary Load 1 (pre-A1)').first().json;\nconst chunks = $('Call Pre-Processor').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    common_glossary: glossary.common_glossary || [],\n    domain_validated_tm: glossary.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary.domain_unvalidated_tm || []\n  }\n}));"
-        }
+        ]
       },
       {
+        "parameters": {
+          "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
+        },
         "id": "merge-domain-chunks",
         "name": "Merge Domain into Chunks",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2060,
+          2064,
           400
-        ],
+        ]
+      },
+      {
         "parameters": {
-          "jsCode": "const domain = $('Detect Domain').first().json;\nconst glossary2 = $('Glossary Load 2 (post-A1)').first().json;\nconst chunks = $('Merge Glossary into Chunks').all();\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    detected_domain: domain.detected_domain,\n    a1_outputs: domain.a1_outputs || [],\n    a1_audit: (domain.a1_outputs || []).find(a => a && a.chapter_index === c.json.chapter_index) || {},\n    target_course_id: domain.target_course_id || c.json.target_course_id || '',\n    score_target: domain.score_target || 90,\n    common_glossary: glossary2.common_glossary || c.json.common_glossary || [],\n    domain_validated_tm: glossary2.domain_validated_tm || [],\n    domain_unvalidated_tm: glossary2.domain_unvalidated_tm || []\n  }\n}));"
-        }
+          "jsCode": "// Reinjecting A2 terminology into the 4 HTML chunks\n// so A3 receives both the source HTML and the A2 glossary\nconst a2item = $('Call A2').first().json;\nconst a2out  = a2item.agent_output || {};\nconst chunks = $('Merge Domain into Chunks').all();\n\nreturn chunks.map(c => ({\n  json: {\n    ...c.json,\n    a2_glossary:           a2out,\n    unified_terms:         a2out.unified_terms         || [],\n    translation_decisions: a2out.translation_decisions || [],\n    domain_tm_patch:       a2out.domain_tm_patch        || []\n  }\n}));\n"
+        },
+        "id": "merge-a2-into-chunks-001",
+        "name": "Merge A2 into Chunks",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2768,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Join barrier: accumule les chunks A5 (toutes itérations) et ne libère\n// vers A6 que quand TOUS les chunks attendus sont arrivés. Évite que A6\n// se déclenche avec 1 seul chunk (chunk PASS iter1 vs chunks en retry).\nconst store = $getWorkflowStaticData('global');\nif (!Array.isArray(store.a6buf)) store.a6buf = [];\nconst incoming = $input.all();\nfor (const it of incoming) store.a6buf.push(it.json);\nlet total = 0;\ntry { total = $('Call Pre-Processor').all().length; } catch(e) {}\nif (!total) total = (incoming[0] && incoming[0].json.pipeline_meta && incoming[0].json.pipeline_meta.total_chunks) || store.a6buf.length;\nif (store.a6buf.length >= total) {\n  const out = store.a6buf.slice();\n  store.a6buf = [];\n  return out.map(j => ({ json: j }));\n}\nreturn [];"
+        },
+        "id": "02d13a85-f586-4a9b-8143-e93a63ef9e65",
+        "name": "Buffer for A6",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          6420,
+          320
+        ]
       }
     ],
     "connections": {
@@ -2800,18 +2673,7 @@
         "main": [
           [
             {
-              "node": "Call Pre-Translation",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Call Pre-Translation": {
-        "main": [
-          [
-            {
-              "node": "Direction?",
+              "node": "Merge A2 into Chunks",
               "type": "main",
               "index": 0
             }
@@ -2895,7 +2757,7 @@
         "main": [
           [
             {
-              "node": "Call A6",
+              "node": "Buffer for A6",
               "type": "main",
               "index": 0
             }
@@ -2909,7 +2771,7 @@
           ],
           [
             {
-              "node": "Call A6",
+              "node": "Buffer for A6",
               "type": "main",
               "index": 0
             }
@@ -2964,7 +2826,7 @@
         "main": [
           [
             {
-              "node": "Call A6",
+              "node": "Buffer for A6",
               "type": "main",
               "index": 0
             }
@@ -3142,7 +3004,7 @@
           ],
           [
             {
-              "node": "Call A6",
+              "node": "Buffer for A6",
               "type": "main",
               "index": 0
             }
@@ -3291,6 +3153,28 @@
             }
           ]
         ]
+      },
+      "Merge A2 into Chunks": {
+        "main": [
+          [
+            {
+              "node": "Direction?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buffer for A6": {
+        "main": [
+          [
+            {
+              "node": "Call A6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Jérémie Borrotzu",
@@ -3299,18 +3183,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-05T07:03:34.932Z",
-        "id": 397,
+        "createdAt": "2026-06-10T09:02:55.009Z",
+        "id": 632,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+        "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-05T07:03:34.917Z",
-        "id": 396,
+        "createdAt": "2026-06-10T09:02:54.978Z",
+        "id": 631,
         "workflowId": "ApjYq9sdM5LKRVlq",
-        "versionId": "10878340-018d-428a-9fdc-cca90fabf6e2",
+        "versionId": "99f9ec41-7d75-419e-93e5-684ee6eba11f",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }

@@ -93,7 +93,7 @@ Call Submitter         ← appelle le SUB Batch Submitter
   │                             dans 07_runs/{course_id}/scratch/{agent}_{ts}.jsonl
   │    GET raw from GitHub   ← récupère en binaire (Accept: vnd.github.v3.raw)
   │    Upload JSONL → OpenAI ← formBinaryData → POST /v1/files
-  │    Create Batch          ← POST /v1/batches (model: gpt-5.2, window: 24h)
+  │    Create Batch          ← POST /v1/batches (model: gpt-5.5-pro-2026-04-23, window: 24h)
   │
   ↓
 Call Poller            ← appelle le SUB Batch Poller
@@ -194,7 +194,7 @@ Merge Domain into Chunks
   ↓
 Call A2 (×N chunks)    ← AGENT : Terminology Architect — construit le glossaire de run
   ↓
-Call A3 (×N chunks)    ← AGENT : A3 Translation Specialist — traduction gpt-5.2 from scratch (v5.0)
+Call A3 (×N chunks)    ← AGENT : A3 Translation Specialist — traduction gpt-5.5-pro (v5.0, post-édition du draft Pre-Translation)
   ↓
 Call A4 (×N chunks)    ← AGENT : Cultural Adapter — swaps culturels (SIRET→EIN, RTT→PTO...)
   ↓
@@ -236,7 +236,15 @@ Send QA Email
   ↓
 [Post-QA Mode? → localize_html]
   ↓
+Buffer for A6          ← BARRIER : accumule les chunks de toutes les itérations,
+                          ne libère que quand les N chunks sont arrivés
+                          (un chunk PASS iter1 ne re-boucle pas — voir doc dédiée)
+  ↓
 Call A6 (×N chunks)    ← AGENT : Final Proofreader — polish final, conformité ISO 17100
+  ↓
+Merge Phase 1          ← mappe agent_output→translated_html + re-injecte
+                          part_index/part_name/chapter_name (depuis Pre-Processor)
+                          + ajoute l'item type:'fingerprint' (depuis Extract Fingerprint)
   ↓
 Call Reassembler       ← SUB : réassemble les N chunks dans l'ordre
                           + 7 checks structurels :
@@ -248,19 +256,22 @@ Call Reassembler       ← SUB : réassemble les N chunks dans l'ordre
                           6. URLs intactes
                           7. Nombre de blocs code = original
   ↓
-Call Deliver           ← SUB : livraison GitHub + Google Doc
-                          Push → 07_runs/{course_id}/output/{target}_localized_{dir}.html
-                          Push → decision_log.json
-                          Push → tm_patch.csv (nouveaux termes pour la TM)
-                          Crée → Google Doc [CLS Review] pour revue humaine
+Structural OK?         ← integrity true → Deliver · false → Flag BLOCKED
   ↓
-Format HTML Delivery
+Call Deliver Output    ← SUB : push 8 fichiers GitHub (nœuds GitHub natifs)
+                          → {tgt}_localized_{dir}.html · _review_{dir}.md
+                          → _qa_report_{dir}.md · _decision_log_{dir}.json
+                          → _tm_patch_{dir}.csv · 3× _todo_*.csv (graphics/links/videos)
+  ↓
+Format HTML Delivery   ← lit deliverables{} → génère le corps HTML avec les liens
   ↓
 Send HTML Email
-  ← liens GitHub + Google Doc + résumé décisions
+  ← emailFormat: html, liens GitHub (PAS de pièce jointe)
 ```
 
-**Ce que tu reçois :** Email avec liens vers le HTML localisé (GitHub) et le Google Doc de review. Injection manuelle dans OC par Jérémie.
+**Ce que tu reçois :** Email HTML avec les liens GitHub (HTML localisé, review .md pour Notion, rapport QA, decision log, TM patch, ToDo Phase 2). Import du `.md` dans Notion pour review, puis injection manuelle du HTML dans OC par Jérémie.
+
+> 📐 Détail du mécanisme join + réassemblage + livraison : [architecture/qa_join_and_delivery.md](architecture/qa_join_and_delivery.md)
 
 ---
 
@@ -292,14 +303,16 @@ Après chaque run : A2 + A4 poussent leurs `domain_tm_patch[]` → merge dans le
 
 ## 9. Coûts estimés (OpenAI Batch API — 50% réduction)
 
+> Tous les agents tournent sur **`gpt-5.5-pro-2026-04-23`** (reasoning, temperature omise) depuis le 2026-06-09. Les coûts ci-dessous sont des ordres de grandeur à reconfirmer sur platform.openai.com.
+
 | Agent | Modèle | Coût / run One Part (~83k tokens) |
 |---|---|---|
-| A1 Audit | gpt-5.2 | ~$1.20 |
-| A2 Terminology | gpt-5.2 | ~$0.18 |
-| A3 MTPE | gpt-5.2 | ~$3.10 |
-| A4 Cultural | gpt-5.2 | ~$3.20 |
-| A5 QA ×2 iter | gpt-5.2 | ~$2.80 |
-| A6 Proofreader | gpt-5.2 | ~$2.50 |
+| A1 Audit | gpt-5.5-pro | ~$1.20 |
+| A2 Terminology | gpt-5.5-pro | ~$0.18 |
+| A3 MTPE | gpt-5.5-pro | ~$3.10 |
+| A4 Cultural | gpt-5.5-pro | ~$3.20 |
+| A5 QA ×2 iter | gpt-5.5-pro | ~$2.80 |
+| A6 Proofreader | gpt-5.5-pro | ~$2.50 |
 | **TOTAL** | | **~$12.98** |
 
 Budget $50 → **3–4 runs complets One Part** (ou ~10 runs audit seul).
@@ -317,7 +330,10 @@ Budget $50 → **3–4 runs complets One Part** (ou ~10 runs audit seul).
 | `body: {}` expressions non évaluées | Clés manquantes dans Create Batch | Utiliser `bodyParameters.parameters` keypairs |
 | Email sans HTML | Tags HTML visibles en texte brut | `emailFormat: "html"` + champ `html:` (pas `message:`) dans emailSend v2.1 |
 | Chunks perdus après Glossary Load | 1 item au lieu de N | Nœud `Merge X into Chunks` obligatoire après chaque SUB qui retourne 1 item |
-| `pretranslation_draft` vide | A3 mode from scratch | Intentionnel — tous les agents alignés sur gpt-5.2. A3 v5.0 gère les 2 modes. |
+| A6 ne reçoit qu'1 chunk → HTML « vide » | `succeeded` mais 1 seul chapitre livré | Nœud `Buffer for A6` (barrier sync, static data, release à `total_chunks`) + reset dans `Init Params`. Voir [qa_join_and_delivery.md](architecture/qa_join_and_delivery.md) |
+| Titres de partie `<h2>` perdus / checks faussés | Réassemblage incomplet | `Merge Phase 1` doit propager `part_index`/`part_name` + injecter l'item `type:'fingerprint'` |
+| Email vide, sans pièce jointe ni lien | Email reçu mais aucun contenu | `Buffer.from()` INTERDIT dans les expressions n8n → livrer par **liens GitHub** (corps HTML), pas par pièce jointe |
+| `pretranslation_draft` vide | A3 mode from scratch | Intentionnel — tous les agents alignés sur gpt-5.5-pro. A3 v5.0 gère les 2 modes. |
 
 ---
 
