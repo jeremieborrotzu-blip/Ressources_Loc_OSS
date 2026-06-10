@@ -336,7 +336,9 @@ Budget $50 → **3–4 runs complets One Part** (ou ~10 runs audit seul).
 | `body: {}` expressions non évaluées | Clés manquantes dans Create Batch | Utiliser `bodyParameters.parameters` keypairs |
 | Email sans HTML | Tags HTML visibles en texte brut | `emailFormat: "html"` + champ `html:` (pas `message:`) dans emailSend v2.1 |
 | Chunks perdus après Glossary Load | 1 item au lieu de N | Nœud `Merge X into Chunks` obligatoire après chaque SUB qui retourne 1 item |
-| A6 ne reçoit qu'1 chunk → HTML « vide » | `succeeded` mais 1 seul chapitre livré | Nœud `Buffer for A6` (barrier sync, static data, release à `total_chunks`) + reset dans `Init Params`. Voir [qa_join_and_delivery.md](architecture/qa_join_and_delivery.md) |
+| **A6 ne reçoit qu'1 chunk → HTML « vide »** (cause racine) | `succeeded` mais 1 seul chapitre ; flow figé sur `Buffer for A6` | `QA Check iter1/iter2` faisaient `$input.first()` → 1 chunk sur 4. Fix : `$input.all().map()`. Voir [qa_join_and_delivery.md §1bis](architecture/qa_join_and_delivery.md) |
+| Pipeline figé en lancement manuel | `Buffer for A6` succeeded mais rien ensuite | Le static data du buffer n'est fiable qu'en **production** → lancer via le **formulaire**, jamais « Execute workflow » |
+| A6 reçoit chunks à itérations mixtes | besoin de réunir PASS iter1 + REVISE iter2/3 | `Buffer for A6` (barrier, static data, release à `total_chunks`) + reset dans `Init Params` |
 | Titres de partie `<h2>` perdus / checks faussés | Réassemblage incomplet | `Merge Phase 1` doit propager `part_index`/`part_name` + injecter l'item `type:'fingerprint'` |
 | Email vide, sans pièce jointe ni lien | Email reçu mais aucun contenu | `Buffer.from()` INTERDIT dans les expressions n8n → livrer par **liens GitHub** (corps HTML), pas par pièce jointe |
 | `pretranslation_draft` vide | A3 mode from scratch | Intentionnel — tous les agents alignés sur gpt-5.5-pro. A3 v5.0 gère les 2 modes. |
