@@ -29,6 +29,8 @@
         ↓                                                               │
 [AGENT A5] Quality Gatekeeper   — Score QA + boucle (max 3 iter)      │
         ↓  ↑ REVISE → retour A3 (segments défaillants uniquement)      │
+[Buffer for A6] join barrier    — attend les N chunks avant A6        │
+        ↓                                                               │
 [AGENT A6] Final Proofreader    — Relecture en isolation               │
         ↓                                                               │
 [SUB] Reassembler + Validator   — Réassemblage + 7 checks HTML        │
@@ -37,7 +39,7 @@
         ↓                                                               │
 [Documents annexes / Images / Liens] — contexte = HTML Phase 1        │
         ↓                                                               │
-[SUB] Deliver Output            — GitHub ZIP + GDoc + notification     │
+[SUB] Deliver Output            — 8 fichiers GitHub + email liens      │
                                                                         │
 [AGENT A7] AV & Caption         — SRT/VTT (hors scope pilote) ────────┘
 ```
@@ -57,7 +59,7 @@
 | Étape | Modèle | Mode | Coût indicatif |
 |---|---|---|---|
 | Pré-traduction | gpt-5.5-pro-2026-04-23 | Batch API (−50%) | estimé |
-| Agents A1→A6 | GPT-5.4 | Batch API (−50%) | ~$11 / partie |
+| Agents A1→A6 | gpt-5.5-pro-2026-04-23 | Batch API (−50%) | ~$11 / partie |
 | **Total / partie** | | | **~$13.52** |
 
 Livraison : Batch API OpenAI → résultats sous 24h.
@@ -80,6 +82,7 @@ Livraison : Batch API OpenAI → résultats sous 24h.
 - [Vue d'ensemble du pipeline](architecture/pipeline_overview.md)
 - [Ordre de traitement et hiérarchie](architecture/processing_order.md)
 - [Stratégie de chunking](architecture/chunking_strategy.md)
+- [QA Join (A5→A6), réassemblage & livraison](architecture/qa_join_and_delivery.md)
 
 ### Workflows n8n
 - *(à compléter lors de la construction)*

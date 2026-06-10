@@ -43,7 +43,7 @@
 | Batch Poller | Polling statut + récupération résultats | OpenAI API Key |
 | Reassembler + Validator | Réassemblage + 7 checks structurels | — |
 | Glossary Loader | Lecture CSV depuis GitHub | GitHub API |
-| Deliver Output | Push ZIP GitHub + création GDoc | GitHub API + Google Docs OAuth2 |
+| Deliver Output | Push 8 fichiers GitHub (nœuds GitHub natifs) | GitHub API |
 
 ---
 
@@ -57,16 +57,17 @@ PHASE 1 (HTML) :
   HTML brut → [Pre-Processor] → chunks
   chunks → [A1] audit → [A2] glossaire
   chunks → [Pre-Translation] pré-trad → [A3] Gold Master → [A4] adapté culturellement
-         → [A5] QA (boucle) → [A6] relu → [Reassembler] HTML validé
+         → [A5] QA (boucle) → [Buffer for A6] join → [A6] relu → [Reassembler] HTML validé
 
 PHASE 2 (Assets) :
   HTML validé + glossaire A2 + log A4 → [Agents annexes] documents/images/liens
 
-OUTPUT :
-  - HTML localisé (GitHub ZIP)
-  - Google Doc (review humaine)
-  - Notification email (GitHub push)
-  - Score final + decision log (JSON)
+OUTPUT (8 fichiers GitHub, push via nœuds GitHub natifs) :
+  - HTML localisé (.html)
+  - Review (.md, import Notion) + rapport QA (.md)
+  - Decision log (.json) + TM patch (.csv)
+  - 3× ToDo Phase 2 (.csv : graphics / links / videos)
+  - Notification email HTML avec les liens GitHub (pas de pièce jointe)
 ```
 
 ---
@@ -78,7 +79,7 @@ OUTPUT :
 | 1 partie (6 chapitres) | ~$13.52 | < 24h |
 | Cours complet (15 chapitres) | ~$29.70 | < 24h |
 
-*Prix GPT-5.4 batch = estimation $5/$20 par Mtok — à confirmer sur platform.openai.com*
+*Tous les agents : `gpt-5.5-pro-2026-04-23` (reasoning, temperature omise). Prix batch = estimation à confirmer sur platform.openai.com*
 
 ---
 
