@@ -1,8 +1,8 @@
 # A4 — Cultural Adapter
 
 **Position dans le pipeline :** Après A3 (Gold Master) | Avant A5 (QA)
-**Modèle :** GPT-5.4 — Batch API
-**Température :** 0.3
+**Modèle :** `gpt-5.5-pro-2026-04-23` (reasoning) — Batch API
+**Température :** aucune (modèle reasoning — temperature non supportée)
 **Prompt :** `01_prompts/a4_cultural_adapter_system.txt` + `a4_cultural_adapter_user_template.txt`
 
 ---
