@@ -219,6 +219,8 @@ Send QA Email
 
 **Ce que tu reçois :** Rapport QA avec score final, segments défaillants restants, décision PASS/FAIL par chunk.
 
+> ⚠️ **Portée du Quality Check.** Ce mode évalue la **qualité de traduction des segments AVANT réassemblage** (score A5 par chunk) — il s'arrête après A5 et ne voit PAS le HTML final. L'**état des lieux du HTML de sortie** (7 checks structurels + métriques) est produit uniquement en localisation complète (Scénario 4), dans `qa_report.md`. Voir [architecture/qa_join_and_delivery.md](architecture/qa_join_and_delivery.md) §4.3.
+
 > **Optimisation coût :** Les itérations 2 et 3 ne retraitent QUE les segments
 > défaillants identifiés par A5 (pas le chapitre entier). Gain ~60% sur les passes suivantes.
 
@@ -258,9 +260,13 @@ Call Reassembler       ← SUB : réassemble les N chunks dans l'ordre
   ↓
 Structural OK?         ← integrity true → Deliver · false → Flag BLOCKED
   ↓
+Prepare Deliver Input  ← consolide checks structurels (Validator) + score A5
+                          (Buffer for A6) + logs A4/A6 (Merge Phase 1)
+  ↓
 Call Deliver Output    ← SUB : push 8 fichiers GitHub (nœuds GitHub natifs)
                           → {tgt}_localized_{dir}.html · _review_{dir}.md
-                          → _qa_report_{dir}.md · _decision_log_{dir}.json
+                          → _qa_report_{dir}.md (= état des lieux du HTML de sortie :
+                             7 checks + métriques) · _decision_log_{dir}.json
                           → _tm_patch_{dir}.csv · 3× _todo_*.csv (graphics/links/videos)
   ↓
 Format HTML Delivery   ← lit deliverables{} → génère le corps HTML avec les liens
