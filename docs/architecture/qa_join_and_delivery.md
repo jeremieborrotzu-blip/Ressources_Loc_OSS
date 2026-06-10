@@ -22,7 +22,38 @@ qui passe en iter 1), puis le Reassembler s'exécutait en aval avec 1 seul chunk
 
 ---
 
+## 1bis. Le bug racine réel — `QA Check` ne gardait qu'1 chunk
+
+⚠️ Cause confirmée par un run de test (2026-06-10) : `QA Check iter1` et `QA Check iter2`
+faisaient `$input.first()` et retournaient **un seul item** — ils jetaient 3 chunks sur 4.
+
+Conséquence : A5 sort 4 chunks notés (ex. 100 / 100 / 83 / 40) → QA Check garde le premier
+seulement → le Buffer reçoit 1 item → `1 < 4` → attente infinie → aucune reboucle iter2.
+C'est **ce** bug (et pas seulement le timing du join) qui causait « A6 reçoit 1 chunk ».
+
+**Fix :** les deux nœuds traitent désormais tous les chunks et routent chacun
+individuellement :
+```js
+return $input.all().map(item => {
+  const j = item.json, a5 = j.agent_output || {};
+  const score = a5.score_total || 0, pass = score >= 90;
+  return { json: { ...j, score_total: score,
+    qa_status: pass ? 'PASS' : (j.iteration >= 3 ? 'ESCALATE' : 'REVISE'),
+    failing_segments: pass ? [] : (a5.critical_blockers || []),
+    previous_qa_report: a5, a5_qa_report: a5 }};
+});
+```
+
+> Le `Score >= 90?` (Switch en mode expression) route alors chaque item selon son
+> `qa_status` : PASS → Buffer, REVISE → A3 iter2, ESCALATE → Buffer.
+
 ## 2. La solution — nœud `Buffer for A6` (barrier sync)
+
+> 🔴 **MODE PRODUCTION OBLIGATOIRE.** Le Buffer repose sur `$getWorkflowStaticData`,
+> qui n'est fiable **qu'en exécution de production** (workflow actif, déclenché par le
+> **formulaire**). En lancement manuel (« Execute workflow »), le static data ne persiste
+> pas → le buffer ne peut pas accumuler → deadlock. **Toujours lancer le pipeline via
+> l'URL du formulaire**, jamais en manuel.
 
 Un Code node **`Buffer for A6`** est inséré entre les trois sorties qui mènent à A6 et
 `Call A6` :
@@ -183,7 +214,8 @@ fait un **état des lieux du HTML final réassemblé** :
 
 | Zone | Avant | Après |
 |---|---|---|
-| Join A5→A6 | `Call A6` déclenché avec 1 chunk | `Buffer for A6` libère quand N chunks prêts |
+| `QA Check iter1/iter2` | `$input.first()` → 1 chunk sur 4 (cause racine) | `$input.all().map()` → route les N chunks |
+| Join A5→A6 | `Call A6` déclenché avec 1 chunk | `Buffer for A6` libère quand N chunks prêts (production only) |
 | `Init Params` | — | reset du static buffer en tête |
 | `Merge Phase 1` | chapter_index/chunk_index seuls | + part_index/part_name/chapter_name + fingerprint |
 | `Format HTML Delivery` | lisait `Call Reassembler.final_html` | lit `Call Deliver Output.deliverables` (liens) |
