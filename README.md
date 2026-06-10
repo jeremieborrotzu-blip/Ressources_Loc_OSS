@@ -40,13 +40,16 @@ A4 Cultural Adapter ────── Swaps culturels (institutions, exemples, 
 A5 Quality Gatekeeper ─── Score /100 — boucle jusqu'à ≥ 90 (max 3 iter)
         │
         ▼
+Buffer for A6 ──────────── Join barrier : attend les N chunks avant A6
+        │
+        ▼
 A6 Final Proofreader ───── Naturalness + FOPR — relecture finale ISO 17100
         │
         ▼
 Reassembler ────────────── Réassemblage HTML + 7 checks structurels
         │
         ▼
-Deliver Output ─────────── Push GitHub (branche review) + email
+Deliver Output ─────────── Push 8 fichiers GitHub + email (liens, pas de PJ)
 ```
 
 ### Phase 2 — Media & Annexes
