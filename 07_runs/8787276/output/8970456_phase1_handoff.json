@@ -1,0 +1,508 @@
+{
+  "meta": {
+    "source_course_id": "8787276",
+    "target_course_id": "8970456",
+    "source_language": "fr",
+    "target_language": "en-US",
+    "direction": "fr>en",
+    "detected_domain": "Tech",
+    "phase1_qa_score": 99.8,
+    "phase1_status": "manual_assembly (A6 not applied)",
+    "generated": "2026-06-11"
+  },
+  "gold_master": {
+    "html_path": "07_runs/8787276/output/8970456_localized_fr>en.html",
+    "html_url": "https://github.com/jeremieborrotzu-blip/Ressources_Loc_OSS/blob/main/07_runs/8787276/output/8970456_localized_fr%3Een.html"
+  },
+  "glossary": {
+    "run_terms": [
+      {
+        "source_term": "IPSEC",
+        "proposed_target": "IPsec",
+        "category": "technical_standard"
+      },
+      {
+        "source_term": "VPN IPSEC site à site",
+        "proposed_target": "site-to-site IPsec VPN",
+        "category": "networking"
+      },
+      {
+        "source_term": "Cisco Packet Tracer",
+        "proposed_target": "Cisco Packet Tracer",
+        "category": "tool"
+      },
+      {
+        "source_term": "IKEv1",
+        "proposed_target": "IKEv1",
+        "category": "networking"
+      },
+      {
+        "source_term": "ACL",
+        "proposed_target": "ACLs",
+        "category": "networking"
+      },
+      {
+        "source_term": "crypto maps",
+        "proposed_target": "crypto maps",
+        "category": "networking"
+      },
+      {
+        "source_term": "commandes de diagnostic",
+        "proposed_target": "diagnostic commands",
+        "category": "networking"
+      },
+      {
+        "source_term": "routeurs",
+        "proposed_target": "routers",
+        "category": "networking"
+      },
+      {
+        "source_term": "topologie réseau",
+        "proposed_target": "network topology",
+        "category": "networking"
+      },
+      {
+        "source_term": "VPN IPSEC",
+        "proposed_target": "IPsec VPN",
+        "category": "technical"
+      },
+      {
+        "source_term": "configuration réseau",
+        "proposed_target": "network configuration",
+        "category": "technical"
+      },
+      {
+        "source_term": "commandes",
+        "proposed_target": "commands",
+        "category": "technical"
+      },
+      {
+        "source_term": "quiz intégrés",
+        "proposed_target": "built-in quizzes",
+        "category": "pedagogical"
+      },
+      {
+        "source_term": "professeur",
+        "proposed_target": "instructor",
+        "category": "role"
+      },
+      {
+        "source_term": "free-lance",
+        "proposed_target": "freelancer or independent consultant",
+        "category": "work_culture"
+      },
+      {
+        "source_term": "switches",
+        "proposed_target": "switches",
+        "category": "technical"
+      },
+      {
+        "source_term": "firewalls",
+        "proposed_target": "firewalls",
+        "category": "technical"
+      },
+      {
+        "source_term": "En résumé",
+        "proposed_target": "Let's Recap!",
+        "category": "forbidden_term"
+      },
+      {
+        "source_term": "VPN site à site",
+        "proposed_target": "site-to-site VPN",
+        "category": "technical_networking"
+      },
+      {
+        "source_term": "Routeur 1941",
+        "proposed_target": "Cisco 1941 router",
+        "category": "technical_hardware"
+      },
+      {
+        "source_term": "maquette",
+        "proposed_target": "lab topology",
+        "category": "pedagogical_technical"
+      },
+      {
+        "source_term": "routeur WAN",
+        "proposed_target": "WAN router",
+        "category": "technical_networking"
+      },
+      {
+        "source_term": "passerelle",
+        "proposed_target": "default gateway",
+        "category": "technical_networking"
+      },
+      {
+        "source_term": "NAT Overload",
+        "proposed_target": "NAT overload",
+        "category": "technical_networking"
+      },
+      {
+        "source_term": "clé prépartagée / clé pré-partagée",
+        "proposed_target": "pre-shared key (PSK)",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "correspondant",
+        "proposed_target": "peer",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "politique ISAKMP",
+        "proposed_target": "ISAKMP policy",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "chiffrement",
+        "proposed_target": "encryption",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "hachage",
+        "proposed_target": "hashing",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "TRANSFORM-SET",
+        "proposed_target": "transform set",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "CRYPTO MAP",
+        "proposed_target": "crypto map",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "association de sécurité",
+        "proposed_target": "security association (SA)",
+        "category": "technical_term"
+      },
+      {
+        "source_term": "lignes de commandes",
+        "proposed_target": "command line",
+        "category": "technical_term"
+      }
+    ],
+    "note": "proposed_terminology agrégé A1; common+domain_tm à charger depuis 02_glossaires/ au runtime"
+  },
+  "concept_swaps": [
+    {
+      "segment_id": "A4-001",
+      "source_term": "mettre les mains dans la configuration",
+      "a3_draft_value": "get hands-on with configuration",
+      "final_output": "get hands-on with configuration",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "idiomatic",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 correctly adapted the French idiom into natural US English. No further cultural swap is needed.",
+      "location": "ch0"
+    },
+    {
+      "segment_id": "A4-002",
+      "source_term": "pas à pas",
+      "a3_draft_value": "step by step",
+      "final_output": "step by step",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "idiomatic",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 correctly rendered the instructional idiom as the standard US English phrase 'step by step.' No further adaptation is needed.",
+      "location": "ch0"
+    },
+    {
+      "segment_id": "A4-001",
+      "source_term": "free-lance",
+      "a3_draft_value": "freelancer",
+      "final_output": "freelancer",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "administrative",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 resolved the French/European work-status term appropriately as the culturally portable US English term \"freelancer\" without implying a specific French legal status such as auto-entrepreneur.",
+      "location": "ch2"
+    },
+    {
+      "segment_id": "A4-002",
+      "source_term": "professeur",
+      "a3_draft_value": "Instructor",
+      "final_output": "Instructor",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "hr_culture",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 used \"Instructor,\" which matches OpenClassrooms glossary guidance and avoids incorrectly implying an academic university role with \"professor.\"",
+      "location": "ch2"
+    },
+    {
+      "segment_id": "A4-001",
+      "source_term": "FR_8787276_banner.png",
+      "a3_draft_value": "https://user.oc-static.com/upload/2026/01/15/17684881214388_FR_8787276_banner.png",
+      "final_output": "https://user.oc-static.com/upload/2026/01/15/17684881214388_FR_8787276_banner.png",
+      "decision_type": "CONSERVE_EXPLAIN",
+      "swap_category": "format",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "The A1 flag was not resolved: the A3 draft still points to the French banner asset. A4 cannot generate or infer a localized replacement asset URL without breaking media references, so the asset is conserved and escalated for human media replacement.",
+      "location": "ch3"
+    },
+    {
+      "segment_id": "A4-002",
+      "source_term": "Comparaison des critères techniques IKEv1 et IKEv2",
+      "a3_draft_value": "Image asset: https://user.oc-static.com/upload/2026/01/09/17679696756745_image5.png; caption translated as: Comparison of IKEv1 and IKEv2 technical criteria",
+      "final_output": "Image asset unchanged; caption and alt text are in English.",
+      "decision_type": "CONSERVE_EXPLAIN",
+      "swap_category": "format",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 translated the surrounding alt text and caption, but the underlying image/table asset remains unchanged and may still contain French text. Because A4 cannot recreate image content as editable HTML or swap to an unknown English asset, this is conserved and escalated as a critical media localization blocker.",
+      "location": "ch3"
+    },
+    {
+      "segment_id": "A4-003",
+      "source_term": "Comparaison des critères fonctionnels IKEv1 et IKEv2",
+      "a3_draft_value": "Image asset: https://user.oc-static.com/upload/2026/01/09/17679696868077_image6.png; caption translated as: Comparison of IKEv1 and IKEv2 functional criteria",
+      "final_output": "Image asset unchanged; caption and alt text are in English.",
+      "decision_type": "CONSERVE_EXPLAIN",
+      "swap_category": "format",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 translated the surrounding alt text and caption, but the underlying image/table asset remains unchanged and may still contain French text. Because A4 cannot recreate image content as editable HTML or swap to an unknown English asset, this is conserved and escalated as a critical media localization blocker.",
+      "location": "ch3"
+    },
+    {
+      "segment_id": "A4-004",
+      "source_term": "En résumé",
+      "a3_draft_value": "<h4>Let's Recap!</h4>",
+      "final_output": "<h4>Let's Recap!</h4>",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "forbidden_term",
+      "domain": "Tech",
+      "a1_flagged": false,
+      "decision_note": "The forbidden French recap heading is not present in A3. A3 correctly applied the common glossary requirement for an h4 recap heading: “Let's Recap!”",
+      "location": "ch3"
+    },
+    {
+      "segment_id": "A4-001",
+      "source_term": "Vous voici arrivé à l’instant de vérité",
+      "a3_draft_value": "Now test the configuration",
+      "final_output": "Now test the configuration",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "idiomatic",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 correctly replaced the French idiomatic expression with a natural en-US instructional phrase. No further cultural adaptation needed.",
+      "location": "ch4"
+    },
+    {
+      "segment_id": "A4-002",
+      "source_term": "FR_8787276_banner.png",
+      "a3_draft_value": "https://user.oc-static.com/upload/2026/01/15/17684884642995_FR_8787276_banner.png",
+      "final_output": "https://user.oc-static.com/upload/2026/01/15/17684884642995_FR_8787276_banner.png",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "format",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "The banner asset still uses an FR-labeled filename. A4 cannot create or verify media assets automatically without risking broken links, so the content is retained and escalated as a CRITICAL human media-localization blocker.",
+      "location": "ch4"
+    },
+    {
+      "segment_id": "A4-003",
+      "source_term": "Cisco Packet Tracer screenshots",
+      "a3_draft_value": "Existing image assets retained; figure alt text remains in French for the Packet Tracer/router interface screenshot.",
+      "final_output": "Existing image assets retained; figure alt text remains in French for the Packet Tracer/router interface screenshot.",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "format",
+      "domain": "Tech",
+      "a1_flagged": true,
+      "decision_note": "A3 did not replace or verify the screenshots against the English Cisco Packet Tracer UI. A4 cannot inspect or regenerate media assets, so this remains unchanged and is escalated for human review.",
+      "location": "ch4"
+    },
+    {
+      "segment_id": "A4-004",
+      "source_term": "En résumé",
+      "a3_draft_value": "Let's Recap!",
+      "final_output": "Let's Recap!",
+      "decision_type": "NO_CHANGE",
+      "swap_category": "forbidden_term",
+      "domain": "Tech",
+      "a1_flagged": false,
+      "decision_note": "The forbidden French heading was correctly replaced by the required OpenClassrooms en-US heading. No blocker remains for this term.",
+      "location": "ch4"
+    }
+  ],
+  "cultural_flags": [
+    {
+      "flag_id": "A1-CF-001",
+      "category": "idiom",
+      "source_term": "mettre les mains dans la configuration",
+      "proposed_swap": "get hands-on with the configuration",
+      "effort": "low",
+      "blocker": false,
+      "location": "ch0"
+    },
+    {
+      "flag_id": "A1-CF-002",
+      "category": "idiom",
+      "source_term": "pas à pas",
+      "proposed_swap": "step by step",
+      "effort": "low",
+      "blocker": false,
+      "location": "ch0"
+    },
+    {
+      "flag_id": "A1-CF-001",
+      "category": "administrative",
+      "source_term": "free-lance",
+      "proposed_swap": "freelancer or independent consultant; avoid implying a specific French legal status such as auto-entrepreneur unless explicitly stated",
+      "effort": "low",
+      "blocker": false,
+      "location": "ch2"
+    },
+    {
+      "flag_id": "A1-CF-002",
+      "category": "education",
+      "source_term": "professeur",
+      "proposed_swap": "instructor or course instructor, not professor unless the person holds an academic university role",
+      "effort": "low",
+      "blocker": false,
+      "location": "ch2"
+    },
+    {
+      "flag_id": "A1-CF-001",
+      "category": "media",
+      "source_term": "FR_8787276_banner.png",
+      "proposed_swap": "Replace with an en-US localized banner asset with English text and target-locale visual conventions.",
+      "effort": "medium",
+      "blocker": false,
+      "location": "ch3"
+    },
+    {
+      "flag_id": "A1-CF-002",
+      "category": "media",
+      "source_term": "Comparaison des critères techniques IKEv1 et IKEv2",
+      "proposed_swap": "Recreate the comparison table as editable HTML or an English image/table asset for en-US learners.",
+      "effort": "medium",
+      "blocker": true,
+      "location": "ch3"
+    },
+    {
+      "flag_id": "A1-CF-003",
+      "category": "media",
+      "source_term": "Comparaison des critères fonctionnels IKEv1 et IKEv2",
+      "proposed_swap": "Recreate the comparison table as editable HTML or an English image/table asset for en-US learners.",
+      "effort": "medium",
+      "blocker": true,
+      "location": "ch3"
+    },
+    {
+      "flag_id": "A1-CF-001",
+      "category": "idiom",
+      "source_term": "Vous voici arrivé à l’instant de vérité",
+      "proposed_swap": "Now test the configuration",
+      "effort": "low",
+      "blocker": false,
+      "location": "ch4"
+    },
+    {
+      "flag_id": "A1-CF-002",
+      "category": "media",
+      "source_term": "FR_8787276_banner.png",
+      "proposed_swap": "Create an en-US banner asset with localized text and filename, or confirm the image contains no embedded French.",
+      "effort": "medium",
+      "blocker": true,
+      "location": "ch4"
+    },
+    {
+      "flag_id": "A1-CF-003",
+      "category": "media",
+      "source_term": "Cisco Packet Tracer screenshots",
+      "proposed_swap": "Use screenshots from the English Cisco Packet Tracer UI/version expected by en-US learners, or verify the current UI is already English.",
+      "effort": "medium",
+      "blocker": false,
+      "location": "ch4"
+    }
+  ],
+  "media_inventory": [
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/15/17684878266718_OC-Course-Banners_Tirez-un-max-de-ce-cours.png",
+      "location": "ch2",
+      "risk": "ui_mismatch",
+      "proposed_alternative": "Create an en-US localized banner image, e.g. with visible text equivalent to \"Get the Most Out of This Course\". Also provide meaningful English alt text if the image is not decorative."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/15/17684880291364_Teacher-Etienne-Laplume.png",
+      "location": "ch2",
+      "risk": "ok",
+      "proposed_alternative": "Keep the same instructor image; add localized alt text if the image conveys non-decorative information."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/15/17684881214388_FR_8787276_banner.png",
+      "location": "ch3",
+      "risk": "ui_mismatch",
+      "proposed_alternative": "Create an en-US banner version; current filename indicates a French-localized asset."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/09/17679694348795_image7.png",
+      "location": "ch3",
+      "risk": "ok",
+      "proposed_alternative": "Keep if embedded labels are language-neutral; translate alt text and figcaption into en-US."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/09/17679696756745_image5.png",
+      "location": "ch3",
+      "risk": "ui_mismatch",
+      "proposed_alternative": "Replace with an editable English comparison table or a localized en-US image."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/09/17679696868077_image6.png",
+      "location": "ch3",
+      "risk": "ui_mismatch",
+      "proposed_alternative": "Replace with an editable English comparison table or a localized en-US image."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/15/17684884642995_FR_8787276_banner.png",
+      "location": "ch4",
+      "risk": "fr_only",
+      "proposed_alternative": "Replace with an en-US banner asset; check for embedded French text."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/09/17679752509564_image2.png",
+      "location": "ch4",
+      "risk": "ok",
+      "proposed_alternative": "Translate alt text and caption; keep image if labels are language-neutral."
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/01/09/17679754158392_image4.png",
+      "location": "ch4",
+      "risk": "ui_mismatch",
+      "proposed_alternative": "Recapture or verify the Cisco Packet Tracer hardware-module screen in the English UI; translate alt text and caption."
+    }
+  ],
+  "dispatch_summary": {
+    "image": 9,
+    "to_localize": 6,
+    "preserve": 3,
+    "pdf": 0,
+    "video": 0,
+    "link": 0
+  },
+  "qa": {
+    "a5_scores": {
+      "ch0": 100,
+      "ch2": 100,
+      "ch3": 99,
+      "ch4": 100
+    },
+    "a6_issues": [],
+    "a6_applied": false
+  }
+}
