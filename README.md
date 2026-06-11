@@ -89,7 +89,7 @@ Iconik / GitHub ─────────── Stockage assets localisés + r
 
 **Destination des médias = Iconik** (MAM), pas GitHub. Storage S3 `iconik-files-s3` (bucket `oc-multimedia-iconik`). Structure `0000_LOCALISATION/{target}/{static_graphics | external_files | transcripts}`. GitHub ne reçoit que les rapports/logs.
 
-État : MAIN Assets **construit** (form + gate) · **A7** prêt (prompt V2) · **A8** dérisqué (faisabilité + coût) · upload Iconik (séquence S3 vérifiée) **à brancher** · **A9/A10** à construire. Détail : [`docs/architecture/assets_pipeline.md`](docs/architecture/assets_pipeline.md).
+État : MAIN Assets **construit** (form + gate) · **SUB Iconik Upload** ✅ validé e2e · **SUB A8 Image Localizer** ✅ **validé e2e** (vision gpt-5.5 → édition gpt-image-2 → upload Iconik) · **A7** prêt (prompt V2) · branchement A7→A10 dans le MAIN + **A9/A10** à construire. Détail : [`docs/architecture/assets_pipeline.md`](docs/architecture/assets_pipeline.md).
 
 ---
 
