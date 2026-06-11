@@ -1,0 +1,861 @@
+{
+  "updatedAt": "2026-06-11T17:03:51.326Z",
+  "createdAt": "2026-06-11T17:03:51.326Z",
+  "id": "Vayz4SnsngHkqWvl",
+  "name": "[SUB] LEO Assets — A8 Image Localizer",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "eef64c4d-b502-4910-9961-6ec34590efae",
+      "name": "Input from MAIN",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json:{ openai_key:'<<OPENAI_KEY — set in n8n, not committed>>' }}];"
+      },
+      "id": "e27c7f2b-8b19-4f73-8178-0520e65e0750",
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Input from MAIN').first().json.image_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "id": "195049f9-1807-4850-8a85-bc06134c0873",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst ip=$('Input from MAIN').first().json;\nconst sys=\"You are A8, image localization analyst for OpenClassrooms. Detect ALL source-language text in the image, translate to \"+(ip.target_language||'English (en-US)')+\", and flag technical terms to PRESERVE (acronyms, RFC numbers, protocol names, code, commands, product names, identifiers, numbers, file names). Output STRICT JSON only.\";\nconst usr=[\n {type:'text', text:`Analyze this OpenClassrooms course image. Domain: ${ip.domain||'Tech'}. Output JSON exactly: {\"asset_class\":\"diagram|table|infographic|screenshot|illustration|chart|other\",\"should_localize\":true,\"is_banner\":false,\"texts\":[{\"fr\":\"source\",\"en\":\"translation\",\"preserve\":false}]}. Set should_localize=false for real UI screenshots or images without localizable editorial text.`},\n {type:'image_url', image_url:{url: ip.image_url}}\n];\nreturn [{json:{ visionBody:{ model:'gpt-5.5', messages:[{role:'system',content:sys},{role:'user',content:usr}], response_format:{type:'json_object'} } }, binary: $('Download Image').first().binary}];\n"
+      },
+      "id": "d177e712-d743-4bb6-a825-5622fe4542ba",
+      "name": "Build Vision Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').first().json.openai_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.visionBody) }}",
+        "options": {}
+      },
+      "id": "8de9dda4-25c9-48ff-8652-a44b183918b0",
+      "name": "Vision Analyse",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst c=$('Vision Analyse').first().json.choices[0].message.content;\nlet v; try{ v=JSON.parse(c); }catch(e){ v={asset_class:'other',should_localize:false,is_banner:false,texts:[]}; }\nv.should_edit = !!(v.should_localize && !v.is_banner && v.asset_class!=='screenshot' && (v.texts||[]).some(t=>!t.preserve));\nreturn [{json:v, binary: $('Download Image').first().binary}];\n"
+      },
+      "id": "4b1c905a-02fa-479b-aa2c-64379a3e9dcb",
+      "name": "Parse Vision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.should_edit }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "8e986f99-4741-4de4-b360-fb34891f7e84",
+      "name": "Should Edit?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst v=$('Parse Vision').first().json; const ip=$('Input from MAIN').first().json;\nreturn [{json:{ agent:'A8', status:'preserved', reason:(v.is_banner?'banner':(v.asset_class==='screenshot'?'ui_screenshot':'no_localizable_text')), asset_class:v.asset_class, filename:ip.filename, location:ip.location }}];\n"
+      },
+      "id": "66368011-ed90-451a-aaba-d4e7c17966cf",
+      "name": "Preserve",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst v=$('Parse Vision').first().json; const texts=v.texts||[];\nconst tr=texts.filter(t=>!t.preserve && t.fr!==t.en);\nconst pres=texts.filter(t=>t.preserve).map(t=>t.fr);\nconst prompt=`Localize this image to English with PIXEL-PERFECT preservation. Keep the EXACT same layout, colors, fonts, positions, composition, and background. PRESERVE EXACTLY (do not translate, keep identical): ${pres.join(', ')||'(none)'}. Apply these exact translations: ${tr.map(t=>`\"${t.fr}\" -> \"${t.en}\"`).join('; ')}.`;\nreturn [{json:{prompt}, binary: $('Download Image').first().binary}];\n"
+      },
+      "id": "ebd3fcf7-6750-49ef-b5a7-403af1b035dd",
+      "name": "Build Edit Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/edits",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').first().json.openai_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-image-2"
+            },
+            {
+              "name": "prompt",
+              "value": "={{ $('Build Edit Prompt').first().json.prompt }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "image",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f32a8c5a-ccde-4fa3-983f-ca6b3cd4e942",
+      "name": "Edit Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst r=$('Edit Image').first().json;\nconst b64=r.data && r.data[0] && r.data[0].b64_json;\nif(!b64) throw new Error('Edit Image: no b64_json returned');\nconst ip=$('Input from MAIN').first().json;\nreturn [{json:{edited:true}, binary:{ data:{ data:b64, mimeType:'image/png', fileName:(ip.filename||'localized.png') } }}];\n"
+      },
+      "id": "a8647cc2-429d-42ee-beef-1b19de888f85",
+      "name": "Decode Image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst ip=$('Input from MAIN').first().json;\nreturn [{json:{ filename: ip.filename||'localized.png', mime:'image/png', collection_id: ip.collection_id }, binary: $('Decode Image').first().binary}];\n"
+      },
+      "id": "0cb9a893-1b5c-46ac-aaa4-735850eb27ba",
+      "name": "Prepare Upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "1rNi2FfRGRbZ3uBI",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "cc4a9cd8-5674-4da4-a9fc-8ae87ff707fa",
+      "name": "Call SUB Upload",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        2200,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst up=$('Call SUB Upload').first().json; const v=$('Parse Vision').first().json; const ip=$('Input from MAIN').first().json;\nreturn [{json:{ agent:'A8', status:'localized', asset_class:v.asset_class, texts_localized:(v.texts||[]).filter(t=>!t.preserve).length, texts_preserved:(v.texts||[]).filter(t=>t.preserve).length, iconik_asset_id:up.asset_id, filename:up.filename, location:ip.location }}];\n"
+      },
+      "id": "1fce45c5-4a8d-4f81-b1f0-f833aabd7049",
+      "name": "Return Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Input from MAIN": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Build Vision Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Vision Request": {
+      "main": [
+        [
+          {
+            "node": "Vision Analyse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision Analyse": {
+      "main": [
+        [
+          {
+            "node": "Parse Vision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Vision": {
+      "main": [
+        [
+          {
+            "node": "Should Edit?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Edit?": {
+      "main": [
+        [
+          {
+            "node": "Build Edit Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preserve",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Edit Prompt": {
+      "main": [
+        [
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "Decode Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode Image": {
+      "main": [
+        [
+          {
+            "node": "Prepare Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Upload": {
+      "main": [
+        [
+          {
+            "node": "Call SUB Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call SUB Upload": {
+      "main": [
+        [
+          {
+            "node": "Return Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "3ac41200-7555-40e2-b647-1a28723b8339",
+  "activeVersionId": "3ac41200-7555-40e2-b647-1a28723b8339",
+  "versionCounter": 3,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-11T17:03:51.332Z",
+      "createdAt": "2026-06-11T17:03:51.332Z",
+      "role": "workflow:owner",
+      "workflowId": "Vayz4SnsngHkqWvl",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-11T17:03:51.335Z",
+    "createdAt": "2026-06-11T17:03:51.335Z",
+    "versionId": "3ac41200-7555-40e2-b647-1a28723b8339",
+    "workflowId": "Vayz4SnsngHkqWvl",
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "eef64c4d-b502-4910-9961-6ec34590efae",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{json:{ openai_key:'<<OPENAI_KEY — set in n8n Config node, not committed>>' }}];"
+        },
+        "id": "e27c7f2b-8b19-4f73-8178-0520e65e0750",
+        "name": "Config",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          200,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "url": "={{ $('Input from MAIN').first().json.image_url }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file",
+                "outputPropertyName": "data"
+              }
+            }
+          }
+        },
+        "id": "195049f9-1807-4850-8a85-bc06134c0873",
+        "name": "Download Image",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          400,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst ip=$('Input from MAIN').first().json;\nconst sys=\"You are A8, image localization analyst for OpenClassrooms. Detect ALL source-language text in the image, translate to \"+(ip.target_language||'English (en-US)')+\", and flag technical terms to PRESERVE (acronyms, RFC numbers, protocol names, code, commands, product names, identifiers, numbers, file names). Output STRICT JSON only.\";\nconst usr=[\n {type:'text', text:`Analyze this OpenClassrooms course image. Domain: ${ip.domain||'Tech'}. Output JSON exactly: {\"asset_class\":\"diagram|table|infographic|screenshot|illustration|chart|other\",\"should_localize\":true,\"is_banner\":false,\"texts\":[{\"fr\":\"source\",\"en\":\"translation\",\"preserve\":false}]}. Set should_localize=false for real UI screenshots or images without localizable editorial text.`},\n {type:'image_url', image_url:{url: ip.image_url}}\n];\nreturn [{json:{ visionBody:{ model:'gpt-5.5', messages:[{role:'system',content:sys},{role:'user',content:usr}], response_format:{type:'json_object'} } }, binary: $('Download Image').first().binary}];\n"
+        },
+        "id": "d177e712-d743-4bb6-a825-5622fe4542ba",
+        "name": "Build Vision Request",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          600,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.openai.com/v1/chat/completions",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Config').first().json.openai_key }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.visionBody) }}",
+          "options": {}
+        },
+        "id": "8de9dda4-25c9-48ff-8652-a44b183918b0",
+        "name": "Vision Analyse",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          800,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst c=$('Vision Analyse').first().json.choices[0].message.content;\nlet v; try{ v=JSON.parse(c); }catch(e){ v={asset_class:'other',should_localize:false,is_banner:false,texts:[]}; }\nv.should_edit = !!(v.should_localize && !v.is_banner && v.asset_class!=='screenshot' && (v.texts||[]).some(t=>!t.preserve));\nreturn [{json:v, binary: $('Download Image').first().binary}];\n"
+        },
+        "id": "4b1c905a-02fa-479b-aa2c-64379a3e9dcb",
+        "name": "Parse Vision",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1000,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.should_edit }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "8e986f99-4741-4de4-b360-fb34891f7e84",
+        "name": "Should Edit?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1200,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst v=$('Parse Vision').first().json; const ip=$('Input from MAIN').first().json;\nreturn [{json:{ agent:'A8', status:'preserved', reason:(v.is_banner?'banner':(v.asset_class==='screenshot'?'ui_screenshot':'no_localizable_text')), asset_class:v.asset_class, filename:ip.filename, location:ip.location }}];\n"
+        },
+        "id": "66368011-ed90-451a-aaba-d4e7c17966cf",
+        "name": "Preserve",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1400,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst v=$('Parse Vision').first().json; const texts=v.texts||[];\nconst tr=texts.filter(t=>!t.preserve && t.fr!==t.en);\nconst pres=texts.filter(t=>t.preserve).map(t=>t.fr);\nconst prompt=`Localize this image to English with PIXEL-PERFECT preservation. Keep the EXACT same layout, colors, fonts, positions, composition, and background. PRESERVE EXACTLY (do not translate, keep identical): ${pres.join(', ')||'(none)'}. Apply these exact translations: ${tr.map(t=>`\"${t.fr}\" -> \"${t.en}\"`).join('; ')}.`;\nreturn [{json:{prompt}, binary: $('Download Image').first().binary}];\n"
+        },
+        "id": "ebd3fcf7-6750-49ef-b5a7-403af1b035dd",
+        "name": "Build Edit Prompt",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1400,
+          260
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.openai.com/v1/images/edits",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('Config').first().json.openai_key }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "model",
+                "value": "gpt-image-2"
+              },
+              {
+                "name": "prompt",
+                "value": "={{ $('Build Edit Prompt').first().json.prompt }}"
+              },
+              {
+                "parameterType": "formBinaryData",
+                "name": "image",
+                "inputDataFieldName": "data"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "f32a8c5a-ccde-4fa3-983f-ca6b3cd4e942",
+        "name": "Edit Image",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1600,
+          260
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst r=$('Edit Image').first().json;\nconst b64=r.data && r.data[0] && r.data[0].b64_json;\nif(!b64) throw new Error('Edit Image: no b64_json returned');\nconst ip=$('Input from MAIN').first().json;\nreturn [{json:{edited:true}, binary:{ data:{ data:b64, mimeType:'image/png', fileName:(ip.filename||'localized.png') } }}];\n"
+        },
+        "id": "a8647cc2-429d-42ee-beef-1b19de888f85",
+        "name": "Decode Image",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1800,
+          260
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst ip=$('Input from MAIN').first().json;\nreturn [{json:{ filename: ip.filename||'localized.png', mime:'image/png', collection_id: ip.collection_id }, binary: $('Decode Image').first().binary}];\n"
+        },
+        "id": "0cb9a893-1b5c-46ac-aaa4-735850eb27ba",
+        "name": "Prepare Upload",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2000,
+          260
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "1rNi2FfRGRbZ3uBI",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "cc4a9cd8-5674-4da4-a9fc-8ae87ff707fa",
+        "name": "Call SUB Upload",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          2200,
+          260
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst up=$('Call SUB Upload').first().json; const v=$('Parse Vision').first().json; const ip=$('Input from MAIN').first().json;\nreturn [{json:{ agent:'A8', status:'localized', asset_class:v.asset_class, texts_localized:(v.texts||[]).filter(t=>!t.preserve).length, texts_preserved:(v.texts||[]).filter(t=>t.preserve).length, iconik_asset_id:up.asset_id, filename:up.filename, location:ip.location }}];\n"
+        },
+        "id": "1fce45c5-4a8d-4f81-b1f0-f833aabd7049",
+        "name": "Return Result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2400,
+          260
+        ]
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Config": {
+        "main": [
+          [
+            {
+              "node": "Download Image",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Download Image": {
+        "main": [
+          [
+            {
+              "node": "Build Vision Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Vision Request": {
+        "main": [
+          [
+            {
+              "node": "Vision Analyse",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vision Analyse": {
+        "main": [
+          [
+            {
+              "node": "Parse Vision",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Vision": {
+        "main": [
+          [
+            {
+              "node": "Should Edit?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Should Edit?": {
+        "main": [
+          [
+            {
+              "node": "Build Edit Prompt",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Preserve",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Edit Prompt": {
+        "main": [
+          [
+            {
+              "node": "Edit Image",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Image": {
+        "main": [
+          [
+            {
+              "node": "Decode Image",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Decode Image": {
+        "main": [
+          [
+            {
+              "node": "Prepare Upload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Upload": {
+        "main": [
+          [
+            {
+              "node": "Call SUB Upload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call SUB Upload": {
+        "main": [
+          [
+            {
+              "node": "Return Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-11T17:03:51.396Z",
+        "id": 654,
+        "workflowId": "Vayz4SnsngHkqWvl",
+        "versionId": "3ac41200-7555-40e2-b647-1a28723b8339",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}
