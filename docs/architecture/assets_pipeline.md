@@ -139,16 +139,53 @@ Séquence d'upload (réf : ancien SUB « Copy videos to iconik », `04_n8n_flows
 > S3 = **1 seul PUT presigned** (plus simple que GCS). mime par agent : A8 `image/png`,
 > A7 `application/x-subrip`, A9 selon type.
 
-## 8. État de construction (2026-06-11)
+**SUB réutilisable construit & validé** : `[SUB] LEO Assets — Iconik Upload`
+(id `1rNi2FfRGRbZ3uBI`). Inputs : `binary.data` + `json{filename, mime, collection_id}`.
+Testé e2e (image 1,2 MB → `CLOSED` dans Iconik).
+> ⚠️ `Compute Filesize` gère **les deux types de binaires** : téléchargé (`binary.data.bytes`,
+> exact) ou inline base64 (`Buffer.from(binary.data.data,'base64').length`, ex. sortie
+> gpt-image qui n'a pas `.bytes`). Sinon → `size` invalide sur Create Upload URL.
+
+## 8. A8 Image Localizer — SUB construit & validé end-to-end
+
+`[SUB] LEO Assets — A8 Image Localizer` (id `Vayz4SnsngHkqWvl`, 14 nodes). **Validé sur image
+réelle** (tableau IKEv1/IKEv2) : 24 textes détectés (13 traduits + 11 préservés), image
+localisée 1,2 MB uploadée dans Iconik. ~67 s/image.
+
+```
+Input {image_url, filename, domain, target_language, collection_id, location}
+  → Config (clé OpenAI) → Download Image
+  → Build Vision Request → Vision Analyse (POST /v1/chat/completions, gpt-5.5,
+       image_url direct, response_format json_object → texts[], preserve, is_banner, asset_class)
+  → Parse Vision → Should Edit? (should_localize && !banner && !screenshot && a du texte à traduire)
+       ├─ oui → Build Edit Prompt → Edit Image (gpt-image-2 /images/edits, multipart)
+       │        → Decode Image (b64→binaire) → Prepare Upload → Call SUB Upload → static_graphics/
+       └─ non → Preserve (status:preserved, raison)
+  → Return {agent:A8, status, texts_localized/preserved, iconik_asset_id}
+```
+
+> ⚠️ **Secrets** : la clé OpenAI est en dur dans le node `Config` (à migrer en credential n8n).
+> Les exports Git **doivent masquer `sk-proj-*`** (GitHub push protection les bloque).
+
+## 9. Fix DNS Docker (durable)
+
+Après `docker restart`, le container n8n peut avoir `EAI_AGAIN` sur `app.iconik.io`
+(cache négatif transitoire du resolver Docker). **Fix durable** : Docker Desktop →
+Settings → **Docker Engine** → ajouter `"dns": ["8.8.8.8", "1.1.1.1"]` → Apply & Restart.
+(Éditer `~/.docker/daemon.json` directement ne tient pas : Docker Desktop le réécrit.)
+Workaround ponctuel : `docker exec --user root n8n sh -c "echo '<ip> app.iconik.io' >> /etc/hosts"` (non persistant).
+
+## 10. État de construction (2026-06-11)
 
 | Élément | État |
 |---|---|
-| MAIN Assets (form + gate) | ✅ construit, actif |
-| Auth Iconik + storage FILES | ✅ vérifiés |
-| Séquence upload S3 | ✅ documentée (réf legacy) |
-| A7 (prompt V2) + Get captions (réf) | ✅ prêt à brancher |
-| A8 (édition gpt-image-2) | ✅ dérisqué (faisabilité + coût) |
-| Brique upload Iconik réutilisable | 🔜 à construire + tester sur 1 fichier |
-| Branchement A7→A10 dans le MAIN | 🔜 |
+| MAIN Assets (form + gate Phase 1) | ✅ construit, actif (`iOvLCwyOv8ReIxbG`) |
+| Auth Iconik (App-ID corrigé) + storage FILES | ✅ vérifiés |
+| **SUB Iconik Upload** (séquence S3) | ✅ **construit & validé e2e** (`1rNi2FfRGRbZ3uBI`) |
+| **SUB A8 Image Localizer** (vision+édition+upload) | ✅ **validé e2e** (`Vayz4SnsngHkqWvl`) |
+| A7 (prompt V2) + Get captions (réf) | ✅ prêt à brancher (`uS9xhXsA3gt1WNfF`) |
+| Branchement A8 dans le MAIN (routage + throttle 12s) | 🔜 |
+| Branchement A7 dans le MAIN | 🔜 |
 | A9 / A10 workflows | 🔜 à concevoir |
+| Migration secrets (OpenAI/Iconik/Vimeo) → credentials n8n | 🔜 propreté |
 | Build Phase 1 Handoff auto en fin de P1 | 🔜 (dépend refactor lot-synchrone Phase 1) |
