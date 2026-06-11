@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-11T14:51:50.134Z",
+  "updatedAt": "2026-06-11T17:07:51.279Z",
   "createdAt": "2026-06-11T13:33:49.177Z",
   "id": "1rNi2FfRGRbZ3uBI",
   "name": "[SUB] LEO Assets — Iconik Upload",
@@ -126,7 +126,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\n// taille EXACTE depuis binary.data.bytes (data = stub filesystem, fileSize = approx)\nconst b = $('Input from MAIN').first().binary.data;\nconst size = (typeof b.bytes === 'number') ? b.bytes : parseInt(b.bytes,10);\nreturn [{json:{ size }}];\n"
+        "jsCode": "\n// Robuste : binaire téléchargé (filesystem → .bytes exact) OU inline base64 (.data réel, pas de .bytes)\nconst b = $('Input from MAIN').first().binary.data;\nlet size = (typeof b.bytes === 'number') ? b.bytes : parseInt(b.bytes, 10);\nif (!size || isNaN(size)) {\n  try { size = Buffer.from(b.data, 'base64').length; } catch(e) { size = 0; }\n}\nreturn [{ json: { size } }];\n"
       },
       "id": "78987147-17c4-4299-ade5-62b217c68ae0",
       "name": "Compute Filesize",
@@ -340,9 +340,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
-  "activeVersionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
-  "versionCounter": 7,
+  "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
+  "activeVersionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
+  "versionCounter": 11,
   "triggerCount": 0,
   "shared": [
     {
@@ -365,9 +365,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-11T14:51:50.293Z",
-    "createdAt": "2026-06-11T14:51:50.293Z",
-    "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+    "updatedAt": "2026-06-11T17:07:51.282Z",
+    "createdAt": "2026-06-11T17:07:51.282Z",
+    "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
     "workflowId": "1rNi2FfRGRbZ3uBI",
     "nodes": [
       {
@@ -489,7 +489,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\n// taille EXACTE depuis binary.data.bytes (data = stub filesystem, fileSize = approx)\nconst b = $('Input from MAIN').first().binary.data;\nconst size = (typeof b.bytes === 'number') ? b.bytes : parseInt(b.bytes,10);\nreturn [{json:{ size }}];\n"
+          "jsCode": "\n// Robuste : binaire téléchargé (filesystem → .bytes exact) OU inline base64 (.data réel, pas de .bytes)\nconst b = $('Input from MAIN').first().binary.data;\nlet size = (typeof b.bytes === 'number') ? b.bytes : parseInt(b.bytes, 10);\nif (!size || isNaN(size)) {\n  try { size = Buffer.from(b.data, 'base64').length; } catch(e) { size = 0; }\n}\nreturn [{ json: { size } }];\n"
         },
         "id": "78987147-17c4-4299-ade5-62b217c68ae0",
         "name": "Compute Filesize",
@@ -701,18 +701,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-11T14:51:51.145Z",
-        "id": 653,
+        "createdAt": "2026-06-11T17:07:51.322Z",
+        "id": 657,
         "workflowId": "1rNi2FfRGRbZ3uBI",
-        "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+        "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-11T14:51:51.011Z",
-        "id": 652,
+        "createdAt": "2026-06-11T17:07:51.312Z",
+        "id": 656,
         "workflowId": "1rNi2FfRGRbZ3uBI",
-        "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+        "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
