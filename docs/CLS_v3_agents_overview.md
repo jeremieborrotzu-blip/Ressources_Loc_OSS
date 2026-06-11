@@ -1,15 +1,17 @@
-# CLS v3 — Vue d'ensemble des systèmes agentiques
+# LEO v1 (CLS v3) — Vue d'ensemble des systèmes agentiques
 
-> Généré le 2026-06-09 — état de production en cours
+> Nom produit : **LEO v1** (« Localization Engine Operator »). Nom technique interne : **CLS v3**.
+> Mis à jour 2026-06-11.
+> 📐 Détail de la Phase 2 : [architecture/assets_pipeline.md](architecture/assets_pipeline.md)
 
 ---
 
-## Deux systèmes indépendants
+## Deux systèmes indépendants (2 formulaires, même triplet d'IDs)
 
 | Système | Déclenchement | Périmètre |
 |---|---|---|
 | **Phase 1 — HTML Pipeline** | Formulaire n8n (MAIN) | Contenu HTML du cours |
-| **Phase 2 — Media & Annexes** | Formulaire n8n (MAIN Media) | Vidéos, images, fichiers annexes |
+| **LEO v1 — Assets** (Phase 2) | 2ᵉ formulaire (MAIN Assets) | Images (A8), annexes (A9), liens (A10), transcripts/dubbing (A7) — routés par le `media_inventory` du `phase1_handoff.json` |
 
 Les deux systèmes partagent la même infrastructure Batch API (Submitter + Poller) et le même dépôt GitHub pour les artefacts.
 

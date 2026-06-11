@@ -83,6 +83,7 @@ Livraison : Batch API OpenAI → résultats sous 24h.
 - [Ordre de traitement et hiérarchie](architecture/processing_order.md)
 - [Stratégie de chunking](architecture/chunking_strategy.md)
 - [QA Join (A5→A6), réassemblage & livraison](architecture/qa_join_and_delivery.md)
+- [LEO v1 — Assets (Phase 2) : handoff, dispatcher, A7–A10](architecture/assets_pipeline.md)
 
 ### Workflows n8n
 - *(à compléter lors de la construction)*
