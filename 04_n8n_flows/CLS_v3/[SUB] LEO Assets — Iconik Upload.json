@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-06-11T13:33:49.177Z",
+  "updatedAt": "2026-06-11T14:51:50.134Z",
   "createdAt": "2026-06-11T13:33:49.177Z",
   "id": "1rNi2FfRGRbZ3uBI",
   "name": "[SUB] LEO Assets — Iconik Upload",
   "description": null,
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -126,7 +126,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst b = $('Input from MAIN').first().binary.data;\nconst size = Buffer.from(b.data, 'base64').length;\nreturn [{json:{ size }}];\n"
+        "jsCode": "\n// taille EXACTE depuis binary.data.bytes (data = stub filesystem, fileSize = approx)\nconst b = $('Input from MAIN').first().binary.data;\nconst size = (typeof b.bytes === 'number') ? b.bytes : parseInt(b.bytes,10);\nreturn [{json:{ size }}];\n"
       },
       "id": "78987147-17c4-4299-ade5-62b217c68ae0",
       "name": "Compute Filesize",
@@ -340,9 +340,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "084ddc4d-f5fa-4366-b4bc-0cf6d64171b5",
-  "activeVersionId": null,
-  "versionCounter": 1,
+  "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+  "activeVersionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+  "versionCounter": 7,
   "triggerCount": 0,
   "shared": [
     {
@@ -364,5 +364,358 @@
     }
   ],
   "tags": [],
-  "activeVersion": null
+  "activeVersion": {
+    "updatedAt": "2026-06-11T14:51:50.293Z",
+    "createdAt": "2026-06-11T14:51:50.293Z",
+    "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+    "workflowId": "1rNi2FfRGRbZ3uBI",
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "54df000b-75af-4293-aabe-fe007c2038e8",
+        "name": "Input from MAIN",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// Inputs attendus de l'appelant : binary.data (fichier), json.filename, json.mime, json.collection_id\nreturn [{json:{\n  app_id:'cd1bfa88-632e-11f1-9f4a-c272eaf6c78d',\n  auth_token:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJjZDFiZmE4OC02MzJlLTExZjEtOWY0YS1jMjcyZWFmNmM3OGQiLCJpZCI6ImQxOWE1MDAwLTYzMmUtMTFmMS1iYTM0LTZhZWQyYmZiYWMyZSIsImV4cCI6MjA5NjM3ODgxNiwic3lzIjoiaWNvbmlrLWV1In0.c3o8DxZbAjiOakN_uiKKeixwZLU2l104B_xkyBx7vnc',\n  storage_id:'a595bf3c-47ff-11ee-8f4a-4ad9c892a042',\n  filename: $input.first().json.filename,\n  mime: $input.first().json.mime || 'application/octet-stream',\n  collection_id: $input.first().json.collection_id || null\n}}];\n"
+        },
+        "id": "3e7f3246-e3c3-457e-88ca-05b8bbcace4d",
+        "name": "Build Auth",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://app.iconik.io/API/assets/v1/assets/?assign_to_collection=true",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "App-ID",
+                "value": "={{ $('Build Auth').first().json.app_id }}"
+              },
+              {
+                "name": "Auth-Token",
+                "value": "={{ $('Build Auth').first().json.auth_token }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"title\": {{ JSON.stringify($('Build Auth').first().json.filename) }},\n  \"type\":\"ASSET\",\"status\":\"ACTIVE\",\"analyze_status\":\"N/A\",\"archive_status\":\"NOT_ARCHIVED\",\"is_online\":true,\n  \"collection_id\": {{ JSON.stringify($('Build Auth').first().json.collection_id) }}\n}"
+        },
+        "id": "e8a91d39-ea92-4c01-8aeb-0e25a6f1686f",
+        "name": "Create Asset",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          440,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Asset').first().json.id }}/formats/",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "App-ID",
+                "value": "={{ $('Build Auth').first().json.app_id }}"
+              },
+              {
+                "name": "Auth-Token",
+                "value": "={{ $('Build Auth').first().json.auth_token }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"user_id\": {{ JSON.stringify($('Create Asset').first().json.created_by_user) }},\n  \"name\":\"ORIGINAL\",\n  \"metadata\":[{\"internet_media_type\": {{ JSON.stringify($('Build Auth').first().json.mime) }} }],\n  \"storage_methods\":[\"S3\"]\n}"
+        },
+        "id": "1b9e0c1a-5d5d-4b73-825e-9b8c623e4f08",
+        "name": "Create Format",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Asset').first().json.id }}/file_sets/",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "App-ID",
+                "value": "={{ $('Build Auth').first().json.app_id }}"
+              },
+              {
+                "name": "Auth-Token",
+                "value": "={{ $('Build Auth').first().json.auth_token }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"format_id\": {{ JSON.stringify($('Create Format').first().json.id) }},\n  \"storage_id\": {{ JSON.stringify($('Build Auth').first().json.storage_id) }},\n  \"base_dir\":\"/\",\n  \"name\": {{ JSON.stringify($('Build Auth').first().json.filename) }},\n  \"component_ids\":[]\n}"
+        },
+        "id": "0d1c2dd9-3953-4bd9-8608-f359c4e4cb60",
+        "name": "Create Fileset",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// taille EXACTE depuis binary.data.bytes (data = stub filesystem, fileSize = approx)\nconst b = $('Input from MAIN').first().binary.data;\nconst size = (typeof b.bytes === 'number') ? b.bytes : parseInt(b.bytes,10);\nreturn [{json:{ size }}];\n"
+        },
+        "id": "78987147-17c4-4299-ade5-62b217c68ae0",
+        "name": "Compute Filesize",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1100,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Asset').first().json.id }}/files/",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "App-ID",
+                "value": "={{ $('Build Auth').first().json.app_id }}"
+              },
+              {
+                "name": "Auth-Token",
+                "value": "={{ $('Build Auth').first().json.auth_token }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"size\": {{ $('Compute Filesize').first().json.size }},\n  \"original_name\": {{ JSON.stringify($('Build Auth').first().json.filename) }},\n  \"directory_path\":\"\",\"type\":\"FILE\",\n  \"format_id\": {{ JSON.stringify($('Create Format').first().json.id) }},\n  \"file_set_id\": {{ JSON.stringify($('Create Fileset').first().json.id) }},\n  \"storage_id\": {{ JSON.stringify($('Build Auth').first().json.storage_id) }},\n  \"multipart_upload_url\":false\n}"
+        },
+        "id": "eafe3d99-9fcb-4c27-b0b2-7ff969731870",
+        "name": "Create Upload URL",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1320,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "PUT",
+          "url": "={{ $('Create Upload URL').first().json.upload_url }}",
+          "sendBody": true,
+          "contentType": "binaryData",
+          "inputDataFieldName": "={{ $('Input from MAIN').item.binary.data }}",
+          "options": {}
+        },
+        "id": "180fbbb5-a31f-4ed5-bf9b-dec644ddbe34",
+        "name": "Upload to S3",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1540,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "PATCH",
+          "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Asset').first().json.id }}/files/{{ $('Create Upload URL').first().json.id }}/",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "App-ID",
+                "value": "={{ $('Build Auth').first().json.app_id }}"
+              },
+              {
+                "name": "Auth-Token",
+                "value": "={{ $('Build Auth').first().json.auth_token }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"status\":\"CLOSED\",\"progress_processed\":100}"
+        },
+        "id": "75c20ac6-d667-40f1-b5ef-34b0fe27ebb1",
+        "name": "Patch Closed",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1760,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nreturn [{json:{\n  status:'uploaded',\n  agent_upload:'iconik',\n  asset_id: $('Create Asset').first().json.id,\n  filename: $('Build Auth').first().json.filename,\n  collection_id: $('Build Auth').first().json.collection_id,\n  size: $('Compute Filesize').first().json.size\n}}];\n"
+        },
+        "id": "bae85d06-141b-401c-921e-55b62d217409",
+        "name": "Return Result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1980,
+          300
+        ]
+      }
+    ],
+    "connections": {
+      "Input from MAIN": {
+        "main": [
+          [
+            {
+              "node": "Build Auth",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Auth": {
+        "main": [
+          [
+            {
+              "node": "Create Asset",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Asset": {
+        "main": [
+          [
+            {
+              "node": "Create Format",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Format": {
+        "main": [
+          [
+            {
+              "node": "Create Fileset",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Fileset": {
+        "main": [
+          [
+            {
+              "node": "Compute Filesize",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compute Filesize": {
+        "main": [
+          [
+            {
+              "node": "Create Upload URL",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Upload URL": {
+        "main": [
+          [
+            {
+              "node": "Upload to S3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload to S3": {
+        "main": [
+          [
+            {
+              "node": "Patch Closed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Patch Closed": {
+        "main": [
+          [
+            {
+              "node": "Return Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-11T14:51:51.145Z",
+        "id": 653,
+        "workflowId": "1rNi2FfRGRbZ3uBI",
+        "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-11T14:51:51.011Z",
+        "id": 652,
+        "workflowId": "1rNi2FfRGRbZ3uBI",
+        "versionId": "fd8c2db6-dfce-407d-96f4-b094bd2184d7",
+        "event": "deactivated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
 }
