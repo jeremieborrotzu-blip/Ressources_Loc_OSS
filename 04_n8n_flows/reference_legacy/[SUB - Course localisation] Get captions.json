@@ -1,0 +1,2157 @@
+{
+  "name": "[SUB - Course localisation] Get captions",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "html"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "850d72d7-edfe-4ce9-a902-d65d8e529628",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "html",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "video",
+              "cssSelector": "video",
+              "returnValue": "attribute",
+              "attribute": "src",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        0
+      ],
+      "id": "206cc67d-3bcb-4c11-9010-ab73bb304815",
+      "name": "Extract vimeo URLs"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.video\n  .filter(url=>url.includes(\"vimeo.com\"))\n  .map(x=>{return{\"link\":x,\"name\":null}})"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        0
+      ],
+      "id": "36768cdc-abc1-49f2-b2c7-f1968f9d4ba5",
+      "name": "Filter tags"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        704,
+        0
+      ],
+      "id": "e48685ec-d4ac-47f2-a7f9-8ea4107a66e0",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {id:$input.first().json.link.split('/').pop().split('?')[0]}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        64
+      ],
+      "id": "a86a8256-16e9-43e5-9ed0-ec139993b30f",
+      "name": "Parse vimeo ID"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.vimeo.com/videos/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1104,
+        64
+      ],
+      "id": "9482a831-21ee-4f56-9fc0-406202e414ff",
+      "name": "Get video",
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lY3GsmAudw993tKe",
+          "name": "Deepl"
+        },
+        "httpBearerAuth": {
+          "id": "yvoegKXfo9SO4u6g",
+          "name": "Vimeo OC"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\"title\":null,\"captions\":null}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        272
+      ],
+      "id": "1ffd2a39-e757-4c5b-b63a-38873a3b4b81",
+      "name": "Handle none"
+    },
+    {
+      "parameters": {
+        "jsCode": "const filtered = $('Get captions').first().json.data.filter(x=>x.active)\nif(filtered.length == 1){\n  return {\"link\": filtered[0].link}\n} else {\n  throw \"\"\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        64
+      ],
+      "id": "455d3cbb-4872-4212-a192-4581f9b61507",
+      "name": "Filter captions",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1696,
+        64
+      ],
+      "id": "3dac92ab-51df-4fe3-abb0-ea144b0957ed",
+      "name": "Download caption",
+      "alwaysOutputData": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api.vimeo.com/{{ $json.metadata.connections.texttracks.uri }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1328,
+        64
+      ],
+      "id": "b933159a-a4c6-49cd-92b3-ef85a504d412",
+      "name": "Get captions",
+      "retryOnFail": true,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "yvoegKXfo9SO4u6g",
+          "name": "Vimeo OC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  \"title\":$('Get video').first().json.name,\n  \"captions\":$(\"Download caption\").first().json.data\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        64
+      ],
+      "id": "35433f25-0582-4852-862a-9322c57d6811",
+      "name": "Output caption"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef566eed-1cc4-4773-b7e8-98450052a86f",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2144,
+        0
+      ],
+      "id": "01d0f522-be32-444d-8b79-d6c9ebf250de",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "sourceLang": "fr",
+          "targetLang": "en",
+          "html": "<video src=\"https://vimeo.com/491649859\"><a href=\"https://vimeo.com/491649859\">https://vimeo.com/491649859</a></video><p>En tant que développeur front-end, comme pour tout métier technique, il faut les bons outils.</p><p>Dans ce cours, je vais vous accompagner dans l’installation, la configuration et la découverte de trois outils essentiels :</p><ul><li><p><strong>Visual Studio Code</strong>, qui sera votre outil principal pour écrire du code, avec son éditeur avancé, son explorateur de fichiers, sa palette de commandes, et tout son outillage intégré ;</p></li><li><p><strong>Chrome</strong> et <strong>Firefox</strong>, deux navigateurs incontournables pour analyser et tester vos projets grâce à leurs puissants outils de développeur, ou <strong><em>devtools</em></strong>.</p></li></ul><p><em>Prêt à vous lancer ? Rejoignez-moi dans ce cours !</em></p><aside data-claire-semantic=\"information\"><p><strong>Objectif pédagogique :</strong></p><p>À l'issue de ce cours, vous serez capable de mettre en place un environnement de développement front-end.</p></aside><p></p>\n<h2>Mettez en place votre environnement</h2>\n\n<h3>Installez vos outils de développement front-end</h3>\n<video src=\"https://vimeo.com/491647985\"><a href=\"https://vimeo.com/491647985\">https://vimeo.com/491647985</a></video><p>Dans ce chapitre, on va installer :</p><ul><li><p>l'un des environnements de développement gratuits les plus utilisés : Visual Studio Code ;</p></li><li><p>les deux navigateurs les plus répandus : Chrome et Firefox.</p></li></ul><aside data-claire-semantic=\"information\"><p>Si vous ne savez pas encore ce qu'est un environnement de développement, ou pourquoi on a besoin de plusieurs navigateurs, ne vous inquiétez pas ! On en parlera en détail dans les prochains chapitres. Ici, on va simplement s'assurer de les télécharger et de les installer correctement, et on les découvrira ensuite.</p></aside><h4>Installez Visual Studio Code</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073346800551_P1C1-1%20Intallez%20VSCode.png\" alt=\"\" /></p><p>Le premier outil qu'on va installer est Visual Studio Code, ou <em>VS Code</em>, qui sera votre outil de travail principal.</p><p>Téléchargez d'abord l'installateur depuis le site officiel : <a href=\"https://code.visualstudio.com\">https://code.visualstudio.com</a>.</p><aside data-claire-semantic=\"warning\"><p>Normalement, votre système d'exploitation (Windows ou macOS) sera sélectionné par défaut. Si ce n'est pas le cas, sélectionnez-le dans le menu déroulant, et sélectionnez l'installation <strong>Stable</strong>.</p></aside><h4>Sous <strong>Windows</strong></h4><p>Une fois le téléchargement terminé, lancez l'installateur depuis son dossier de téléchargement, et acceptez le<em> User Agreement</em>. Vous pouvez avancer dans les différents écrans de l'installation sans modifier la configuration par défaut.</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085651860482_image29.png\" alt=\"Accept the license agreement\" /><figcaption>Acceptez le contrat de licence</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/1608565203072_image64.png\" alt=\"Les options par défaut\" /><figcaption>Les options par défaut</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085652164701_image50.png\" alt=\"Prêt à installer\" /><figcaption>Prêt à installer</figcaption></figure><aside data-claire-semantic=\"information\"><p>Après l'installation, vous avez le choix ou non de lancer VS Code, mais faites-le uniquement si vous avez terminé les installations et que vous êtes prêt à avancer au prochain chapitre !</p></aside><h4>Sous <strong>macOS</strong></h4><p>Le fichier que vous téléchargez est l'application déjà prête à l'emploi. Glissez-la dans votre dossier <em>Applications</em> pour la rendre accessible depuis le <em>launchpad</em>.</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085653980659_image15.png\" alt=\"Glissez VS Code dans Applications\" /><figcaption>Glissez VS Code dans Applications</figcaption></figure><p>Et voilà ! VS Code est installé correctement : il est temps d'installer les navigateurs.</p><aside data-claire-semantic=\"information\"><p>Si vous avez déjà installé Chrome et/ou Firefox, n'hésitez pas à passer les instructions correspondantes.</p></aside><h4>Installez vos navigateurs</h4><p>Les différents navigateurs n'affichent pas forcément les sites et applications exactement de la même manière, et il faut souvent modifier son code pour qu'il soit compatible. Il vous sera donc indispensable d'avoir accès à plusieurs navigateurs, en tant que développeur front-end, pour tester vos projets. Il faudra au moins les deux navigateurs les plus répandus : Chrome et Firefox.</p><h4>Installez Chrome</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073347151941_P1C1-2%20Installez%20Chrome.png\" alt=\"\" /></p><p>Allez sur <a href=\"https://www.google.com/chrome/\">https://www.google.com/chrome/</a> et téléchargez Google Chrome pour votre système d'exploitation.</p><h5>Sous <strong>Windows</strong></h5><p>Lancez l'installateur téléchargé, l'installation se fait automatiquement.</p><h5>Sous <strong>macOS</strong></h5><p>Ouvrez le fichier que vous avez téléchargé. Glissez l'icône Chrome dans le dossier <em>Applications</em> dans la fenêtre qui s'ouvre.</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085652323839_image3.png\" alt=\"Glissez Chrome dans Applications\" /><figcaption>Glissez Chrome dans Applications</figcaption></figure><h4>Installez Firefox</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073347303794_P1C1-3%20Installez%20Firefox.png\" alt=\"\" /></p><p>Naviguez vers <a href=\"https://www.mozilla.org/fr/firefox/new/\">https://www.mozilla.org/fr/firefox/new/</a> et téléchargez la dernière version de Firefox pour votre système d'exploitation.</p><h5>Sous <strong>Windows</strong></h5><p>Lancez l'installateur téléchargé, l'installation se fait automatiquement.</p><h5>Sous <strong>macOS</strong></h5><p>Ouvrez le fichier téléchargé. Glissez l'icône Firefox dans le dossier Applications dans la fenêtre qui s'ouvre.</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085652466189_image55.png\" alt=\"Glissez Firefox dans Applications\" /><figcaption>Glissez Firefox dans Applications</figcaption></figure><h4>En résumé</h4><p>Tous les outils dont vous aurez besoin pour ce cours sont maintenant installés :</p><ul><li><p>Visual Studio Code ;</p></li><li><p>vos navigateurs : Chrome et Firefox.</p></li></ul><p><em>Il est temps de commencer à les découvrir dans le prochain chapitre ! </em></p>\n<h3>Éditez vos premières lignes de code avec Visual Studio Code</h3>\n<video src=\"https://vimeo.com/491648565\"><a href=\"https://vimeo.com/491648565\">https://vimeo.com/491648565</a></video><p>Apprenez dans les deux chapitres qui suivent à utiliser l'outil Visual Studio Code. Vous apprendrez à :</p><ul><li><p>Configurer Visual Studio Code ; </p></li><li><p>Utiliser l'éditeur ;</p></li><li><p>Gérez vos dossiers de travail ;</p></li><li><p>Prendre en main la palette de commandes ;</p></li><li><p>Manipuler le terminal ;</p></li><li><p>Utiliser Git ;</p></li><li><p>Exploiter les extensions. </p></li></ul><div data-claire-semantic=\"question\"><p>Vous êtes prêt ? </p></div><h4>Configurez VS Code</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073347576707_P1C2-1%20Configurez%20VSCode.png\" alt=\"\" /></p><p>Avant de plonger dans les fonctionnalités de VS Code, commençons par une configuration de base.</p><aside data-claire-semantic=\"information\"><p>La plupart des vidéos et des captures d'écran de ce cours sont effectuées sur un Mac, mais les interfaces Mac et PC de VS Code sont sensiblement les mêmes. La plus grande différence est que la <strong>barre des menus</strong> sur Mac se trouve en haut de l'écran, alors que sur PC elle est collée à la fenêtre VS Code.</p><p>L'autre différence se situe au niveau des <strong>raccourcis clavier</strong>, et je donnerai toujours les raccourcis des deux plateformes.</p></aside><p>Découvrez dans ce premier screencast l'outil Visual Studio Code et comment réaliser les premières configuration de base. Et ci-dessous, retrouvez en images, pas à pas, les configurations.</p><aside data-claire-semantic=\"warning\"><p>Le logiciel VSCode, comme tout logiciel, est en constante évolution. Pour cette raison, il se peut que certains éléments que vous voyez dans le screencast ou dans les images du cours soient légèrement différents de ce que vous avez dans votre version du logiciel. Cependant, les fonctionnalités principales restent les mêmes.</p></aside><video src=\"https://vimeo.com/491648135\"><a href=\"https://vimeo.com/491648135\">https://vimeo.com/491648135</a></video><p>Commençons par choisir un thème. Cliquez sur &quot;Get Started with VS Code&quot;:</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432883032375_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2013.58.10.png\" alt=\"Cliquez sur\" /><figcaption>Cliquez sur &quot;Get Started with VS Code&quot;</figcaption></figure><p>Ensuite, choisissez &quot;Browse Color Themes&quot;:</p><p><img src=\"https://user.oc-static.com/upload/2022/01/27/16432881519054_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2013.55.41.png\" alt=\"\" /></p><figure><figcaption>Cliquez sur &quot;Browse Color Themes&quot;</figcaption></figure><p>Vous pouvez choisir, avec les flèches de votre clavier, entre des <strong>thèmes Dark</strong> (fond foncé, texte clair) et <strong>Light</strong> (fond clair, texte foncé). Appuyez sur Entrée pour sélectionner le thème que vous préférez.</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/1643289419249_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2014.16.54.png\" alt=\"Liste des thèmes\" /><figcaption>Liste des thèmes</figcaption></figure><p>Pour toutes les autres <strong>options de configuration</strong> de VS Code, vous avez le bouton <strong>Manage</strong> en bas à gauche, à partir duquel vous pouvez ouvrir les <strong>Settings</strong>.</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432894996759_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2014.18.10.png\" alt=\"Le bouton Manage\" /><figcaption>Le bouton Manage</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432898836399_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2014.24.33.png\" alt=\"Settings\" /><figcaption>L'interface Settings</figcaption></figure><p>Vous pouvez, par exemple, y modifier le réglage <strong>Editor: Font Size</strong>, ce qui change la taille de police de l'éditeur. Personnellement, je préfère l'augmenter légèrement, car je la trouve un peu petite.</p><aside data-claire-semantic=\"information\"><p>N'hésitez pas à explorer les différents paramètres !</p></aside><p>Vous pouvez maintenant fermer l'onglet Settings. Comme vous pouvez le constater, on ne revient pas par défaut sur l'onglet d'accueil de VS Code. Pour revenir à l'accueil, allez dans le menu <strong>Help</strong>, puis cliquez sur <strong>Get Started</strong>.</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432899327626_1ch2-ss5-Retour-a-la-page-accueil.png\" alt=\"Retour à la page d'accueil\" /><figcaption>Retour à la page d'accueil</figcaption></figure><h4>Découvrez l'éditeur</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/09/16075191126501_P1C2-2%20De%CC%81couvrez%20l%27e%CC%81diteur.png\" alt=\"\" /></p><p>Dans ce screencast, observez les fonctionnalités de VS Code à partir d'un fichier de code.</p><video src=\"https://vimeo.com/491648160\"><a href=\"https://vimeo.com/491648160\">https://vimeo.com/491648160</a></video><p>Pour travailler avec l'éditeur de code, il nous faut d'abord du code ! Je vous propose de cloner un projet simple à partir d'un dépôt Git OpenClassrooms :</p><p><a href=\"https://github.com/OpenClassrooms-Student-Center/5543061-ecrivez-du-javascript-pour-le-web-activity.git\">https://github.com/OpenClassrooms-Student-Center/5543061-ecrivez-du-javascript-pour-le-web-activity.git</a></p><aside data-claire-semantic=\"information\"><p>Il s'agit du code d'une activité du cours <a href=\"/en/courses/5543061-ecrivez-du-javascript-pour-le-web?status=published\">Écrivez du JavaScript pour le Web</a> que j'ai créé en collaboration avec Fabien Henon !</p></aside><p>Une fois le repo cloné, on va ouvrir le dossier qui contient le code, depuis l'onglet d'accueil :</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432900104201_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2014.26.33.png\" alt=\"Open folder\" /><figcaption>Ouvrir un dossier</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432900479894_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2014.27.19.png\" alt=\"Dossier ouvert !\" /><figcaption>Dossier ouvert !</figcaption></figure><aside data-claire-semantic=\"information\"><p>Pour faciliter la lecture des images et des screencasts, j'ai zoomé mon interface. La gestion du zoom se fait dans le <strong>menu <em>View -&gt; Appearance</em></strong>, où vous trouverez également les raccourcis clavier !</p></aside><p>À gauche de la fenêtre VS Code, le contenu du dossier de code apparaît. On peut maintenant fermer l'onglet d'accueil, et ouvrir le fichier <code data-claire-semantic=\"text\">blog.js</code> en cliquant dessus :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/01/16042519487563_Screenshot%202020-11-01%20at%2018.31.19.png\" alt=\"A JavaScript file\" /><figcaption>Un fichier JavaScript</figcaption></figure><p>Là vous voyez un fichier écrit en <strong>JavaScript</strong>, l'un des nombreux langages gérés par défaut par VS Code. Ne vous inquiétez pas si vous ne comprenez pas le code, ceci n'est pas un cours de JavaScript ! Je voudrais simplement attirer votre attention sur l'onglet <strong>Editor </strong>qui s'est ouvert.</p><p>La première chose que l'on peut constater, c'est que le texte est <strong>coloré</strong>. Les différentes couleurs correspondent à différents éléments du langage utilisé, rendant votre code plus facile à lire et à comprendre.</p><p>Vous constaterez ensuite que les lignes du fichier sont <strong>numérotées</strong>. C'est une aide qui, vous le verrez, est indispensable, car elle nous permet de retrouver rapidement les erreurs, ainsi que de collaborer bien plus facilement avec d'autres développeurs.</p><aside data-claire-semantic=\"information\"><p>Souvent, quand un programme que nous créons rencontre une erreur, il nous fournit le nom du fichier et le numéro de la ligne où l'erreur se trouve !</p></aside><p>Passez maintenant votre souris entre les numéros de ligne et le code : vous y verrez apparaître des flèches qui permettent de <strong>réduire</strong> le code. Cliquez sur les flèches des lignes <strong>4</strong>, <strong>20</strong>, <strong>31,</strong> et <strong>35 </strong>:</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/01/1604252580551_Screenshot%202020-11-01%20at%2018.42.13.png\" alt=\"Réduire du code\" /><figcaption>Réduire du code</figcaption></figure><p>Le code est toujours là (les numéros de ligne reflètent la vérité cachée !), mais le fait de cacher certaines sections du code rend l'écran <strong>moins encombré</strong> et peut nous aider à nous concentrer sur l'essentiel.</p><p>Vous découvrirez beaucoup d'autres fonctionnalités de l'éditeur de code au cours de vos études et de votre carrière de développeur.</p><h4>Gérez vos dossiers de travail</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073347873366_P1C2-2%20Ge%CC%81rez%20vos%20dossiers%20de%20travail.png\" alt=\"\" /></p><p>Gérez ici les extensions de fichiers et organisez vos dossiers. Cela vous sera bien utile pour gérer vos projets !</p><video src=\"https://vimeo.com/491648267\"><a href=\"https://vimeo.com/491648267\">https://vimeo.com/491648267</a></video><p>En travaillant avec l'éditeur de code, on a vu qu'on pouvait ouvrir un fichier en cliquant dessus dans l'explorateur de fichiers à gauche de l'écran. Cet explorateur vous permet également de <strong>gérer vos fichiers et dossiers de travail</strong>. Si vous y passez votre souris, vous verrez apparaître quelques icônes dans l'en-tête :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085656856691_image17.png\" alt=\"Opérations de dossier\" /><figcaption>Opérations de dossier</figcaption></figure><p>Le premier vous permet de <strong>créer un nouveau fichier</strong>. Quand on crée un fichier, on doit spécifier son <strong>extension</strong>.</p><aside data-claire-semantic=\"information\"><p>L'extension d'un fichier nous spécifie son <strong>type</strong>, et ce qu'on pourra y trouver. C'est ce qui se trouve après le dernier point dans un nom de fichier ; par exemple, index.<em>html</em>, blog.<em>js</em>, styles.<em>css</em>…</p></aside><p>VS Code interprète l'extension du fichier pour colorer correctement le code et pour mettre en place la bonne autocorrection, par exemple. Cliquez sur l'icône  <code data-claire-semantic=\"text\">New File</code> , et essayez ces trois exemples :  <code data-claire-semantic=\"text\">new.html</code> ,<code data-claire-semantic=\"text\">new.js</code> , <code data-claire-semantic=\"text\">new.css</code> . Vous voyez que VS Code reconnaît l'extension, grâce à l'icône qu'il y attribue.</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085656968735_image16.png\" alt=\"Nouveaux fichiers\" /><figcaption>Reconnaissance des extensions des nouveaux fichiers</figcaption></figure><aside data-claire-semantic=\"information\"><p>Cette différenciation par icône va faciliter la navigation !</p></aside><p>La deuxième icône de l'en-tête vous permet de <strong>créer des dossiers</strong> et sous-dossiers. On différencie les dossiers dans l'explorateur par l'icône <em>chevron</em>. Quand vous cliquez sur un dossier, il s'ouvre pour montrer son contenu. Créez un sous-dossier <code data-claire-semantic=\"text\">icons</code> au dossier <code data-claire-semantic=\"text\">images</code> en le sélectionnant, puis en cliquant sur <code data-claire-semantic=\"text\">New Folder</code> :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085657060202_image20.png\" alt=\"Nouveau dossier\" /><figcaption>Nouveau dossier</figcaption></figure><p>La prochaine icône, la flèche en cercle, permet de <strong>rafraîchir</strong> l'explorateur. Cette fonctionnalité vous sera utile notamment quand des fichiers auront été créés par un autre outil, et que VS Code devra en prendre compte.</p><p>La dernière icône est un raccourci pour <strong>replier</strong> tous les dossiers qui sont ouverts dans l'explorateur. Ça vous sera utile quand vous aurez des projets plus complexes avec beaucoup de dossiers, comme ce projet front-end avancé :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085657188725_image7.png\" alt=\"Une multitude de dossiers...\" /><figcaption>Une multitude de dossiers...</figcaption></figure><aside data-claire-semantic=\"information\"><p>En tout cas, l'explorateur de fichiers intégré à VS Code vous permettra de vous organiser et de naviguer facilement à l'intérieur de votre projet. </p></aside><h4>Prenez en main la palette de commandes</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073348090971_P1C2-3%20Prenez%20en%20main%20la%20palette%20de%20commandes.png\" alt=\"\" /></p><p>La palette de commande est une fonctionnalité dont vous ne pourrez plus vous passer ! Elle vous sera d'une grande aide pour travailler plus efficacement sur VS Code. Découvrez là dans ce sceencast :</p><video src=\"https://vimeo.com/491648321\"><a href=\"https://vimeo.com/491648321\">https://vimeo.com/491648321</a></video><p>Dans VS Code, il existe un raccourci qui vous permet de trouver toutes les commandes possibles et imaginables en tapant leur nom. Ça veut dire que vous n'avez pas besoin d'apprendre par cœur dans quel menu se trouve une commande, ni son raccourci clavier (même si vous finirez par en apprendre certains !). Tout ça grâce à la <strong>palette de commandes</strong>, que vous ouvrez avec  <code data-claire-semantic=\"text\">Ctrl+Maj+P</code>  sur PC, ou  <code data-claire-semantic=\"text\">Cmd+Maj+P</code>  sur Mac :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/07/16047517833775_Screenshot%202020-11-07%20at%2013.22.10.png\" alt=\"La palette de commandes\" /><figcaption>La palette de commandes</figcaption></figure><p>Par exemple, imaginons que vous ayez plusieurs éditeurs ouverts, et que vous vouliez tous les fermer pour travailler sur une autre fonctionnalité de votre projet. Ouvrez la palette de commandes et tapez simplement le mot &quot;Close&quot; :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/07/16047519832114_Screenshot%202020-11-07%20at%2013.25.27.png\" alt=\"Fermer tous les éditeurs\" /><figcaption>Fermer tous les éditeurs</figcaption></figure><p>Vous y voyez la commande &quot;Close All Editors&quot;, ou &quot;Fermer tous les éditeurs&quot;. Vous pouvez y accéder avec les flèches de votre clavier, et appuyer sur &quot;Entrée&quot; pour exécuter la commande.</p><aside data-claire-semantic=\"information\"><p>Notez aussi que la palette de commandes vous montre également le raccourci clavier pour la commande que vous souhaitez exécuter !</p></aside><p>Un autre exemple de commande rapide : la création d'un nouveau fichier. Ouvrez la palette de commandes et tapez &quot;New File&quot; :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/07/16047522778353_Screenshot%202020-11-07%20at%2013.30.38.png\" alt=\"New File\" /><figcaption>Nouveau fichier</figcaption></figure><p>Cela accomplit la même chose que lorsque vous cliquez sur le bouton dans l'explorateur de fichiers, mais <strong>sans utiliser votre souris</strong>. Tout geste qui requiert la souris nous ralentit : essayez de garder le plus possible les mains sur le clavier !</p><aside data-claire-semantic=\"information\"><p>La palette de commandes est un peu l'arme secrète de VS Code : elle vous facilitera l'apprentissage de l'outil, et vous permettra d'être plus efficace !</p></aside><h4>En résumé</h4><p>Dans ce chapitre, vous avez exploré les bases de Visual Studio Code :</p><ul><li><p>vous avez configuré votre installation en choisissant un thème ;</p></li><li><p>vous avez découvert l'éditeur de code ;</p></li><li><p>vous avez manipulé l'explorateur de fichiers ;</p></li><li><p>vous avez utilisé la palette de commandes pour accéder aux différentes commandes de VS Code ;</p></li></ul><p>Découvrez dans le chapitre suivant d'autres fonctionnalités qui vous seront utiles sur VS Code.</p><p></p>\n<h3>Explorez les fonctionnalités de Visual Studio Code</h3>\n<aside data-claire-semantic=\"warning\"><p><strong>Prérequis à avoir :</strong></p><p>À partir de ce chapitre, il vous est nécessaire d'avoir des connaissances de base en Git et en ligne de commande pour suivre ce cours. Vous pouvez les apprendre grâce à ces cours :</p><ul><li><p><a href=\"/fr/courses/6173491-apprenez-a-utiliser-la-ligne-de-commande-dans-un-terminal\">Apprenez à utiliser la ligne de commande dans un terminal</a></p></li><li><p><a href=\"/fr/courses/5641721-utilisez-git-et-github-pour-vos-projets-de-developpement\">Utilisez Git et GitHub pour vos projets de développement</a></p></li></ul></aside><h4>Manipulez le terminal</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073349530167_P1C2-4%20Manipulez%20le%20terminal.png\" alt=\"\" /></p><p>Découvrez dans ce screencast le terminal intégré à l'outil VS Code. De quoi vous simplifier la vie en gérant qu'un seul outil !</p><video src=\"https://vimeo.com/673125468\"><a href=\"https://vimeo.com/673125468\">https://vimeo.com/673125468</a></video><p>Au cours de vos études et de votre carrière de développeur, vous aurez souvent besoin d'exécuter des commandes de terminal (aussi connu sous les noms de <em>shell</em>, <em>PowerShell</em>, <em>invite de commandes</em>…). C'est pour cela que VS Code permet d'utiliser un <strong>terminal intégré</strong>. Ouvrez la palette de commandes, tapez &quot;create terminal&quot; et choisissez <code data-claire-semantic=\"text\">Terminal: Create New Integrated Terminal</code> :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/07/16047632908408_Screenshot%202020-11-07%20at%2016.34.33.png\" alt=\"Create Terminal\" /><figcaption>Commande : Create Terminal</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432911167373_Optimized-1ch3-ss2-Terminal-integre.png\" alt=\"Terminal intégré\" /><figcaption>Terminal intégré</figcaption></figure><aside data-claire-semantic=\"information\"><p>Votre terminal ne ressemblera pas forcément exactement au mien, selon votre système d'exploitation.</p></aside><p>On peut être amené à avoir besoin de <strong>plusieurs fenêtres de terminal</strong> en même temps – par exemple, un serveur de développement occupera un terminal, du coup on aura besoin d'un autre pour exécuter d'autres commandes.</p><p>VS Code nous offre donc plusieurs possibilités : le bouton &quot;New Terminal&quot; qui ajoute un terminal à la liste déroulante, ou le bouton &quot;Split Terminal&quot; qui permet d'ouvrir plusieurs onglets côte à côte :</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432911636176_1ch3-ss3-Le-bouton-plus.png\" alt=\"Liste déroulante des terminaux créés après avoir cliqué sur\" /><figcaption>&quot;New Terminal&quot; + menu</figcaption></figure><figure><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/1643291299353_1ch3-ss4-Bouton-split-terminal.png\" alt=\"Le bouton split terminal\" /><figcaption>Bouton &quot;Split Terminal&quot;</figcaption></figure></figure><p>Voici à quoi ressemblera votre Split Terminal :</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432914247701_1ch3-ss4.1-Split-Terminal.png\" alt=\"\" /></figure><figure><figcaption>Split Terminal</figcaption></figure><aside data-claire-semantic=\"information\"><p>Plus vous avancerez dans vos études et votre carrière de développeur, plus vous apprécierez le terminal intégré !</p></aside><h4>Utilisez Git</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073349683126_P1C2-5%20Utiliser%20Git.png\" alt=\"\" /></p><aside data-claire-semantic=\"information\"><p>Si vous ne connaissez pas comment utilisez Git, je vous invite à suivre le cours &quot;<a href=\"/fr/courses/5641721-utilisez-git-et-github-pour-vos-projets-de-developpement\">utilisez Git et GitHub pour vos projets de développement</a>&quot;. </p></aside><p>Dans ce screencast, vous allez découvrir comment VS Code intègre les fonctionnalités de Git.</p><video src=\"https://player.vimeo.com/video/491648453?color=7451eb\"><a href=\"https://player.vimeo.com/video/491648453?color=7451eb\">https://player.vimeo.com/video/491648453?color=7451eb</a></video><p>Comme vous le savez, le système de contrôle de version Git est extrêmement important dans le monde du développement, que ce soit au niveau individuel, au niveau d'une équipe, ou même au niveau d'une entreprise. VS Code intègre donc tous les outils nécessaires à son utilisation.</p><h4>Clonez un dépôt</h4><p>Tout d'abord, vous pouvez cloner un dépôt Git directement depuis VS Code. Pour faire cela, fermez tout projet actuellement ouvert, et ouvrez l'explorateur de fichiers (en haut à gauche) :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/07/16047669171213_Screenshot%202020-11-07%20at%2017.33.51.png\" alt=\"Clone a repo\" /><figcaption>Cloner un dépôt</figcaption></figure><p>Vous pouvez ensuite cliquer sur &quot;Clone Repository&quot;, puis coller l'URL du dépôt à cloner ; par exemple celui que nous avons utilisé jusqu'ici :</p><p><a href=\"https://github.com/OpenClassrooms-Student-Center/5543061-ecrivez-du-javascript-pour-le-web-activity.git\">https://github.com/OpenClassrooms-Student-Center/5543061-ecrivez-du-javascript-pour-le-web-activity.git</a></p><p>Quand vous validez l'URL, VS Code vous propose de choisir l'emplacement où vous souhaitez cloner le code, et vous propose d'ouvrir le dépôt cloné. En cliquant sur &quot;Open&quot;, vous vous retrouvez dans le bon projet.</p><h4>Créez une branche</h4><p>Il est temps de travailler sur votre code, et vous souhaitez créer une branche de travail. Les outils Git se trouvent à gauche :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/07/16047675764325_Screenshot%202020-11-07%20at%2017.45.06.png\" alt=\"Les outils Git\" /><figcaption>Les outils Git</figcaption></figure><p>Vous pouvez ouvrir le menu  <code data-claire-semantic=\"text\">…</code>  ; allez sur Branch -&gt; Create Branch.</p><aside data-claire-semantic=\"information\"><p>Bien sûr, vous pouvez aussi chercher &quot;Create Branch&quot; dans la palette de commandes !</p></aside><p>Choisissez un nom pour votre branche et appuyez sur Entrée. Vous verrez alors la branche sur laquelle vous vous trouvez, en bas à gauche de la fenêtre principale :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085659413319_image18.png\" alt=\"La branche active\" /><figcaption>La branche active</figcaption></figure><p>En cliquant sur cette branche, vous pouvez choisir de changer de branche ou d'en créer une nouvelle.</p><h4>Commit</h4><p>Effectuons quelques modifications. Ouvrez l'explorateur de fichiers, puis ouvrez  <code data-claire-semantic=\"text\">blog.html</code>, et changez la langue  <code data-claire-semantic=\"text\">en</code> en ligne 2 à  <code data-claire-semantic=\"text\">fr</code> . Dans  <code data-claire-semantic=\"text\">functions.js</code> , à la ligne 17, changez &quot;Veuillez saisir quelque chose !&quot; en &quot;Il faut saisir quelque chose !&quot;.</p><aside data-claire-semantic=\"information\"><p>N'oubliez pas d'enregistrer vos modifications à chaque fois avec  <code data-claire-semantic=\"text\">Ctrl+S</code>  sur PC ou  <code data-claire-semantic=\"text\">Cmd+S</code>  sur Mac !</p></aside><p>Rouvrez les outils Git, et vous verrez le résumé de vos modifications. Cliquez sur un fichier pour voir le détail :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/07/16047681121861_Screenshot%202020-11-07%20at%2017.54.29.png\" alt=\"Git Diff\" /><figcaption>Git Diff</figcaption></figure><p>Plusieurs options s'ouvrent donc à nous, mais disons que nous souhaitons <em>commit</em> nos modifications. Il faut d'abord <strong>stage</strong> nos modifications en cliquant sur les boutons + sur chaque fichier. Puis, entrez simplement votre <strong>message de commit</strong> (&quot;Changed language&quot;, par exemple), et faites Ctrl+Entrée sur PC, ou Cmd+Entrée sur Mac pour effectuer votre commit.</p><p>Toutes les commandes liées au contrôle de version se trouvent dans cette partie de VS Code (et sont trouvables par la palette de commandes), donc n'hésitez pas à les essayer avec vos propres dépôts.</p><aside data-claire-semantic=\"information\"><p>Vous pouvez même y lier votre compte GitHub !</p></aside><h4>Exploitez les extensions</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073349891466_P1C2-6%20Exploitez%20les%20plugins.png\" alt=\"\" /></p><p>Pour personnaliser encore plus votre configuration de VS Code, vous pouvez installer des <strong>plugins</strong>, ou <strong><em>extensions</em></strong>. Ces plugins viennent rajouter des fonctionnalités ou des outils supplémentaires à votre VS Code.</p><p>Vous pouvez parcourir toutes les extensions disponibles sur <a href=\"https://marketplace.visualstudio.com\">https://marketplace.visualstudio.com</a>, mais voici deux extensions que je peux vous conseiller :</p><ul><li><p><em>Live Server</em> – cette extension fait partie des plus populaires sur VS Code. Elle vous permet de lancer un serveur de développement qui rafraichira le rendu de votre page dans le navigateur chaque fois que vous allez enregistrer les modifications dans vos fichiers ;</p></li><li><p><em>Git Lens</em> – également un extension très populaire qui rajoute un accès facile à de nombreuses fonctionnalités de Git et Github. </p></li></ul><p>Pour installer une extension, ouvrez Extensions à gauche de la fenêtre, et tapez le nom de l'extension souhaitée :</p><figure><img src=\"https://user.oc-static.com/upload/2022/01/27/16432916645369_Capture%20d%E2%80%99e%CC%81cran%202022-01-27%20a%CC%80%2014.54.10.png\" alt=\"Une page de VSCode Marketplace qui affiche l'extension Live Server\" /><figcaption>Choisissez une extension</figcaption></figure><p>En cliquant sur les différentes extensions, vous pouvez lire leur descriptif, et pour en installer une, il suffit de cliquer sur le bouton Install correspondant !</p><h4>Découvrez des extensions VS Code supplémentaires</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/09/1607503355669_P1C3-5%20-%20Allez%20plus%20loin.png\" alt=\"\" /></p><p>Voici quelques suggestions d'extensions VS Code que vous trouverez peut-être intéressantes :</p><ul><li><p><a href=\"https://marketplace.visualstudio.com/items?itemName=MS-vsliveshare.vsliveshare-pack\">Live Share</a> – collaborez avec d'autres développeurs <strong>en temps réel</strong>, travaillez sur les mêmes fichiers en simultané pour du pair programming facile.</p></li><li><p><a href=\"https://marketplace.visualstudio.com/items?itemName=MS-CEINTL.vscode-language-pack-fr\">French Language Pack for Visual Studio Code</a> – L’extension officielle de Microsoft pour traduire l’interface de VSCode en français. </p></li><li><p><a href=\"https://marketplace.visualstudio.com/items?itemName=bar9.stories\">Stories</a> – comme les stories Instagram, mais en code !</p></li><li><p><a href=\"https://marketplace.visualstudio.com/items?itemName=Wscats.search\">Search Hero</a> – tous les développeurs font des recherches sur Internet pour trouver des réponses, donc Search Hero intègre directement la recherche et la traduction multimoteur.</p></li></ul><p>Vous pouvez bien sûr trouver toutes les extensions disponibles au <a href=\"https://marketplace.visualstudio.com/vscode\">Visual Studio Marketplace </a></p><h4>En résumé</h4><p>Dans ce chapitre vous avez exploré les fonctionnalités supplémentaires de VS Code  :</p><ul><li><p>vous avez vu les différentes possibilités du terminal intégré ;</p></li><li><p>vous avez interagi avec des dépôts Git ;</p></li><li><p>vous avez installé vos premières extensions.</p></li></ul><p>Bien évidemment, vous apprendrez de mieux en mieux cet outil au cours de vos études et de votre carrière, et vous en découvrirez des fonctionnalités plus avancées, mais c'est déjà un excellent début !</p><p><em>Dans le chapitre suivant, vous apprendrez à tester votre code avec les outils de développeur (devtools) Chrome et Firefox !</em></p>\n<h3>Testez votre code avec les devtools Chrome et Firefox</h3>\n<video src=\"https://vimeo.com/491649474\"><a href=\"https://vimeo.com/491649474\">https://vimeo.com/491649474</a></video><p>Dans ce chapitre, vous allez utiliser les outils développeur, ou <strong>devtools</strong>, de Chrome et Firefox, pour analyser une page du site d'OpenClassrooms !</p><h4>Découvrez l’inspecteur – HTML</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/1607335033082_P1C3-1%20De%CC%81couvrez%20l%27inspecteur%20HTML.png\" alt=\"\" /></p><p>À partir d'une page web d'OpenClassrooms, découvrez à quoi ressemble l'inspecteur HTML sur votre navigateur web.</p><video src=\"https://vimeo.com/491648719\"><a href=\"https://vimeo.com/491648719\">https://vimeo.com/491648719</a></video><p></p><p>Pour commencer, ouvrez <a href=\"/fr/paths\">https://openclassrooms.com/fr/paths</a> dans Chrome :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/10/16050319867305_Screenshot%202020-11-10%20at%2019.12.24.png\" alt=\"Open Classrooms - Parcours\" /><figcaption>OpenClassrooms – Parcours</figcaption></figure><p>Pour inspecter la structure de cette page, vous allez ouvrir <strong>l'inspecteur d'éléments</strong>. Sur Windows, faites  <code data-claire-semantic=\"text\">Ctrl+Maj+C</code>  . Sur macOS, faites  <code data-claire-semantic=\"text\">Option+Cmd+C</code>  . L'inspecteur s'ouvrira en bas de votre écran.</p><aside data-claire-semantic=\"information\"><p>Les raccourcis sont les mêmes entre <strong>Chrome</strong> et <strong>Firefox</strong>, et toutes les manipulations dans cette section sont identiques, avec quelques nuances sur le design des icônes (mais tout se trouve aux mêmes endroits dans les deux navigateurs).</p></aside><p>Pour la lisibilité, je préfère ancrer les devtools à droite de mon écran. Pour changer l'ancrage des devtools, l'option se trouve dans le menu de customisation :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085674203905_image33.png\" alt=\"Customisation des Devtools\" /><figcaption>Personnalisation des devtools</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2020/11/10/16050327136836_Screenshot%202020-11-10%20at%2019.23.42.png\" alt=\"Devtools à droite\" /><figcaption>Devtools à droite</figcaption></figure><aside data-claire-semantic=\"information\"><p>Le code que vous voyez dans l'inspecteur est du code <strong>HTML</strong> – le langage qui définit la <strong>structure</strong> d'une page web.</p><p>Une page web est composée d'<strong>éléments</strong> – du texte, les images, les boutons…ce sont tous des exemples d'éléments. Un élément peut être <strong>parent</strong> de plusieurs éléments <strong>enfants</strong> : par exemple, l'élément d'en-tête de cette page contient des éléments enfants : le logo OpenClassrooms, des liens, un bouton Rechercher, et les boutons liés à la connexion.</p></aside><p>Lorsque vous passez votre souris sur différentes lignes de code, les différents éléments sont surlignés sur la page affichée. Par exemple, survolez la ligne suivante :</p><pre><code data-claire-semantic=\"html\">&lt;div id=&quot;oc-header&quot; data-widget=&quot;header&quot;&gt;...&lt;/div&gt;</code></pre><p>L'en-tête de la page sera surligné :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/10/16050332616965_Screenshot%202020-11-10%20at%2019.33.23.png\" alt=\"En-tête surlignée\" /><figcaption>En-tête surligné</figcaption></figure><p>Ce surlignage nous signale que l'élément de code survolé correspond à l'en-tête de la page. Plongeons dedans en cliquant sur la flèche qui se trouve au début de la ligne de code :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085674351081_image5.png\" alt=\"Ouvrez l'en-tête\" /><figcaption>Ouvrez l'en-tête</figcaption></figure><p>On voit que l'élément de type  <code data-claire-semantic=\"text\">div</code>  contient un seul enfant : un élément de type  <code data-claire-semantic=\"text\">header</code>  . La structure de cette page fait que nous avons plusieurs éléments à un seul enfant. Ouvrons-les tous jusqu'à trouver les enfants multiples qui correspondent aux différents éléments de l'en-tête : </p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085674655034_image44.png\" alt=\"Plongeons dans la structure\" /><figcaption>Plongeons dans la structure</figcaption></figure><p>Si vous survolez les différents enfants à ce niveau, vous voyez les différents éléments surlignés sur la page, et ainsi vous savez à quel élément visuel correspond telle ligne de code :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085674877389_image14.png\" alt=\"Le logo\" /><figcaption>Le logo surligné</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/1608567511102_image62.png\" alt=\"Le menu surligné\" /><figcaption>Le menu surligné</figcaption></figure><p>Vous pouvez aussi retrouver la ligne qui correspond à un élément en faisant un <strong>clic droit</strong> sur l'élément de la page, puis sur Inspecter. Essayez sur le texte &quot;Découvrez nos parcours diplômants&quot; :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085675396129_image71.png\" alt=\"Clic-droit + Inspecter\" /><figcaption>Clic droit + Inspecter</figcaption></figure><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085675664466_image4.png\" alt=\"Le code correspondant\" /><figcaption>Le code correspondant</figcaption></figure><p>Vous pouvez aussi activer l'inspection à la sélection, qui vous permet de survoler et de cliquer sur les éléments de la page pour les inspecter, depuis l'inspecteur :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085675813778_image68.png\" alt=\"L'inspection à la sélection\" /><figcaption>L'inspection à la sélection</figcaption></figure><aside data-claire-semantic=\"information\"><p>Vous savez maintenant inspecter les éléments structurels d'une page web. Gardons la sélection que l'on vient d'effectuer, et profitons-en pour découvrir un autre aspect de l'inspecteur : les <strong>styles</strong>. </p></aside><h4>Découvrez l’inspecteur – styles</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073350539802_P1C3-2%20De%CC%81couvrez%20l%27inspecteur%20de%20styles.png\" alt=\"\" /></p><p>Découvrez à présent, à quoi ressemble l'inspecteur style sur votre navigateur web.</p><video src=\"https://vimeo.com/491649042\"><a href=\"https://vimeo.com/491649042\">https://vimeo.com/491649042</a></video><p>L'inspecteur des navigateurs nous permet de visualiser et de modifier le code qui régit les <strong>styles</strong> d'une page web, c'est-à-dire l'<strong>apparence</strong> des différents éléments. Si vous avez modifié votre sélection depuis la section précédente, revenez sur l'élément &quot;Découvrez nos parcours diplômants&quot;. Dans la partie inférieure de l'inspecteur, vous verrez la partie Styles :</p><h4>Sur Chrome</h4><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085676008565_image2.png\" alt=\"Styles inspector - Chrome\" /><figcaption>L'inspecteur de style sur Chrome</figcaption></figure><h4>Sur Firefox</h4><figure><img src=\"https://user.oc-static.com/upload/2020/11/11/16051038229467_Screenshot%202020-11-11%20at%2015.09.06.png\" alt=\"Styles inspector - Firefox\" /><figcaption>L'inspecteur de style sur Firefox</figcaption></figure><aside data-claire-semantic=\"information\"><p>N'hésitez pas à augmenter la hauteur de cette partie de l'inspecteur, et sur Firefox, je vous conseille également de désactiver la vue à trois panneaux à l'aide de ce bouton dans l'en-tête de l'inspecteur des styles :</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/11/16051039822563_Screenshot%202020-11-11%20at%2015.12.22.png\" alt=\"Désactivez la vue à trois panneaux\" /><figcaption>Désactivez la vue à trois panneaux</figcaption></figure></aside><p>Dans l'inspecteur des styles (&quot;Styles&quot; dans Chrome, &quot;Règles&quot; ou &quot;Rules&quot; dans Firefox), vous pouvez filtrer les styles pour trouver ce qui vous intéresse, et même en modifier la valeur.</p><p>Imaginons que vous souhaitiez modifier la couleur blanche du texte. Dans le champ de filtrage, tapez &quot;color&quot;, et cherchez la règle  <code data-claire-semantic=\"text\">color</code>  qui est accompagnée d'un petit carré blanc et de la valeur  <code data-claire-semantic=\"text\">rgb(255, 255, 255)</code>  :</p><h4>Sur Chrome</h4><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085676198339_image11.png\" alt=\"color - Chrome\" /><figcaption>color – Chrome</figcaption></figure><h4>Sur Firefox</h4><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085676324716_image34.png\" alt=\"color - Firefox\" /><figcaption>color – Firefox</figcaption></figure><p>Si vous cliquez sur la valeur associée à  <code data-claire-semantic=\"text\">color</code>  , vous pouvez la modifier. Tapez  <code data-claire-semantic=\"text\">red</code>  , et vous remarquerez la modification de l'apparence de l'élément :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085676430126_image70.png\" alt=\"Texte rouge\" /><figcaption>Texte rouge</figcaption></figure><aside data-claire-semantic=\"information\"><p>Le fait de pouvoir modifier ainsi à la volée les styles d'une page web nous permet de tester des modifications sans toucher au code source de notre projet, et peut être extrêmement utile.</p></aside><h4>Étudiez la console</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/1607335071702_P1C3-3%20Etudiez%20la%20console.png\" alt=\"\" /></p><p>Un autre outil principal des devtools est la <strong>console</strong>. La console nous apporte des informations essentielles sur le fonctionnement de nos projets, surtout en cas de problème. Vous trouverez l'accès à la console dans l'en-tête des devtools.</p><video src=\"https://vimeo.com/491649218\"><a href=\"https://vimeo.com/491649218\">https://vimeo.com/491649218</a></video><h4>Sur Chrome</h4><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085676592728_image67.png\" alt=\"Accès à la console - Chrome\" /><figcaption>Accès à la console – Chrome</figcaption></figure><h4>Sur Firefox</h4><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085676708182_image24.png\" alt=\"Accès à la console - Firefox\" /><figcaption>Accès à la console – Firefox</figcaption></figure><p>En tant que développeur front-end, vous pourrez faire afficher des messages dans la console. Par exemple, les développeurs chez OpenClassrooms font apparaître un message d'avertissement pour prévenir les potentielles victimes d'attaque self-XSS, où l'attaquant convainc la victime à coller du code néfaste dans cette console.</p><p>Au moment de la création de ce cours, on constate également des avertissements liés au code source, et même une erreur !</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/11/1605107708982_Screenshot%202020-11-11%20at%2016.12.56.png\" alt=\"Erreur dans la console !\" /><figcaption>Erreur dans la console !</figcaption></figure><aside data-claire-semantic=\"information\"><p>La console sera certainement l'un des outils que vous utiliserez le plus souvent de toute la gamme des devtools.</p></aside><h4>Activez le mode mobile</h4><p><img src=\"https://user.oc-static.com/upload/2020/12/07/16073350829128_P1C3-4%20Activez%20le%20mode%20mobile.png\" alt=\"\" /></p><p>Environ 50 % du trafic web aujourd'hui se déroule sur mobile, donc il vous est indispensable, en tant que développeur front-end, de vérifier l'apparence de vos projets sur différents types d'appareils. Découvrez comment gérer l'apparence mobile :</p><video src=\"https://vimeo.com/491649402\"><a href=\"https://vimeo.com/491649402\">https://vimeo.com/491649402</a></video><p></p><aside data-claire-semantic=\"information\"><p>On parle souvent de design <strong>responsive</strong> : il s'agit d'une technique de design où l'apparence d'une page ou d'une application dépend de l'appareil sur lequel on les consulte. On dépendra souvent de la largeur en pixels de la fenêtre de navigateur.</p></aside><p>Les devtools vous permettent de simuler de manière assez fiable plusieurs appareils mobiles. Vous pouvez activer le mode mobile depuis l'en-tête des devtools :</p><h4>Sur Chrome</h4><figure><img src=\"https://user.oc-static.com/upload/2020/11/11/16051093392511_Screenshot%202020-11-11%20at%2016.41.22.png\" alt=\"Mode mobile - Chrome\" /><figcaption>Mode mobile – Chrome</figcaption></figure><h4>Sur Firefox</h4><figure><img src=\"https://user.oc-static.com/upload/2020/11/11/16051093534836_Screenshot%202020-11-11%20at%2016.41.43.png\" alt=\"Mode mobile - Firefox\" /><figcaption>Mode mobile – Firefox</figcaption></figure><p>Vous constaterez le redimensionnement de la partie active de la fenêtre de navigation, et vous remarquerez que les développeurs chez OpenClassrooms ont bien fait leur travail ! Le design fonctionne bien en vue mobile :</p><figure><img src=\"https://user.oc-static.com/upload/2020/12/21/16085676890631_image72.png\" alt=\"Responsive design\" /><figcaption>Responsive design</figcaption></figure><p>En mode mobile, l'en-tête du navigateur permet de choisir le type de mobile simulé, son orientation, et vous pouvez même choisir de limiter la bande passante pour simuler une mauvaise connexion !</p><figure><img src=\"https://user.oc-static.com/upload/2020/11/11/16051096243321_Screenshot%202020-11-11%20at%2016.46.46.png\" alt=\"Options mode mobile\" /><figcaption>Options mode mobile</figcaption></figure><p>Tous ces outils vous seront très importants dans la réalisation de vos projets front-end.</p><h4>En résumé</h4><p>Dans ce chapitre :</p><ul><li><p>vous avez analysé la structure d'une page web avec l'inspecteur ;</p></li><li><p>vous avez trouvé et modifié les styles d'un élément ;</p></li><li><p>vous avez découvert la console ;</p></li><li><p>vous avez utilisé le mode mobile pour simuler l'utilisation d'un appareil mobile.</p></li></ul><p><em>Félicitations ! Vous arrivez à la fin de cours. Vous avez mis en place votre environnement de développement. Vous avez installé <strong>Visual Studio Code</strong>, <strong>Chrome</strong> et <strong>Firefox</strong>, et vous avez une bonne compréhension de base de leurs différentes fonctionnalités. <br />Vous êtes maintenant prêt à évaluer ce que vous avez appris avec le quiz que je vous ai préparé !</em></p><p><em>Bonne continuation dans le monde du développement front-end ! 😀</em></p>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Parse vimeo ID": [
+      {
+        "json": {
+          "id": "491649859"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Get video": [
+      {
+        "json": {
+          "uri": "/videos/491649859",
+          "name": "FR_6943241_CRS_envrment-front-end_0-0_0-0_TLK",
+          "description": null,
+          "type": "video",
+          "link": "https://vimeo.com/491649859",
+          "player_embed_url": "https://player.vimeo.com/video/491649859?h=382ff89078",
+          "duration": 49,
+          "width": 1920,
+          "language": null,
+          "height": 1080,
+          "embed": {
+            "html": "<iframe src=\"https://player.vimeo.com/video/491649859?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=159155\" width=\"1920\" height=\"1080\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" title=\"FR_6943241_CRS_envrment-front-end_0-0_0-0_TLK\"></iframe>",
+            "badges": {
+              "hdr": false,
+              "live": {
+                "streaming": false,
+                "archived": false
+              },
+              "staff_pick": {
+                "normal": false,
+                "best_of_the_month": false,
+                "best_of_the_year": false,
+                "premiere": false
+              },
+              "vod": false,
+              "weekend_challenge": false
+            },
+            "interactive": false,
+            "buttons": {
+              "watchlater": false,
+              "share": false,
+              "embed": false,
+              "hd": false,
+              "fullscreen": true,
+              "scaling": true,
+              "like": false
+            },
+            "logos": {
+              "vimeo": false,
+              "custom": {
+                "active": false,
+                "url": null,
+                "link": null,
+                "use_link": false,
+                "sticky": false
+              }
+            },
+            "play_button": {
+              "position": "auto"
+            },
+            "title": {
+              "name": "hide",
+              "owner": "hide",
+              "portrait": "hide"
+            },
+            "end_screen": [],
+            "playbar": true,
+            "quality_selector": true,
+            "pip": true,
+            "autopip": true,
+            "volume": true,
+            "color": "00adef",
+            "colors": {
+              "color_one": "000000",
+              "color_two": "00adef",
+              "color_three": "ffffff",
+              "color_four": "000000"
+            },
+            "event_schedule": true,
+            "has_cards": false,
+            "outro_type": "link",
+            "show_timezone": false,
+            "cards": [],
+            "airplay": true,
+            "audio_tracks": true,
+            "chapters": true,
+            "chromecast": true,
+            "closed_captions": true,
+            "transcript": true,
+            "skipping_forward": true,
+            "ask_ai": false,
+            "uri": "/presets/120692089",
+            "email_capture_form": [],
+            "speed": true
+          },
+          "created_time": "2020-12-16T14:38:44+00:00",
+          "modified_time": "2026-01-27T03:45:15+00:00",
+          "release_time": "2020-12-16T14:38:44+00:00",
+          "content_rating": [
+            "safe"
+          ],
+          "content_rating_class": "safe",
+          "rating_mod_locked": false,
+          "license": "by-nc-sa",
+          "privacy": {
+            "view": "disable",
+            "embed": "public",
+            "download": false,
+            "add": true,
+            "comments": "nobody"
+          },
+          "pictures": {
+            "uri": "/videos/491649859/pictures/1627196950",
+            "active": true,
+            "type": "custom",
+            "base_link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d?region=us",
+            "sizes": [
+              {
+                "width": 100,
+                "height": 75,
+                "link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_100x75?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_100x75%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 200,
+                "height": 150,
+                "link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_200x150?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_200x150%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 295,
+                "height": 166,
+                "link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_295x166?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_295x166%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 640,
+                "height": 360,
+                "link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_640x360?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_640x360%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 960,
+                "height": 540,
+                "link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_960x540?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_960x540%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 1280,
+                "height": 720,
+                "link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_1280x720?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_1280x720%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              },
+              {
+                "width": 1920,
+                "height": 1080,
+                "link": "https://i.vimeocdn.com/video/1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_1920x1080?&r=pad&region=us",
+                "link_with_play_button": "https://i.vimeocdn.com/filter/overlay?src0=https%3A%2F%2Fi.vimeocdn.com%2Fvideo%2F1627196950-4fcd94cd1e387c4db7fa79418730b83f405bbc67316bd56c45975f8c81f93299-d_1920x1080%3F%26region%3Dus&src1=http%3A%2F%2Ff.vimeocdn.com%2Fp%2Fimages%2Fcrawler_play.png"
+              }
+            ],
+            "resource_key": "a5d0de4bc911576890d417ef1326d3fadfe51cd9",
+            "default_picture": false
+          },
+          "tags": [],
+          "stats": {
+            "plays": 19279
+          },
+          "categories": [],
+          "uploader": {
+            "pictures": {
+              "uri": "/users/84203268/pictures/24935616",
+              "active": true,
+              "type": "custom",
+              "base_link": "https://i.vimeocdn.com/portrait/24935616?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us",
+              "sizes": [
+                {
+                  "width": 30,
+                  "height": 30,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_30x30?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 72,
+                  "height": 72,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_72x72?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 75,
+                  "height": 75,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_75x75?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 100,
+                  "height": 100,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_100x100?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 144,
+                  "height": 144,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_144x144?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 216,
+                  "height": 216,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_216x216?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 288,
+                  "height": 288,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_288x288?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 300,
+                  "height": 300,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_300x300?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                },
+                {
+                  "width": 360,
+                  "height": 360,
+                  "link": "https://i.vimeocdn.com/portrait/24935616_360x360?sig=31c4033c2294d4ffbc43762924bd1e7b48aa384e584bf5f39e361ecceffddfa1&v=1&region=us"
+                }
+              ],
+              "resource_key": "2dfd4b071f0efda807b6c9b4c72be322bcd46fe2",
+              "default_picture": false
+            }
+          },
+          "metadata": {
+            "connections": {
+              "comments": {
+                "uri": "/videos/491649859/comments",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 0
+              },
+              "credits": {
+                "uri": "/videos/491649859/credits",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 0
+              },
+              "likes": {
+                "uri": "/videos/491649859/likes",
+                "options": [
+                  "GET"
+                ],
+                "total": 0
+              },
+              "pictures": {
+                "uri": "/videos/491649859/pictures",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 6
+              },
+              "texttracks": {
+                "uri": "/videos/491649859/texttracks",
+                "options": [
+                  "GET",
+                  "POST"
+                ],
+                "total": 1
+              },
+              "related": null,
+              "recommendations": {
+                "uri": "/videos/491649859/recommendations",
+                "options": [
+                  "GET"
+                ],
+                "resource_signature": "64f61d19e46f1ed6dc2974a4c8fb404ad26c34d0695f6f7c15b60246bc59b452_1769519060"
+              },
+              "albums": {
+                "uri": "/videos/491649859/albums",
+                "options": [
+                  "GET",
+                  "PATCH"
+                ],
+                "total": 0
+              },
+              "available_albums": {
+                "uri": "/videos/491649859/available_albums",
+                "options": [
+                  "GET"
+                ],
+                "total": 68
+              },
+              "versions": {
+                "uri": "/videos/491649859/versions",
+                "options": [
+                  "GET"
+                ],
+                "total": 1,
+                "current_uri": "/videos/491649859/versions/408093903",
+                "resource_key": "f354dd04a9c74b638de23fe22895bcb7ffc6ccbc",
+                "create_storyboard_id": "",
+                "latest_incomplete_version": null
+              }
+            },
+            "interactions": {
+              "report": {
+                "uri": "/videos/491649859/report",
+                "options": [
+                  "POST"
+                ],
+                "reason": [
+                  "pornographic",
+                  "harassment",
+                  "ripoff",
+                  "incorrect rating",
+                  "spam",
+                  "causes harm",
+                  "csam",
+                  "voting misinformation"
+                ]
+              },
+              "view_team_members": {
+                "uri": "/videos/491649859/teammembers",
+                "options": [
+                  "GET"
+                ]
+              },
+              "edit": {
+                "uri": "/videos/491649859",
+                "options": [
+                  "PATCH"
+                ],
+                "blocked_fields": []
+              },
+              "edit_content_rating": {
+                "uri": "/videos/491649859",
+                "options": [
+                  "PATCH"
+                ],
+                "content_rating": [
+                  "language",
+                  "drugs",
+                  "violence",
+                  "nudity",
+                  "advertisement",
+                  "safe",
+                  "unrated"
+                ]
+              },
+              "edit_privacy": {
+                "uri": "/videos/491649859",
+                "options": [
+                  "PATCH"
+                ],
+                "content_type": "application/vnd.vimeo.video",
+                "properties": [
+                  {
+                    "name": "privacy.view",
+                    "required": true,
+                    "options": [
+                      "anybody",
+                      "nobody",
+                      "team",
+                      "password",
+                      "disable",
+                      "unlisted"
+                    ]
+                  }
+                ]
+              },
+              "delete": {
+                "uri": "/videos/491649859",
+                "options": [
+                  "DELETE"
+                ]
+              },
+              "can_update_privacy_to_public": {
+                "uri": "/videos/491649859",
+                "options": [
+                  "PATCH"
+                ]
+              },
+              "invite": {
+                "uri": "/users/19604204/team_user_clip_access_grants",
+                "options": [
+                  "GET",
+                  "POST"
+                ]
+              },
+              "trim": {
+                "uri": "/videos/491649859/cliptrim",
+                "options": [
+                  "GET",
+                  "POST"
+                ]
+              },
+              "validate": {
+                "uri": "/videos/491649859/validate",
+                "options": [
+                  "PUT"
+                ]
+              }
+            },
+            "is_vimeo_create": false,
+            "is_screen_record": false
+          },
+          "manage_link": "/manage/videos/491649859",
+          "user": {
+            "uri": "/users/19604204",
+            "name": "OpenClassrooms",
+            "link": "https://vimeo.com/openclassrooms",
+            "capabilities": {
+              "hasLiveSubscription": true
+            },
+            "location": "",
+            "gender": "n",
+            "bio": "L’entreprise est née de la rencontre de Pierre Dubuc et Mathieu Nebra, alors âgés de respectivement 11 et 13 ans. Tous deux animés de la même passion pour l’informatique, ils lancent leur premier cours de programmation en ligne en 1999 ; dès le début de l’histoire, l’objectif est de rendre accessible un savoir complexe.\n\nUne communauté de plus en plus large se construit progressivement autour de Mathieu et Pierre, qui lancent alors l’un des premiers forums en ligne d’entraide au code à la programmation : le Site du Zéro. Mine d’information pour tous les passionnés d’internet, le SdZ devient vite une référence à travers le Web francophone.\n\nEn 2013, les deux associés décident de lancer OpenClassrooms, une véritable école en ligne offrant d’abord de très nombreux cours gratuits sur une multitude de sujets ; OpenClassrooms propose aujourd’hui de nombreux parcours menant à une licence ou un mastère, ou encore à un diplôme inscrit au Répertoire National des Compétences Professionnelles.\n\nLa priorité d’OpenClassrooms, c’est l’employabilité. Notre objectif et le critère de réussite que nous nous sommes donnés, c’est d’aider chaque année un million d'étudiants OpenClassrooms à trouver un travail ou à évoluer dans leur carrière à partir de 2025.",
+            "short_bio": "OpenClassrooms est une école en ligne comptant 300 000 étudiants connectés chaque mois à travers le monde.",
+            "created_time": "2013-07-18T08:42:12+00:00",
+            "pictures": {
+              "uri": "/users/19604204/pictures/28786337",
+              "active": true,
+              "type": "custom",
+              "base_link": "https://i.vimeocdn.com/portrait/28786337?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us",
+              "sizes": [
+                {
+                  "width": 30,
+                  "height": 30,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_30x30?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 72,
+                  "height": 72,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_72x72?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 75,
+                  "height": 75,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_75x75?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 100,
+                  "height": 100,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_100x100?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 144,
+                  "height": 144,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_144x144?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 216,
+                  "height": 216,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_216x216?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 288,
+                  "height": 288,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_288x288?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 300,
+                  "height": 300,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_300x300?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                },
+                {
+                  "width": 360,
+                  "height": 360,
+                  "link": "https://i.vimeocdn.com/portrait/28786337_360x360?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                }
+              ],
+              "resource_key": "3df391019bd727629ba6eb2b891524884a793071",
+              "default_picture": false
+            },
+            "websites": [
+              {
+                "uri": "/users/19604204/links/7988638",
+                "name": "OpenClassrooms",
+                "link": "http://www.openclassrooms.com",
+                "type": "link",
+                "description": "Make education accessible"
+              }
+            ],
+            "metadata": {
+              "connections": {
+                "albums": {
+                  "uri": "/users/19604204/albums",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 68
+                },
+                "appearances": {
+                  "uri": "/users/19604204/appearances",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "categories": {
+                  "uri": "/users/19604204/categories",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "channels": {
+                  "uri": "/users/19604204/channels",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "feed": {
+                  "uri": "/users/19604204/feed",
+                  "options": [
+                    "GET"
+                  ]
+                },
+                "followers": {
+                  "uri": "/users/19604204/followers",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 1101
+                },
+                "following": {
+                  "uri": "/users/19604204/following",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "groups": {
+                  "uri": "/users/19604204/groups",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "likes": {
+                  "uri": "/users/19604204/likes",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "membership": {
+                  "uri": "/users/19604204/membership/",
+                  "options": [
+                    "PATCH"
+                  ]
+                },
+                "moderated_channels": {
+                  "uri": "/users/19604204/channels?filter=moderated",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "portfolios": {
+                  "uri": "/users/19604204/portfolios",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "videos": {
+                  "uri": "/users/19604204/videos",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 16951
+                },
+                "watchlater": {
+                  "uri": "/users/19604204/watchlater",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "shared": {
+                  "uri": "/users/19604204/shared/videos",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "pictures": {
+                  "uri": "/users/19604204/pictures",
+                  "options": [
+                    "GET",
+                    "POST"
+                  ],
+                  "total": 2
+                },
+                "watched_videos": {
+                  "uri": "/me/watched/videos",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "folders_root": {
+                  "uri": "/users/19604204/folders/root",
+                  "options": [
+                    "GET"
+                  ]
+                },
+                "folders": {
+                  "uri": "/users/19604204/folders",
+                  "options": [
+                    "GET",
+                    "POST"
+                  ],
+                  "total": 661
+                },
+                "teams": {
+                  "uri": "/users/19604204/teams",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 1
+                },
+                "permission_policies": {
+                  "uri": "/users/19604204/permission_policies",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 13
+                },
+                "block": {
+                  "uri": "/me/block",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                }
+              }
+            },
+            "location_details": {
+              "formatted_address": "",
+              "latitude": null,
+              "longitude": null,
+              "city": null,
+              "state": null,
+              "neighborhood": null,
+              "sub_locality": null,
+              "state_iso_code": null,
+              "country": null,
+              "country_iso_code": null
+            },
+            "skills": [],
+            "available_for_hire": false,
+            "can_work_remotely": false,
+            "preferences": {
+              "videos": {
+                "rating": [
+                  "safe"
+                ],
+                "autocc_display_enabled_by_default": false,
+                "license": "by-nc-sa",
+                "hide_stats": true,
+                "privacy": {
+                  "view": "disable",
+                  "comments": "nobody",
+                  "embed": "public",
+                  "download": false,
+                  "add": true,
+                  "allow_share_link": true
+                }
+              },
+              "webinar_registrant_lower_watermark_banner_dismissed": []
+            },
+            "content_filter": [
+              "language",
+              "drugs",
+              "violence",
+              "nudity",
+              "safe",
+              "unrated"
+            ],
+            "resource_key": "bb310bc46054140a7481d03f7905a95fe2ef50e0",
+            "account": "enterprise"
+          },
+          "last_user_action_event_date": "2023-03-24T12:03:03+00:00",
+          "parent_folder": {
+            "created_time": "2020-12-04T11:53:41+00:00",
+            "modified_time": "2023-03-24T12:03:36+00:00",
+            "last_user_action_event_date": "2023-03-24T12:03:36+00:00",
+            "name": "FR_6943241_envrment-front-end",
+            "privacy": {
+              "view": "nobody"
+            },
+            "resource_key": "3a289e9ddca7803c2a17add7211514e9d1c8314b",
+            "uri": "/users/19604204/projects/3117393",
+            "link": null,
+            "manage_link": "https://vimeo.com/user/19604204/folder/3117393",
+            "pinned_on": null,
+            "is_pinned": false,
+            "is_private_to_user": false,
+            "user": {
+              "uri": "/users/19604204",
+              "name": "OpenClassrooms",
+              "link": "https://vimeo.com/openclassrooms",
+              "capabilities": {
+                "hasLiveSubscription": true
+              },
+              "location": "",
+              "gender": "n",
+              "bio": "L’entreprise est née de la rencontre de Pierre Dubuc et Mathieu Nebra, alors âgés de respectivement 11 et 13 ans. Tous deux animés de la même passion pour l’informatique, ils lancent leur premier cours de programmation en ligne en 1999 ; dès le début de l’histoire, l’objectif est de rendre accessible un savoir complexe.\n\nUne communauté de plus en plus large se construit progressivement autour de Mathieu et Pierre, qui lancent alors l’un des premiers forums en ligne d’entraide au code à la programmation : le Site du Zéro. Mine d’information pour tous les passionnés d’internet, le SdZ devient vite une référence à travers le Web francophone.\n\nEn 2013, les deux associés décident de lancer OpenClassrooms, une véritable école en ligne offrant d’abord de très nombreux cours gratuits sur une multitude de sujets ; OpenClassrooms propose aujourd’hui de nombreux parcours menant à une licence ou un mastère, ou encore à un diplôme inscrit au Répertoire National des Compétences Professionnelles.\n\nLa priorité d’OpenClassrooms, c’est l’employabilité. Notre objectif et le critère de réussite que nous nous sommes donnés, c’est d’aider chaque année un million d'étudiants OpenClassrooms à trouver un travail ou à évoluer dans leur carrière à partir de 2025.",
+              "short_bio": "OpenClassrooms est une école en ligne comptant 300 000 étudiants connectés chaque mois à travers le monde.",
+              "created_time": "2013-07-18T08:42:12+00:00",
+              "pictures": {
+                "uri": "/users/19604204/pictures/28786337",
+                "active": true,
+                "type": "custom",
+                "base_link": "https://i.vimeocdn.com/portrait/28786337?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us",
+                "sizes": [
+                  {
+                    "width": 30,
+                    "height": 30,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_30x30?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 72,
+                    "height": 72,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_72x72?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 75,
+                    "height": 75,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_75x75?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 100,
+                    "height": 100,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_100x100?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 144,
+                    "height": 144,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_144x144?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 216,
+                    "height": 216,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_216x216?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 288,
+                    "height": 288,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_288x288?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 300,
+                    "height": 300,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_300x300?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  },
+                  {
+                    "width": 360,
+                    "height": 360,
+                    "link": "https://i.vimeocdn.com/portrait/28786337_360x360?sig=40da6c17ea12519822132ceb37a4ad30602c3386c0f4ae5adbc4e13a4d0709c1&v=1&region=us"
+                  }
+                ],
+                "resource_key": "3df391019bd727629ba6eb2b891524884a793071",
+                "default_picture": false
+              },
+              "websites": [
+                {
+                  "uri": "/users/19604204/links/7988638",
+                  "name": "OpenClassrooms",
+                  "link": "http://www.openclassrooms.com",
+                  "type": "link",
+                  "description": "Make education accessible"
+                }
+              ],
+              "metadata": {
+                "connections": {
+                  "albums": {
+                    "uri": "/users/19604204/albums",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 68
+                  },
+                  "appearances": {
+                    "uri": "/users/19604204/appearances",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "categories": {
+                    "uri": "/users/19604204/categories",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "channels": {
+                    "uri": "/users/19604204/channels",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "feed": {
+                    "uri": "/users/19604204/feed",
+                    "options": [
+                      "GET"
+                    ]
+                  },
+                  "followers": {
+                    "uri": "/users/19604204/followers",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 1101
+                  },
+                  "following": {
+                    "uri": "/users/19604204/following",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "groups": {
+                    "uri": "/users/19604204/groups",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "likes": {
+                    "uri": "/users/19604204/likes",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "membership": {
+                    "uri": "/users/19604204/membership/",
+                    "options": [
+                      "PATCH"
+                    ]
+                  },
+                  "moderated_channels": {
+                    "uri": "/users/19604204/channels?filter=moderated",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "portfolios": {
+                    "uri": "/users/19604204/portfolios",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "videos": {
+                    "uri": "/users/19604204/videos",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 16951
+                  },
+                  "watchlater": {
+                    "uri": "/users/19604204/watchlater",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "shared": {
+                    "uri": "/users/19604204/shared/videos",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "pictures": {
+                    "uri": "/users/19604204/pictures",
+                    "options": [
+                      "GET",
+                      "POST"
+                    ],
+                    "total": 2
+                  },
+                  "watched_videos": {
+                    "uri": "/me/watched/videos",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  },
+                  "folders_root": {
+                    "uri": "/users/19604204/folders/root",
+                    "options": [
+                      "GET"
+                    ]
+                  },
+                  "folders": {
+                    "uri": "/users/19604204/folders",
+                    "options": [
+                      "GET",
+                      "POST"
+                    ],
+                    "total": 661
+                  },
+                  "teams": {
+                    "uri": "/users/19604204/teams",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 1
+                  },
+                  "permission_policies": {
+                    "uri": "/users/19604204/permission_policies",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 13
+                  },
+                  "block": {
+                    "uri": "/me/block",
+                    "options": [
+                      "GET"
+                    ],
+                    "total": 0
+                  }
+                }
+              },
+              "location_details": {
+                "formatted_address": "",
+                "latitude": null,
+                "longitude": null,
+                "city": null,
+                "state": null,
+                "neighborhood": null,
+                "sub_locality": null,
+                "state_iso_code": null,
+                "country": null,
+                "country_iso_code": null
+              },
+              "skills": [],
+              "available_for_hire": false,
+              "can_work_remotely": false,
+              "preferences": {
+                "videos": {
+                  "rating": [
+                    "safe"
+                  ],
+                  "autocc_display_enabled_by_default": false,
+                  "license": "by-nc-sa",
+                  "hide_stats": true,
+                  "privacy": {
+                    "view": "disable",
+                    "comments": "nobody",
+                    "embed": "public",
+                    "download": false,
+                    "add": true,
+                    "allow_share_link": true
+                  }
+                },
+                "webinar_registrant_lower_watermark_banner_dismissed": []
+              },
+              "content_filter": [
+                "language",
+                "drugs",
+                "violence",
+                "nudity",
+                "safe",
+                "unrated"
+              ],
+              "resource_key": "bb310bc46054140a7481d03f7905a95fe2ef50e0",
+              "account": "enterprise"
+            },
+            "access_grant": null,
+            "metadata": {
+              "connections": {
+                "items": {
+                  "uri": "/users/19604204/projects/3117393/items",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 16
+                },
+                "videos": {
+                  "uri": "/users/19604204/projects/3117393/videos",
+                  "options": [
+                    "GET",
+                    "DELETE",
+                    "PUT"
+                  ],
+                  "total": 16
+                },
+                "folders": {
+                  "uri": "/users/19604204/projects/3117393/items",
+                  "options": [
+                    "GET",
+                    "DELETE",
+                    "PUT"
+                  ],
+                  "total": 0
+                },
+                "group_folder_grants": {
+                  "uri": "/users/19604204/folders/3117393/group_folder_grants",
+                  "options": [
+                    "GET"
+                  ],
+                  "total": 0
+                },
+                "ancestor_path": []
+              },
+              "interactions": {
+                "edit": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "PATCH"
+                  ]
+                },
+                "move_video": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "PATCH"
+                  ]
+                },
+                "upload_video": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "POST"
+                  ]
+                },
+                "view": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "GET"
+                  ]
+                },
+                "invite": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "POST"
+                  ]
+                },
+                "edit_settings": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "PATCH"
+                  ]
+                },
+                "delete": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "DELETE"
+                  ]
+                },
+                "delete_video": {
+                  "uri": "/users/19604204/projects/3117393",
+                  "options": [
+                    "DELETE"
+                  ]
+                },
+                "add_subfolder": {
+                  "uri": "/user/19604204/projects",
+                  "options": [
+                    "POST"
+                  ],
+                  "can_add_subfolders": true,
+                  "subfolder_depth_limit_reached": false,
+                  "content_type": "application/vnd.vimeo.folder",
+                  "properties": [
+                    {
+                      "name": "name",
+                      "required": false,
+                      "value": ""
+                    },
+                    {
+                      "name": "parent_folder_uri",
+                      "required": true,
+                      "value": "/users/19604204/projects/3117393"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "review_page": {
+            "active": true,
+            "link": "https://vimeo.com/openclassrooms/review/491649859/5a8cf99d34",
+            "is_shareable": true
+          },
+          "files": [
+            {
+              "quality": "hd",
+              "rendition": "1080p",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/rendition/1080p/file.mp4%20%281080p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=8563042f6146039487280f34473a7500fe45e5ca4c3035a09c6d65791bb4b7e4",
+              "created_time": "2020-12-22T09:27:28+00:00",
+              "fps": 25,
+              "size": 12481819,
+              "md5": "f87760858c82d2afe45d63a0a7840d96",
+              "public_name": "1080p",
+              "size_short": "11.9MB"
+            },
+            {
+              "quality": "hd",
+              "rendition": "720p",
+              "type": "video/mp4",
+              "width": 1280,
+              "height": 720,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/rendition/720p/file.mp4%20%28720p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=5a3f70b0eca723c0de4008540cb1af709a265d3d11333e2ba907b0a58ce5e6f8",
+              "created_time": "2020-12-22T09:27:23+00:00",
+              "fps": 25,
+              "size": 6570727,
+              "md5": "d3adc17fb72620f3ddf79d6b85d050b1",
+              "public_name": "720p",
+              "size_short": "6.27MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "540p",
+              "type": "video/mp4",
+              "width": 960,
+              "height": 540,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/rendition/540p/file.mp4%20%28540p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=84a259e1f259968c1b9e57b0d68e96357ed0f7568eef0750f97ca1e5a2001803",
+              "created_time": "2020-12-22T09:27:24+00:00",
+              "fps": 25,
+              "size": 5213929,
+              "md5": "d03f062272831c57afb5894137e12a17",
+              "public_name": "540p",
+              "size_short": "4.97MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "360p",
+              "type": "video/mp4",
+              "width": 640,
+              "height": 360,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/rendition/360p/file.mp4%20%28360p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=95b3161d68af25d3ae47000e085d0b5feabc034a9c6daf09b80a6d8ccc70df31",
+              "created_time": "2020-12-22T09:27:16+00:00",
+              "fps": 25,
+              "size": 2605438,
+              "md5": "c75cd7b446a27299522b55f4470194d0",
+              "public_name": "360p",
+              "size_short": "2.48MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "240p",
+              "type": "video/mp4",
+              "width": 426,
+              "height": 240,
+              "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/rendition/240p/file.mp4%20%28240p%29.mp4?loc=external&oauth2_token_id=1785873960&signature=d238816b8a67ead7da881729bf783669271dc84fdbf796d5f539c13aa00f76e9",
+              "created_time": "2020-12-22T09:27:14+00:00",
+              "fps": 25,
+              "size": 1353441,
+              "md5": "2c6a86fc2336636c730031dcba92a121",
+              "public_name": "240p",
+              "size_short": "1.29MB"
+            },
+            {
+              "quality": "hls",
+              "rendition": "adaptive",
+              "type": "video/mp4",
+              "link": "https://player.vimeo.com/external/491649859.m3u8?s=c73abb6dae76201a0f54aaa17e2794ae58402819&oauth2_token_id=1785873960",
+              "created_time": "2020-12-22T09:27:28+00:00",
+              "fps": 25,
+              "size": 12481819,
+              "md5": "f87760858c82d2afe45d63a0a7840d96",
+              "public_name": "1080p",
+              "size_short": "11.9MB"
+            }
+          ],
+          "download": [
+            {
+              "quality": "hd",
+              "rendition": "1080p",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "expires": "2026-01-28T13:01:19+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/a791b24d/fr_6943241_crs_envrment-front-end_0-0_0-0_tlk%20%281080p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=4923b9d487be4b354387ce2cf6363204aeb41345e027e71349e623c2a9c25594&user_id=19604204",
+              "created_time": "2020-12-22T09:27:28+00:00",
+              "fps": 25,
+              "size": 12481819,
+              "md5": "f87760858c82d2afe45d63a0a7840d96",
+              "public_name": "1080p",
+              "size_short": "11.9MB"
+            },
+            {
+              "quality": "hd",
+              "rendition": "720p",
+              "type": "video/mp4",
+              "width": 1280,
+              "height": 720,
+              "expires": "2026-01-28T13:01:19+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/b7fb7173/fr_6943241_crs_envrment-front-end_0-0_0-0_tlk%20%28720p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=0337a0df3855187a1164984a4d7eaa45e2c7c807ee48bc3106a6b922d378e992&user_id=19604204",
+              "created_time": "2020-12-22T09:27:23+00:00",
+              "fps": 25,
+              "size": 6570727,
+              "md5": "d3adc17fb72620f3ddf79d6b85d050b1",
+              "public_name": "720p",
+              "size_short": "6.27MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "540p",
+              "type": "video/mp4",
+              "width": 960,
+              "height": 540,
+              "expires": "2026-01-28T13:01:19+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/c01f62e3/fr_6943241_crs_envrment-front-end_0-0_0-0_tlk%20%28540p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=01c5074fec7795726c25fba0fbf10d9bf50bb8bd9fd3cff75e9861984441094a&user_id=19604204",
+              "created_time": "2020-12-22T09:27:24+00:00",
+              "fps": 25,
+              "size": 5213929,
+              "md5": "d03f062272831c57afb5894137e12a17",
+              "public_name": "540p",
+              "size_short": "4.97MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "360p",
+              "type": "video/mp4",
+              "width": 640,
+              "height": 360,
+              "expires": "2026-01-28T13:01:19+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/d7ff1354/fr_6943241_crs_envrment-front-end_0-0_0-0_tlk%20%28360p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=9cacc0b59e45ae79f2c3206ee1a8dd5e2fbc017ff7d3d21f087274ae33472124&user_id=19604204",
+              "created_time": "2020-12-22T09:27:16+00:00",
+              "fps": 25,
+              "size": 2605438,
+              "md5": "c75cd7b446a27299522b55f4470194d0",
+              "public_name": "360p",
+              "size_short": "2.48MB"
+            },
+            {
+              "quality": "sd",
+              "rendition": "240p",
+              "type": "video/mp4",
+              "width": 426,
+              "height": 240,
+              "expires": "2026-01-28T13:01:19+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/d1b71f4b/fr_6943241_crs_envrment-front-end_0-0_0-0_tlk%20%28240p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=8545b4cdd64bcbd3adb3669cc27a34dd10d1b2ed89b398d27295f47c2e3b590c&user_id=19604204",
+              "created_time": "2020-12-22T09:27:14+00:00",
+              "fps": 25,
+              "size": 1353441,
+              "md5": "2c6a86fc2336636c730031dcba92a121",
+              "public_name": "240p",
+              "size_short": "1.29MB"
+            },
+            {
+              "quality": "source",
+              "rendition": "source",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "expires": "2026-01-28T13:01:19+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/200d599f/fr_6943241_crs_envrment-front-end_0-0_0-0_tlk.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=881960553a41cc5856d447b7056e0794c6245105fe2bde64793d7d2d50f99a65&user_id=19604204",
+              "created_time": "2020-12-22T09:26:48+00:00",
+              "fps": 25,
+              "size": 23709685,
+              "md5": null,
+              "public_name": "source",
+              "size_short": "22.61MB"
+            }
+          ],
+          "app": {
+            "name": "Parallel Uploader",
+            "uri": "/apps/87099"
+          },
+          "play": {
+            "progressive": [
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 1920,
+                "height": 1080,
+                "link_expiration_time": "2026-01-28T13:01:19+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/a791b24d/file.mp4%20%281080p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=b93d4a29fdc4349fc13c5ce7a7905b8b99ba6af8afabb3d3467b05e6fb78bc10&user_id=19604204",
+                "created_time": "2020-12-22T09:27:28+00:00",
+                "fps": 25,
+                "size": 12481819,
+                "md5": "f87760858c82d2afe45d63a0a7840d96",
+                "rendition": "1080p"
+              },
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 1280,
+                "height": 720,
+                "link_expiration_time": "2026-01-28T13:01:19+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/b7fb7173/file.mp4%20%28720p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=2ebcccbf703a439775e5763ddc8bd5c5480673b320f5ad1d08e58eba5b61d242&user_id=19604204",
+                "created_time": "2020-12-22T09:27:23+00:00",
+                "fps": 25,
+                "size": 6570727,
+                "md5": "d3adc17fb72620f3ddf79d6b85d050b1",
+                "rendition": "720p"
+              },
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 960,
+                "height": 540,
+                "link_expiration_time": "2026-01-28T13:01:19+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/c01f62e3/file.mp4%20%28540p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=f2ff54c76eb23a157d9b0d9cb75a879459c3c09643f5f0d7e137cf6efe093e27&user_id=19604204",
+                "created_time": "2020-12-22T09:27:24+00:00",
+                "fps": 25,
+                "size": 5213929,
+                "md5": "d03f062272831c57afb5894137e12a17",
+                "rendition": "540p"
+              },
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 640,
+                "height": 360,
+                "link_expiration_time": "2026-01-28T13:01:19+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/d7ff1354/file.mp4%20%28360p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=21c0169eb77008dc913a6617f545697fe53da16df49b571fed582c3fd25d5803&user_id=19604204",
+                "created_time": "2020-12-22T09:27:16+00:00",
+                "fps": 25,
+                "size": 2605438,
+                "md5": "c75cd7b446a27299522b55f4470194d0",
+                "rendition": "360p"
+              },
+              {
+                "type": "video/mp4",
+                "codec": "H264",
+                "width": 426,
+                "height": 240,
+                "link_expiration_time": "2026-01-28T13:01:19+00:00",
+                "link": "https://player.vimeo.com/progressive_redirect/playback/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/d1b71f4b/file.mp4%20%28240p%29.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=528b91c5407eee7d7e50814f62857bb376d314117fd6edb5d287119afd49b000&user_id=19604204",
+                "created_time": "2020-12-22T09:27:14+00:00",
+                "fps": 25,
+                "size": 1353441,
+                "md5": "2c6a86fc2336636c730031dcba92a121",
+                "rendition": "240p"
+              }
+            ],
+            "source": {
+              "quality": "source",
+              "rendition": "source",
+              "type": "video/mp4",
+              "width": 1920,
+              "height": 1080,
+              "expires": "2026-01-28T13:01:19+00:00",
+              "link": "https://player.vimeo.com/progressive_redirect/download/491649859/container/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/200d599f/fr_6943241_crs_envrment-front-end_0-0_0-0_tlk.mp4?expires=1769605279&loc=external&oauth2_token_id=1785873960&signature=881960553a41cc5856d447b7056e0794c6245105fe2bde64793d7d2d50f99a65&user_id=19604204",
+              "created_time": "2020-12-22T09:26:48+00:00",
+              "fps": 25,
+              "size": 23709685,
+              "md5": null,
+              "public_name": "source",
+              "size_short": "22.61MB"
+            },
+            "hls": {
+              "link_expiration_time": "2026-01-28T12:59:20+00:00",
+              "link": "https://player.vimeo.com/play/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/hls.m3u8?s=491649859_1769605160_cd5a43589c143e2c32c733a4c48006b9&context=Vimeo%5CController%5CApi%5CResources%5CVideoController.&oauth2_token_id=1785873960"
+            },
+            "dash": {
+              "link_expiration_time": "2026-01-28T12:59:20+00:00",
+              "link": "https://player.vimeo.com/play/0718bc69-f90b-4f0f-98b3-a0a5c17049e7/dash.mpd?s=491649859_1769605160_cd5a43589c143e2c32c733a4c48006b9&context=Vimeo%5CController%5CApi%5CResources%5CVideoController.&oauth2_token_id=1785873960"
+            },
+            "status": "playable"
+          },
+          "status": "available",
+          "resource_key": "66d00ddcf52b7b6bb1df2ed6f1c6e4e1a72f65b0",
+          "upload": {
+            "status": "complete",
+            "link": null,
+            "upload_link": null,
+            "form": null,
+            "approach": null,
+            "size": null,
+            "redirect_url": null
+          },
+          "transcode": {
+            "status": "complete"
+          },
+          "is_playable": true,
+          "has_audio": true
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Filter captions": [
+      {
+        "json": {
+          "link": "https://captions.cloud.vimeo.com/captions/11521526.vtt?expires=1769525961&sig=8b0836d5f9e81782bab0c67791af3bfa3d5b97af&download=authot440949.vtt"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Download caption": [
+      {
+        "json": {
+          "data": "WEBVTT\n\n1\n00:00:00.240 --> 00:00:03.510\nEn tant que développeur front-end,\ncomme pour tout métier technique,\n\n2\n00:00:03.710 --> 00:00:05.100\nil faut les bons outils.\n\n3\n00:00:05.640 --> 00:00:09.870\nDans ce cours, je vais vous accompagner\ndans l'installation, la configuration\n\n4\n00:00:10.070 --> 00:00:12.750\net la découverte de trois outils\nessentiels.\n\n5\n00:00:13.440 --> 00:00:17.730\nD'abord Visual Studio Code qui sera\nvotre outil principal pour écrire\n\n6\n00:00:17.930 --> 00:00:21.540\ndu code avec son éditeur avancé,\nson explorateur de fichiers,\n\n7\n00:00:21.740 --> 00:00:24.600\nsa palette de commandes et tout\nson outillage intégré.\n\n8\n00:00:25.410 --> 00:00:30.060\nNous verrons ensuite Chrome et Firefox,\ndeux navigateurs incontournables\n\n9\n00:00:30.260 --> 00:00:34.020\npour analyser et tester vos projets\ngrâce à leurs puissants outils de\n\n10\n00:00:34.220 --> 00:00:34.980\ndéveloppeurs.\n\n11\n00:00:35.180 --> 00:00:39.450\nA la fin du cours, vous serez capable\nde mettre en place votre environnement\n\n12\n00:00:39.650 --> 00:00:40.410\nfront-end.\n\n13\n00:00:40.610 --> 00:00:42.060\nAlors, prêt à vous lancer&nbsp;?\n\n14\n00:00:42.260 --> 00:00:43.770\nRejoignez-moi dans le premier\nchapitre.\n"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Get captions": [
+      {
+        "json": {
+          "total": 1,
+          "page": 1,
+          "per_page": 25,
+          "paging": {
+            "next": null,
+            "previous": null,
+            "first": "/491649859/texttracks?page=1",
+            "last": "/491649859/texttracks?page=1"
+          },
+          "data": [
+            {
+              "uri": "/videos/491649859/texttracks/11521526",
+              "active": true,
+              "type": "captions",
+              "language": "fr",
+              "display_language": "français",
+              "id": 11521526,
+              "link": "https://captions.cloud.vimeo.com/captions/11521526.vtt?expires=1769525961&sig=8b0836d5f9e81782bab0c67791af3bfa3d5b97af&download=authot440949.vtt",
+              "link_expires_time": 1769525961,
+              "source_link": "https://captions.cloud.vimeo.com/source/11521526?expires=1769525961&sig=40537ae3b85138625ad4e5de70305689b6d6c5d9",
+              "source_link_expires_time": 1769525961,
+              "hls_link": "https://captions.cloud.vimeo.com/captions/11521526.vtt?expires=1769525961&sig=585638d66038cc661bf3d91126fa07986c8d8fd7&download=authot440949.vtt&hls=1",
+              "hls_link_expires_time": 1769525961,
+              "name": "authot440949.vtt",
+              "provenance": "user_uploaded",
+              "metadata": {
+                "connections": []
+              }
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Output caption": [
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_0-0_TLK",
+          "captions": "WEBVTT\n\n1\n00:00:00.240 --> 00:00:03.510\nEn tant que développeur front-end,\ncomme pour tout métier technique,\n\n2\n00:00:03.710 --> 00:00:05.100\nil faut les bons outils.\n\n3\n00:00:05.640 --> 00:00:09.870\nDans ce cours, je vais vous accompagner\ndans l'installation, la configuration\n\n4\n00:00:10.070 --> 00:00:12.750\net la découverte de trois outils\nessentiels.\n\n5\n00:00:13.440 --> 00:00:17.730\nD'abord Visual Studio Code qui sera\nvotre outil principal pour écrire\n\n6\n00:00:17.930 --> 00:00:21.540\ndu code avec son éditeur avancé,\nson explorateur de fichiers,\n\n7\n00:00:21.740 --> 00:00:24.600\nsa palette de commandes et tout\nson outillage intégré.\n\n8\n00:00:25.410 --> 00:00:30.060\nNous verrons ensuite Chrome et Firefox,\ndeux navigateurs incontournables\n\n9\n00:00:30.260 --> 00:00:34.020\npour analyser et tester vos projets\ngrâce à leurs puissants outils de\n\n10\n00:00:34.220 --> 00:00:34.980\ndéveloppeurs.\n\n11\n00:00:35.180 --> 00:00:39.450\nA la fin du cours, vous serez capable\nde mettre en place votre environnement\n\n12\n00:00:39.650 --> 00:00:40.410\nfront-end.\n\n13\n00:00:40.610 --> 00:00:42.060\nAlors, prêt à vous lancer&nbsp;?\n\n14\n00:00:42.260 --> 00:00:43.770\nRejoignez-moi dans le premier\nchapitre.\n"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Filter": [
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_0-0_TLK",
+          "captions": "WEBVTT\n\n1\n00:00:00.240 --> 00:00:03.510\nEn tant que développeur front-end,\ncomme pour tout métier technique,\n\n2\n00:00:03.710 --> 00:00:05.100\nil faut les bons outils.\n\n3\n00:00:05.640 --> 00:00:09.870\nDans ce cours, je vais vous accompagner\ndans l'installation, la configuration\n\n4\n00:00:10.070 --> 00:00:12.750\net la découverte de trois outils\nessentiels.\n\n5\n00:00:13.440 --> 00:00:17.730\nD'abord Visual Studio Code qui sera\nvotre outil principal pour écrire\n\n6\n00:00:17.930 --> 00:00:21.540\ndu code avec son éditeur avancé,\nson explorateur de fichiers,\n\n7\n00:00:21.740 --> 00:00:24.600\nsa palette de commandes et tout\nson outillage intégré.\n\n8\n00:00:25.410 --> 00:00:30.060\nNous verrons ensuite Chrome et Firefox,\ndeux navigateurs incontournables\n\n9\n00:00:30.260 --> 00:00:34.020\npour analyser et tester vos projets\ngrâce à leurs puissants outils de\n\n10\n00:00:34.220 --> 00:00:34.980\ndéveloppeurs.\n\n11\n00:00:35.180 --> 00:00:39.450\nA la fin du cours, vous serez capable\nde mettre en place votre environnement\n\n12\n00:00:39.650 --> 00:00:40.410\nfront-end.\n\n13\n00:00:40.610 --> 00:00:42.060\nAlors, prêt à vous lancer&nbsp;?\n\n14\n00:00:42.260 --> 00:00:43.770\nRejoignez-moi dans le premier\nchapitre.\n"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-1_TLK",
+          "captions": "WEBVTT\n\n1\n00:00:00.210 --> 00:00:02.220\nBonjour, et bienvenue dans ce cours.\n\n2\n00:00:02.730 --> 00:00:05.280\nJe m'appelle Will Alexander,\nje suis développeur front-end,\n\n3\n00:00:05.670 --> 00:00:08.940\navec une expertise en Angular,\net je serai votre guide pour la\n\n4\n00:00:09.140 --> 00:00:11.280\nmise en place de votre environnement\nde développement.\n\n5\n00:00:12.090 --> 00:00:14.580\nDans ce premier chapitre,\nvous allez installer trois outils\n\n6\n00:00:14.780 --> 00:00:18.150\nprincipaux&nbsp;: l'environnement de\ndéveloppement gratuit Visual Studio\n\n7\n00:00:18.350 --> 00:00:22.080\nCode, ou VS Code, ainsi que les\ndeux navigateurs les plus répandus,\n\n8\n00:00:22.280 --> 00:00:23.610\nChrome et Firefox.\n\n9\n00:00:24.570 --> 00:00:27.330\nVous ne savez peut-être pas encore\nà quoi vous servira VS Code,\n\n10\n00:00:27.530 --> 00:00:29.490\nou pourquoi il faudra plusieurs\nnavigateurs.\n\n11\n00:00:29.820 --> 00:00:31.140\nMais ne vous inquiétez pas.\n\n12\n00:00:31.340 --> 00:00:34.560\nPour l'instant, on va simplement\ns'assurer d'installer correctement\n\n13\n00:00:34.760 --> 00:00:35.520\nles outils.\n\n14\n00:00:35.720 --> 00:00:38.850\nComme ça, on pourra les découvrir\nsereinement pendant le reste du cours.\n\n15\n00:00:39.910 --> 00:00:41.830\nCe cours est composé de trois chapitres.\n\n16\n00:00:42.220 --> 00:00:45.430\nChaque chapitre inclut une vidéo,\ncomme celle-ci, qui introduit chaque\n\n17\n00:00:45.630 --> 00:00:46.390\nsujet.\n\n18\n00:00:46.590 --> 00:00:49.690\nLa vidéo est complétée par un texte\njuste en dessous, ainsi que des\n\n19\n00:00:49.890 --> 00:00:53.740\nscreencasts où je filme mon écran\nen expliquant chaque sujet en détail.\n\n20\n00:00:54.460 --> 00:00:57.490\nDans le texte, vous trouverez des\ncaptures d'écran pour que vous puissiez\n\n21\n00:00:57.690 --> 00:01:00.120\nsuivre facilement et même y revenir\nsi besoin.\n\n22\n00:01:01.210 --> 00:01:04.600\nJe vous suggère de regarder d'abord\nla vidéo et ensuite de suivre les\n\n23\n00:01:04.800 --> 00:01:07.660\nscreencasts et le texte,\nen manipulant vous-même les outils\n\n24\n00:01:07.860 --> 00:01:08.620\nen même temps.\n\n25\n00:01:08.920 --> 00:01:11.620\nÀ la fin de la partie,\nvous aurez un quiz sous forme\n\n26\n00:01:11.820 --> 00:01:14.380\nd'exercices pratiques pour évaluer\nce que vous avez appris.\n\n27\n00:01:14.800 --> 00:01:17.350\nVous avez maintenant toutes les\nclés pour tirer le meilleur parti\n\n28\n00:01:17.550 --> 00:01:18.520\nde ce cours.\n\n29\n00:01:18.720 --> 00:01:20.860\nRentrons dans le vif du sujet dans\nle prochain chapitre.\n"
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-2_TLK",
+          "captions": "WEBVTT\n\n1\n00:00:00.090 --> 00:00:03.630\nVisual Studio Code, ou VS Code,\nest ce qu'on appelle un IDE :\n\n2\n00:00:04.590 --> 00:00:09.150\nintegrated development environment,\nou environnement de développement intégré.\n\n3\n00:00:09.840 --> 00:00:10.830\nPourquoi intégré ?\n\n4\n00:00:11.040 --> 00:00:14.480\nParce qu'il intègre un grand nombre\nd'outils que vous utiliserez pendant\n\n5\n00:00:14.580 --> 00:00:15.930\nvotre carrière de développeur.\n\n6\n00:00:16.170 --> 00:00:20.360\nD'abord, VS Code contient un éditeur\nde codes intelligent, c'est-à-dire qu'il\n\n7\n00:00:20.460 --> 00:00:24.540\nest capable, avec certaines limites,\nd'analyser votre code pendant que vous l'écrivez.\n\n8\n00:00:25.080 --> 00:00:29.570\nIl peut vous aider à coder plus efficacement,\nà éviter certaines erreurs, et il fonctionne\n\n9\n00:00:29.670 --> 00:00:33.300\navec un grand nombre de langages\net de technologies web et mobiles.\n\n10\n00:00:33.510 --> 00:00:36.870\nEnsuite, VS Code contient un explorateur\nde fichiers.\n\n11\n00:00:37.110 --> 00:00:41.520\nCe qui vous permet de naviguer facilement\net organiser correctement votre projet.\n\n12\n00:00:42.480 --> 00:00:45.840\nPour faciliter toutes les manipulations\nen ligne de commandes dont vous aurez besoin\n\n13\n00:00:46.110 --> 00:00:51.150\nVS Code contient un terminal intégré qui gère\nsimultanément plusieurs lignes de commandes.\n\n14\n00:00:51.690 --> 00:00:56.520\nVous n'aurez pas besoin de changer de fenêtre\nlorsque vous aurez des commandes à exécuter.\n\n15\n00:00:57.240 --> 00:01:00.780\nLe contrôle de version est essentiel\npour les projets de développement\n\n16\n00:01:01.020 --> 00:01:02.520\ngénéralement via les dépôts git.\n\n17\n00:01:03.330 --> 00:01:08.250\nVS Code intègre le contrôle git et peut\nmême fonctionner directement avec GitHub.\n\n18\n00:01:09.300 --> 00:01:14.240\nAvec toutes ces fonctionnalités, on peut avoir\npeur de se perdre, mais je vous montrerai l'outil\n\n19\n00:01:14.340 --> 00:01:16.860\nindispensable qui est la palette de commandes.\n\n20\n00:01:17.250 --> 00:01:21.650\nUn endroit centralisé, où on peut retrouver\ntoutes les commandes par leur nom et même\n\n21\n00:01:21.750 --> 00:01:23.370\napprendre leurs raccourcis clavier.\n\n22\n00:01:24.180 --> 00:01:29.790\nEnfin, il y a une grande communauté d'extensions\nVS Code pour personnaliser votre installation.\n\n23\n00:01:30.480 --> 00:01:33.000\nOn découvrira certaines de ces\nextensions ensemble\n\n24\n00:01:33.210 --> 00:01:36.750\net je vous montrerai comment en trouver\nd'autres pour que vous puissiez customiser\n\n25\n00:01:36.870 --> 00:01:38.460\nvotre expérience de développement.\n\n26\n00:01:39.000 --> 00:01:43.800\nOn verra ensemble toutes ces fonctionnalités.\nCommençons par la configuration de l'outil.\n"
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-2_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.330 --> 00:00:04.020\nNous voici à l’écran d’accueil de\nVisual Studio Code.\n\n2\n00:00:04.620 --> 00:00:08.430\nJe vais faire mes vidéos sur Mac\nprincipalement, mais ne vous inquiétez\n\n3\n00:00:08.630 --> 00:00:12.660\npas, les interfaces sont sensiblement\nles mêmes entre la version PC et\n\n4\n00:00:12.860 --> 00:00:13.620\nla version Mac.\n\n5\n00:00:13.820 --> 00:00:17.370\nLa différence principale étant que\nsur Mac, il faut que je monte en\n\n6\n00:00:17.570 --> 00:00:21.180\nhaut de mon écran pour avoir ma\nbarre des menus, alors que sur PC,\n\n7\n00:00:21.380 --> 00:00:24.120\nça sera collé à l’application VS\ncode directement.\n\n8\n00:00:24.960 --> 00:00:27.480\nAvant de rentrer dans les\nfonctionnalités de l’application,\n\n9\n00:00:27.750 --> 00:00:32.070\non va faire une configuration de base,\nnotamment choisir un thème.\n\n10\n00:00:32.520 --> 00:00:35.730\nLes thèmes, on vient les choisir\nici avec Color Theme.\n\n11\n00:00:36.540 --> 00:00:39.020\nEt quand je clique dessus,\nj’ai la liste des thèmes qui apparaît\n\n12\n00:00:39.510 --> 00:00:43.350\net en utilisant les flèches du clavier,\nje peux me promener et regarder\n\n13\n00:00:43.680 --> 00:00:44.610\nles différents thèmes.\n\n14\n00:00:44.810 --> 00:00:49.290\nJ’ai les thèmes dark avec un fond\nfoncé et ici, attention aux yeux,\n\n15\n00:00:49.490 --> 00:00:52.260\nle theme light avec un fond clair.\n\n16\n00:00:53.340 --> 00:00:55.920\nBien évidemment, il n’y a pas de\nbon ou de mauvais choix,\n\n17\n00:00:56.230 --> 00:00:57.990\nvous choisissez le thème que vous\npréférez.\n\n18\n00:00:58.190 --> 00:01:00.340\nPersonnellement, je préfère les\nthèmes dark.\n\n19\n00:01:00.750 --> 00:01:03.240\nEn appuyant sur Entrée,\nje reste sur Dark+.\n\n20\n00:01:04.260 --> 00:01:08.850\nPour toutes les autres configurations\nde l’application, je viens ici en\n\n21\n00:01:09.050 --> 00:01:14.600\nbas à gauche dans Settings,\net ici, j’ai vraiment tous les réglages\n\n22\n00:01:14.800 --> 00:01:15.560\nde l’application.\n\n23\n00:01:16.010 --> 00:01:20.300\nIl y a une chose que je vais changer,\nc’est la Font size, la taille de\n\n24\n00:01:20.500 --> 00:01:24.440\npolice parce que je trouve que 12,\nc’est un peu petit, donc je vais\n\n25\n00:01:24.640 --> 00:01:26.070\nvenir mettre 15 ici.\n\n26\n00:01:26.270 --> 00:01:28.160\nC’est une préférence personnelle.\n\n27\n00:01:29.180 --> 00:01:32.690\nVous n’êtes pas obligé de faire\nla même modification, mais sachez\n\n28\n00:01:32.890 --> 00:01:36.440\nsimplement que dès que vous voudrez\nchanger un réglage dans l’application,\n\n29\n00:01:36.770 --> 00:01:40.130\nça sera ici sur ce bouton et dans\nSettings.\n\n30\n00:01:40.490 --> 00:01:42.740\nMaintenant qu’on a fait notre\nconfiguration de base,\n\n31\n00:01:42.940 --> 00:01:44.720\non va fermer la fenêtre Settings.\n\n32\n00:01:44.920 --> 00:01:48.890\nOn ne revient pas sur la fenêtre\nd’accueil par défaut pour la rouvrir.\n\n33\n00:01:49.090 --> 00:01:52.340\nOn va venir dans le menu Help et\non va cliquer sur Welcome.\n\n34\n00:01:52.820 --> 00:01:56.420\nEt là, on retrouve l’écran d’accueil\net on est prêt pour la suite.\n"
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-2_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.120 --> 00:00:04.200\nPour travailler avec l'éditeur de code,\non va avoir besoin de codes.\n\n2\n00:00:05.220 --> 00:00:09.030\nJe vous invite à cloner ce dépôt Git,\nd'OpenClassrooms.\n\n3\n00:00:09.870 --> 00:00:11.670\nVous trouverez le lien dans le texte\nci-dessous.\n\n4\n00:00:12.980 --> 00:00:17.730\nEt une fois le code cloné,\non va l'ouvrir à partir de l'onglet\n\n5\n00:00:17.930 --> 00:00:19.500\nd'accueil de VS Code.\n\n6\n00:00:19.700 --> 00:00:23.970\nOn va venir ici, on va faire Open\nfolder, pour ouvrir un dossier.\n\n7\n00:00:24.170 --> 00:00:28.450\nMoi, j'ai cloné le code ici,\ndans ce dossier.\n\n8\n00:00:29.560 --> 00:00:30.830\nJe vais l'ouvrir ici.\n\n9\n00:00:32.330 --> 00:00:36.410\nEt comme vous pouvez le constater,\non a le contenu du dossier qui s'est\n\n10\n00:00:36.610 --> 00:00:39.590\nouvert ici, à gauche,\ndans l'interface.\n\n11\n00:00:40.310 --> 00:00:42.290\nOn peut maintenant fermer l'onglet\nd'accueil.\n\n12\n00:00:42.490 --> 00:00:43.250\nOn n'en a plus besoin.\n\n13\n00:00:44.030 --> 00:00:45.530\nEt on va ouvrir un fichier.\n\n14\n00:00:45.730 --> 00:00:49.370\nOn va ouvrir le fichier blog.js\nen cliquant dessus.\n\n15\n00:00:49.940 --> 00:00:53.810\nCe qu'on regarde ici,\nc'est un fichier écrit en JavaScript.\n\n16\n00:00:54.320 --> 00:00:58.550\nC'est un des multiples langages\nque VS Code gère par défaut.\n\n17\n00:00:58.880 --> 00:01:03.260\nC'est aussi un langage que vous\napprendrez certainement au cours\n\n18\n00:01:03.460 --> 00:01:04.610\nde vos études de front-end.\n\n19\n00:01:05.300 --> 00:01:08.390\nPour l'instant, ne vous inquiétez\npas de ne rien comprendre au langage\n\n20\n00:01:08.590 --> 00:01:09.350\nlui-même.\n\n21\n00:01:09.550 --> 00:01:13.610\nJe veux simplement attirer votre\nattention sur certaines fonctionnalités\n\n22\n00:01:13.810 --> 00:01:14.570\nde l'éditeur.\n\n23\n00:01:15.410 --> 00:01:19.040\nTout d'abord, comme vous pouvez\nle constater, le texte est coloré.\n\n24\n00:01:19.670 --> 00:01:23.030\nLes différentes couleurs dépendent\nbien évidemment du thème que vous\n\n25\n00:01:23.230 --> 00:01:29.560\navez choisi, mais chaque couleur\ncorrespond à un élément du langage.\n\n26\n00:01:30.100 --> 00:01:33.820\nÇa nous facilite la lecture et la\ncompréhension du code.\n\n27\n00:01:34.430 --> 00:01:36.970\nVous imaginez, si tout était de\nla même couleur, ce serait beaucoup\n\n28\n00:01:37.170 --> 00:01:40.390\nplus difficile d'identifier les\ndifférentes parties de notre code,\n\n29\n00:01:41.020 --> 00:01:44.590\nalors qu'ici, les différents éléments\nressortent grâce à la couleur.\n\n30\n00:01:45.500 --> 00:01:49.310\nLe deuxième élément que je voudrais\nvous montrer, ce sont les numéros\n\n31\n00:01:49.510 --> 00:01:52.250\nde lignes que vous avez ici,\nà gauche.\n\n32\n00:01:54.050 --> 00:01:58.100\nLe fait que les lignes soient\nnumérotées, c'est extrêmement utile.\n\n33\n00:01:58.300 --> 00:02:02.390\nTrès souvent, quand une application\nlance une erreur, l'application\n\n34\n00:02:02.590 --> 00:02:06.590\nnous donne le nom du fichier et\nle numéro de ligne où l'erreur a\n\n35\n00:02:06.790 --> 00:02:07.550\nété retrouvée.\n\n36\n00:02:08.060 --> 00:02:11.060\nLe fait d'avoir les numéros de lignes\nici nous permet de retrouver facilement\n\n37\n00:02:11.260 --> 00:02:12.020\nnos erreurs.\n\n38\n00:02:12.220 --> 00:02:15.410\nÇa facilite également la collaboration\navec d'autres développeurs,\n\n39\n00:02:15.830 --> 00:02:19.400\ncar on peut communiquer facilement\nsur les différentes parties de nos\n\n40\n00:02:19.600 --> 00:02:20.360\nfichiers.\n\n41\n00:02:20.560 --> 00:02:23.000\nEnsuite, une autre fonctionnalité\nde l'éditeur.\n\n42\n00:02:23.330 --> 00:02:28.580\nSi on passe notre souris ici,\nentre les numéros de lignes et le code,\n\n43\n00:02:29.060 --> 00:02:31.190\non voit ces flèches qui apparaissent.\n\n44\n00:02:31.940 --> 00:02:35.810\nEn fait, ces flèches nous permettent\nde réduire le code, de le replier.\n\n45\n00:02:37.130 --> 00:02:42.200\nSi vous cliquez sur les flèches\nde la ligne 4, de la ligne 20,\n\n46\n00:02:42.680 --> 00:02:48.680\nde la ligne 31 et de la ligne 35,\nlà, on a replié ce qu'on appelle\n\n47\n00:02:48.880 --> 00:02:49.640\nles fonctions.\n\n48\n00:02:49.840 --> 00:02:54.080\nVous découvrirez ce que c'est plus tard,\nmais le fait de replier justement\n\n49\n00:02:54.280 --> 00:02:56.810\ntoutes ces lignes de code,\nça nous permet de venir ici,\n\n50\n00:02:57.010 --> 00:03:03.980\npar exemple, d'écrire des choses\nà la fin du fichier, sans devoir\n\n51\n00:03:04.180 --> 00:03:05.830\nremonter et redescendre à chaque fois.\n\n52\n00:03:06.440 --> 00:03:09.230\nÇa nous permet de naviguer plus\nfacilement à l'intérieur du fichier.\n\n53\n00:03:10.100 --> 00:03:12.110\nCe sont quelques fonctionnalités de base.\n\n54\n00:03:13.160 --> 00:03:17.510\nVous en découvrirez plein d'autres\nau cours de vos études et de votre\n\n55\n00:03:17.710 --> 00:03:18.740\ncarrière de développeur.\n\n56\n00:03:19.780 --> 00:03:22.630\nPar exemple, comme vous pouvez le\nconstater, le mot function,\n\n57\n00:03:22.830 --> 00:03:24.460\nque je viens d'écrire,\nest souligné en rouge.\n\n58\n00:03:25.000 --> 00:03:28.750\nC'est exactement comme dans un logiciel\nde traitement de texte.\n\n59\n00:03:29.710 --> 00:03:31.930\nIl est en train de me dire qu'il\ny a potentiellement une erreur,\n\n60\n00:03:32.130 --> 00:03:32.890\nici.\n\n61\n00:03:33.090 --> 00:03:35.350\nÇa, c'est une fonctionnalité qui\nvous sera très utile.\n\n62\n00:03:35.950 --> 00:03:38.560\nEgalement, je ne sais pas si vous\nl'avez vu, mais pendant que j'écris\n\n63\n00:03:38.760 --> 00:03:44.020\nle mot, j'ai de l'autocomplétion,\nj'ai des suggestions automatiques\n\n64\n00:03:44.220 --> 00:03:47.380\nfournies par VS Code pour me permettre\nd'écrire plus rapidement.\n\n65\n00:03:47.580 --> 00:03:52.390\nVoilà, l'éditeur de VS Code a énormément\nde fonctionnalités, et ce sera votre\n\n66\n00:03:52.590 --> 00:03:55.180\noutil principal pour tout votre\ndéveloppement.\n"
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-2_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.270 --> 00:00:03.600\nEn travaillant avec l'éditeur de code,\non s'est rendu compte qu'on pouvait\n\n2\n00:00:03.800 --> 00:00:07.590\nouvrir des fichiers en cliquant dessus,\nici dans l'explorateur de fichiers\n\n3\n00:00:07.790 --> 00:00:08.640\nà gauche de l'écran.\n\n4\n00:00:09.240 --> 00:00:12.660\nSi vous passez votre souris sur\ncet explorateur, vous voyez ces\n\n5\n00:00:12.860 --> 00:00:15.030\nicônes qui apparaissent dans l'en-tête.\n\n6\n00:00:15.600 --> 00:00:18.720\nCe premier icône, par exemple,\npermet de créer un nouveau fichier.\n\n7\n00:00:19.350 --> 00:00:22.140\nEt si on clique dessus,\non choisit simplement le nom du fichier.\n\n8\n00:00:22.340 --> 00:00:25.580\nDonc on va créer un nouveau fichier\nqui s'appelle New.\n\n9\n00:00:26.040 --> 00:00:29.160\nMais il faut également spécifier\nl'extension du fichier.\n\n10\n00:00:29.360 --> 00:00:32.520\nL'extension, c'est ce qui vient\naprès le dernier point du nom du\n\n11\n00:00:32.720 --> 00:00:35.340\nfichier et spécifier le type du fichier.\n\n12\n00:00:36.060 --> 00:00:40.200\nVS Code va reconnaître l'extension\ndu fichier et mettre en place la\n\n13\n00:00:40.400 --> 00:00:43.080\nbonne coloration du code,\npar exemple, et l'autocorrection\n\n14\n00:00:43.590 --> 00:00:45.600\ncorrespondant à ce type de fichier.\n\n15\n00:00:46.080 --> 00:00:48.660\nOn peut voir que VS Code va reconnaître\nces fichiers.\n\n16\n00:00:48.860 --> 00:00:54.330\nSi on essaye par exemple New.html,\non voit l'icône qui a été attribué.\n\n17\n00:00:55.440 --> 00:00:58.350\nSi on change le html,\non met css à la place,\n\n18\n00:00:58.970 --> 00:01:01.110\non peut mettre js, on peut mettre ts.\n\n19\n00:01:01.310 --> 00:01:04.020\nVoilà, donc tout ça, ce sont des\nextensions valables de fichiers\n\n20\n00:01:04.440 --> 00:01:08.490\net on voit que VS Code reconnait\ntout de suite le type de fichier\n\n21\n00:01:08.690 --> 00:01:09.450\ndont il s'agit.\n\n22\n00:01:09.800 --> 00:01:12.600\nEt on appuie sur Entrée simplement\npour créer notre nouveau fichier.\n\n23\n00:01:13.140 --> 00:01:15.540\nEt VS Code nous l'ouvre même ici\ndans l'éditeur.\n\n24\n00:01:16.410 --> 00:01:18.360\nOn peut fermer notre fichier ici.\n\n25\n00:01:18.840 --> 00:01:22.740\nOn peut également modifier les noms\ndes fichiers dans l'explorateur\n\n26\n00:01:23.370 --> 00:01:27.560\net on peut aussi les supprimer en\nappuyant sur la touche Supprimer\n\n27\n00:01:27.760 --> 00:01:31.650\nsur un PC ou sur Mac,\nen faisant (Commande Supprimer).\n\n28\n00:01:31.850 --> 00:01:35.460\nDonc là, il me propose de le mettre\nà la Corbeille, chose que je vais faire.\n\n29\n00:01:36.300 --> 00:01:39.150\nEnsuite, le deuxième icône qui vous\nest présenté ici, c'est pour créer\n\n30\n00:01:39.350 --> 00:01:40.170\nun dossier.\n\n31\n00:01:40.370 --> 00:01:45.580\nDonc, vous reconnaissez les dossiers\ndans VS Code avec l'icône Chevron\n\n32\n00:01:45.780 --> 00:01:46.540\nqu'on voit à côté.\n\n33\n00:01:46.740 --> 00:01:49.000\nEn cliquant dessus, ça nous permet\nd'ouvrir le dossier.\n\n34\n00:01:49.810 --> 00:01:52.840\nEt si je veux créer un dossier ici,\nun sous-dossier à mon dossier Images,\n\n35\n00:01:53.040 --> 00:01:56.590\nje clique ici sur Nouveau Dossier\net je vais créer un dossier Icons,\n\n36\n00:01:56.950 --> 00:01:57.710\npar exemple.\n\n37\n00:01:58.030 --> 00:02:00.760\nDonc là, on voit également qu'il\ns'agit d'un dossier, mais qu'il\n\n38\n00:02:00.960 --> 00:02:01.720\nn'y a rien dedans.\n\n39\n00:02:01.930 --> 00:02:06.280\nLe prochain icône permet de rafraîchir\nou d'actualiser l'explorateur de\n\n40\n00:02:06.480 --> 00:02:07.240\nfichiers.\n\n41\n00:02:07.440 --> 00:02:10.270\nDonc ça vous sera utile,\nnotamment quand vous aurez d'autres\n\n42\n00:02:10.470 --> 00:02:13.900\noutils qui créent des fichiers dans\nvotre dossier de travail et qu'il\n\n43\n00:02:14.100 --> 00:02:16.000\nfaut que VS Code en prenne compte.\n\n44\n00:02:16.240 --> 00:02:20.470\nEt le dernier icône ici permet de\nreplier tous les dossiers qui sont\n\n45\n00:02:20.670 --> 00:02:21.430\nouverts.\n\n46\n00:02:22.090 --> 00:02:26.170\nCela permet de désencombrer\nl'explorateur de fichiers.\n\n47\n00:02:26.370 --> 00:02:29.590\nÇa vous sera utile, notamment dans\ndes projets plus complexes.\n\n48\n00:02:30.010 --> 00:02:35.120\nPar exemple, si j'ouvre ici un dossier\n\n49\n00:02:35.780 --> 00:02:39.590\nde projet plus complexe,\nsi j'ai plein de dossiers ici qui\n\n50\n00:02:39.790 --> 00:02:41.810\nsont ouverts parce que je suis en\ntrain de travailler et que je veux\n\n51\n00:02:42.010 --> 00:02:46.610\nrevenir à la base de mon projet,\nj'ai juste à cliquer ici et en replie\n\n52\n00:02:46.810 --> 00:02:49.070\ntout pour revenir à la racine du projet.\n\n53\n00:02:49.910 --> 00:02:54.590\nEn tout cas, l'explorateur de fichiers\nVS Code vous permet d'organiser\n\n54\n00:02:54.790 --> 00:02:57.740\nvotre dossier de travail et d'y\nnaviguer très facilement.\n"
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-2_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.090 --> 00:00:03.880\nIl existe un endroit centralisé\noù vous trouverez toutes les commandes\n\n2\n00:00:04.080 --> 00:00:04.840\nde VS Code.\n\n3\n00:00:05.040 --> 00:00:08.640\nCet endroit, c'est la palette de\ncommandes, et la palette de commandes,\n\n4\n00:00:08.840 --> 00:00:14.760\non l'ouvre sur PC avec le raccourci\nContrôle+Maj+P, et sur Mac avec\n\n5\n00:00:14.960 --> 00:00:15.720\nCommande+Maj+P.\n\n6\n00:00:15.920 --> 00:00:20.940\nLà, vous voyez, je peux scroller ici,\net j'ai accès vraiment à toutes\n\n7\n00:00:21.140 --> 00:00:22.950\nles commandes de mon application.\n\n8\n00:00:24.260 --> 00:00:27.640\nPar exemple, si je veux rouvrir\nla fenêtre de bienvenue qu'on a\n\n9\n00:00:27.840 --> 00:00:30.760\nutilisée plusieurs fois,\nje peux taper Welcome ici,\n\n10\n00:00:31.480 --> 00:00:34.720\nj'appuie sur Entrée et j'ouvre ma\nfenêtre de bienvenue,\n\n11\n00:00:34.920 --> 00:00:35.730\nma fenêtre d'accueil.\n\n12\n00:00:37.080 --> 00:00:39.410\nUne autre commande possible,\nça serait, imaginons,\n\n13\n00:00:39.610 --> 00:00:42.800\non a plusieurs fenêtres d'éditeurs\nqui sont ouvertes.\n\n14\n00:00:44.050 --> 00:00:48.460\nJe double-clique sur les fichiers\nici pour les ouvrir dans des tabs\n\n15\n00:00:48.660 --> 00:00:49.420\nséparés.\n\n16\n00:00:49.620 --> 00:00:52.570\nEt là, je veux travailler sur une\nautre fonctionnalité, je veux fermer\n\n17\n00:00:52.770 --> 00:00:53.860\ntous mes éditeurs d'un coup.\n\n18\n00:00:54.970 --> 00:00:59.260\nJe peux faire Contrôle+Maj+P ou\nCommande+Maj+P, et si je tape le\n\n19\n00:00:59.460 --> 00:01:03.580\nmot close, j'ai accès à toutes mes\ncommandes de fermeture.\n\n20\n00:01:03.780 --> 00:01:07.780\nEt là, je vois, donc en descendant\navec les flèches de mon clavier,\n\n21\n00:01:08.500 --> 00:01:11.290\nj'ai Close All Editors,\nou fermer tous les éditeurs.\n\n22\n00:01:12.010 --> 00:01:14.940\nJe vois aussi que j'ai un raccourci\nclavier, qui est mentionné ici.\n\n23\n00:01:15.460 --> 00:01:18.940\nLa palette de commandes vous permet\négalement d'apprendre à utiliser\n\n24\n00:01:19.140 --> 00:01:19.900\nl'outil.\n\n25\n00:01:20.100 --> 00:01:23.620\nLà, j'appuie sur Entrée pour fermer\ntous mes éditeurs.\n\n26\n00:01:24.630 --> 00:01:27.110\nUne dernière commande que je vais\nvous montrer, encore une fois\n\n27\n00:01:27.310 --> 00:01:31.920\nContrôle+Maj+P ou Commande+Maj+P,\nça serait pour créer un nouveau fichier,\n\n28\n00:01:32.220 --> 00:01:37.350\ndonc New File et là, quand je tape\nsur Entrée, je crée mon nouveau fichier,\n\n29\n00:01:37.550 --> 00:01:40.530\nexactement comme on l'a fait avec\nl'explorateur de fichiers,\n\n30\n00:01:40.830 --> 00:01:44.160\nsauf que là, je n'ai pas besoin\nd'enlever mes mains du clavier pour\n\n31\n00:01:44.360 --> 00:01:47.790\nprendre la souris, pour rajouter\ndes manipulations, je fais tout\n\n32\n00:01:47.990 --> 00:01:49.600\nça en gardant les mains sur le clavier.\n\n33\n00:01:50.400 --> 00:01:53.580\nLa palette de commandes nous permet\nd'être plus confortables et plus\n\n34\n00:01:53.780 --> 00:01:54.540\nefficaces.\n"
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-3_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:03.020 --> 00:00:06.080\nAu cours de vos études et de votre\ncarrière de développeur,\n\n2\n00:00:06.560 --> 00:00:10.190\nvous utiliserez certainement très\nsouvent le terminal ou l'invite\n\n3\n00:00:10.390 --> 00:00:11.150\nde commande.\n\n4\n00:00:11.350 --> 00:00:14.450\nEt justement, VSCODE contient un\nterminal intégré.\n\n5\n00:00:14.900 --> 00:00:18.380\nComme ça, on n'a pas besoin de basculer\nsans cesse entre une fenêtre de\n\n6\n00:00:18.580 --> 00:00:20.910\nterminal et la fenêtre de VSCODE.\n\n7\n00:00:22.490 --> 00:00:26.330\nPour créer un terminal ou pour ouvrir\nle terminal intégré, nous avons\n\n8\n00:00:26.530 --> 00:00:27.290\nplusieurs options.\n\n9\n00:00:27.560 --> 00:00:30.920\nLa première, c'est d'aller dans\nle menu Terminal et sélectionner\n\n10\n00:00:31.120 --> 00:00:31.880\nNew Terminal.\n\n11\n00:00:32.660 --> 00:00:38.570\nNous pouvons également ouvrir notre\npalette de commande et écrire à\n\n12\n00:00:38.770 --> 00:00:44.450\nl'intérieur&nbsp;: create terminal et\nnous voyons que nous avons la commande\n\n13\n00:00:44.650 --> 00:00:47.360\nqui apparaît&nbsp;: Terminal Create New\nTerminal.\n\n14\n00:00:48.590 --> 00:00:51.530\nOn peut sélectionner cette option\net le terminal apparaît.\n\n15\n00:00:52.370 --> 00:00:56.360\nAlors en fonction de votre système\nd'exploitation, il se peut que votre\n\n16\n00:00:56.560 --> 00:00:58.580\nterminal ressemble plus ou moins au mien.\n\n17\n00:00:58.780 --> 00:01:03.530\nCependant, c'est un terminal tout\nà fait classique et on peut y effectuer\n\n18\n00:01:03.730 --> 00:01:06.180\nles mêmes opérations que dans n'importe\nquel terminal.\n\n19\n00:01:06.380 --> 00:01:09.530\nPar exemple, je peux naviguer dans\nmon fichier images.\n\n20\n00:01:12.360 --> 00:01:17.640\nAlors maintenant, lorsque l'on va\ntravailler, il se peut que parfois\n\n21\n00:01:18.030 --> 00:01:21.210\nnous ayons besoin d'ouvrir plusieurs\nterminaux.\n\n22\n00:01:21.690 --> 00:01:25.650\nPar exemple, lorsque nous allons\ndevoir lancer un serveur de\n\n23\n00:01:25.850 --> 00:01:26.610\ndéveloppement.\n\n24\n00:01:27.350 --> 00:01:30.320\nPour cela, nous avons plusieurs\noptions dans VSCODE.\n\n25\n00:01:31.400 --> 00:01:34.970\nLa première, c'est de cliquer ici\nsur le +.\n\n26\n00:01:36.650 --> 00:01:39.170\nEn cliquant sur le +,\nnous allons avoir un deuxième terminal\n\n27\n00:01:39.370 --> 00:01:42.920\nqui va s'afficher et nous voyons\ndans la barre latérale de droite\n\n28\n00:01:43.310 --> 00:01:46.040\nque nous avons une liste de nos\nterminaux actuels.\n\n29\n00:01:47.740 --> 00:01:52.570\nAlors ici, je vais supprimer le\nterminal que je viens de créer pour\n\n30\n00:01:52.770 --> 00:01:53.650\nvoir une autre option.\n\n31\n00:01:54.400 --> 00:01:58.990\nOn peut voir à côté du +,\nnous avons l'icône split terminal.\n\n32\n00:01:59.650 --> 00:02:03.850\nDans ce cas-là, on aura un nouveau\nterminal de créé, mais cette fois-ci\n\n33\n00:02:04.120 --> 00:02:06.700\ndans une deuxième colonne sur le\nmême écran.\n\n34\n00:02:08.080 --> 00:02:11.140\nEt donc de la même manière,\nnous avons la barre latérale de\n\n35\n00:02:11.340 --> 00:02:15.340\ndroite qui s'affiche avec le symbole\npour indiquer que nous avons bien\n\n36\n00:02:15.540 --> 00:02:16.450\nun split terminal.\n\n37\n00:02:16.990 --> 00:02:20.500\nSi je clique sur le +,\nj'aurai un nouveau terminal dans\n\n38\n00:02:20.700 --> 00:02:24.490\nune nouvelle fenêtre et à tout moment,\nje pourrai revenir sur mes terminaux\n\n39\n00:02:24.850 --> 00:02:26.080\nqui sont splittés.\n\n40\n00:02:28.320 --> 00:02:32.310\nVous verrez que plus vous avancerez\ndans vos études et dans votre carrière\n\n41\n00:02:32.510 --> 00:02:36.480\nde développeur et plus vous apprécierez\nle fait que VSCODE ait un terminal\n\n42\n00:02:36.680 --> 00:02:37.440\nintégré.\n"
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-3_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.090 --> 00:00:04.410\nComme vous le savez, le système\nde contrôle de version Git est\n\n2\n00:00:04.610 --> 00:00:07.260\nextrêmement important dans le monde\ndu développement.\n\n3\n00:00:07.460 --> 00:00:12.330\nC’est pourquoi VS Code intègre tous\nles outils Git pour interagir\n\n4\n00:00:12.530 --> 00:00:13.980\ndirectement avec des dépôts.\n\n5\n00:00:14.910 --> 00:00:19.050\nOn va commencer par cloner un dépôt\nGit et on va utiliser celui qu’on\n\n6\n00:00:19.250 --> 00:00:20.910\na utilisé jusqu’ici dans le cours.\n\n7\n00:00:21.820 --> 00:00:24.490\nPour ce faire, vous allez fermer\ntoutes les fenêtres que vous avez\n\n8\n00:00:24.690 --> 00:00:28.960\nactuellement ouvertes et vous allez\nouvrir une nouvelle fenêtre et cliquer\n\n9\n00:00:29.160 --> 00:00:32.510\nsur l’Explorateur de fichiers et\non va utiliser Clone Repository,\n\n10\n00:00:33.400 --> 00:00:34.210\njuste ici.\n\n11\n00:00:35.080 --> 00:00:39.730\nOn va y coller l’URL du Git qu’on\nveut utiliser et appuyez sur Entrée.\n\n12\n00:00:41.170 --> 00:00:46.480\nOn va ensuite choisir l’endroit\noù on veut cloner notre dépôt.\n\n13\n00:00:46.680 --> 00:00:51.710\nVS Code nous propose de l’ouvrir.\n\n14\n00:00:51.910 --> 00:00:53.180\nOn va l’ouvrir dans cette fenêtre-là.\n\n15\n00:00:55.190 --> 00:00:59.030\nUne fois la fenêtre d’accueil fermée,\non est de retour dans un dossier\n\n16\n00:00:59.230 --> 00:01:04.340\nde travail, mais cette fois-ci,\ni lié directement au dépôt Git qu’on\n\n17\n00:01:04.540 --> 00:01:05.300\na cloné.\n\n18\n00:01:05.500 --> 00:01:07.460\nEnsuite, imaginons qu’on veut se\nmettre au travail.\n\n19\n00:01:07.660 --> 00:01:09.140\nOn veut créer une branche de travail.\n\n20\n00:01:09.340 --> 00:01:11.330\nOn veut travailler sur une\nfonctionnalité de notre projet.\n\n21\n00:01:12.890 --> 00:01:16.290\nNous avons ce bouton avec l’icône\nGit à gauche pour ouvrir les outils\n\n22\n00:01:16.490 --> 00:01:21.290\nGit et avec le menu trois petits\npoints ici, on a Branch,\n\n23\n00:01:21.490 --> 00:01:22.250\nCreate Branch.\n\n24\n00:01:23.480 --> 00:01:26.690\nEt évidemment, on peut faire la\nmême chose avec la palette de commandes\n\n25\n00:01:26.890 --> 00:01:29.480\nen tapant Create Branch directement.\n\n26\n00:01:30.090 --> 00:01:32.510\nDonc là, on va choisir un nom pour\nnotre branche.\n\n27\n00:01:32.930 --> 00:01:38.180\nJe vais l’appeler dev-branch pour\nla branche de développement et en\n\n28\n00:01:38.380 --> 00:01:41.930\nbas à gauche ici, vous voyez qu’on\nest bien sur dev-branch.\n\n29\n00:01:42.860 --> 00:01:45.270\nSi on clique dessus d’ailleurs,\non peut choisir notre branche,\n\n30\n00:01:45.470 --> 00:01:48.860\non peut changer de branche et c’est\nun autre accès pour créer une nouvelle\n\n31\n00:01:49.060 --> 00:01:49.820\nbranche.\n\n32\n00:01:50.030 --> 00:01:51.500\nDonc imaginons qu’on va se mettre\nau travail.\n\n33\n00:01:51.700 --> 00:01:56.180\nOn va effectuer quelques modifications\nsur blog-html en ligne 2,\n\n34\n00:01:56.380 --> 00:01:59.750\non va changer EN en FR.\n\n35\n00:02:01.070 --> 00:02:03.710\nSi vous voulez tous les détails\ndes modifications que j’apporte,\n\n36\n00:02:03.910 --> 00:02:06.410\nvous les trouverez dans le texte\nsous cette vidéo.\n\n37\n00:02:07.490 --> 00:02:12.200\nOn va ouvrir function.js et au lieu\nde \"Veuillez saisir quelque chose\",\n\n38\n00:02:12.400 --> 00:02:16.070\non va changer, on va marquer \"Il\nfaut saisir quelque chose\".\n\n39\n00:02:16.970 --> 00:02:20.180\nA chaque fois, n’oubliez pas\nd’enregistrer vos modifications\n\n40\n00:02:20.540 --> 00:02:23.750\navec Contrl + S sur PC ou Command\nS sur Mac.\n\n41\n00:02:24.860 --> 00:02:29.210\nUne fois qu’on a fait une modification,\nsi vous regardez sur le bouton Git,\n\n42\n00:02:29.410 --> 00:02:33.050\non a maintenant ce titre 2 qui nous\nmontre qu’on a bien deux modifications\n\n43\n00:02:33.250 --> 00:02:34.370\nà deux fichiers modifiés.\n\n44\n00:02:35.060 --> 00:02:38.120\nPlusieurs options s’ouvrent à nous\nmaintenant, mais disons qu’on veut\n\n45\n00:02:38.320 --> 00:02:40.790\ncommitte Nos changements on veut\ncommitter nos modifications.\n\n46\n00:02:41.480 --> 00:02:44.780\nIl faut d’abord les stages,\ndonc l’équivalent d’un guide add.\n\n47\n00:02:45.530 --> 00:02:50.540\nOn va cliquer sur le petit plus\nsur chaque fichier pour passer en stage.\n\n48\n00:02:51.470 --> 00:02:54.710\nEt maintenant, pour effectuer notre\ncommit, on va bien rentrer notre\n\n49\n00:02:54.910 --> 00:02:55.670\nmessage ici.\n\n50\n00:02:55.970 --> 00:03:01.700\nPar exemple, on va dire \"Change\nlanguage\", sur PC, vous faites Contrôle\n\n51\n00:03:01.900 --> 00:03:05.490\n+ Entrée pour faire votre commit,\nsur Mac, c’est Commande Entrée et\n\n52\n00:03:05.690 --> 00:03:07.530\nvotre commit a bien été effectué.\n\n53\n00:03:08.750 --> 00:03:12.680\nBien sûr, ici, vous trouverez tous\nles outils dont vous pouvez avoir\n\n54\n00:03:12.880 --> 00:03:14.890\nbesoin pour travailler avec vos\ndépôts Git.\n\n55\n00:03:15.410 --> 00:03:18.290\nDonc n’hésitez pas à les essayer\navec vos propres dépôts.\n"
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-4_TLK",
+          "captions": "WEBVTT\n\n1\n00:00:00.330 --> 00:00:03.510\nEst-ce que vous saviez que les\ndifférents navigateurs Internet\n\n2\n00:00:03.750 --> 00:00:07.230\nn'affichent pas forcément les sites\nexactement de la même manière&nbsp;?\n\n3\n00:00:07.920 --> 00:00:11.850\nLes couleurs, les polices de caractères,\nmême certaines fonctionnalités que\n\n4\n00:00:12.050 --> 00:00:15.270\nvous ajouterez à vos projets,\nsont susceptibles d'être interprétées\n\n5\n00:00:15.470 --> 00:00:18.150\ndifféremment selon les navigateurs\nde vos utilisateurs.\n\n6\n00:00:18.720 --> 00:00:21.330\nC'est pour cela qu'il faut,\nen tant que développeur Front-End,\n\n7\n00:00:21.630 --> 00:00:25.470\nutiliser plusieurs navigateurs pour\ntester l'apparence et la fonctionnalité\n\n8\n00:00:25.670 --> 00:00:26.430\nde vos projets.\n\n9\n00:00:27.060 --> 00:00:30.030\nDans ce chapitre, vous découvrirez\nles outils de développeurs,\n\n10\n00:00:30.230 --> 00:00:33.640\nou Dev Tools, qui sont intégrés\nà Chrome et Firefox.\n\n11\n00:00:34.050 --> 00:00:38.520\nCes deux navigateurs représentent,\nà eux deux, environ 70% des utilisateurs\n\n12\n00:00:38.720 --> 00:00:39.480\naujourd'hui.\n\n13\n00:00:39.780 --> 00:00:43.800\nDes outils similaires existent pour\nSafari sur Mac et Edge sur Windows,\n\n14\n00:00:44.170 --> 00:00:46.350\ndonc n'hésitez pas à les explorer\négalement.\n\n15\n00:00:47.340 --> 00:00:51.540\nOn commencera par inspecter la structure\nd'une page web, pour voir comment\n\n16\n00:00:51.740 --> 00:00:53.980\nnos navigateurs peuvent nous aider\nà la comprendre.\n\n17\n00:00:54.180 --> 00:00:59.070\nEnsuite, on verra qu'on peut également\ninspecter les styles d'une page Web,\n\n18\n00:00:59.270 --> 00:01:03.180\nou tout ce qui concerne sa mise en forme:\nles couleurs, les formes et la\n\n19\n00:01:03.380 --> 00:01:04.440\ntypographie, par exemple.\n\n20\n00:01:05.070 --> 00:01:08.520\nOn peut même modifier certaines\nde ces valeurs en temps réel pour\n\n21\n00:01:08.720 --> 00:01:11.280\nvoir à quoi ressembleraient des\nmodifications du code.\n\n22\n00:01:12.090 --> 00:01:14.580\nUn autre élément des Dev Tools,\nqui vous sera très utile,\n\n23\n00:01:14.820 --> 00:01:16.260\nest ce qu'on appelle la Console.\n\n24\n00:01:16.770 --> 00:01:19.650\nElle nous apporte souvent des\ninformations précieuses sur le\n\n25\n00:01:19.850 --> 00:01:22.770\nfonctionnement de nos projets,\nsurtout en cas de problème.\n\n26\n00:01:23.370 --> 00:01:27.980\nDepuis 2017, environ 50% du trafic\nWeb provient des mobiles.\n\n27\n00:01:28.320 --> 00:01:30.930\nDonc il est essentiel,\nen tant que développeur Front-End,\n\n28\n00:01:31.230 --> 00:01:34.240\nde savoir à quoi ressemblent nos\nprojets sur ce genre d'appareil.\n\n29\n00:01:34.830 --> 00:01:38.550\nPour faciliter cette tâche,\nles Dev Tools de Chrome et de Firefox\n\n30\n00:01:38.750 --> 00:01:42.300\nnous permettent de visionner nos\nsites et applications comme si on\n\n31\n00:01:42.500 --> 00:01:43.260\nétait sur mobile.\n\n32\n00:01:44.010 --> 00:01:47.130\nOn a plein de choses à voir,\ndonc, commençons dès maintenant\n\n33\n00:01:47.330 --> 00:01:49.980\navec l'inspection d'une page que\nvous reconnaîtrez sûrement,\n\n34\n00:01:50.310 --> 00:01:52.260\nla page Parcours du site\nd'OpenClassrooms.\n"
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-4_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.360 --> 00:00:04.800\nNous voici sur la page parcours\ndu site OpenClassrooms, et on va\n\n2\n00:00:05.000 --> 00:00:08.850\nutiliser cette page pour explorer\nl'inspecteur d'éléments.\n\n3\n00:00:09.930 --> 00:00:13.230\nPour ouvrir l'inspecteur,\nsur PC, vous allez faire:\n\n4\n00:00:13.430 --> 00:00:18.090\nContrôle + MAJ + C, et sur Mac,\non va faire: Option + Commande + C.\n\n5\n00:00:19.080 --> 00:00:23.400\nLà, on a les Dev Tools qui s'ouvrent\nen bas, donc l'inspecteur qui est\n\n6\n00:00:23.600 --> 00:00:24.360\nsélectionné.\n\n7\n00:00:24.850 --> 00:00:28.440\nPersonnellement, je préfère avoir\nles Dev Tools, au lieu de les avoir\n\n8\n00:00:28.640 --> 00:00:32.670\nancrés en bas, je préfère les ancrer\nà droite, je trouve ça plus facile\n\n9\n00:00:32.870 --> 00:00:33.630\nà utiliser.\n\n10\n00:00:33.830 --> 00:00:37.040\nDonc, je vais venir cliquer ici\nsur le bouton \"Customiser\",\n\n11\n00:00:37.470 --> 00:00:40.230\net je vais choisir d'ancrer les\nDev Tools à droite.\n\n12\n00:00:40.430 --> 00:00:44.790\nDonc, sachez que les manipulations\nqu'on fait ici dans Chrome se font\n\n13\n00:00:44.990 --> 00:00:47.350\nde la même manière dans Firefox.\n\n14\n00:00:47.550 --> 00:00:51.060\nDonc, j'ai exactement la même chose,\nj'ai les mêmes raccourcis clavier,\n\n15\n00:00:52.140 --> 00:00:54.990\nle fait d'ancrer les Dev Tools se\ntrouve au même endroit,\n\n16\n00:00:55.270 --> 00:00:58.020\nil y a juste de légères nuances\ndans les icônes des boutons,\n\n17\n00:00:58.500 --> 00:01:01.620\nmais tout ce qu'on verra ici sur\nChrome pourra s'appliquer également\n\n18\n00:01:01.820 --> 00:01:02.910\nsur Firefox.\n\n19\n00:01:03.110 --> 00:01:09.000\nDonc, le code que vous voyez ici\ndans l'inspecteur, c'est du code HTML,\n\n20\n00:01:09.370 --> 00:01:13.560\net le code HTML, c'est le code qui\ndéfinit la structure d'une page Web.\n\n21\n00:01:14.220 --> 00:01:19.320\nEt la structure d'une page Web,\non peut avoir des éléments qui sont\n\n22\n00:01:19.520 --> 00:01:21.790\ndes parents de plusieurs éléments\nenfants.\n\n23\n00:01:22.190 --> 00:01:26.250\nDonc chaque élément que vous voyez\nsur la page, les boutons,\n\n24\n00:01:26.450 --> 00:01:27.330\nle texte, les images,\netc.\n\n25\n00:01:27.870 --> 00:01:33.270\nTout ça, ça correspond à des éléments,\net par exemple, si je survole ici\n\n26\n00:01:33.470 --> 00:01:36.030\ncette ligne de code, vous pouvez\nfaire de même, donc la ligne avec\n\n27\n00:01:36.230 --> 00:01:40.920\n\"oc header\" comme identifiant,\non voit que l'entête de la page\n\n28\n00:01:41.120 --> 00:01:44.670\nest surligné, à gauche,\ndonc on voit que cette ligne de\n\n29\n00:01:44.870 --> 00:01:46.680\ncode correspond à l'élément entête.\n\n30\n00:01:47.790 --> 00:01:51.060\nMais on voit bien aussi que cet\nélément d'entête a plusieurs enfants:\n\n31\n00:01:51.300 --> 00:01:53.520\non a le logo OpenClassrooms,\non a les liens, etc.\n\n32\n00:01:53.720 --> 00:01:58.110\nDonc, pour les retrouver dans la\nstructure ici, on va venir cliquer\n\n33\n00:01:58.310 --> 00:02:01.170\nsur la petite flèche à côté de la\nligne de code.\n\n34\n00:02:01.370 --> 00:02:03.590\nLà, on peut faire la même chose.\n\n35\n00:02:03.790 --> 00:02:06.440\nIl va falloir plonger un petit peu\ndans les différents éléments.\n\n36\n00:02:06.640 --> 00:02:09.260\nLà, on a plusieurs éléments à un\nseul enfant.\n\n37\n00:02:10.120 --> 00:02:12.730\nMais quand on arrive ici,\net qu'on ouvre cet élément,\n\n38\n00:02:12.930 --> 00:02:17.290\non voit qu'on a plusieurs enfants\nau même niveau, et en survolant,\n\n39\n00:02:17.560 --> 00:02:20.380\non voit, par exemple,\nque cet élément correspond au logo,\n\n40\n00:02:20.710 --> 00:02:25.540\nque cet élément correspond au menu\net que cet élément correspond au\n\n41\n00:02:25.740 --> 00:02:27.620\nbouton \"Se connecter\" et \"S'inscrire\".\n\n42\n00:02:27.820 --> 00:02:33.610\nDonc voici comment retrouver des\néléments dans l'inspecteur.\n\n43\n00:02:34.480 --> 00:02:36.110\nOn a deux autres options.\n\n44\n00:02:36.610 --> 00:02:43.570\nOn peut venir faire un clic droit\nsur un élément du document et on\n\n45\n00:02:43.770 --> 00:02:47.050\npeut cliquer sur un \"Inspect\" ou\n\"Inspectez\", selon la langue de\n\n46\n00:02:47.250 --> 00:02:48.010\nvotre installation.\n\n47\n00:02:48.670 --> 00:02:53.170\nEt là, j'ai effectivement:\n\"Découvrez nos parcours diplômants\"\n\n48\n00:02:53.370 --> 00:02:54.130\nqui apparaît ici.\n\n49\n00:02:54.330 --> 00:02:58.570\nJe vois bien qu'il s'agit de mon\ntexte dans le document,\n\n50\n00:02:59.590 --> 00:03:03.010\net je peux aussi venir cliquer ici\npour sélectionner les éléments.\n\n51\n00:03:03.210 --> 00:03:06.610\nDonc, là, quand je survole,\nje vois tous les éléments sur lesquels\n\n52\n00:03:06.810 --> 00:03:09.280\nje peux cliquer et je peux venir\nfaire la même chose, cliquer sur\n\n53\n00:03:09.480 --> 00:03:13.630\nmon texte ici, pour retrouver mon\ntexte dans le code.\n\n54\n00:03:14.170 --> 00:03:19.540\nDonc là, vous savez comment retrouver\ndes éléments HTML dans l'inspecteur\n\n55\n00:03:19.740 --> 00:03:23.560\ndes éléments, et dans la prochaine\nsection du cours, on verra comment\n\n56\n00:03:23.760 --> 00:03:28.360\non peut utiliser ces éléments pour\nregarder les styles ou la mise en\n\n57\n00:03:28.560 --> 00:03:29.560\npage de ces éléments.\n"
+        },
+        "pairedItem": {
+          "item": 10
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-4_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.090 --> 00:00:04.440\nLes styles d'une page web sont les\nrègles qui régissent l'apparence\n\n2\n00:00:04.640 --> 00:00:05.400\ndes éléments.\n\n3\n00:00:05.600 --> 00:00:08.700\nÇa peut être la couleur,\nla forme, la police de caractères.\n\n4\n00:00:08.970 --> 00:00:10.830\nTout ça, ce sont des styles.\n\n5\n00:00:11.490 --> 00:00:15.450\nEt pour visualiser, et même modifier\nles styles d'un élément,\n\n6\n00:00:15.810 --> 00:00:17.460\non a l'inspecteur des styles.\n\n7\n00:00:17.660 --> 00:00:21.330\nIci, sur Chrome, il se trouve ici,\nen bas de l'inspecteur.\n\n8\n00:00:21.530 --> 00:00:24.930\nOn va augmenter la hauteur de cette\npartie pour que ce soit un peu plus\n\n9\n00:00:25.130 --> 00:00:25.890\nfacile à lire.\n\n10\n00:00:26.340 --> 00:00:28.650\nSur Firefox, vous avez la même chose.\n\n11\n00:00:28.850 --> 00:00:29.760\nOn va l'augmenter ici.\n\n12\n00:00:30.060 --> 00:00:33.360\nEt sur Firefox, la particularité,\non va fermer ce troisième panneau\n\n13\n00:00:33.560 --> 00:00:38.160\nici pour avoir les règles de style\nqui prennent toute la largeur de\n\n14\n00:00:38.360 --> 00:00:39.120\nl'inspecteur.\n\n15\n00:00:39.900 --> 00:00:43.590\nOn le voit ici, sur Firefox&nbsp;;\non a la même chose ici,\n\n16\n00:00:43.790 --> 00:00:44.550\nsur Chrome.\n\n17\n00:00:44.750 --> 00:00:48.390\nOn peut filtrer les styles pour\nretrouver exactement ce qu'on veut.\n\n18\n00:00:49.440 --> 00:00:54.250\nSi vous ne l'avez pas déjà fait,\nresélectionnez le texte ici \"Découvrez\n\n19\n00:00:55.020 --> 00:00:56.310\nnos parcours diplômants\".\n\n20\n00:00:56.510 --> 00:01:00.120\nLà, on voit les styles qui régissent\njustement son apparence.\n\n21\n00:01:00.570 --> 00:01:04.680\nEt imaginons qu'on souhaite modifier\nla couleur blanche du texte.\n\n22\n00:01:05.460 --> 00:01:09.690\nJe sais que ce style,\ncette règle, s'appelle \"color\",\n\n23\n00:01:09.890 --> 00:01:10.650\ncomme ça.\n\n24\n00:01:10.850 --> 00:01:12.500\nLà, on voit plusieurs styles.\n\n25\n00:01:12.700 --> 00:01:15.600\nSi on descend, voilà,\nc'est cet attribut-là,\n\n26\n00:01:16.320 --> 00:01:20.910\ndonc la couleur blanche avec le\npetit carré blanc, et ce texte rgb(255,\n\n27\n00:01:21.110 --> 00:01:25.110\n255, 255), donc qui correspond à\nla couleur blanche.\n\n28\n00:01:25.770 --> 00:01:28.300\nEt on peut faire la même chose ici\nsur Firefox.\n\n29\n00:01:28.500 --> 00:01:32.580\nSi je cherche \"color\",\nje descends, j'ai la même chose ici.\n\n30\n00:01:33.390 --> 00:01:37.260\nQue ce soit sur Chrome ou sur Firefox,\non peut venir cliquer sur cette\n\n31\n00:01:37.460 --> 00:01:39.720\nvaleur et la modifier.\n\n32\n00:01:40.170 --> 00:01:45.330\nPar exemple, si ici je tape \"red\"\net je fais entrer, vous voyez ici,\n\n33\n00:01:45.530 --> 00:01:48.810\ndans la page, que la couleur a été\nchangée en rouge.\n\n34\n00:01:49.420 --> 00:01:52.080\nVous pouvez faire ça pour tous les\nstyles d'une page web.\n\n35\n00:01:52.320 --> 00:01:54.840\nBien évidemment, ça n'enregistre\npas sur la page.\n\n36\n00:01:55.230 --> 00:01:59.610\nC'est uniquement dans le navigateur,\nc'est la visualisation qui change.\n\n37\n00:02:00.450 --> 00:02:03.930\nC'est quelque chose d'extrêmement\nutile si on veut tester des\n\n38\n00:02:04.130 --> 00:02:07.170\nmodifications à nos projets,\npar exemple, sans avoir à toucher\n\n39\n00:02:07.370 --> 00:02:08.130\nau code source.\n"
+        },
+        "pairedItem": {
+          "item": 11
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_2-2_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.300 --> 00:00:03.510\nMaintenant, on va regarder l'un\ndes outils que vous utiliserez très\n\n2\n00:00:03.710 --> 00:00:06.870\nsouvent en tant que développeur\nfront-end&nbsp;: la console.\n\n3\n00:00:07.410 --> 00:00:11.370\nLa console nous apporte des informations\nessentielles sur le fonctionnement\n\n4\n00:00:11.570 --> 00:00:15.150\nde nos projets, notamment en cas\nd'erreur, en cas de problème.\n\n5\n00:00:16.170 --> 00:00:19.530\nPour accéder à la console,\nsur Chrome, dans l'en-tête des Dev\n\n6\n00:00:19.730 --> 00:00:22.530\nTools, vous allez cliquer sur les\nflèches et cliquer sur Console.\n\n7\n00:00:22.770 --> 00:00:25.880\nIl est également possible que vous\nayez déjà le mot Console qui apparaisse\n\n8\n00:00:26.080 --> 00:00:26.840\nici.\n\n9\n00:00:27.040 --> 00:00:28.470\nSur Firefox, c'est la même chose.\n\n10\n00:00:28.670 --> 00:00:31.620\nOn peut cliquer sur les flèches\net venir cliquer sur Console.\n\n11\n00:00:31.820 --> 00:00:35.850\nDonc, en tant que développeur,\nvous avez la possibilité de faire\n\n12\n00:00:36.050 --> 00:00:37.920\napparaître des messages dans la console.\n\n13\n00:00:38.460 --> 00:00:42.120\nEt ici, les développeurs chez\nOpenClassrooms ont choisi de faire\n\n14\n00:00:42.320 --> 00:00:45.960\napparaître cet avertissement qui\nnous avertit de ne pas venir coller\n\n15\n00:00:46.160 --> 00:00:50.340\ndu code qu'on ne comprend pas dans\nla console pour éviter les attaques\n\n16\n00:00:50.540 --> 00:00:54.540\nqu'on appelle attaques Self-XSS\nou l'attaquant nous convint de venir\n\n17\n00:00:54.740 --> 00:00:57.300\ncoller du code néfaste dans la console.\n\n18\n00:00:58.530 --> 00:01:03.900\nOn voit également des avertissements\nqui sont liés au code source et\n\n19\n00:01:04.100 --> 00:01:07.740\non voit également une erreur,\ndonc un problème qui a été causé\n\n20\n00:01:07.940 --> 00:01:10.590\npar quelque chose dans le fonctionnement\nde la page.\n\n21\n00:01:10.790 --> 00:01:14.160\nVisiblement, ce n'est pas une erreur\ntrès grave parce que la page fonctionne\n\n22\n00:01:14.360 --> 00:01:19.350\nquand même, mais vous avez ici toutes\nles informations essentielles dont\n\n23\n00:01:19.550 --> 00:01:22.710\non a besoin, en tant que développeur,\npour savoir comment fonctionnent\n\n24\n00:01:22.910 --> 00:01:23.670\nnos projets.\n"
+        },
+        "pairedItem": {
+          "item": 12
+        }
+      },
+      {
+        "json": {
+          "title": "FR_6943241_CRS_envrment-front-end_0-0_1-4_SCR",
+          "captions": "WEBVTT\n\n1\n00:00:00.120 --> 00:00:04.320\nEnviron 50% du trafic web aujourd'hui\nvient d'appareils mobiles,\n\n2\n00:00:04.740 --> 00:00:08.040\ndonc il vous sera indispensable,\nen tant que développeur Front-End,\n\n3\n00:00:08.310 --> 00:00:10.770\nde tester vos projets sur des appareils\nmobiles.\n\n4\n00:00:11.400 --> 00:00:15.150\nLes DevTools vous proposent un outil\npour simuler l'utilisation d'un\n\n5\n00:00:15.350 --> 00:00:16.110\nappareil mobile.\n\n6\n00:00:16.620 --> 00:00:20.370\nDans Chrome, je peux venir cliquer\nici pour activer le mode mobile&nbsp;;\n\n7\n00:00:21.090 --> 00:00:25.470\net dans Firefox, le bouton est ici,\nen haut à droite.\n\n8\n00:00:26.250 --> 00:00:29.400\nComme vous le constatez,\non a un redimensionnement de la\n\n9\n00:00:29.600 --> 00:00:34.140\npartie active de la fenêtre de\nnavigation, pour simuler un appareil\n\n10\n00:00:34.340 --> 00:00:35.100\nmobile.\n\n11\n00:00:35.490 --> 00:00:39.150\nOn voit bien le super travail des\ndéveloppeurs OpenClassrooms car\n\n12\n00:00:39.350 --> 00:00:43.950\nleur interface fonctionne très bien\nsur mobile, grâce au design responsive.\n\n13\n00:00:44.340 --> 00:00:48.060\nPar exemple, on a un bouton menu ici,\nplutôt qu'avoir des liens en haut,\n\n14\n00:00:48.340 --> 00:00:50.130\ndonc ça fonctionne très bien sur mobile.\n\n15\n00:00:51.180 --> 00:00:54.720\nDans l'entête du navigateur,\nvous avez des options pour le mode\n\n16\n00:00:54.920 --> 00:00:58.260\nmobile&nbsp;: on peut choisir,\npar exemple, le type d'appareil\n\n17\n00:00:58.460 --> 00:01:03.810\nqui est simulé&nbsp;; on peut choisir\nson orientation&nbsp;; on peut même choisir\n\n18\n00:01:04.010 --> 00:01:09.000\nde limiter la bande passante pour\nsimuler une mauvaise connexion mobile.\n\n19\n00:01:09.420 --> 00:01:12.990\nTous ces outils vous seront\nindispensables dans les tests de\n\n20\n00:01:13.190 --> 00:01:13.950\nvos projets.\n"
+        },
+        "pairedItem": {
+          "item": 13
+        }
+      }
+    ],
+    "Extract vimeo URLs": [
+      {
+        "json": {
+          "video": [
+            "https://vimeo.com/491649859",
+            "https://vimeo.com/491647985",
+            "https://vimeo.com/491648565",
+            "https://vimeo.com/491648135",
+            "https://vimeo.com/491648160",
+            "https://vimeo.com/491648267",
+            "https://vimeo.com/491648321",
+            "https://vimeo.com/673125468",
+            "https://player.vimeo.com/video/491648453?color=7451eb",
+            "https://vimeo.com/491649474",
+            "https://vimeo.com/491648719",
+            "https://vimeo.com/491649042",
+            "https://vimeo.com/491649218",
+            "https://vimeo.com/491649402"
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Filter tags": [
+      {
+        "json": {
+          "link": "https://vimeo.com/491649859",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491647985",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491648565",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491648135",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491648160",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491648267",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491648321",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/673125468",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://player.vimeo.com/video/491648453?color=7451eb",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491649474",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491648719",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491649042",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491649218",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "link": "https://vimeo.com/491649402",
+          "name": null
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Extract vimeo URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract vimeo URLs": {
+      "main": [
+        [
+          {
+            "node": "Filter tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter tags": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse vimeo ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse vimeo ID": {
+      "main": [
+        [
+          {
+            "node": "Get video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get video": {
+      "main": [
+        [
+          {
+            "node": "Get captions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle none",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle none": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter captions": {
+      "main": [
+        [
+          {
+            "node": "Download caption",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle none",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download caption": {
+      "main": [
+        [
+          {
+            "node": "Output caption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get captions": {
+      "main": [
+        [
+          {
+            "node": "Filter captions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output caption": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "699cc23c-7e53-4034-bd33-a8ed3ccf652d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8524bd12d70e0a97c731d06e7b34aca714fad09c346374a21b1e6e6cde0f217e"
+  },
+  "id": "rJc7RDKHI7x9F04z",
+  "tags": []
+}
