@@ -102,7 +102,53 @@ Détail : [pricing gpt-image mesuré sur tokens réels](../../06_specs/research/
 
 ---
 
-## 6. Reste à construire
+## 6. Le MAIN Assets (construit de zéro)
 
-- **Build Phase 1 Handoff** intégré au pipeline (générer `phase1_handoff.json` automatiquement en fin de P1 — dépend du refactor lot-synchrone, voir [qa_join_and_delivery.md](qa_join_and_delivery.md)).
-- **Workflows A8** (synchrone vision+image), **A9**, **A10** (faisabilité A8 validée ; A9/A10 à concevoir).
+Workflow **`[MAIN] LEO v1 — Assets`** (id `iOvLCwyOv8ReIxbG`, actif), construit de zéro
+(ne réutilise PAS l'ancien MAIN Media & Annexes).
+
+- **Form** : `http://localhost:5678/form/leo-assets`
+- **Input = TARGET ID** uniquement (+ email + 4 cases A7/A8/A9/A10)
+- **Gate Phase 1** : depuis le seul target id, retrouve le HTML via **GitHub Trees API**
+  (`git/trees/main?recursive=1` → regex `07_runs/(\d+)/output/{target}_localized_(.+)\.html$`)
+  → en déduit `source_id`, `direction`, `html_url`, `handoff_url`. Si absent → email d'erreur.
+- **Règle** : A7/A8/A9/A10 ne tournent **que si le HTML Phase 1 existe** sur GitHub.
+
+> Pièges de création de workflow via l'API n8n (rencontrés) : `/activate` exige
+> `Content-Type: application/json` ; un `formTrigger` créé par API n'a pas de `webhookId`
+> (en ajouter un UUID) ; le form reste 404 jusqu'à un **restart Docker** (registre webhook
+> in-memory désynchronisé) — checkpointer le WAL **avant** le restart.
+
+## 7. Upload Iconik (séquence S3 vérifiée)
+
+Les médias localisés vont dans **Iconik** (MAM), structurés par target id (voir §1).
+Auth : header `App-ID: ***REMOVED***` + `Auth-Token`. Storage
+FILES : `iconik-files-s3` (id `***REMOVED***`, bucket
+`oc-multimedia-iconik`, eu-west-3).
+
+Séquence d'upload (réf : ancien SUB « Copy videos to iconik », `04_n8n_flows/reference_legacy/`) :
+```
+1. POST /API/assets/v1/assets?assign_to_collection=true   {title, collection_id, type:ASSET, status:ACTIVE}
+2. GET  /API/files/v1/storages/matching/FILES/            → storage (OBJET unique, pas liste)
+3. POST /API/files/v1/assets/{id}/formats/                {name:ORIGINAL, metadata:[{internet_media_type}], storage_methods:[S3]}
+4. POST /API/files/v1/assets/{id}/file_sets/              {format_id, storage_id, base_dir:/, name}
+5. POST /API/files/v1/assets/{id}/files/                  {size, original_name, type:FILE, format_id, file_set_id, storage_id, multipart_upload_url:false}  → upload_url (presigned S3)
+6. PUT  {upload_url}   (binaire direct, S3 — pas de header App-ID)
+7. PATCH /API/files/v1/assets/{id}/files/{file_id}/       {status:CLOSED, progress_processed:100}
+```
+> S3 = **1 seul PUT presigned** (plus simple que GCS). mime par agent : A8 `image/png`,
+> A7 `application/x-subrip`, A9 selon type.
+
+## 8. État de construction (2026-06-11)
+
+| Élément | État |
+|---|---|
+| MAIN Assets (form + gate) | ✅ construit, actif |
+| Auth Iconik + storage FILES | ✅ vérifiés |
+| Séquence upload S3 | ✅ documentée (réf legacy) |
+| A7 (prompt V2) + Get captions (réf) | ✅ prêt à brancher |
+| A8 (édition gpt-image-2) | ✅ dérisqué (faisabilité + coût) |
+| Brique upload Iconik réutilisable | 🔜 à construire + tester sur 1 fichier |
+| Branchement A7→A10 dans le MAIN | 🔜 |
+| A9 / A10 workflows | 🔜 à concevoir |
+| Build Phase 1 Handoff auto en fin de P1 | 🔜 (dépend refactor lot-synchrone Phase 1) |
