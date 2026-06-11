@@ -1,11 +1,17 @@
-# Ressources_Loc_OSS
-**Strategic Library — OpenClassrooms Automated Localization (CLS v3)**
+# Ressources_Loc_OSS — LEO v1
+**LEO v1 — « Localization Engine Operator »**
+*OpenClassrooms Automated Localization*
 
 Dépôt central du pipeline de localisation automatisée OC. Toutes les ressources sont lues et écrites par les agents via l'API GitHub. Orchestration n8n self-hosted.
 
+> **Noms :** **LEO v1** = nom produit de l'outil. **CLS v3** (Content Localization System v3) = nom technique interne du pipeline n8n (workflows, exports). Les deux désignent le même système.
+> Le pipeline a **deux phases**, lancées via **deux formulaires distincts** partageant le même triplet d'identifiants (`source_course_id` + `target_course_id` + direction) :
+> 1. **Phase 1 — HTML** (texte du cours)
+> 2. **LEO v1 — Assets** (images, annexes, liens, transcripts) — déclenchée après validation de la Phase 1
+
 ---
 
-## Architecture CLS v3
+## Architecture
 
 ### Phase 1 — HTML Pipeline
 
@@ -52,19 +58,34 @@ Reassembler ────────────── Réassemblage HTML + 7 ch
 Deliver Output ─────────── Push 8 fichiers GitHub + email (liens, pas de PJ)
 ```
 
-### Phase 2 — Media & Annexes
+### LEO v1 — Assets (Phase 2)
 
-> Déclenché uniquement après Phase 1 ≥ 90/100
+> Déclenché par un **2ᵉ formulaire**, après validation de la Phase 1.
+> Prérequis (vérifié par un gate) : `{target}_phase1_handoff.json` + le HTML Gold Master doivent exister sur GitHub.
+
+Le **`phase1_handoff.json`** est le contrat d'interface P1→Assets. Son `media_inventory`
+(produit par A1) agit comme **dispatcher** : chaque asset est routé vers son agent.
 
 ```
-A7 Caption Localizer ──── SRT/VTT Vimeo
-A8 Image Localizer ─────── Vision + édition images *(à construire)*
-A9 Annexes Localizer ───── XLSX / DOCX / PPTX / CSV *(à construire)*
-A10 Links Resolver ─────── Résolution des liens externes FR→EN *(à construire)*
+phase1_handoff.json (media_inventory = dispatcher)
+        │
+        ├── image           → A8 Image Localizer   (vision + édition gpt-image-2)
+        ├── pdf/docx/xlsx/pptx → A9 Annexes Localizer (XLSX/DOCX/PPTX/CSV)
+        ├── video/screencast → A7 Dubbing Transcript Adapter (SRT/VTT, dubbing IA)
+        └── link            → A10 Links Resolver   (résolution liens FR→EN)   [EN DERNIER : agrège]
         │
         ▼
-Iconik ─────────────────── Stockage assets localisés
+Iconik / GitHub ─────────── Stockage assets localisés + rapports
 ```
+
+**Hiérarchie imposée** : A8/A9/A7 en parallèle (après le handoff) ; **A10 en dernier** (il agrège les liens du HTML + annexes + images + captions).
+
+**Règles métier :**
+- **Les bannières ne sont pas traitées** (exclues par nom de fichier « banner »).
+- **Screenshots UI réels → préservés** (pas d'édition, falsifierait l'interface). Seuls diagrammes/infographies/tableaux sont édités.
+- A8 vérifie chaque image après édition (re-OCR + comparaison aux traductions attendues, flag si écart).
+
+État : **A7** actif (prompt V2 à appliquer) · **A8** dérisqué (faisabilité + coût validés) · **A9/A10** à construire.
 
 ---
 
@@ -72,11 +93,13 @@ Iconik ─────────────────── Stockage assets
 
 | Composant | Modèle | Type | Temperature |
 |---|---|---|---|
-| Pre-Translation → A7 | `gpt-5.5-pro-2026-04-23` | Reasoning | — (omise) |
-| A8 → A10 *(à venir)* | `gpt-5.5-pro-2026-04-23` | Reasoning | — |
+| Pre-Translation → A7, A9, A10 | `gpt-5.5-pro-2026-04-23` | Reasoning (Batch API) | — (omise) |
+| A8 — analyse image | modèle vision (gpt-5.x vision) | — | — |
+| A8 — édition image | `gpt-image-2` (`/v1/images/edits`, synchrone) | Image | — |
 
 > Les modèles reasoning (`-pro`) n'acceptent pas de valeur `temperature` personnalisée.
 > Voir [`docs/openai_reasoning_models_temperature.md`](docs/openai_reasoning_models_temperature.md)
+> A8 tourne en **synchrone** (l'édition d'image n'a pas de Batch API). `input_fidelity` non supporté par gpt-image-2.
 
 ---
 
@@ -130,6 +153,8 @@ URL formulaire : http://localhost:5678/form/f146189f-507c-44da-beb7-6c888a156a3f
 | Document | Description |
 |---|---|
 | [`docs/CLS_v3_agents_overview.md`](docs/CLS_v3_agents_overview.md) | Vue d'ensemble complète des agents Phase 1 et Phase 2 |
+| [`docs/architecture/assets_pipeline.md`](docs/architecture/assets_pipeline.md) | **LEO v1 — Assets** : handoff, dispatcher, A7–A10, A8 dérisqué, coûts |
+| [`docs/architecture/qa_join_and_delivery.md`](docs/architecture/qa_join_and_delivery.md) | Join QA A5→A6, réassemblage propre, livraison, état des lieux HTML |
 | [`docs/OC_html_extractor.md`](docs/OC_html_extractor.md) | Extracteur HTML OC — authentification, flow, structure du HTML produit |
 | [`docs/OC_asset_extractor.md`](docs/OC_asset_extractor.md) | Extracteur d'assets statiques OC (outil autonome, ZIP) |
 | [`docs/openai_reasoning_models_temperature.md`](docs/openai_reasoning_models_temperature.md) | Incompatibilité `temperature` sur les reasoning models — règle et fix |
@@ -153,9 +178,22 @@ URL formulaire : http://localhost:5678/form/f146189f-507c-44da-beb7-6c888a156a3f
 
 ---
 
+## Coûts (réels mesurés — 2026-06)
+
+| Poste | Coût réel | Base |
+|---|---|---|
+| **Phase 1 (texte)** | **~$5 / partie** (4 chapitres) → ~$1.25/chapitre | run 8787276 |
+| **A8 (images)** | **~$0.10 / image** (analyse + édition + vérif) | tokens mesurés gpt-image-2 |
+| **Cours complet** (12 ch + ~15 images) | **~$16-20** | Phase 1 ~$15 + Assets ~$1.5 |
+
+→ Enveloppe **$50 OpenAI ≈ 3 cours complets**. Le **texte domine (~90 %)** ; les images sont marginales. Batch API = −50 % sur le texte (livraison J+1, latence variable).
+
+---
+
 ## Nommage des runs
 
-`07_runs/{course_id}/` — ID OC à 7 chiffres.
+`07_runs/{course_id}/` — ID OC à 7 chiffres (= `source_course_id`).
 Exemple : `07_runs/8787276/`
 
-Sous-dossier `scratch/` : fichiers JSONL batch intermédiaires (archivage des appels OpenAI).
+- `scratch/` : fichiers JSONL batch intermédiaires (archivage des appels OpenAI).
+- `output/` : livrables — `{target}_localized_{dir}.html`, `{target}_qa_report_{dir}.md`, `{target}_phase1_handoff.json`, decision log, TM patch, ToDo CSV.
