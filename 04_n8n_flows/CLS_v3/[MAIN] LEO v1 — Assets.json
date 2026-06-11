@@ -1,0 +1,647 @@
+{
+  "updatedAt": "2026-06-11T10:01:46.308Z",
+  "createdAt": "2026-06-11T10:00:42.318Z",
+  "id": "iOvLCwyOv8ReIxbG",
+  "name": "[MAIN] LEO v1 — Assets",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "leo-assets",
+        "formTitle": "LEO v1 — Assets",
+        "formDescription": "Localisation des assets d'un cours déjà traité en Phase 1 (HTML). Saisir l'ID du cours cible (target).",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Target Course ID",
+              "placeholder": "ex: 8970456",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Transcripts / Dubbing (A7)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Images (A8)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Annexes (A9)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Liens (A10)",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {}
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "respondWith": "text",
+          "responseText": "Requête reçue. Les assets seront traités si la Phase 1 (HTML) est disponible. Résultats envoyés par email."
+        }
+      },
+      "id": "78af250c-d4cf-4b6d-a753-82270f849b3b",
+      "name": "LEO Assets Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        400
+      ],
+      "webhookId": "529d0e1a-436e-4233-acc6-c872d6026de8"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst f=$input.first().json;\nconst cb=(v)=> !!(Array.isArray(v)? v.length : v);\nreturn [{json:{\n  target_id: String(f['Target Course ID']||'').trim(),\n  email: f['Email'],\n  modules:{\n    a7: cb(f['Transcripts / Dubbing (A7)']),\n    a8: cb(f['Images (A8)']),\n    a9: cb(f['Annexes (A9)']),\n    a10: cb(f['Liens (A10)'])\n  },\n  started_at: new Date().toISOString()\n}}];\n"
+      },
+      "id": "9829d80c-a235-48c3-a51e-ddfae827e2d4",
+      "name": "Init Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/git/trees/main?recursive=1",
+        "options": {}
+      },
+      "id": "37cccf9b-8431-4f25-887c-546467276db1",
+      "name": "Find P1 (GitHub Tree)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst ip=$('Init Params').first().json;\nconst target=ip.target_id;\nconst tree=($('Find P1 (GitHub Tree)').first().json.tree)||[];\nconst re=new RegExp('07_runs/(\\\\d+)/output/'+target+'_localized_(.+)\\\\.html$');\nlet found=null;\nfor(const t of tree){ const m=(t.path||'').match(re); if(m){ found={path:t.path, source_id:m[1], direction:m[2]}; break; } }\nif(!found) return [{json:{...ip, phase1_ready:false}}];\nconst RAW='https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/';\nconst od='07_runs/'+found.source_id+'/output/';\nconst enc=(p)=>RAW+encodeURIComponent(p).replace(/%2F/g,'/');\n// handoff présent ?\nconst hasHandoff=tree.some(t=>t.path===od+target+'_phase1_handoff.json');\nreturn [{json:{\n  ...ip, phase1_ready:true, source_id:found.source_id, direction:found.direction,\n  html_path:found.path,\n  html_url:enc(found.path),\n  handoff_present:hasHandoff,\n  handoff_url:enc(od+target+'_phase1_handoff.json'),\n  output_dir:od\n}}];\n"
+      },
+      "id": "522870dd-4ff2-467e-9312-daf1885d1d20",
+      "name": "Locate Deliverables",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.phase1_ready }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "3f7e66b5-4532-4052-8786-f2d86ac6c715",
+      "name": "Phase 1 Ready?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst j=$input.first().json;\nreturn [{json:{...j, error_html:`<h2>LEO Assets — Phase 1 introuvable</h2>\n<p>Aucun HTML localisé trouvé pour le Target ID <b>${j.target_id}</b> dans <code>07_runs/*/output/${j.target_id}_localized_*.html</code>.</p>\n<p>Lance d'abord la <b>Phase 1</b> (localisation HTML) pour ce cours, puis relance les Assets.</p>`}}];\n"
+      },
+      "id": "cd40ff0b-d0c1-4b1e-9252-b37090aefca7",
+      "name": "P1 Missing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "jborrotzu@gmail.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=[LEO Assets] Phase 1 introuvable — {{ $json.target_id }}",
+        "emailFormat": "html",
+        "html": "={{ $json.error_html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "202187f7-57c3-485b-b131-ffa530311704",
+      "name": "Send Error Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1560,
+        560
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.handoff_url }}",
+        "options": {}
+      },
+      "id": "834aca18-956b-4031-bac5-8778a9de6830",
+      "name": "Load Handoff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1300,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "ff943716-a9ad-42bf-90b2-2e78a8a5cd07",
+      "name": "Phase 1 OK → Route Agents",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "LEO Assets Form": {
+      "main": [
+        [
+          {
+            "node": "Init Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Params": {
+      "main": [
+        [
+          {
+            "node": "Find P1 (GitHub Tree)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find P1 (GitHub Tree)": {
+      "main": [
+        [
+          {
+            "node": "Locate Deliverables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Locate Deliverables": {
+      "main": [
+        [
+          {
+            "node": "Phase 1 Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Phase 1 Ready?": {
+      "main": [
+        [
+          {
+            "node": "Load Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "P1 Missing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Handoff": {
+      "main": [
+        [
+          {
+            "node": "Phase 1 OK → Route Agents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "P1 Missing": {
+      "main": [
+        [
+          {
+            "node": "Send Error Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
+  "activeVersionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
+  "versionCounter": 8,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-11T10:00:42.323Z",
+      "createdAt": "2026-06-11T10:00:42.323Z",
+      "role": "workflow:owner",
+      "workflowId": "iOvLCwyOv8ReIxbG",
+      "projectId": "7y0kZCkeSDugmpzP",
+      "project": {
+        "updatedAt": "2026-03-12T16:05:16.582Z",
+        "createdAt": "2026-03-12T16:02:39.200Z",
+        "id": "7y0kZCkeSDugmpzP",
+        "name": "Jérémie Borrotzu <jeremie.borrotzu@openclassrooms.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-06-11T10:01:46.310Z",
+    "createdAt": "2026-06-11T10:01:46.310Z",
+    "versionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
+    "workflowId": "iOvLCwyOv8ReIxbG",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "leo-assets",
+          "formTitle": "LEO v1 — Assets",
+          "formDescription": "Localisation des assets d'un cours déjà traité en Phase 1 (HTML). Saisir l'ID du cours cible (target).",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Target Course ID",
+                "placeholder": "ex: 8970456",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Email",
+                "fieldType": "email",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Transcripts / Dubbing (A7)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Images (A8)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Annexes (A9)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              },
+              {
+                "fieldLabel": "Liens (A10)",
+                "fieldType": "checkbox",
+                "fieldOptions": {
+                  "values": [
+                    {}
+                  ]
+                }
+              }
+            ]
+          },
+          "options": {
+            "respondWith": "text",
+            "responseText": "Requête reçue. Les assets seront traités si la Phase 1 (HTML) est disponible. Résultats envoyés par email."
+          }
+        },
+        "id": "78af250c-d4cf-4b6d-a753-82270f849b3b",
+        "name": "LEO Assets Form",
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          400
+        ],
+        "webhookId": "529d0e1a-436e-4233-acc6-c872d6026de8"
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst f=$input.first().json;\nconst cb=(v)=> !!(Array.isArray(v)? v.length : v);\nreturn [{json:{\n  target_id: String(f['Target Course ID']||'').trim(),\n  email: f['Email'],\n  modules:{\n    a7: cb(f['Transcripts / Dubbing (A7)']),\n    a8: cb(f['Images (A8)']),\n    a9: cb(f['Annexes (A9)']),\n    a10: cb(f['Liens (A10)'])\n  },\n  started_at: new Date().toISOString()\n}}];\n"
+        },
+        "id": "9829d80c-a235-48c3-a51e-ddfae827e2d4",
+        "name": "Init Params",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          260,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://api.github.com/repos/jeremieborrotzu-blip/Ressources_Loc_OSS/git/trees/main?recursive=1",
+          "options": {}
+        },
+        "id": "37cccf9b-8431-4f25-887c-546467276db1",
+        "name": "Find P1 (GitHub Tree)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          520,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst ip=$('Init Params').first().json;\nconst target=ip.target_id;\nconst tree=($('Find P1 (GitHub Tree)').first().json.tree)||[];\nconst re=new RegExp('07_runs/(\\\\d+)/output/'+target+'_localized_(.+)\\\\.html$');\nlet found=null;\nfor(const t of tree){ const m=(t.path||'').match(re); if(m){ found={path:t.path, source_id:m[1], direction:m[2]}; break; } }\nif(!found) return [{json:{...ip, phase1_ready:false}}];\nconst RAW='https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/';\nconst od='07_runs/'+found.source_id+'/output/';\nconst enc=(p)=>RAW+encodeURIComponent(p).replace(/%2F/g,'/');\n// handoff présent ?\nconst hasHandoff=tree.some(t=>t.path===od+target+'_phase1_handoff.json');\nreturn [{json:{\n  ...ip, phase1_ready:true, source_id:found.source_id, direction:found.direction,\n  html_path:found.path,\n  html_url:enc(found.path),\n  handoff_present:hasHandoff,\n  handoff_url:enc(od+target+'_phase1_handoff.json'),\n  output_dir:od\n}}];\n"
+        },
+        "id": "522870dd-4ff2-467e-9312-daf1885d1d20",
+        "name": "Locate Deliverables",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          780,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.phase1_ready }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "3f7e66b5-4532-4052-8786-f2d86ac6c715",
+        "name": "Phase 1 Ready?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1040,
+          400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst j=$input.first().json;\nreturn [{json:{...j, error_html:`<h2>LEO Assets — Phase 1 introuvable</h2>\n<p>Aucun HTML localisé trouvé pour le Target ID <b>${j.target_id}</b> dans <code>07_runs/*/output/${j.target_id}_localized_*.html</code>.</p>\n<p>Lance d'abord la <b>Phase 1</b> (localisation HTML) pour ce cours, puis relance les Assets.</p>`}}];\n"
+        },
+        "id": "cd40ff0b-d0c1-4b1e-9252-b37090aefca7",
+        "name": "P1 Missing",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1300,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "fromEmail": "jborrotzu@gmail.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "=[LEO Assets] Phase 1 introuvable — {{ $json.target_id }}",
+          "emailFormat": "html",
+          "html": "={{ $json.error_html }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "202187f7-57c3-485b-b131-ffa530311704",
+        "name": "Send Error Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1560,
+          560
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "={{ $json.handoff_url }}",
+          "options": {}
+        },
+        "id": "834aca18-956b-4031-bac5-8778a9de6830",
+        "name": "Load Handoff",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1300,
+          300
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "ff943716-a9ad-42bf-90b2-2e78a8a5cd07",
+        "name": "Phase 1 OK → Route Agents",
+        "type": "n8n-nodes-base.noOp",
+        "typeVersion": 1,
+        "position": [
+          1560,
+          300
+        ]
+      }
+    ],
+    "connections": {
+      "LEO Assets Form": {
+        "main": [
+          [
+            {
+              "node": "Init Params",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Init Params": {
+        "main": [
+          [
+            {
+              "node": "Find P1 (GitHub Tree)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find P1 (GitHub Tree)": {
+        "main": [
+          [
+            {
+              "node": "Locate Deliverables",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Locate Deliverables": {
+        "main": [
+          [
+            {
+              "node": "Phase 1 Ready?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Phase 1 Ready?": {
+        "main": [
+          [
+            {
+              "node": "Load Handoff",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "P1 Missing",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Handoff": {
+        "main": [
+          [
+            {
+              "node": "Phase 1 OK → Route Agents",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "P1 Missing": {
+        "main": [
+          [
+            {
+              "node": "Send Error Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Jérémie Borrotzu",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-06-11T10:01:46.362Z",
+        "id": 643,
+        "workflowId": "iOvLCwyOv8ReIxbG",
+        "versionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
+        "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      }
+    ]
+  }
+}
