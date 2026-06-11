@@ -85,7 +85,11 @@ Iconik / GitHub ─────────── Stockage assets localisés + r
 - **Screenshots UI réels → préservés** (pas d'édition, falsifierait l'interface). Seuls diagrammes/infographies/tableaux sont édités.
 - A8 vérifie chaque image après édition (re-OCR + comparaison aux traductions attendues, flag si écart).
 
-État : **A7** actif (prompt V2 à appliquer) · **A8** dérisqué (faisabilité + coût validés) · **A9/A10** à construire.
+**Form Assets** : `http://localhost:5678/form/leo-assets` — **input = TARGET ID** (le gate retrouve le HTML Phase 1 sur GitHub depuis ce seul id). A7-A10 ne tournent que si le HTML Phase 1 existe.
+
+**Destination des médias = Iconik** (MAM), pas GitHub. Storage S3 `iconik-files-s3` (bucket `oc-multimedia-iconik`). Structure `0000_LOCALISATION/{target}/{static_graphics | external_files | transcripts}`. GitHub ne reçoit que les rapports/logs.
+
+État : MAIN Assets **construit** (form + gate) · **A7** prêt (prompt V2) · **A8** dérisqué (faisabilité + coût) · upload Iconik (séquence S3 vérifiée) **à brancher** · **A9/A10** à construire. Détail : [`docs/architecture/assets_pipeline.md`](docs/architecture/assets_pipeline.md).
 
 ---
 
@@ -128,8 +132,11 @@ manuelle dépend de l'onglet navigateur (elle meurt si on le ferme ou si le post
 en veille), ce qui est incompatible avec un pipeline Batch de plusieurs heures.
 
 ```
-URL formulaire : http://localhost:5678/form/f146189f-507c-44da-beb7-6c888a156a3f
+Form Phase 1 (HTML)  : http://localhost:5678/form/f146189f-507c-44da-beb7-6c888a156a3f
+Form LEO Assets (P2) : http://localhost:5678/form/leo-assets   (input = TARGET ID)
 ```
+
+> **2 formulaires, 2 lancements** : Phase 1 (HTML) d'abord, puis Assets après validation. Le form Assets prend le **TARGET ID** et retrouve seul le HTML Phase 1 sur GitHub (gate). Si le HTML n'existe pas → email d'erreur, rien ne tourne.
 
 ---
 
