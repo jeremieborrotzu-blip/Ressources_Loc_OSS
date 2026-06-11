@@ -1,0 +1,438 @@
+<p>Every day, large volumes of data move between sites within the same company. Without adequate protection, this information can be intercepted or manipulated. Fortunately, solutions like IPsec can encrypt and secure these exchanges.</p><p>In this course, you will learn to <strong>design, configure, and validate a site-to-site IPsec VPN tunnel</strong> using the well-known Cisco Packet Tracer simulator. You will be guided step by step through each stage: from configuring routers, to establishing the IPsec tunnel, to performing essential technical checks.</p><aside data-claire-semantic="information"><p>🔧 <strong>Discover what you’ll learn in this course:</strong></p><ul><li><p>A clear overview of the network topology used, with multiple remote sites</p></li><li><p>Full configuration of an IPsec VPN using IKEv1</p></li><li><p>Adding a third site to manage multiple simultaneous VPN tunnels</p></li><li><p>Using ACLs, crypto maps, and diagnostic commands</p></li></ul></aside><p><strong>🚀 Ready to get hands-on with configuration and master the basics of a secure VPN? Join the course now and build your networking skills!</strong></p>
+
+<h2>Configure a Site-to-Site IPsec VPN in Cisco Packet Tracer</h2>
+<h3>Make the most out of this course</h3>
+<p><img src="https://user.oc-static.com/upload/2026/01/15/17684878266718_OC-Course-Banners_Tirez-un-max-de-ce-cours.png" alt="" /></p><p>Welcome to this course on setting up an IPsec VPN with Cisco Packet Tracer. It’s designed to be <strong>clear, gradual, and hands-on</strong>. Whether you’re new to IPsec or want to strengthen your network configuration skills, you can move forward step by step. Follow the demos, reproduce the commands, and test what you’ve learned with the built-in quizzes.</p><aside data-claire-semantic="information"><p><strong>Open Cisco Packet Tracer during the course and apply each configuration right away—it’s the best way to make effective progress.</strong></p></aside><h4>Meet Your Instructor</h4><p></p><p><img src="https://user.oc-static.com/upload/2026/01/15/17684880291364_Teacher-Etienne-Laplume.png" alt="" /></p><p>Etienne Laplume is a network and security engineer. He worked for 10 years at a European multinational before becoming a freelancer. He has over 15 years of experience in networking and has developed expertise in Cisco technologies (routers, switches) and Stormshield technologies (firewalls).</p><p></p><p><em>Ready to take on the challenge? Let’s get started!</em></p>
+<h3>Explore the Topology Used</h3><p><img src="https://user.oc-static.com/upload/2026/01/15/17684881214388_FR_8787276_banner.png" alt="" /></p><p>Before diving into IPsec VPN configuration, it’s important to understand the architecture of the network you’ll be working on. In this chapter, you’ll explore the topology used in the course, including its different sites, routers, and the connections between them.</p><p>This will help you clearly visualize the path the data will take… and the secure tunnel you’ll build from start to finish.</p><h4>Study the Infrastructure</h4><p>You’ll now learn how to configure an IPsec VPN with Packet Tracer using this lab topology, which consists of two remote sites: <strong>OC-SITE-A</strong> and <strong>OC-SITE-B</strong>.</p><p>Each site has users who need to access the company’s two networks. This is called a <strong>site-to-site VPN</strong>.</p><p>In this lab topology, PC1 is located at the OC-SITE-A site on LAN 192.168.1.0/24, and PC2 is located at the OC-SITE-B site on LAN 192.168.2.0/24.</p><figure><img src="https://user.oc-static.com/upload/2026/01/09/17679694348795_image7.png" alt="Network diagram showing two sites, OC-SITE-A and OC-SITE-B, connected via WAN. Each site connects a local PC with different private IP ranges." /><figcaption>PC-1 is on OC-SITE-A and PC-2 is on OC-SITE-B</figcaption></figure><div><aside data-claire-semantic="information"><p>To practice as you follow this course, you can use the <strong>Cisco 1941 router</strong> available in Packet Tracer. This router model provides all the features you need to set up an IPsec VPN.</p></aside></div><div><aside data-claire-semantic="warning"><p>Packet Tracer is an excellent simulation tool that lets you configure IPsec with IKEv1. That said, Packet Tracer does not let you configure IPsec with IKEv2. Even though IKEv1 has been replaced by IKEv2, which is faster and more secure, the basic principle remains the same. The tables below list the differences between IKEv1 and IKEv2:</p><p></p><figure><img src="https://user.oc-static.com/upload/2026/01/09/17679696756745_image5.png" alt="Comparison table between IKEv1 and IKEv2 based on several technical criteria, including year introduced, structure, messages, negotiation, reliability, and NAT-T support." /><figcaption>Comparison of IKEv1 and IKEv2 technical criteria</figcaption></figure><p></p><figure><img src="https://user.oc-static.com/upload/2026/01/09/17679696868077_image6.png" alt="Comparison table of functional criteria between IKEv1 and IKEv2: authentication, configuration, security, recovery, interoperability, and recommended use." /><figcaption>Comparison of IKEv1 and IKEv2 functional criteria</figcaption></figure></aside></div><p></p><p></p><h4>Configure the Basic Topology</h4><p>Start with the basic router configuration, beginning with the OC-SITE-A router:</p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#interface gig 0/0
+
+OC-SITE-A(config-if)#ip address 192.168.1.254 255.255.255.0
+
+OC-SITE-A(config-if)#ip nat insidem
+
+OC-SITE-A(config-if)#no shut
+
+OC-SITE-A(config-if)#exit
+
+OC-SITE-A(config)#interface gig 0/1
+
+OC-SITE-A(config-if)#ip address 62.59.1.1 255.255.255.252
+
+OC-SITE-A(config-if)#ip nat outside
+
+OC-SITE-A(config-if)#no shut
+
+OC-SITE-A(config-if)#exit
+
+&amp;nbsp;
+
+OC-SITE-A(config)#ip route 0.0.0.0 0.0.0.0 62.59.1.2
+
+&amp;nbsp;
+
+OC-SITE-A(config)#ip access-list extended NAT
+
+OC-SITE-A(config-std-nacl)#deny ip&amp;nbsp; 192.168.1.0 0.0.0.255 192.168.2.0 0.0.0.255
+
+OC-SITE-A(config-std-nacl)#permit ip 192.168.1.0 0.0.0.255 any
+
+&amp;nbsp;
+
+OC-SITE-A(config)#ip nat inside source list NAT interface gig 0/1 overload</code></pre><p>This basic configuration includes: a default route through the WAN router; NAT, with the internal interface identified as INSIDE and the WAN interface identified as OUTSIDE; and an ACL that defines what should be translated by NAT and what should not be translated because it is being sent through the VPN. Note that this ACL is used only for NAT, not to allow packets to enter or leave the router interfaces. Finally, the <code data-claire-semantic="text">NAT Overload</code> command translates all IP addresses from LAN 192.168.1.0/24 to the public IP address of the GigabitEthernet 0/1 interface.</p><p>Continue with the OC-SITE-B router, whose configuration is similar to the OC-SITE-A router:</p><pre><code data-claire-semantic="plain_text">OC-SITE-B(config)#interface gig 0/0
+
+OC-SITE-B(config-if)#ip address 192.168.2.254 255.255.255.0
+
+OC-SITE-B(config-if)#ip nat inside
+
+OC-SITE-B(config-if)#no shut
+
+OC-SITE-B(config-if)#exit
+
+OC-SITE-B(config)#interface gig 0/1
+
+OC-SITE-B(config-if)#ip address 59.62.1.1 255.255.255.252
+
+OC-SITE-B(config-if)#ip nat outside
+
+OC-SITE-B(config-if)#no shut
+
+OC-SITE-B(config-if)#exit
+
+&amp;nbsp;
+
+OC-SITE-B(config)#ip route 0.0.0.0 0.0.0.0 59.62.1.2
+
+&amp;nbsp;
+
+OC-SITE-B(config)#ip access-list extended NAT
+
+OC-SITE-B(config-std-nacl)#deny ip&amp;nbsp; 192.168.2.0 0.0.0.255 192.168.1.0 0.0.0.255
+
+OC-SITE-B(config-std-nacl)#permit ip 192.168.2.0 0.0.0.255 any
+
+&amp;nbsp;
+
+OC-SITE-B(config)#ip nat inside source list NAT interface gig 0/1 overload</code></pre><p><strong> </strong></p><p>Configure the WAN router. Its configuration is very simple: you only need to configure the IP addresses on its interfaces:</p><pre><code data-claire-semantic="plain_text">WAN(config)#int gig 0/0
+
+WAN(config-if)#ip address 62.59.1.2 255.255.255.252
+
+WAN(config-if)#no shutdown
+
+WAN(config-if)#exit
+
+WAN(config)#int gig 0/1
+
+WAN(config-if)#ip address 59.62.1.2 255.255.255.252
+
+WAN(config-if)#no shutdown
+
+WAN(config-if)#exit</code></pre><p><strong> </strong></p><p>On the PC side, configure PC1 with IP address 192.168.1.1, subnet mask 255.255.255.0, and default gateway 192.168.1.254. Configure PC2 with IP address 192.168.2.1, subnet mask 255.255.255.0, and default gateway 192.168.2.254.</p><p>To validate your basic configuration, send pings from PC1 and PC2 to a public IP address. You should get this result:</p><pre><code data-claire-semantic="plain_text">Routeur OC-SITE-A :&amp;nbsp;
+
+OC-SITE-A#show ip nat translations
+
+Pro&amp;nbsp; &amp;nbsp; Inside Global Inside Local Outside Local Outside global
+
+icmp 62.59.1.1:1 192.168.1.1:1 59.62.1.1:1 59.62.1.1:1
+
+icmp 62.59.1.1:2 192.168.1.1:2 59.62.1.1:2 59.62.1.1:2
+
+icmp 62.59.1.1:3 192.168.1.1:3 59.62.1.1:3 59.62.1.1:3
+
+icmp 62.59.1.1:4 192.168.1.1:4 59.62.1.1:4 59.62.1.1:4
+
+&amp;nbsp;
+
+Routeur OC-SITE-B :&amp;nbsp;
+
+OC-SITE-B#show ip nat translations
+
+Pro&amp;nbsp; &amp;nbsp; Inside Global Inside Local Outside Local Outside global
+
+icmp 59.62.1.1:1 192.168.2.1:1 62.59.1.1:1 62.59.1.1:1 icmp 59.62.1.1:2 192.168.2.1:2 62.59.1.1:2 62.59.1.1:2 icmp 59.62.1.1:3 192.168.2.1:3 62.59.1.1:3 62.59.1.1:3 icmp 59.62.1.1:4 192.168.2.1:4 62.59.1.1:4 62.59.1.1:4
+
+&amp;nbsp;</code></pre><p>The result confirms that several ICMP packets sent from PC1 to the public IP address of OC-SITE-B were translated by NAT on OC-SITE-A. The same applies to ICMP packets sent from PC2 to the public IP address of OC-SITE-A, which were translated by NAT on the OC-SITE-B router.</p><h4>Prepare the OC-SITE-A and OC-SITE-B Routers for VPN Setup</h4><p>On both routers, enter the command that enables security features, including IPsec. After you enter and validate this command, you’ll need to save your configuration and reboot the routers to apply it:</p><pre><samp>OC-SITE-A(config)#license boot module c1900 technology-package securityk9</samp></pre><div><aside data-claire-semantic="warning"><p>You may need to enter this command twice before it works. This is normal behavior: you’re using a simulator, not a real IOS device.</p></aside></div><p>At the acceptance prompt, type yes:</p><pre><samp>ACCEPT? [yes/no] : yes</samp></pre><p></p><p>Save your configuration:</p><pre><code data-claire-semantic="plain_text">OC-SITE-A#copy running-config startup-config
+
+OC-SITE-A#reload</code></pre><p><strong> </strong></p><p>The configuration is exactly the same on OC-SITE-B:</p><pre><code data-claire-semantic="plain_text">OC-SITE-B(config)#license boot module c1900 technology-package securityk9
+
+ACCEPT? [yes/no] : yes
+
+OC-SITE-B#copy running-config startup-config
+
+OC-SITE-B#reload</code></pre><h4>Let's Recap!</h4><ul><li><p>The network topology used in this course includes two remote sites, OC-SITE-A and OC-SITE-B. Each one has a Cisco 1941 router and is connected through a WAN router simulated in Packet Tracer. Each site hosts a separate local area network (LAN), 192.168.1.0/24 and 192.168.2.0/24, with one PC configured to access the remote network through a site-to-site VPN.</p></li><li><p>The basic router configuration includes IP addressing, NAT setup, a default route, and an ACL used only for NAT to exclude VPN traffic from address translation.</p></li><li><p>Packet Tracer lets you simulate IPsec with IKEv1, which is enough to understand the concepts, even though IKEv2 is more common in production today.</p></li><li><p>Before configuring the VPN tunnel, you need to enable IPsec security features on the routers with a specific command, then reboot the devices to apply the changes.</p></li></ul><p><em>Now that you understand the network topology, it’s time to take action: let’s see how to configure a secure IPsec VPN tunnel step by step in Cisco Packet Tracer.</em></p>
+<h3>Configure IPsec</h3>
+<p><img src="https://user.oc-static.com/upload/2026/01/15/17684884642995_FR_8787276_banner.png" alt="" /></p><h4>Configure the IPsec VPN</h4><p>You will configure Phase 1 of the IPsec VPN, which establishes a secure channel for negotiating the tunnel.</p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#crypto isakmp policy 1
+
+OC-SITE-A(config-isakmp)#authentication pre-share
+
+OC-SITE-A(config-isakmp)#encryption aes 256
+
+OC-SITE-A(config-isakmp)#hash sha
+
+OC-SITE-A(config-isakmp)#group 5
+
+OC-SITE-A(config-isakmp)#lifetime 21600</code></pre><p><strong> </strong></p><p>Let me explain what each of the commands above does.</p><ul><li><p><strong><code data-claire-semantic="text">crypto isakmp policy 1</code></strong>: creates an ISAKMP policy that uses IKE for negotiation.</p></li><li><p><strong><code data-claire-semantic="text">authentication pre-share</code></strong>: sets up pre-shared key authentication.</p></li><li><p><strong><code data-claire-semantic="text">encryption aes 256</code></strong>: defines the encryption algorithm used to secure exchanges.</p></li><li><p><strong><code data-claire-semantic="text">group 5</code></strong>: defines Diffie-Hellman group 5, which uses 1536 bits. This is the maximum value in Packet Tracer. On a real router or firewall, you should preferably use group 15 with 3072 bits.</p></li><li><p><strong><code data-claire-semantic="text">hash sha</code></strong>: defines the hashing algorithm used to ensure data integrity. As with Diffie-Hellman, Packet Tracer does not let you define a hash value. On real equipment, SHA512 is recommended.</p></li><li><p><strong><code data-claire-semantic="text">lifetime 21600</code></strong>: defines the lifetime of the ISAKMP security association. When this time expires, a new SA must be established. Note that on real equipment, if the peer is lost, you can enable DPD (Dead Peer Detection). This mechanism is optional in IKEv1 and built into IKEv2. It quickly detects a lost peer and triggers renegotiation or deletion of the SA before the timer expires.</p></li></ul><div><aside data-claire-semantic="information"><p>Here is a brief comparison between IKEv1 and IKEv2: DPD in IKEv1 uses R-U-THERE and R-U-THERE-ACK messages, sent periodically if no traffic is detected in the tunnel. IKEv2 uses an empty message to test whether the peer is responsive. If the peer responds, the SA is active. If not, it is considered invalid. DPD with IKEv2 reduces failure detection time, maintains security by removing obsolete SAs, and supports fast renegotiation.</p></aside></div><p>The configuration is exactly the same—and must be exactly the same—on OC-SITE-B:</p><pre><code data-claire-semantic="plain_text">OC-SITE-B(config)#crypto isakmp policy 1
+
+OC-SITE-B(config-isakmp)#authentication pre-share
+
+OC-SITE-B(config-isakmp)#encryption aes 256
+
+OC-SITE-B(config-isakmp)#hash sha
+
+OC-SITE-B(config-isakmp)#group 5
+
+OC-SITE-B(config-isakmp)#lifetime 21600</code></pre><p>The next step in Phase 1 is to define the pre-shared key with the peer: </p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#crypto isakmp key OpenClassR00m$IP5ecL@b address 59.62.1.1
+
+OC-SITE-B(config)#crypto isakmp key OpenClassR00m$IP5ecL@b address 62.59.1.1</code></pre><div><aside data-claire-semantic="warning"><p>As you can see, the same key is entered on both routers. In a real-world situation, you might prefer to use certificates for authentication. The advantage is that they rely on asymmetric key pairs, which are harder to compromise, easy to revoke using a CRL, well suited to multisite environments, and provide strong authentication by verifying the certificate signature and validity. We cannot use them here in this simulation.</p></aside></div><p>Before configuring Phase 2, you will configure an ACL on OC-SITE-A and OC-SITE-B to define the traffic that must pass through the tunnel: </p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#ip access-list extended VPN
+
+OC-SITE-A(config-ext-nacl)#permit ip 192.168.1.0 0.0.0.255 192.168.2.0 0.0.0.255
+
+
+OC-SITE-B(config)#ip access-list extended VPN
+
+OC-SITE-B(config-ext-nacl)#permit ip 192.168.2.0 0.0.0.255 192.168.1.0 0.0.0.255</code></pre><p>Once the VPN ACLs have been created, you will configure Phase 2. Start by creating the transform set, which calls the ESP protocol. ESP encrypts and ensures the integrity of the data that passes through the IPsec tunnel: </p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#crypto ipsec transform-set OCSET esp-aes 256 esp-sha-hmac
+
+
+OC-SITE-B(config)#crypto ipsec transform-set OCSET esp-aes 256 esp-sha-hmac</code></pre><p>In the command above, which is the same on OC-SITE-A and OC-SITE-B, you create a transform set named OCSET that uses ESP with AES 256 for encryption and SHA for integrity.</p><p>Finally, you will create a crypto map, which is an object that includes: </p><ul><li><p>The transform set</p></li><li><p>The ACL used to identify the traffic that must pass through the VPN</p></li><li><p>The Phase 2 security association lifetime</p></li><li><p>The peer address</p></li></ul><p>Before creating this crypto map, let’s review the SA: </p><ul><li><p>In Phase 1, a security association (SA) is established with a lifetime of 21600 seconds (6 hours). When it expires, a new Diffie-Hellman (DH) key pair is generated, reducing the risk of long-term key compromise.</p></li><li><p>In Phase 2, the keys used to encrypt and authenticate data are derived from the key established in Phase 1. A full Diffie-Hellman exchange is not performed each time a Phase 2 SA expires, unless PFS (Perfect Forward Secrecy) is enabled. In that case, a new key is generated, which strengthens security: even if one key is compromised, the other sessions remain protected. The lifetime of a Phase 2 SA is generally configured at 3600 seconds (1 hour).</p></li></ul><div><aside data-claire-semantic="information"><p>Each IPsec peer generates a private key and a public key. The peers exchange their public keys, then each one locally calculates a shared key using its own private key and the public key it received. This gives both peers the same shared key without ever transmitting it over the network. This mechanism, known as Diffie-Hellman, is the central element of the IPsec protocol. </p></aside></div><div><aside data-claire-semantic="warning"><p>Do not confuse the pre-shared key (PSK) used for authentication between peers, which can be replaced by certificates, with the Diffie-Hellman shared key, also known as the "shared secret." These are two completely different mechanisms.</p></aside></div><p>Here is the crypto map configuration on OC-SITE-A and OC-SITE-B:  </p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#crypto map OCMAP 10 ipsec-isakmp
+
+OC-SITE-A(config-crypto-map)#set transform-set OCSET
+
+OC-SITE-A(config-crypto-map)#set security-association lifetime seconds 3600
+
+OC-SITE-A(config-crypto-map)#set peer 59.62.1.1
+
+OC-SITE-A(config-crypto-map)#match address VPN
+
+OC-SITE-A(config-crypto-map)#exit
+
+
+OC-SITE-B(config)#crypto map OCMAP 10 ipsec-isakmp
+
+OC-SITE-B(config-crypto-map)#set transform-set OCSET
+
+OC-SITE-B(config-crypto-map)#set security-association lifetime seconds 3600
+
+OC-SITE-B(config-crypto-map)#set peer 62.59.1.1
+
+OC-SITE-B(config-crypto-map)#match address VPN
+
+OC-SITE-B(config-crypto-map)#exit</code></pre><p>After the name given to the crypto map, OCMAP in this case, you will see the number 10. This is a sequence number. You can apply only one crypto map per interface, so for each different VPN, if you have several—and you will later in this course—you must use a different sequence number for each VPN.</p><p>The other commands are fairly self-explanatory: you set the Phase 2 SA lifetime to 3600 seconds, call the transform set OCSET, define the remote peer’s IP address, and call the ACL used to identify the traffic that can pass through the tunnel.</p><p>Now you just need to apply this crypto map to the interface where your public IP address is configured: </p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#int gig 0/1
+
+OC-SITE-A(config-if)#crypto map OCMAP
+
+
+OC-SITE-B(config)#int gig 0/1
+
+OC-SITE-B(config-if)#crypto map OCMAP</code></pre><p>A log message confirms that the crypto map has been activated.</p><pre><samp>*Jan 3 07:16:26.785: %CRYPTO-6-ISAKMP_ON_OFF: ISAKMP is ON</samp></pre><p>Now test the configuration: run a continuous ping between each PC: </p><pre><code data-claire-semantic="plain_text">Cisco Packet Tracer PC command Line 1.0
+
+C:\&amp;gt;ping -t 192.168.2.1 with 32 bytes of data:
+
+Reply from 192.168.2.1: bytes=32 time&amp;lt;1ms TTL=126
+
+
+Cisco Packet Tracer PC command Line 1.0
+
+C:\&amp;gt;ping -t 192.168.1.1 with 32 bytes of data:
+
+Reply from 192.168.1.1: bytes=32 time&amp;lt;1ms TTL=126</code></pre><p>It works! The VPN is established. You can use the following commands to verify that it is working: </p><pre><code data-claire-semantic="plain_text">OC-SITE-A#show crypto isakmp sa
+
+IPv4 Crypto ISAKMP SA
+
+dst src state conn-id slot status
+
+59.62.1.1 62.59.1.1 QM_IDLE 1076 0 ACTIVE
+
+
+OC-SITE-B#show crypto isakmp sa
+
+IPv4 Crypto ISAKMP SA
+
+dst src state conn-id slot status
+
+62.59.1.1 59.62.1.1 QM_IDLE 1070 0 ACTIVE</code></pre><p>The command above confirms that Phase 1 is established (ACTIVE). QM_IDLE indicates that Phase 1 negotiation is complete.</p><pre><code data-claire-semantic="plain_text">OC-SITE-A#show crypto ipsec sa
+
+
+interface: GigabitEthernet0/1
+
+  Crypto map tag: OCMAP, local addr 62.59.1.1
+
+protected vrf: none
+
+local ident (addr/mask/prot/port): (192.168.1.0/255.255.255.0/0/0)
+
+remote ident (addr/mask/prot/port): (192.168.2.0/255.255.255.0/0/0)
+
+current_peer 59.62.1.1 port 500
+
+   PERMIT, flags={origin_is_acl,}
+
+#pkts encaps: 688, #pkts encrypt: 688, #pkts digest: 0
+
+#pkts decaps: 688, #pkts decrypt: 688, #pkts verify: 0
+
+#pkts compressed: 0, #pkts decompressed: 0
+
+#pkts not compressed: 0, #pkts compr. failed: 0
+
+#pkts not decompressed: 0, #pkts decompress failed: 0
+
+#send errors 0, #recv errors 0</code></pre><p>The command above confirms that Phase 2 is properly established and that packets are being encrypted and decrypted. Note that the values #pkts digest: 0 and #pkts verify: 0 are abnormal. This is a known bug in Packet Tracer. A real IOS would show the packets whose integrity was verified here.</p><p>Congratulations! You have configured your first IPsec VPN from the command line. </p><h4>Configure a second IPsec VPN</h4><p>You will now add a third site, OC-SITE-C. The topology now looks like this: </p><p></p><figure><img src="https://user.oc-static.com/upload/2026/01/09/17679752509564_image2.png" alt="Schéma réseau avec trois sites OC-SITE-A, B et C connectés via un WAN. Chaque site relie un PC local avec des sous-réseaux privés distincts." /><figcaption>The topology with three sites</figcaption></figure><p>The 1941 router has two RJ45 Ethernet interfaces. To establish a connection between the WAN and OC-SITE-C, add an HWIC-1GE-SFP card to both routers, then add a GLC-LH-SMD module to that card: </p><figure><img src="https://user.oc-static.com/upload/2026/01/09/17679754158392_image4.png" alt="Interface d’un routeur Cisco 1941 dans Packet Tracer, affichant les modules physiques, ports réseau, alimentation, console et options d’extension à gauche." /><figcaption>Add the HWIC-1GE-SFP card, then a GLC-LH-SMD module</figcaption></figure><p>You can then connect the two routers using fiber-optic cable.</p><p>Here is the basic configuration you will set up on OC-SITE-C: </p><pre><code data-claire-semantic="plain_text">OC-SITE-C(config)#int gig 0/1/0
+
+OC-SITE-C(config-if)#ip address 80.59.62.1 255.255.255.252
+
+OC-SITE-C(config-if)#no shut
+
+OC-SITE-C(config-if)#ip nat outside
+
+OC-SITE-C(config-if)#exit
+
+OC-SITE-C(config)#int gig 0/0
+
+OC-SITE-C(config-if)#ip address 192.168.3.254 255.255.255.0
+
+OC-SITE-C(config-if)#ip nat inside
+
+OC-SITE-C(config-if)#no shut
+
+OC-SITE-C(config-if)#exit
+
+
+OC-SITE-C(config)#ip route 0.0.0.0 0.0.0.0 80.59.62.2
+
+
+OC-SITE-C(config)#ip access-list extended NAT
+
+OC-SITE-C(config-ext-nacl)#deny ip 192.168.3.0 0.0.0.255 192.168.1.0 0.0.0.255
+
+OC-SITE-C(config-ext-nacl)#deny ip 192.168.3.0 0.0.0.255 192.168.2.0 0.0.0.255
+
+OC-SITE-C(config-ext-nacl)#permit ip 192.168.3.0 0.0.0.255 any
+
+
+OC-SITE-C(config)#ip nat inside source list NAT interface gig 0/1/0 overload</code></pre><p>Notice that in the NAT ACL, traffic from LAN 192.168.3.0/24 to 192.168.1.0/24 and 192.168.2.0/24 is denied. This is normal because these traffic flows must pass through the VPNs.</p><p>You will also need to update the NAT ACL on OC-SITE-A and OC-SITE-B: </p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#ip access-list extended NAT
+
+OC-SITE-A(config-ext-nacl)#15 deny ip 192.168.1.0 0.0.0.255 192.168.3.0 0.0.0.255
+
+
+OC-SITE-B(config)#ip access-list extended NAT
+
+OC-SITE-B(config-ext-nacl)#15 deny ip 192.168.2.0 0.0.0.255 192.168.3.0 0.0.0.255</code></pre><p>You probably noticed the "15" before the ACL entry that was added. This 15 is the sequence number. By default, sequence numbers increase by 10. In other words, each time you add a line to your ACL, it receives a sequence number incremented by 10: 10, 20, 30, 40, and so on. </p><p>If you want to add a deny sequence before the sequence that allows all remaining traffic to be translated, choose a sequence number lower than the one that permits all remaining traffic to be translated. This gives you the following result when you display the ACL: </p><p></p><pre><code data-claire-semantic="plain_text">OC-SITE-A#show access-lists NAT
+
+Extended IP access list NAT
+
+deny ip 192.168.1.0 0.0.0.255 192.168.2.0 0.0.0.255
+
+deny ip 192.168.1.0 0.0.0.255 192.168.3.0 0.0.0.255
+
+permit ip 192.168.1.0 0.0.0.255 any
+
+
+OC-SITE-B#show access-lists NAT
+
+Extended IP access list NAT
+
+deny ip 192.168.2.0 0.0.0.255 192.168.1.0 0.0.0.255
+
+deny ip 192.168.2.0 0.0.0.255 192.168.3.0 0.0.0.255
+
+permit ip 192.168.2.0 0.0.0.255 any</code></pre><p></p><p>As you can see above, the new deny sequence is correctly positioned in the ACL.</p><p>Next, create the ACLs dedicated to this second VPN: </p><pre><code data-claire-semantic="plain_text">OC-SITE-C(config)#ip access-list extended C-TO-A
+
+OC-SITE-C(config-ext-nacl)#permit ip 192.168.3.0 0.0.0.255 192.168.1.0 0.0.0.255
+
+OC-SITE-C(config-ext-nacl)#exit
+
+OC-SITE-C(config)#ip access-list extended C-TO-B
+
+OC-SITE-C(config-ext-nacl)#permit ip 192.168.3.0 0.0.0.255 192.168.2.0 0.0.0.255
+
+OC-SITE-C(config-ext-nacl)#exit
+
+OC-SITE-A(config)#ip access-list extended A-TO-C
+
+OC-SITE-A(config-ext-nacl)#permit ip 192.168.1.0 0.0.0.255 192.168.3.0 0.0.0.255
+
+OC-SITE-B(config)#ip access-list extended B-TO-C
+
+OC-SITE-B(config-ext-nacl)#permit ip 192.168.2.0 0.0.0.255 192.168.3.0 0.0.0.255</code></pre><p>Enable the SECURITY module on OC-SITE-C: </p><p><strong> </strong></p><pre><samp>OC-SITE-C(config)#license boot module c1900 technology-package securityk9</samp></pre><p><strong> </strong>Next, configure the first part of Phase 1 on OC-SITE-C in the same way as on OC-SITE-A and OC-SITE-B: </p><pre><code data-claire-semantic="plain_text">OC-SITE-C(config)#crypto isakmp policy 1
+
+OC-SITE-C(config-isakmp)#authentication pre-share
+
+OC-SITE-C(config-isakmp)#encryption aes 256
+
+OC-SITE-C(config-isakmp)#hash sha
+
+OC-SITE-C(config-isakmp)#group 5
+
+OC-SITE-C(config-isakmp)#lifetime 21600</code></pre><p>The next step is to create a pre-shared key between OC-SITE-C and OC-SITE-A, and another pre-shared key between OC-SITE-C and OC-SITE-B. You will also configure the OC-SITE-C to OC-SITE-A key on OC-SITE-A, and the OC-SITE-C to OC-SITE-B key on OC-SITE-B: </p><pre><code data-claire-semantic="plain_text">OC-SITE-C(config)#crypto isakmp key OpenClassR00m$IP5ecL@bCtoA address 62.59.1.1
+
+OC-SITE-C(config)#crypto isakmp key OpenClassR00m$IP5ecL@bCtoB address 59.62.1.1
+
+
+OC-SITE-A(config)#crypto isakmp key OpenClassR00m$IP5ecL@bCtoA address 80.59.62.1
+
+
+OC-SITE-B(config)#crypto isakmp key OpenClassR00m$IP5ecL@bCtoB address 80.59.62.1</code></pre><p><strong> </strong></p><p>You then need to configure the transform set on OC-SITE-C: </p><pre><samp>OC-SITE-C(config)#crypto ipsec transform-set OCSET esp-aes 256 esp-sha-hmac</samp></pre><p><strong> </strong>Once this step is complete, you will need to create a crypto map sequence on OC-SITE-A and OC-SITE-B to establish the VPN with OC-SITE-C: </p><pre><code data-claire-semantic="plain_text">OC-SITE-A(config)#crypto map OCMAP 20 ipsec-isakmp
+
+OC-SITE-A(config-crypto-map)#set peer 80.59.62.1
+
+OC-SITE-A(config-crypto-map)#set transform-set OCSET
+
+OC-SITE-A(config-crypto-map)#match address A-TO-C
+
+OC-SITE-A(config-crypto-map)#set security-association lifetime seconds 3600
+
+OC-SITE-B(config)#crypto map OCMAP 30 ipsec-isakmp
+
+OC-SITE-B(config-crypto-map)#set transform-set OCSET
+
+OC-SITE-B(config-crypto-map)#match address B-TO-C
+
+OC-SITE-B(config-crypto-map)#set peer 80.59.62.1
+
+OC-SITE-B(config-crypto-map)#set security-association lifetime seconds 3600</code></pre><p>Next, configure the two crypto map sequence numbers on OC-SITE-C: </p><pre><code data-claire-semantic="plain_text">OC-SITE-C(config)#crypto map OCMAP 20 ipsec-isakmp
+
+OC-SITE-C(config-crypto-map)#set peer 62.59.1.1
+
+OC-SITE-C(config-crypto-map)#set transform-set OCSET
+
+OC-SITE-C(config-crypto-map)#match address C-TO-A
+
+OC-SITE-C(config-crypto-map)#set security-association lifetime seconds 3600
+
+OC-SITE-C(config-crypto-map)#exit
+
+OC-SITE-C(config)#crypto map OCMAP 30 ipsec-isakmp
+
+OC-SITE-C(config-crypto-map)#set peer 59.62.1.1
+
+OC-SITE-C(config-crypto-map)#set transform-set OCSET
+
+OC-SITE-C(config-crypto-map)#match address C-TO-B
+
+OC-SITE-C(config-crypto-map)#set security-association lifetime seconds 3600
+
+OC-SITE-C(config-crypto-map)#exit</code></pre><p>To finish, apply the crypto map to OC-SITE-C’s gig 0/1/0 interface: </p><pre><code data-claire-semantic="plain_text">OC-SITE-C(config)#int gig 0/1/0
+
+OC-SITE-C(config-if)#crypto map OCMAP</code></pre><p>PC3 has the IP address 192.168.3.1. Send a ping to PC1 and a ping to PC2 from PC3. You should get this result: </p><pre><code data-claire-semantic="plain_text">C:\&amp;gt;ping 192.168.1.1
+
+
+Pinging 192.168.1.1 with 32 bytes of data:
+
+
+Reply from 192.168.1.1: bytes=32 time&amp;lt;1ms TTL=126
+
+Reply from 192.168.1.1: bytes=32 time=1ms TTL=126
+
+Reply from 192.168.1.1: bytes=32 time&amp;lt;1ms TTL=126
+
+Reply from 192.168.1.1: bytes=32 time&amp;lt;1ms TTL=126
+
+
+Ping statistics for 192.168.1.1:
+
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+
+Approximate round trip times in milli-seconds:
+
+Minimum = 0ms, Maximum = 1ms, Average = 0ms
+
+C:\&amp;gt;ping 192.168.3.1
+
+
+Pinging 192.168.3.1 with 32 bytes of data:
+
+
+Reply from 192.168.3.1: bytes=32 time=3ms TTL=128
+
+Reply from 192.168.3.1: bytes=32 time=4ms TTL=128
+
+Reply from 192.168.3.1: bytes=32 time=9ms TTL=128
+
+Reply from 192.168.3.1: bytes=32 time=1ms TTL=128
+
+
+Ping statistics for 192.168.3.1:
+
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+
+Approximate round trip times in milli-seconds:
+
+Minimum = 1ms, Maximum = 9ms, Average = 4ms</code></pre><p>Both VPNs are working! </p><p>You can also verify that Phase 1 is working toward OC-SITE-A, as well as Phase 1 toward </p><pre><code data-claire-semantic="plain_text">OC-SITE-B :
+
+OC-SITE-C#show crypto isakmp sa
+
+IPv4 Crypto ISAKMP SA
+
+dst src state conn-id slot status
+
+62.59.1.1 80.59.62.1 QM_IDLE 1044 0 ACTIVE
+
+59.62.1.1 80.59.62.1 QM_IDLE 1049 0 ACTIVE</code></pre><p><strong> </strong>Verify Phase 2 with the show crypto ipsec sa command:</p><pre><code data-claire-semantic="plain_text">Tunnel OC-SITE-C - OC-SITE-A :
+
+#pkts encaps: 561, #pkts encrypt: 561
+
+#pkts decaps: 561, #pkts decrypt
+
+Tunnel OC-SITE-C - OC-SITE-B :
+
+#pkts encaps: 449, #pkts encrypt: 449
+
+#pkts decaps: 449, #pkts decrypt: 449</code></pre><p>You have just configured a complete IPsec VPN in Cisco Packet Tracer—from the network topology to establishing a secure tunnel between multiple sites. You learned how to use the essential commands, understand the IKE phases, secure traffic flows, and rigorously test your configurations. These skills are highly valued in networking and cybersecurity. Now take a few minutes to complete the final quiz and validate what you have learned.</p><h4>Let's Recap!</h4><ul><li><p>Phase 1 of the IPsec VPN establishes a secure channel between two sites using a common ISAKMP policy on both routers: pre-shared key authentication, AES 256 encryption, SHA hash, and DH group 5.</p></li><li><p>A dedicated ACL defines the traffic flows that must pass through the tunnel, while a transform set configures the use of ESP for data encryption and integrity (AES + SHA).</p></li><li><p>The crypto map brings together all the elements required for the IPsec tunnel: transform set, ACL, peer, and SA lifetime. It is applied to the router’s public interface. Each tunnel uses a different sequence number.</p></li><li><p>The Diffie-Hellman protocol generates a shared key without exchanging it, providing a high level of security. The PFS option further strengthens this security by forcing a new DH exchange at each key renewal.</p></li><li><p>Adding a third site, OC-SITE-C, requires creating new ACLs, crypto maps, and shared keys, as well as updating the existing NAT ACLs. This allows each router to manage several IPsec tunnels in parallel.</p></li></ul><p><em>Good luck, and congratulations on your commitment throughout the course!</em></p><p></p>
