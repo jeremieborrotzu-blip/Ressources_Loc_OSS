@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-11T10:01:46.308Z",
+  "updatedAt": "2026-06-12T09:15:36.186Z",
   "createdAt": "2026-06-11T10:00:42.318Z",
   "id": "iOvLCwyOv8ReIxbG",
   "name": "[MAIN] LEO v1 — Assets",
@@ -202,15 +202,154 @@
       ]
     },
     {
-      "parameters": {},
-      "id": "ff943716-a9ad-42bf-90b2-2e78a8a5cd07",
-      "name": "Phase 1 OK → Route Agents",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "parameters": {
+        "jsCode": "\nconst raw = $('Load Handoff').first().json;\nconst h = (typeof raw.data === 'string') ? JSON.parse(raw.data) : (raw.meta ? raw : JSON.parse(raw.content ? Buffer.from(raw.content,'base64').toString('utf8') : '{}'));\nconst loc = $('Locate Deliverables').first().json;\nconst banner = u => /banner/i.test(u||'');\nconst media = h.media_inventory || [];\n// A8 — images\nconst images = media.filter(m => m.type==='image' && !banner(m.url));\nconst imagesToLocalize = images.filter(m => m.risk!=='ok');\n// A7 — vidéos / screencasts (dubbing)\nconst videos = media.filter(m => ['video','screencast'].includes(m.type));\n// A9 — annexes (docs)\nconst docExt = /\\.(pdf|docx?|xlsx?|pptx?|csv)$/i;\nconst annexes = media.filter(m => ['pdf','docx','xlsx','pptx','csv','document','annex'].includes(m.type) || docExt.test(m.url||''));\n// A10 — liens\nconst links = media.filter(m => m.type==='link');\nreturn [{json:{\n  target_course_id: h.meta.target_course_id,\n  source_course_id: h.meta.source_course_id,\n  direction: h.meta.direction,\n  domain: h.meta.detected_domain,\n  target_language: h.meta.target_language,\n  email: loc.email,\n  modules: loc.modules || {a7:false,a8:false,a9:false,a10:false},\n  images_to_localize: imagesToLocalize,\n  inventory: {\n    videos: videos.map(m=>({url:m.url,location:m.location})),\n    annexes: annexes.map(m=>({url:m.url,location:m.location,type:m.type})),\n    links: links.map(m=>({url:m.url,location:m.location}))\n  },\n  counts:{ images_total:images.length, images_to_localize:imagesToLocalize.length, images_preserved:images.length-imagesToLocalize.length,\n           videos:videos.length, annexes:annexes.length, links:links.length }\n}}];\n"
+      },
+      "id": "9a49e8fb-0f97-4cb2-837a-31be5cee1a55",
+      "name": "Parse Handoff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         1560,
         300
       ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "P97ds2vbSmklYbnP",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "5a99dae1-4c57-4701-a64e-1225a29b8263",
+      "name": "Call Iconik Init",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        1780,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst ph=$('Parse Handoff').first().json;\nconst ic=$('Call Iconik Init').first().json;\nconst coll=ic.graphics_collection_id;\nconst a8on = !!(ph.modules && ph.modules.a8);\nconst list = a8on ? (ph.images_to_localize||[]) : [];\nconst items=list.map(m=>({json:{\n  image_url:m.url, filename:(m.url.split('/').pop()||'image.png'),\n  domain:ph.domain, target_language:ph.target_language,\n  collection_id:coll, location:m.location, original_url:m.url\n}}));\nreturn items.length?items:[{json:{__no_images:true, collection_id:coll}}];\n"
+      },
+      "id": "0bd0c5c0-2691-41de-b6f4-5a88a48780cb",
+      "name": "Build A8 Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.__no_images }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "474a9e96-e16e-4123-8aab-27b60d875f5b",
+      "name": "Has Images?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Vayz4SnsngHkqWvl",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "mode": "each"
+      },
+      "id": "819abafb-2003-416c-9fbe-caf05bd325b2",
+      "name": "Call A8",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        2440,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nlet a8=[];\ntry{ a8=$('Call A8').all().map(i=>i.json).filter(x=>x&&x.agent==='A8'); }catch(e){}\nconst ph=$('Parse Handoff').first().json;\nconst localized=a8.filter(r=>r.status==='localized');\nconst preserved=a8.filter(r=>r.status==='preserved');\nreturn [{json:{\n  target_course_id:ph.target_course_id, source_course_id:ph.source_course_id,\n  direction:ph.direction, email:ph.email,\n  a8:{ processed:a8.length, localized:localized.length, preserved:preserved.length, results:a8 }\n}}];\n"
+      },
+      "id": "5d7c72da-b942-40df-81f2-b23d1fec422a",
+      "name": "Collect Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst r = $('Collect Results').first().json;\nconst ph = $('Parse Handoff').first().json;\nconst mod = ph.modules || {};\nconst inv = ph.inventory || {videos:[],annexes:[],links:[]};\nconst a8rows = (r.a8.results||[]).map(x=>`<tr><td>${x.filename||''}</td><td>${x.status}</td><td>${x.asset_class||''}</td><td>${x.texts_localized||0}/${x.texts_preserved||0}</td><td>${x.iconik_asset_id||x.reason||''}</td></tr>`).join('');\nconst sec = (on, title, body) => `<h3>${on?'✅':'⬜'} ${title}</h3>${on?body:'<p><i>Non demandé (case décochée).</i></p>'}`;\nconst invList = (arr, empty) => arr.length ? `<ul>${arr.map(x=>`<li>${(x.url||'').split('/').pop()} <small>(${x.location||'?'})</small></li>`).join('')}</ul>` : `<p><i>${empty}</i></p>`;\nconst html = `<h2>LEO v1 — Assets : rapport</h2>\n<p><b>Cours :</b> ${r.source_course_id} → ${r.target_course_id} | <b>Direction :</b> ${r.direction}</p>\n${sec(mod.a8, `A8 — Images : ${r.a8.localized} localisées, ${r.a8.preserved} préservées (${r.a8.processed} traitées)`,\n  `<table border=1 cellpadding=4><tr><th>Fichier</th><th>Statut</th><th>Type</th><th>Loc/Pres</th><th>Iconik / raison</th></tr>${a8rows}</table>\n   <p>Uploadées dans Iconik : 0000_LOCALISATION/${r.target_course_id}/static_graphics/</p>`)}\n${sec(mod.a7, `A7 — Transcripts / Dubbing (inventaire : ${inv.videos.length})`,\n  invList(inv.videos,'Aucune vidéo dans le handoff.') + '<p><small>Traitement dubbing complet : build SUB dédié à venir.</small></p>')}\n${sec(mod.a9, `A9 — Annexes (inventaire : ${inv.annexes.length})`,\n  invList(inv.annexes,'Aucune annexe dans le handoff.') + '<p><small>Édition docs (XLSX/DOCX/PPTX/CSV) : build SUB dédié à venir.</small></p>')}\n${sec(mod.a10, `A10 — Liens (inventaire : ${inv.links.length})`,\n  invList(inv.links,'Aucun lien dans le handoff.') + '<p><small>Résolution liens FR→EN : build SUB dédié à venir.</small></p>')}`;\nreturn [{json:{...r, html}}];\n"
+      },
+      "id": "b70ed062-b42e-4662-a026-7d2302732079",
+      "name": "Build Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "learning.automations@openclassrooms.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=[LEO Assets] Terminé — {{ $json.target_course_id }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "822676fd-d7fb-41de-a956-7d2eb106265a",
+      "name": "Send Completion Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3100,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "g6zrrMLej2ViXu6P",
+          "name": "SMTP account"
+        }
+      }
     }
   ],
   "connections": {
@@ -280,7 +419,7 @@
       "main": [
         [
           {
-            "node": "Phase 1 OK → Route Agents",
+            "node": "Parse Handoff",
             "type": "main",
             "index": 0
           }
@@ -297,6 +436,90 @@
           }
         ]
       ]
+    },
+    "Parse Handoff": {
+      "main": [
+        [
+          {
+            "node": "Call Iconik Init",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Iconik Init": {
+      "main": [
+        [
+          {
+            "node": "Build A8 Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build A8 Items": {
+      "main": [
+        [
+          {
+            "node": "Has Images?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Images?": {
+      "main": [
+        [
+          {
+            "node": "Call A8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call A8": {
+      "main": [
+        [
+          {
+            "node": "Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Results": {
+      "main": [
+        [
+          {
+            "node": "Build Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Report": {
+      "main": [
+        [
+          {
+            "node": "Send Completion Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -307,9 +530,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
-  "activeVersionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
-  "versionCounter": 8,
+  "versionId": "aeef6f21-985c-4eaa-931e-de37c6b6a418",
+  "activeVersionId": "aeef6f21-985c-4eaa-931e-de37c6b6a418",
+  "versionCounter": 26,
   "triggerCount": 1,
   "shared": [
     {
@@ -332,9 +555,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-11T10:01:46.310Z",
-    "createdAt": "2026-06-11T10:01:46.310Z",
-    "versionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
+    "updatedAt": "2026-06-12T09:15:36.187Z",
+    "createdAt": "2026-06-12T09:15:36.187Z",
+    "versionId": "aeef6f21-985c-4eaa-931e-de37c6b6a418",
     "workflowId": "iOvLCwyOv8ReIxbG",
     "nodes": [
       {
@@ -532,15 +755,154 @@
         ]
       },
       {
-        "parameters": {},
-        "id": "ff943716-a9ad-42bf-90b2-2e78a8a5cd07",
-        "name": "Phase 1 OK → Route Agents",
-        "type": "n8n-nodes-base.noOp",
-        "typeVersion": 1,
+        "parameters": {
+          "jsCode": "\nconst raw = $('Load Handoff').first().json;\nconst h = (typeof raw.data === 'string') ? JSON.parse(raw.data) : (raw.meta ? raw : JSON.parse(raw.content ? Buffer.from(raw.content,'base64').toString('utf8') : '{}'));\nconst loc = $('Locate Deliverables').first().json;\nconst banner = u => /banner/i.test(u||'');\nconst media = h.media_inventory || [];\n// A8 — images\nconst images = media.filter(m => m.type==='image' && !banner(m.url));\nconst imagesToLocalize = images.filter(m => m.risk!=='ok');\n// A7 — vidéos / screencasts (dubbing)\nconst videos = media.filter(m => ['video','screencast'].includes(m.type));\n// A9 — annexes (docs)\nconst docExt = /\\.(pdf|docx?|xlsx?|pptx?|csv)$/i;\nconst annexes = media.filter(m => ['pdf','docx','xlsx','pptx','csv','document','annex'].includes(m.type) || docExt.test(m.url||''));\n// A10 — liens\nconst links = media.filter(m => m.type==='link');\nreturn [{json:{\n  target_course_id: h.meta.target_course_id,\n  source_course_id: h.meta.source_course_id,\n  direction: h.meta.direction,\n  domain: h.meta.detected_domain,\n  target_language: h.meta.target_language,\n  email: loc.email,\n  modules: loc.modules || {a7:false,a8:false,a9:false,a10:false},\n  images_to_localize: imagesToLocalize,\n  inventory: {\n    videos: videos.map(m=>({url:m.url,location:m.location})),\n    annexes: annexes.map(m=>({url:m.url,location:m.location,type:m.type})),\n    links: links.map(m=>({url:m.url,location:m.location}))\n  },\n  counts:{ images_total:images.length, images_to_localize:imagesToLocalize.length, images_preserved:images.length-imagesToLocalize.length,\n           videos:videos.length, annexes:annexes.length, links:links.length }\n}}];\n"
+        },
+        "id": "9a49e8fb-0f97-4cb2-837a-31be5cee1a55",
+        "name": "Parse Handoff",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
           1560,
           300
         ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "P97ds2vbSmklYbnP",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          }
+        },
+        "id": "5a99dae1-4c57-4701-a64e-1225a29b8263",
+        "name": "Call Iconik Init",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          1780,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst ph=$('Parse Handoff').first().json;\nconst ic=$('Call Iconik Init').first().json;\nconst coll=ic.graphics_collection_id;\nconst a8on = !!(ph.modules && ph.modules.a8);\nconst list = a8on ? (ph.images_to_localize||[]) : [];\nconst items=list.map(m=>({json:{\n  image_url:m.url, filename:(m.url.split('/').pop()||'image.png'),\n  domain:ph.domain, target_language:ph.target_language,\n  collection_id:coll, location:m.location, original_url:m.url\n}}));\nreturn items.length?items:[{json:{__no_images:true, collection_id:coll}}];\n"
+        },
+        "id": "0bd0c5c0-2691-41de-b6f4-5a88a48780cb",
+        "name": "Build A8 Items",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2000,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.__no_images }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "notExists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "474a9e96-e16e-4123-8aab-27b60d875f5b",
+        "name": "Has Images?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          2220,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "Vayz4SnsngHkqWvl",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": true
+          },
+          "mode": "each"
+        },
+        "id": "819abafb-2003-416c-9fbe-caf05bd325b2",
+        "name": "Call A8",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.1,
+        "position": [
+          2440,
+          200
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nlet a8=[];\ntry{ a8=$('Call A8').all().map(i=>i.json).filter(x=>x&&x.agent==='A8'); }catch(e){}\nconst ph=$('Parse Handoff').first().json;\nconst localized=a8.filter(r=>r.status==='localized');\nconst preserved=a8.filter(r=>r.status==='preserved');\nreturn [{json:{\n  target_course_id:ph.target_course_id, source_course_id:ph.source_course_id,\n  direction:ph.direction, email:ph.email,\n  a8:{ processed:a8.length, localized:localized.length, preserved:preserved.length, results:a8 }\n}}];\n"
+        },
+        "id": "5d7c72da-b942-40df-81f2-b23d1fec422a",
+        "name": "Collect Results",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2660,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\nconst r = $('Collect Results').first().json;\nconst ph = $('Parse Handoff').first().json;\nconst mod = ph.modules || {};\nconst inv = ph.inventory || {videos:[],annexes:[],links:[]};\nconst a8rows = (r.a8.results||[]).map(x=>`<tr><td>${x.filename||''}</td><td>${x.status}</td><td>${x.asset_class||''}</td><td>${x.texts_localized||0}/${x.texts_preserved||0}</td><td>${x.iconik_asset_id||x.reason||''}</td></tr>`).join('');\nconst sec = (on, title, body) => `<h3>${on?'✅':'⬜'} ${title}</h3>${on?body:'<p><i>Non demandé (case décochée).</i></p>'}`;\nconst invList = (arr, empty) => arr.length ? `<ul>${arr.map(x=>`<li>${(x.url||'').split('/').pop()} <small>(${x.location||'?'})</small></li>`).join('')}</ul>` : `<p><i>${empty}</i></p>`;\nconst html = `<h2>LEO v1 — Assets : rapport</h2>\n<p><b>Cours :</b> ${r.source_course_id} → ${r.target_course_id} | <b>Direction :</b> ${r.direction}</p>\n${sec(mod.a8, `A8 — Images : ${r.a8.localized} localisées, ${r.a8.preserved} préservées (${r.a8.processed} traitées)`,\n  `<table border=1 cellpadding=4><tr><th>Fichier</th><th>Statut</th><th>Type</th><th>Loc/Pres</th><th>Iconik / raison</th></tr>${a8rows}</table>\n   <p>Uploadées dans Iconik : 0000_LOCALISATION/${r.target_course_id}/static_graphics/</p>`)}\n${sec(mod.a7, `A7 — Transcripts / Dubbing (inventaire : ${inv.videos.length})`,\n  invList(inv.videos,'Aucune vidéo dans le handoff.') + '<p><small>Traitement dubbing complet : build SUB dédié à venir.</small></p>')}\n${sec(mod.a9, `A9 — Annexes (inventaire : ${inv.annexes.length})`,\n  invList(inv.annexes,'Aucune annexe dans le handoff.') + '<p><small>Édition docs (XLSX/DOCX/PPTX/CSV) : build SUB dédié à venir.</small></p>')}\n${sec(mod.a10, `A10 — Liens (inventaire : ${inv.links.length})`,\n  invList(inv.links,'Aucun lien dans le handoff.') + '<p><small>Résolution liens FR→EN : build SUB dédié à venir.</small></p>')}`;\nreturn [{json:{...r, html}}];\n"
+        },
+        "id": "b70ed062-b42e-4662-a026-7d2302732079",
+        "name": "Build Report",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2880,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "fromEmail": "learning.automations@openclassrooms.com",
+          "toEmail": "={{ $json.email }}",
+          "subject": "=[LEO Assets] Terminé — {{ $json.target_course_id }}",
+          "emailFormat": "html",
+          "html": "={{ $json.html }}",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "822676fd-d7fb-41de-a956-7d2eb106265a",
+        "name": "Send Completion Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          3100,
+          300
+        ],
+        "credentials": {
+          "smtp": {
+            "id": "g6zrrMLej2ViXu6P",
+            "name": "SMTP account"
+          }
+        }
       }
     ],
     "connections": {
@@ -610,7 +972,7 @@
         "main": [
           [
             {
-              "node": "Phase 1 OK → Route Agents",
+              "node": "Parse Handoff",
               "type": "main",
               "index": 0
             }
@@ -627,6 +989,90 @@
             }
           ]
         ]
+      },
+      "Parse Handoff": {
+        "main": [
+          [
+            {
+              "node": "Call Iconik Init",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call Iconik Init": {
+        "main": [
+          [
+            {
+              "node": "Build A8 Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build A8 Items": {
+        "main": [
+          [
+            {
+              "node": "Has Images?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Has Images?": {
+        "main": [
+          [
+            {
+              "node": "Call A8",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call A8": {
+        "main": [
+          [
+            {
+              "node": "Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Collect Results": {
+        "main": [
+          [
+            {
+              "node": "Build Report",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Report": {
+        "main": [
+          [
+            {
+              "node": "Send Completion Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Jérémie Borrotzu",
@@ -635,11 +1081,19 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-11T10:01:46.362Z",
-        "id": 643,
+        "createdAt": "2026-06-12T09:15:36.235Z",
+        "id": 667,
         "workflowId": "iOvLCwyOv8ReIxbG",
-        "versionId": "6653acff-83c7-403e-90c7-1665dbabcba5",
+        "versionId": "aeef6f21-985c-4eaa-931e-de37c6b6a418",
         "event": "activated",
+        "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
+      },
+      {
+        "createdAt": "2026-06-12T09:15:36.222Z",
+        "id": 666,
+        "workflowId": "iOvLCwyOv8ReIxbG",
+        "versionId": "aeef6f21-985c-4eaa-931e-de37c6b6a418",
+        "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
     ]

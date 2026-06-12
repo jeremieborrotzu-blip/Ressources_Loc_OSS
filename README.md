@@ -89,7 +89,9 @@ Iconik / GitHub ─────────── Stockage assets localisés + r
 
 **Destination des médias = Iconik** (MAM), pas GitHub. Storage S3 `iconik-files-s3` (bucket `oc-multimedia-iconik`). Structure `0000_LOCALISATION/{target}/{static_graphics | external_files | transcripts}`. GitHub ne reçoit que les rapports/logs.
 
-État : MAIN Assets **construit** (form + gate) · **SUB Iconik Upload** ✅ validé e2e · **SUB A8 Image Localizer** ✅ **validé e2e** (vision gpt-5.5 → édition gpt-image-2 → upload Iconik) · **A7** prêt (prompt V2) · branchement A7→A10 dans le MAIN + **A9/A10** à construire. Détail : [`docs/architecture/assets_pipeline.md`](docs/architecture/assets_pipeline.md).
+État (2026-06-12) : **MAIN Assets branché et validé e2e via le form** · **A8 (images)** ✅ **opérationnel e2e** (vision gpt-5.5 → édition gpt-image-2 → upload Iconik ; tri tableau→édition / screenshot→préservation) · **A7/A9/A10** branchés en **inventaire MVP** (rapport par module, gated par case) · traitement complet A7 (dubbing) / A9 (édition docs) / A10 (résolution liens) = builds SUB dédiés à venir. Détail : [`docs/architecture/assets_pipeline.md`](docs/architecture/assets_pipeline.md).
+
+> **Soumission du form Assets** : `multipart/form-data`, champs par index (`field-0`=Target ID, `field-1`=Email, `field-2..5`=cases A7/A8/A9/A10) ; une case cochée = valeur JSON `[""]`. Le mode "Run once for each item" sur l'appel A8 traite chaque image individuellement.
 
 ---
 
