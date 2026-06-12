@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return [{json:{ openai_key:'<<OPENAI_KEY — set in n8n, not committed>>' }}];"
+        "jsCode": "return [{json:{ openai_key:'<<OPENAI_KEY_MASKED>>' }}];"
       },
       "id": "e27c7f2b-8b19-4f73-8178-0520e65e0750",
       "name": "Config",
@@ -416,7 +416,7 @@
   "pinData": null,
   "versionId": "3ac41200-7555-40e2-b647-1a28723b8339",
   "activeVersionId": "3ac41200-7555-40e2-b647-1a28723b8339",
-  "versionCounter": 3,
+  "versionCounter": 4,
   "triggerCount": 0,
   "shared": [
     {
@@ -457,7 +457,7 @@
       },
       {
         "parameters": {
-          "jsCode": "return [{json:{ openai_key:'<<OPENAI_KEY — set in n8n Config node, not committed>>' }}];"
+          "jsCode": "return [{json:{ openai_key:'<<OPENAI_KEY_MASKED>>' }}];"
         },
         "id": "e27c7f2b-8b19-4f73-8178-0520e65e0750",
         "name": "Config",
