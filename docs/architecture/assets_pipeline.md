@@ -175,17 +175,42 @@ Settings → **Docker Engine** → ajouter `"dns": ["8.8.8.8", "1.1.1.1"]` → A
 (Éditer `~/.docker/daemon.json` directement ne tient pas : Docker Desktop le réécrit.)
 Workaround ponctuel : `docker exec --user root n8n sh -c "echo '<ip> app.iconik.io' >> /etc/hosts"` (non persistant).
 
-## 10. État de construction (2026-06-11)
+## 10. État de construction (2026-06-12)
 
 | Élément | État |
 |---|---|
-| MAIN Assets (form + gate Phase 1) | ✅ construit, actif (`iOvLCwyOv8ReIxbG`) |
+| MAIN Assets (form + gate Phase 1) | ✅ construit, actif (`iOvLCwyOv8ReIxbG`, 16 nodes) |
 | Auth Iconik (App-ID corrigé) + storage FILES | ✅ vérifiés |
 | **SUB Iconik Upload** (séquence S3) | ✅ **construit & validé e2e** (`1rNi2FfRGRbZ3uBI`) |
 | **SUB A8 Image Localizer** (vision+édition+upload) | ✅ **validé e2e** (`Vayz4SnsngHkqWvl`) |
-| A7 (prompt V2) + Get captions (réf) | ✅ prêt à brancher (`uS9xhXsA3gt1WNfF`) |
-| Branchement A8 dans le MAIN (routage + throttle 12s) | 🔜 |
-| Branchement A7 dans le MAIN | 🔜 |
-| A9 / A10 workflows | 🔜 à concevoir |
+| **Branchement A8 dans le MAIN** (mode each + gate case) | ✅ **validé e2e via le form** (run 9446 : 2 localisées + 1 préservée) |
+| **Branchement A7/A9/A10 (inventaire MVP)** | ✅ rapport par module, gated par case (run 9453) |
+| A7 dubbing complet (SRT/VTT + TTS) | 🔜 SUB dédié |
+| A9 docs complet (openpyxl/python-docx) | 🔜 SUB dédié |
+| A10 résolution liens FR→EN | 🔜 SUB dédié |
 | Migration secrets (OpenAI/Iconik/Vimeo) → credentials n8n | 🔜 propreté |
 | Build Phase 1 Handoff auto en fin de P1 | 🔜 (dépend refactor lot-synchrone Phase 1) |
+
+### Soumission du form Assets (multipart)
+Le form trigger n8n attend du **`multipart/form-data`** ; les champs sont nommés par **index** et les cases à cocher attendent une **valeur JSON** :
+
+| Champ | Nom wire | Valeur cochée |
+|---|---|---|
+| Target Course ID | `field-0` | `8970456` |
+| Email | `field-1` | `mail@…` |
+| Transcripts/Dubbing (A7) | `field-2` | `[""]` |
+| Images (A8) | `field-3` | `[""]` |
+| Annexes (A9) | `field-4` | `[""]` |
+| Liens (A10) | `field-5` | `[""]` |
+
+```bash
+curl -X POST http://localhost:5678/form/leo-assets \
+  -F 'field-0=8970456' -F 'field-1=mail@oc.com' -F 'field-3=[""]'   # A8 seul
+```
+Erreurs typiques si mal formé : `Expected multipart/form-data`, `… is not valid JSON`, ou HTTP 500 *"Workflow could not be started!"*.
+
+### Pièges résolus (2026-06-12)
+- **`Parse Handoff`** : le handoff GitHub arrive en string dans `.data` → `JSON.parse($('Load Handoff').first().json.data)`.
+- **`Call A8` mode `each`** : sans ça, les N images partent en 1 sous-exécution et A8 (`.first()`) n'en traite qu'1.
+- **`Build A8 Items`** gate sur `modules.a8` (sinon A8 tourne même décoché).
+- **"Create Upload URL : JSON parameter needs to be valid JSON"** = exécutions périmées (avant le save du fix `Compute Filesize` base64-fallback). Fix bien live.
