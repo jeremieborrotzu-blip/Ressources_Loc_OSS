@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-11T17:07:51.279Z",
+  "updatedAt": "2026-06-12T09:57:11.403Z",
   "createdAt": "2026-06-11T13:33:49.177Z",
   "id": "1rNi2FfRGRbZ3uBI",
   "name": "[SUB] LEO Assets — Iconik Upload",
@@ -226,7 +226,38 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1980,
+        1560,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Asset').first().json.id }}/files/{{ $('Create Upload URL').first().json.id }}/keyframes/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "App-ID",
+              "value": "={{ $('Build Auth').first().json.app_id }}"
+            },
+            {
+              "name": "Auth-Token",
+              "value": "={{ $('Build Auth').first().json.auth_token }}"
+            }
+          ]
+        },
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={}"
+      },
+      "id": "c56e4508-1d00-42af-ad62-5de7b253c929",
+      "name": "Trigger Keyframes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
         300
       ]
     }
@@ -324,6 +355,17 @@
       "main": [
         [
           {
+            "node": "Trigger Keyframes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Keyframes": {
+      "main": [
+        [
+          {
             "node": "Return Result",
             "type": "main",
             "index": 0
@@ -340,9 +382,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
-  "activeVersionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
-  "versionCounter": 12,
+  "versionId": "d7f6d51d-e36c-4ae4-9715-0732e77d6cd3",
+  "activeVersionId": "d7f6d51d-e36c-4ae4-9715-0732e77d6cd3",
+  "versionCounter": 15,
   "triggerCount": 0,
   "shared": [
     {
@@ -365,9 +407,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-11T17:07:51.282Z",
-    "createdAt": "2026-06-11T17:07:51.282Z",
-    "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
+    "updatedAt": "2026-06-12T09:57:11.406Z",
+    "createdAt": "2026-06-12T09:57:11.406Z",
+    "versionId": "d7f6d51d-e36c-4ae4-9715-0732e77d6cd3",
     "workflowId": "1rNi2FfRGRbZ3uBI",
     "nodes": [
       {
@@ -589,7 +631,38 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1980,
+          1560,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "=https://app.iconik.io/API/files/v1/assets/{{ $('Create Asset').first().json.id }}/files/{{ $('Create Upload URL').first().json.id }}/keyframes/",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "App-ID",
+                "value": "={{ $('Build Auth').first().json.app_id }}"
+              },
+              {
+                "name": "Auth-Token",
+                "value": "={{ $('Build Auth').first().json.auth_token }}"
+              }
+            ]
+          },
+          "options": {},
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={}"
+        },
+        "id": "c56e4508-1d00-42af-ad62-5de7b253c929",
+        "name": "Trigger Keyframes",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1340,
           300
         ]
       }
@@ -687,6 +760,17 @@
         "main": [
           [
             {
+              "node": "Trigger Keyframes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Trigger Keyframes": {
+        "main": [
+          [
+            {
               "node": "Return Result",
               "type": "main",
               "index": 0
@@ -701,18 +785,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-11T17:07:51.322Z",
-        "id": 657,
+        "createdAt": "2026-06-12T09:57:11.455Z",
+        "id": 671,
         "workflowId": "1rNi2FfRGRbZ3uBI",
-        "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
+        "versionId": "d7f6d51d-e36c-4ae4-9715-0732e77d6cd3",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-11T17:07:51.312Z",
-        "id": 656,
+        "createdAt": "2026-06-12T09:57:11.441Z",
+        "id": 670,
         "workflowId": "1rNi2FfRGRbZ3uBI",
-        "versionId": "b83ed88a-14e5-4157-9b6e-e3758a3a5eaf",
+        "versionId": "d7f6d51d-e36c-4ae4-9715-0732e77d6cd3",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
