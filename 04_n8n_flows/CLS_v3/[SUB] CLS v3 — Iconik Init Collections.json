@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T16:01:16.545Z",
+  "updatedAt": "2026-06-12T09:42:05.351Z",
   "createdAt": "2026-06-08T15:26:40.898Z",
   "id": "P97ds2vbSmklYbnP",
   "name": "[SUB] CLS v3 — Iconik Init Collections",
@@ -28,254 +28,21 @@
         300
       ],
       "parameters": {
-        "jsCode": "// ICONIK CREDENTIALS — configured 2026-06-08\nconst ICONIK_APP_ID     = 'feff994e-1a46-11ee-9965-6a0b57ea0a0e';\nconst ICONIK_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJjZDFiZmE4OC02MzJlLTExZjEtOWY0YS1jMjcyZWFmNmM3OGQiLCJpZCI6ImQxOWE1MDAwLTYzMmUtMTFmMS1iYTM0LTZhZWQyYmZiYWMyZSIsImV4cCI6MjA5NjM3ODgxNiwic3lzIjoiaWNvbmlrLWV1In0.c3o8DxZbAjiOakN_uiKKeixwZLU2l104B_xkyBx7vnc';\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id:    inp.target_course_id,\n  iconik_app_id:       ICONIK_APP_ID,\n  iconik_auth_token:   ICONIK_AUTH_TOKEN,\n  root_collection_name:'0000_LOCALISATION'\n}}];"
+        "jsCode": "// ICONIK CREDENTIALS — configured 2026-06-08\nconst ICONIK_APP_ID     = 'cd1bfa88-632e-11f1-9f4a-c272eaf6c78d';\nconst ICONIK_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJjZDFiZmE4OC02MzJlLTExZjEtOWY0YS1jMjcyZWFmNmM3OGQiLCJpZCI6ImQxOWE1MDAwLTYzMmUtMTFmMS1iYTM0LTZhZWQyYmZiYWMyZSIsImV4cCI6MjA5NjM3ODgxNiwic3lzIjoiaWNvbmlrLWV1In0.c3o8DxZbAjiOakN_uiKKeixwZLU2l104B_xkyBx7vnc';\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id:    inp.target_course_id,\n  iconik_app_id:       ICONIK_APP_ID,\n  iconik_auth_token:   ICONIK_AUTH_TOKEN,\n  root_collection_name:'0000_LOCALISATION'\n}}];"
       }
     },
     {
-      "id": "search",
-      "name": "Search Root Collection",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        440,
-        300
-      ],
-      "onError": "continueRegularOutput",
       "parameters": {
-        "method": "POST",
-        "url": "https://app.iconik.io/API/search/v1/search/",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "App-ID",
-              "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-            },
-            {
-              "name": "Auth-Token",
-              "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "doc_types": [
-            "=collections"
-          ],
-          "query": "=0000_LOCALISATION",
-          "limit": 5
-        }
-      }
-    },
-    {
-      "id": "find",
-      "name": "Extract Root ID",
+        "jsCode": "\nconst a = $('Build Auth').first().json;\nconst APP = a.iconik_app_id, TOK = a.iconik_auth_token;\nconst tid = String(a.target_course_id || '').trim();\nconst base = 'https://app.iconik.io';\nconst H = { 'App-ID': APP, 'Auth-Token': TOK, 'Content-Type': 'application/json' };\nconst http = this.helpers.httpRequest;\n\nconst searchColl = async (title) => {\n  const r = await http({ method:'POST', url: base+'/API/search/v1/search/', headers:H, body:{ doc_types:['collections'], query:title, per_page:50 }, json:true });\n  return (r.objects||[]).filter(o => (o.title||'').trim() === title);\n};\nconst childColls = async (pid) => {\n  const r = await http({ method:'GET', url: base+`/API/assets/v1/collections/${pid}/contents/?object_types=collections&per_page=200`, headers:H, json:true });\n  return r.objects||[];\n};\nconst createColl = async (title, parent_id) => {\n  const body = { title };\n  if (parent_id) body.parent_id = parent_id;\n  const r = await http({ method:'POST', url: base+'/API/assets/v1/collections/', headers:H, body, json:true });\n  return r.id;\n};\nconst ensureRoot = async (title) => {\n  const hits = await searchColl(title);\n  const top = hits.find(o => !o.parent_id) || hits[0];\n  return top ? top.id : await createColl(title, null);\n};\nconst ensureUnder = async (parent_id, title) => {\n  const kids = await childColls(parent_id);\n  const hit = kids.find(o => (o.title||'').trim() === title);\n  return hit ? hit.id : await createColl(title, parent_id);\n};\n\nconst root = await ensureRoot('0000_LOCALISATION');\nconst target = await ensureUnder(root, tid);\nconst graphics = await ensureUnder(target, 'static_graphics');\nconst files = await ensureUnder(target, 'external_files');\nconst transcripts = await ensureUnder(target, 'transcripts');\nconst pdf = await ensureUnder(target, 'pdf_to_be_localized');\n\nreturn [{ json: {\n  target_course_id: tid,\n  root_collection_id: root,\n  target_collection_id: target,\n  graphics_collection_id: graphics,\n  files_collection_id: files,\n  transcripts_collection_id: transcripts,\n  pdf_collection_id: pdf,\n  iconik_ready: !!(root && target && graphics)\n}}];\n"
+      },
+      "id": "1aacfff9-daf1-4a27-b2c8-46fcceec05f2",
+      "name": "Init Collections",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        660,
+        700,
         300
-      ],
-      "parameters": {
-        "jsCode": "const auth=$('Build Auth').first().json;\nconst res=$input.first().json;\nconst match=(res.objects||[]).find(o=>(o.title||'').trim()==='0000_LOCALISATION');\nreturn [{json:{...auth,root_collection_id:match?match.id:null,root_found:!!match}}];"
-      }
-    },
-    {
-      "id": "c_tgt",
-      "name": "Create Target Collection",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        880,
-        300
-      ],
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "method": "POST",
-        "url": "https://app.iconik.io/API/assets/v1/collections/",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "App-ID",
-              "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-            },
-            {
-              "name": "Auth-Token",
-              "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "title": "={{ $('Build Auth').first().json.target_course_id }}",
-          "parent_collection_id": "={{ $('Extract Root ID').first().json.root_collection_id }}"
-        }
-      }
-    },
-    {
-      "id": "ext",
-      "name": "Extract Target ID",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1100,
-        300
-      ],
-      "parameters": {
-        "jsCode": "const a=$('Build Auth').first().json;\nreturn [{json:{...a,root_collection_id:$('Extract Root ID').first().json.root_collection_id,target_collection_id:$input.first().json.id||null}}];"
-      }
-    },
-    {
-      "id": "c_g",
-      "name": "Create static_graphics",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        1320,
-        160
-      ],
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "method": "POST",
-        "url": "https://app.iconik.io/API/assets/v1/collections/",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "App-ID",
-              "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-            },
-            {
-              "name": "Auth-Token",
-              "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "title": "static_graphics",
-          "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-        }
-      }
-    },
-    {
-      "id": "c_f",
-      "name": "Create external_files",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        1320,
-        300
-      ],
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "method": "POST",
-        "url": "https://app.iconik.io/API/assets/v1/collections/",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "App-ID",
-              "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-            },
-            {
-              "name": "Auth-Token",
-              "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "title": "external_files",
-          "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-        }
-      }
-    },
-    {
-      "id": "c_t",
-      "name": "Create transcripts",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        1320,
-        440
-      ],
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "method": "POST",
-        "url": "https://app.iconik.io/API/assets/v1/collections/",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "App-ID",
-              "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-            },
-            {
-              "name": "Auth-Token",
-              "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "title": "transcripts",
-          "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-        }
-      }
-    },
-    {
-      "id": "ret",
-      "name": "Return Collection IDs",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1560,
-        300
-      ],
-      "parameters": {
-        "jsCode": "const e=$('Extract Target ID').first().json;\nconst g=()=>{try{return $('Create static_graphics').first().json.id||null;}catch{return null;}};\nconst f=()=>{try{return $('Create external_files').first().json.id||null;}catch{return null;}};\nconst t=()=>{try{return $('Create transcripts').first().json.id||null;}catch{return null;}};\nconst p=()=>{try{return $('Create pdf_to_be_localized').first().json.id||null;}catch{return null;}};\nreturn [{json:{target_course_id:e.target_course_id,root_collection_id:e.root_collection_id,target_collection_id:e.target_collection_id,graphics_collection_id:g(),files_collection_id:f(),transcripts_collection_id:t(),pdf_collection_id:p(),iconik_ready:!!(g()&&f()&&t()&&p())}}];"
-      }
-    },
-    {
-      "id": "c_pdf",
-      "name": "Create pdf_to_be_localized",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [
-        1320,
-        560
-      ],
-      "onError": "continueRegularOutput",
-      "parameters": {
-        "method": "POST",
-        "url": "https://app.iconik.io/API/assets/v1/collections/",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "App-ID",
-              "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-            },
-            {
-              "name": "Auth-Token",
-              "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "title": "pdf_to_be_localized",
-          "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-        }
-      }
+      ]
     }
   ],
   "connections": {
@@ -294,114 +61,7 @@
       "main": [
         [
           {
-            "node": "Search Root Collection",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search Root Collection": {
-      "main": [
-        [
-          {
-            "node": "Extract Root ID",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract Root ID": {
-      "main": [
-        [
-          {
-            "node": "Create Target Collection",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create Target Collection": {
-      "main": [
-        [
-          {
-            "node": "Extract Target ID",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract Target ID": {
-      "main": [
-        [
-          {
-            "node": "Create static_graphics",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Create pdf_to_be_localized",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create external_files",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create transcripts",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create static_graphics": {
-      "main": [
-        [
-          {
-            "node": "Return Collection IDs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create external_files": {
-      "main": [
-        [
-          {
-            "node": "Return Collection IDs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create transcripts": {
-      "main": [
-        [
-          {
-            "node": "Return Collection IDs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create pdf_to_be_localized": {
-      "main": [
-        [
-          {
-            "node": "Return Collection IDs",
+            "node": "Init Collections",
             "type": "main",
             "index": 0
           }
@@ -417,9 +77,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "2d539a93-8c1a-481a-8b46-f58344ea8ceb",
-  "activeVersionId": "2d539a93-8c1a-481a-8b46-f58344ea8ceb",
-  "versionCounter": 6,
+  "versionId": "058e6954-fde2-4b2c-ae05-6d5fdd899afc",
+  "activeVersionId": "058e6954-fde2-4b2c-ae05-6d5fdd899afc",
+  "versionCounter": 21,
   "triggerCount": 0,
   "shared": [
     {
@@ -442,9 +102,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-06-08T16:01:16.547Z",
-    "createdAt": "2026-06-08T16:01:16.547Z",
-    "versionId": "2d539a93-8c1a-481a-8b46-f58344ea8ceb",
+    "updatedAt": "2026-06-12T09:42:05.354Z",
+    "createdAt": "2026-06-12T09:42:05.354Z",
+    "versionId": "058e6954-fde2-4b2c-ae05-6d5fdd899afc",
     "workflowId": "P97ds2vbSmklYbnP",
     "nodes": [
       {
@@ -468,254 +128,21 @@
           300
         ],
         "parameters": {
-          "jsCode": "// ICONIK CREDENTIALS — configured 2026-06-08\nconst ICONIK_APP_ID     = 'feff994e-1a46-11ee-9965-6a0b57ea0a0e';\nconst ICONIK_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJjZDFiZmE4OC02MzJlLTExZjEtOWY0YS1jMjcyZWFmNmM3OGQiLCJpZCI6ImQxOWE1MDAwLTYzMmUtMTFmMS1iYTM0LTZhZWQyYmZiYWMyZSIsImV4cCI6MjA5NjM3ODgxNiwic3lzIjoiaWNvbmlrLWV1In0.c3o8DxZbAjiOakN_uiKKeixwZLU2l104B_xkyBx7vnc';\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id:    inp.target_course_id,\n  iconik_app_id:       ICONIK_APP_ID,\n  iconik_auth_token:   ICONIK_AUTH_TOKEN,\n  root_collection_name:'0000_LOCALISATION'\n}}];"
+          "jsCode": "// ICONIK CREDENTIALS — configured 2026-06-08\nconst ICONIK_APP_ID     = 'cd1bfa88-632e-11f1-9f4a-c272eaf6c78d';\nconst ICONIK_AUTH_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOiJjZDFiZmE4OC02MzJlLTExZjEtOWY0YS1jMjcyZWFmNmM3OGQiLCJpZCI6ImQxOWE1MDAwLTYzMmUtMTFmMS1iYTM0LTZhZWQyYmZiYWMyZSIsImV4cCI6MjA5NjM3ODgxNiwic3lzIjoiaWNvbmlrLWV1In0.c3o8DxZbAjiOakN_uiKKeixwZLU2l104B_xkyBx7vnc';\n\nconst inp = $input.first().json;\nreturn [{json:{\n  target_course_id:    inp.target_course_id,\n  iconik_app_id:       ICONIK_APP_ID,\n  iconik_auth_token:   ICONIK_AUTH_TOKEN,\n  root_collection_name:'0000_LOCALISATION'\n}}];"
         }
       },
       {
-        "id": "search",
-        "name": "Search Root Collection",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          440,
-          300
-        ],
-        "onError": "continueRegularOutput",
         "parameters": {
-          "method": "POST",
-          "url": "https://app.iconik.io/API/search/v1/search/",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "App-ID",
-                "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-              },
-              {
-                "name": "Auth-Token",
-                "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-              }
-            ]
-          },
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "doc_types": [
-              "=collections"
-            ],
-            "query": "=0000_LOCALISATION",
-            "limit": 5
-          }
-        }
-      },
-      {
-        "id": "find",
-        "name": "Extract Root ID",
+          "jsCode": "\nconst a = $('Build Auth').first().json;\nconst APP = a.iconik_app_id, TOK = a.iconik_auth_token;\nconst tid = String(a.target_course_id || '').trim();\nconst base = 'https://app.iconik.io';\nconst H = { 'App-ID': APP, 'Auth-Token': TOK, 'Content-Type': 'application/json' };\nconst http = this.helpers.httpRequest;\n\nconst searchColl = async (title) => {\n  const r = await http({ method:'POST', url: base+'/API/search/v1/search/', headers:H, body:{ doc_types:['collections'], query:title, per_page:50 }, json:true });\n  return (r.objects||[]).filter(o => (o.title||'').trim() === title);\n};\nconst childColls = async (pid) => {\n  const r = await http({ method:'GET', url: base+`/API/assets/v1/collections/${pid}/contents/?object_types=collections&per_page=200`, headers:H, json:true });\n  return r.objects||[];\n};\nconst createColl = async (title, parent_id) => {\n  const body = { title };\n  if (parent_id) body.parent_id = parent_id;\n  const r = await http({ method:'POST', url: base+'/API/assets/v1/collections/', headers:H, body, json:true });\n  return r.id;\n};\nconst ensureRoot = async (title) => {\n  const hits = await searchColl(title);\n  const top = hits.find(o => !o.parent_id) || hits[0];\n  return top ? top.id : await createColl(title, null);\n};\nconst ensureUnder = async (parent_id, title) => {\n  const kids = await childColls(parent_id);\n  const hit = kids.find(o => (o.title||'').trim() === title);\n  return hit ? hit.id : await createColl(title, parent_id);\n};\n\nconst root = await ensureRoot('0000_LOCALISATION');\nconst target = await ensureUnder(root, tid);\nconst graphics = await ensureUnder(target, 'static_graphics');\nconst files = await ensureUnder(target, 'external_files');\nconst transcripts = await ensureUnder(target, 'transcripts');\nconst pdf = await ensureUnder(target, 'pdf_to_be_localized');\n\nreturn [{ json: {\n  target_course_id: tid,\n  root_collection_id: root,\n  target_collection_id: target,\n  graphics_collection_id: graphics,\n  files_collection_id: files,\n  transcripts_collection_id: transcripts,\n  pdf_collection_id: pdf,\n  iconik_ready: !!(root && target && graphics)\n}}];\n"
+        },
+        "id": "1aacfff9-daf1-4a27-b2c8-46fcceec05f2",
+        "name": "Init Collections",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          660,
+          700,
           300
-        ],
-        "parameters": {
-          "jsCode": "const auth=$('Build Auth').first().json;\nconst res=$input.first().json;\nconst match=(res.objects||[]).find(o=>(o.title||'').trim()==='0000_LOCALISATION');\nreturn [{json:{...auth,root_collection_id:match?match.id:null,root_found:!!match}}];"
-        }
-      },
-      {
-        "id": "c_tgt",
-        "name": "Create Target Collection",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          880,
-          300
-        ],
-        "onError": "continueRegularOutput",
-        "parameters": {
-          "method": "POST",
-          "url": "https://app.iconik.io/API/assets/v1/collections/",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "App-ID",
-                "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-              },
-              {
-                "name": "Auth-Token",
-                "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-              }
-            ]
-          },
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "title": "={{ $('Build Auth').first().json.target_course_id }}",
-            "parent_collection_id": "={{ $('Extract Root ID').first().json.root_collection_id }}"
-          }
-        }
-      },
-      {
-        "id": "ext",
-        "name": "Extract Target ID",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          1100,
-          300
-        ],
-        "parameters": {
-          "jsCode": "const a=$('Build Auth').first().json;\nreturn [{json:{...a,root_collection_id:$('Extract Root ID').first().json.root_collection_id,target_collection_id:$input.first().json.id||null}}];"
-        }
-      },
-      {
-        "id": "c_g",
-        "name": "Create static_graphics",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          1320,
-          160
-        ],
-        "onError": "continueRegularOutput",
-        "parameters": {
-          "method": "POST",
-          "url": "https://app.iconik.io/API/assets/v1/collections/",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "App-ID",
-                "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-              },
-              {
-                "name": "Auth-Token",
-                "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-              }
-            ]
-          },
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "title": "static_graphics",
-            "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-          }
-        }
-      },
-      {
-        "id": "c_f",
-        "name": "Create external_files",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          1320,
-          300
-        ],
-        "onError": "continueRegularOutput",
-        "parameters": {
-          "method": "POST",
-          "url": "https://app.iconik.io/API/assets/v1/collections/",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "App-ID",
-                "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-              },
-              {
-                "name": "Auth-Token",
-                "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-              }
-            ]
-          },
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "title": "external_files",
-            "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-          }
-        }
-      },
-      {
-        "id": "c_t",
-        "name": "Create transcripts",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          1320,
-          440
-        ],
-        "onError": "continueRegularOutput",
-        "parameters": {
-          "method": "POST",
-          "url": "https://app.iconik.io/API/assets/v1/collections/",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "App-ID",
-                "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-              },
-              {
-                "name": "Auth-Token",
-                "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-              }
-            ]
-          },
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "title": "transcripts",
-            "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-          }
-        }
-      },
-      {
-        "id": "ret",
-        "name": "Return Collection IDs",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          1560,
-          300
-        ],
-        "parameters": {
-          "jsCode": "const e=$('Extract Target ID').first().json;\nconst g=()=>{try{return $('Create static_graphics').first().json.id||null;}catch{return null;}};\nconst f=()=>{try{return $('Create external_files').first().json.id||null;}catch{return null;}};\nconst t=()=>{try{return $('Create transcripts').first().json.id||null;}catch{return null;}};\nconst p=()=>{try{return $('Create pdf_to_be_localized').first().json.id||null;}catch{return null;}};\nreturn [{json:{target_course_id:e.target_course_id,root_collection_id:e.root_collection_id,target_collection_id:e.target_collection_id,graphics_collection_id:g(),files_collection_id:f(),transcripts_collection_id:t(),pdf_collection_id:p(),iconik_ready:!!(g()&&f()&&t()&&p())}}];"
-        }
-      },
-      {
-        "id": "c_pdf",
-        "name": "Create pdf_to_be_localized",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4,
-        "position": [
-          1320,
-          560
-        ],
-        "onError": "continueRegularOutput",
-        "parameters": {
-          "method": "POST",
-          "url": "https://app.iconik.io/API/assets/v1/collections/",
-          "sendHeaders": true,
-          "headerParameters": {
-            "parameters": [
-              {
-                "name": "App-ID",
-                "value": "={{ $('Build Auth').first().json.iconik_app_id }}"
-              },
-              {
-                "name": "Auth-Token",
-                "value": "={{ $('Build Auth').first().json.iconik_auth_token }}"
-              }
-            ]
-          },
-          "sendBody": true,
-          "contentType": "json",
-          "body": {
-            "title": "pdf_to_be_localized",
-            "parent_collection_id": "={{ $('Extract Target ID').first().json.target_collection_id }}"
-          }
-        }
+        ]
       }
     ],
     "connections": {
@@ -734,114 +161,7 @@
         "main": [
           [
             {
-              "node": "Search Root Collection",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Search Root Collection": {
-        "main": [
-          [
-            {
-              "node": "Extract Root ID",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Extract Root ID": {
-        "main": [
-          [
-            {
-              "node": "Create Target Collection",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Create Target Collection": {
-        "main": [
-          [
-            {
-              "node": "Extract Target ID",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Extract Target ID": {
-        "main": [
-          [
-            {
-              "node": "Create static_graphics",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Create pdf_to_be_localized",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Create external_files",
-              "type": "main",
-              "index": 0
-            }
-          ],
-          [
-            {
-              "node": "Create transcripts",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Create static_graphics": {
-        "main": [
-          [
-            {
-              "node": "Return Collection IDs",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Create external_files": {
-        "main": [
-          [
-            {
-              "node": "Return Collection IDs",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Create transcripts": {
-        "main": [
-          [
-            {
-              "node": "Return Collection IDs",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Create pdf_to_be_localized": {
-        "main": [
-          [
-            {
-              "node": "Return Collection IDs",
+              "node": "Init Collections",
               "type": "main",
               "index": 0
             }
@@ -855,18 +175,18 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-06-08T16:01:16.585Z",
-        "id": 508,
+        "createdAt": "2026-06-12T09:42:05.393Z",
+        "id": 669,
         "workflowId": "P97ds2vbSmklYbnP",
-        "versionId": "2d539a93-8c1a-481a-8b46-f58344ea8ceb",
+        "versionId": "058e6954-fde2-4b2c-ae05-6d5fdd899afc",
         "event": "activated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       },
       {
-        "createdAt": "2026-06-08T16:01:16.575Z",
-        "id": 507,
+        "createdAt": "2026-06-12T09:42:05.383Z",
+        "id": 668,
         "workflowId": "P97ds2vbSmklYbnP",
-        "versionId": "2d539a93-8c1a-481a-8b46-f58344ea8ceb",
+        "versionId": "058e6954-fde2-4b2c-ae05-6d5fdd899afc",
         "event": "deactivated",
         "userId": "7ae71612-d8be-4acd-a26d-869e32490f0e"
       }
