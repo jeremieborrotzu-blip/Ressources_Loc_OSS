@@ -7,9 +7,11 @@
 
 ## Rôle
 
-Extrait tous les assets statiques d'un cours OpenClassrooms (images, vidéos, fichiers) hébergés sur `user.oc-static.com`, les télécharge en parallèle et les livre sous forme d'une archive ZIP prête à être traitée.
+Extrait tous les assets statiques d'un cours OpenClassrooms (images **et** documents téléchargeables) hébergés sur **n'importe quel hôte `oc-static.com`** (`user.oc-static.com`, `course.oc-static.com`, ainsi que le miroir S3 `s3.eu-west-1.amazonaws.com/course.oc-static.com/…`), les télécharge en parallèle et les livre sous forme d'une archive ZIP prête à être traitée. **Les banners sont exclus automatiquement.**
 
 C'est un outil **autonome et indépendant** — il n'est pas intégré dans le pipeline CLS v3. Il est déclenché manuellement via une interface web intégrée.
+
+**URL du formulaire :** `http://localhost:5678/webhook/oc-extractor`
 
 ---
 
@@ -17,8 +19,8 @@ C'est un outil **autonome et indépendant** — il n'est pas intégré dans le p
 
 L'extracteur expose sa propre mini-application web via des webhooks n8n :
 
-1. **Page de formulaire** (`GET /webhook/…`) — interface HTML où l'utilisateur saisit l'URL du cours OC
-2. **Traitement** (`POST /webhook/…`) — reçoit l'URL, démarre l'extraction en arrière-plan
+1. **Page de formulaire** (`GET /webhook/oc-extractor`) — interface HTML où l'utilisateur **dépose (drag & drop) le fichier HTML du cours** (pas une URL)
+2. **Traitement** (`POST /webhook/oc-upload`) — reçoit le HTML uploadé, démarre l'extraction en arrière-plan
 3. **Polling statut** (`GET /webhook/…/status`) — l'interface interroge régulièrement l'avancement (temps réel)
 4. **Téléchargement** (`GET /webhook/…/download`) — livre le ZIP une fois l'extraction terminée
 
@@ -27,9 +29,12 @@ L'extracteur expose sa propre mini-application web via des webhooks n8n :
 ## Fonctionnement technique
 
 ```
-Formulaire (URL cours OC)
+Formulaire (upload du HTML du cours)
     ↓
-Download All — scraping de user.oc-static.com
+Download All — scraping de tous les hôtes oc-static.com
+    ├── regex : /https?:\/\/[^\s"'<>]*oc-static\.com\/[^\s"'<>]+/g
+    ├── filtre extension (fin d'URL) : png/jpg/svg… + pdf/xlsx/ods/docx/pptx/csv/zip…
+    ├── exclusion banners : nom de fichier matchant /banner/i
     ├── téléchargement parallèle des assets
     └── construction du ZIP en mémoire (zlib custom, base64 inline)
     ↓
@@ -50,10 +55,12 @@ Return ZIP — livraison au navigateur
 
 ## Ce que l'extracteur produit
 
-Une archive `.zip` contenant tous les fichiers statiques trouvés sur `user.oc-static.com` pour le cours donné :
-- Images (`.png`, `.jpg`, `.gif`, `.svg`, …)
-- Fichiers téléchargeables (`.pdf`, `.xlsx`, `.docx`, `.pptx`, `.csv`, …)
+Une archive `.zip` contenant tous les fichiers statiques `oc-static.com` du cours, **banners exclus** :
+- Images (`.png`, `.jpg`, `.gif`, `.svg`, …) — depuis `user.oc-static.com`
+- **Documents téléchargeables** (`.pdf`, `.xlsx`, `.ods`, `.docx`, `.pptx`, `.csv`, …) — depuis `course.oc-static.com` (+ miroir S3)
 - Éventuellement : polices, icônes, autres ressources statiques
+
+> **Historique :** jusqu'au 2026-06-16, l'extracteur ne scrapait que `user.oc-static.com` → il **ratait tous les documents** (PDF/xlsx/ods…, hébergés sur `course.oc-static.com`) et **embarquait les banners**. Corrigé : scan multi-hôtes `oc-static.com`, filtre par extension en fin d'URL, exclusion des banners par nom de fichier.
 
 ---
 
