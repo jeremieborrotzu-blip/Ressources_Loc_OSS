@@ -223,13 +223,9 @@
 
     <!-- ====================== SUIVI ========================= -->
     <section class="view" id="v-suivi">
-      <div class="pagehead"><h1>Suivi des runs <span class="demoflag">démo — données fictives</span></h1><p>État temps réel des exécutions (en prod : API n8n + store de progression).</p></div>
-      <div class="card"><table><thead><tr><th>Run</th><th>Cible</th><th>Phase / Agents</th><th>Statut</th><th>Progression</th><th>Coût</th><th>Sorties</th></tr></thead><tbody>
-        <tr><td>#9584</td><td>8787276 → 8970456</td><td>Phase 2 · A7</td><td><span class="st ok">success</span></td><td><div class="bar"><i style="width:100%"></i></div></td><td>$0.10</td><td>Iconik · transcripts</td></tr>
-        <tr><td>#9602</td><td>Parcours 1047 · P2</td><td>Projet · DOCX</td><td><span class="st run">running</span></td><td><div class="bar"><i style="width:48%"></i></div></td><td>~$3</td><td>—</td></tr>
-        <tr><td>#9579</td><td>8787276 → 8970456</td><td>Phase 2 · A9</td><td><span class="st ok">success</span></td><td><div class="bar"><i style="width:100%"></i></div></td><td>$0.12</td><td>Iconik · external_files</td></tr>
-        <tr><td>#9555</td><td>8541233 → 8702991</td><td>Phase 1 · Audit A1</td><td><span class="st err">error</span></td><td><div class="bar"><i style="width:30%;background:var(--red)"></i></div></td><td>$0.30</td><td>OC API timeout (504)</td></tr>
-      </tbody></table></div>
+      <div class="pagehead"><h1>Suivi des runs <span id="suiviLive" class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">● live</span></h1><p>Exécutions n8n en temps réel (rafraîchi toutes les 5 s). Source : le BFF lit la base n8n.</p></div>
+      <div class="card"><table><thead><tr><th>Run</th><th>Workflow</th><th>Statut</th><th>Démarré</th><th>Durée</th></tr></thead>
+        <tbody id="runsBody"><tr><td colspan="5" class="empty">Chargement…</td></tr></tbody></table></div>
     </section>
 
     <!-- ====================== REVUE ========================= -->
@@ -320,7 +316,7 @@ const courseInfo=()=>{ if(!isCours())return null; const l=live[S.targetId]; if(l
 const phase1Done=()=>isCours()&&(S.simP1||!!(courseInfo()&&courseInfo().done));
 const p2Available=()=>phase1Done()||S.p1_localize;
 
-document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x===n));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('v-'+n.dataset.v).classList.add('on');}));
+document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x===n));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('v-'+n.dataset.v).classList.add('on');if(n.dataset.v==='suivi')fetchRuns();}));
 document.querySelectorAll('#ctype button').forEach(b=>b.addEventListener('click',()=>{S.ctype=b.dataset.t;document.querySelectorAll('#ctype button').forEach(x=>x.classList.toggle('on',x===b));render();}));
 const bindT=(id,k,f)=>$(id).addEventListener('input',e=>{let v=e.target.value;if(f)v=f(v);e.target.value=v;S[k]=v;render();});
 bindT('sourceId','sourceId',v=>v.replace(/\D/g,'')); bindT('pathId','pathId',v=>v.replace(/\D/g,''));
@@ -439,6 +435,21 @@ $('aLaunch').addEventListener('click',()=>{
   const t=$('toast');t.innerHTML='✅ <b>Localisation d\'assets à la demande</b> — payload BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),9000);
 });
 renderAssets();
+
+/* ===================== SUIVI (live) ===================== */
+function runStatus(s){ if(s==='success')return['ok','success']; if(s==='error'||s==='crashed')return['err',s]; if(s==='canceled')return['err','canceled']; return['run',s||'…']; }
+function fmtDur(ms){ if(ms==null)return '—'; if(ms<1000)return ms+'ms'; const s=Math.round(ms/1000); return s<60?s+'s':Math.floor(s/60)+'m'+String(s%60).padStart(2,'0'); }
+function fmtTime(t){ return t? t.slice(5,19).replace('T',' ') : '—'; }
+async function fetchRuns(){
+  const body=$('runsBody'); if(!body)return;
+  try{
+    const r=await fetch('/api/runs'); if(!r.ok)throw 0; const d=await r.json();
+    $('suiviLive').style.display='inline-block';
+    if(!d.runs.length){ body.innerHTML='<tr><td colspan="5" class="empty">Aucune exécution.</td></tr>'; return; }
+    body.innerHTML=d.runs.map(x=>{const[cl,lbl]=runStatus(x.status);return `<tr><td><b>#${x.id}</b></td><td>${x.workflow||''}</td><td><span class="st ${cl}">${lbl}</span></td><td>${fmtTime(x.started)}</td><td>${fmtDur(x.durationMs)}</td></tr>`;}).join('');
+  }catch(e){ $('suiviLive').style.display='none'; body.innerHTML='<tr><td colspan="5" class="empty">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code> puis ouvre http://localhost:4317</td></tr>'; }
+}
+setInterval(()=>{ const v=$('v-suivi'); if(v&&v.classList.contains('on'))fetchRuns(); },5000);
 </script>
 </body>
 </html>
