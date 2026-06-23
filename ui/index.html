@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LEO v1 — Localization Engine Operator</title>
+<link rel="icon" type="image/png" href="assets/leo-logo.png">
 <style>
   :root{--navy:#131a4a;--indigo:#5b4fe0;--purple:#7c3aed;--blue:#2f6bff;--teal:#16c1a0;--orange:#f59e0b;--coral:#ff6d5a;--green:#22c55e;--red:#ef4444;--bg:#eef1f8;--card:#fff;--line:#e6e9f2;--muted:#8a90a6;--ink:#1c2238;--p1:#2f6bff;--p1soft:#eef3ff;--p2:#f59e0b;--p2soft:#fff7ec;--shadow:0 6px 24px rgba(20,26,74,.08);}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -80,8 +81,18 @@
   .drop{border:2px dashed #cdd6ea;border-radius:14px;padding:22px;display:flex;align-items:center;gap:14px;justify-content:center;cursor:pointer;transition:.15s;text-align:center}.drop.hover{border-color:var(--teal);background:#f1fbf9}.drop .dz-i{font-size:1.8rem}.drop .lk{color:var(--blue);font-weight:700;text-decoration:underline}
   .frow{display:flex;align-items:center;gap:11px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;font-size:.85rem}.frow .ag{font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:6px}.ag-a8{background:#fff7ec;color:#b9740a}.ag-a9{background:#eef3ff;color:#2b54b6}.ag-na{background:#fdeef0;color:#b03048}.frow .rm{margin-left:auto;cursor:pointer;color:var(--muted);font-weight:700}
   .chk.oc.on{border-color:var(--teal);background:#f1fbf9}.chk.oc.on .box{background:var(--teal);border-color:var(--teal)}
-  .hero{margin:-4px 0 22px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);background:#fff;line-height:0}
+  .hero{margin:-4px 0 22px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);background:#fff;line-height:0;position:relative}
   .hero img{width:100%;height:auto;display:block}
+  .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#7c3aed,#2f6bff,#16c1a0,#f59e0b)}
+  /* ---- branding ---- */
+  body::before{content:"";position:fixed;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#7c3aed,#2f6bff,#16c1a0,#f59e0b);z-index:200}
+  body{background-image:radial-gradient(rgba(91,79,224,.055) 1.1px,transparent 1.1px);background-size:24px 24px}
+  .side .brand{flex-direction:column;align-items:flex-start;gap:12px;padding:10px 6px 20px;position:relative}
+  .side .brand::before{content:"";position:absolute;top:-6px;left:-12px;width:130px;height:120px;background:radial-gradient(75px 62px at 42% 32%,rgba(124,58,237,.5),transparent 70%);pointer-events:none}
+  .side .brand svg,.side .brand img{width:66px!important;height:66px!important;border-radius:15px;position:relative;z-index:1}
+  .side .brand .t{font-size:1.6rem}
+  .nav.on{box-shadow:0 5px 16px rgba(91,79,224,.45)}
+  .byoc{font-size:.66rem;color:#7c80b5;text-align:center;padding:10px 0 2px;letter-spacing:.3px}.byoc b{color:#cdd3ef}
 </style>
 </head>
 <body>
@@ -93,7 +104,7 @@
         <circle cx="28" cy="22" r="11" fill="#7c3aed"/><text x="28" y="26" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">文A</text>
         <circle cx="28" cy="80" r="10" fill="#f59e0b"/><rect x="24" y="75" width="8" height="10" rx="1.5" fill="#fff"/>
         <text x="56" y="61" font-size="33" font-weight="800" fill="#fff" text-anchor="middle" font-family="Arial">LEO</text></svg>
-      <img src="assets/leo-logo.png" alt="LEO" style="width:44px;height:44px;border-radius:10px;object-fit:cover;display:none" onload="this.style.display='block';document.getElementById('leoFallback').style.display='none'">
+      <img src="assets/leo-logo.png" alt="LEO" style="object-fit:cover;display:none;box-shadow:0 8px 22px rgba(91,79,224,.4)" onload="this.style.display='block';document.getElementById('leoFallback').style.display='none'">
       <div><div class="t">LEO <span class="v1">v1</span></div><span class="s">Localization Engine Operator</span></div>
     </div>
     <div class="nav on" data-v="lancer"><span class="ic">🚀</span> Lancer</div>
@@ -101,6 +112,7 @@
     <div class="nav" data-v="suivi"><span class="ic">📡</span> Suivi <span class="badge">2</span></div>
     <div class="nav" data-v="revue"><span class="ic">✅</span> Revue <span class="badge">5</span></div>
     <div class="pillars"><div><i style="background:#7c3aed"></i>Localisation Thinking</div><div><i style="background:#22c55e"></i>1st Quality Check</div><div><i style="background:#2f6bff"></i>Full Automated</div><div><i style="background:#f59e0b"></i>AI Agent Coordination</div></div>
+    <div class="byoc">✦ by <b>OpenClassrooms</b></div>
   </aside>
 
   <main class="main">
