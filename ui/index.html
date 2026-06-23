@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LEO v1 — Localization Engine Operator</title>
+<style>
+  :root{
+    --navy:#131a4a; --indigo:#5b4fe0; --purple:#7c3aed; --blue:#2f6bff;
+    --teal:#16c1a0; --orange:#f59e0b; --coral:#ff6d5a; --green:#22c55e; --red:#ef4444;
+    --bg:#eef1f8; --card:#ffffff; --line:#e6e9f2; --muted:#8a90a6; --ink:#1c2238;
+    --p1:#2f6bff; --p1soft:#eef3ff; --p2:#f59e0b; --p2soft:#fff7ec;
+    --shadow:0 6px 24px rgba(20,26,74,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .wrap{max-width:1240px;margin:0 auto;padding:24px}
+  /* ---------- Header / brand ---------- */
+  header.brand{display:flex;align-items:center;gap:18px;background:var(--card);border-radius:18px;padding:18px 24px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  header.brand::after{content:"";position:absolute;inset:0;background:radial-gradient(1200px 120px at 80% -40%,rgba(91,79,224,.10),transparent);pointer-events:none}
+  .logo{width:60px;height:60px;flex:0 0 60px}
+  .brandtxt h1{font-size:1.5rem;letter-spacing:.5px;color:var(--navy);display:flex;align-items:center;gap:8px}
+  .v1{font-size:.7rem;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));padding:2px 8px;border-radius:7px;transform:translateY(-2px)}
+  .brandtxt p{color:var(--muted);font-size:.86rem}
+  .pillars{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+  .pillar{display:flex;align-items:center;gap:7px;font-size:.76rem;color:#5b6178}
+  .pillar i{width:9px;height:9px;border-radius:50%}
+  /* ---------- Layout ---------- */
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:22px;margin-top:22px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .col-main{display:flex;flex-direction:column;gap:22px}
+  /* ---------- Cards ---------- */
+  .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--line)}
+  .card-h{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+  .card-h .ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;flex:0 0 40px}
+  .card-h h2{font-size:1.05rem}
+  .card-h .sub{font-size:.8rem;color:var(--muted)}
+  .phase-tag{margin-left:auto;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:20px}
+  .card-b{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+  /* phase color frames */
+  .p1 .card-h{background:var(--p1soft)} .p1 .card-h .ico{background:linear-gradient(135deg,var(--blue),var(--indigo))}
+  .p1 .phase-tag{background:var(--p1soft);color:var(--p1);border:1px solid #cfe0ff}
+  .p1{border-top:4px solid var(--p1)}
+  .p2 .card-h{background:var(--p2soft)} .p2 .card-h .ico{background:linear-gradient(135deg,var(--orange),var(--coral))}
+  .p2 .phase-tag{background:var(--p2soft);color:#b9740a;border:1px solid #ffe2b8}
+  .p2{border-top:4px solid var(--p2)}
+  .tool .card-h .ico{background:linear-gradient(135deg,var(--teal),#0ea5b7)}
+  .tool{border-top:4px solid var(--teal)}
+  /* ---------- Fields ---------- */
+  .field label{display:block;font-size:.82rem;font-weight:600;margin-bottom:5px;color:#3a4060}
+  .req{color:var(--red);font-weight:800;margin-left:3px}
+  .cond{font-size:.66rem;font-weight:700;color:var(--orange);background:var(--p2soft);border:1px solid #ffe2b8;padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:middle}
+  input[type=text],input[type=email],select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.92rem;background:#fbfcfe;transition:border .15s}
+  input:focus,select:focus{outline:none;border-color:var(--blue)}
+  input.invalid{border-color:var(--red);background:#fef4f4}
+  .hint{font-size:.74rem;color:var(--muted);margin-top:4px}
+  .err{font-size:.74rem;color:var(--red);margin-top:4px;display:none}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:560px){.row2{grid-template-columns:1fr}}
+  /* ---------- Switch / option rows ---------- */
+  .opt{display:flex;align-items:flex-start;gap:14px;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;transition:all .15s;background:#fff}
+  .opt.on{border-color:var(--blue);background:var(--p1soft)}
+  .p2 .opt.on{border-color:var(--orange);background:var(--p2soft)}
+  .opt.locked{opacity:.55;background:#f6f7fb}
+  .opt .meta{flex:1}
+  .opt .meta b{font-size:.92rem}
+  .opt .meta .d{font-size:.78rem;color:var(--muted)}
+  .opt .badge{font-size:.64rem;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef1f8;color:#6b7191;margin-left:6px}
+  .switch{position:relative;width:46px;height:26px;flex:0 0 46px;cursor:pointer}
+  .switch input{display:none}
+  .slider{position:absolute;inset:0;background:#cdd3e3;border-radius:30px;transition:.2s}
+  .slider::before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch input:checked + .slider{background:var(--blue)}
+  .p2 .switch input:checked + .slider{background:var(--orange)}
+  .switch input:checked + .slider::before{transform:translateX(20px)}
+  .switch input:disabled + .slider{cursor:not-allowed;opacity:.6}
+  /* radio modes */
+  .modes{display:flex;flex-direction:column;gap:9px}
+  .mode{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;cursor:pointer;transition:.15s}
+  .mode.sel{border-color:var(--blue);background:var(--p1soft)}
+  .mode .dot{width:18px;height:18px;border-radius:50%;border:2px solid #c3cae0;flex:0 0 18px;position:relative}
+  .mode.sel .dot{border-color:var(--blue)}
+  .mode.sel .dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--blue)}
+  .mode .m{flex:1}.mode .m b{font-size:.9rem}.mode .m .d{font-size:.75rem;color:var(--muted)}
+  .mode .star{font-size:.64rem;font-weight:700;color:var(--green);background:#eafaf0;border:1px solid #bdedcb;padding:2px 7px;border-radius:6px}
+  .gate{display:none;font-size:.8rem;color:#8a5a00;background:var(--p2soft);border:1px solid #ffe2b8;border-radius:10px;padding:10px 12px}
+  .gate.show{display:flex;gap:9px;align-items:flex-start}
+  .status-pill{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:600;padding:6px 11px;border-radius:20px}
+  .status-ok{background:#eafaf0;color:#138a45;border:1px solid #bdedcb}
+  .status-no{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}
+  .collapse{display:none}.collapse.show{display:flex;flex-direction:column;gap:16px}
+  /* ---------- Plan panel ---------- */
+  .panel{position:sticky;top:24px;display:flex;flex-direction:column;gap:16px}
+  .plan{background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
+  .plan-h{padding:15px 18px;background:linear-gradient(135deg,#131a4a,#2a2f66);color:#fff}
+  .plan-h h3{font-size:1rem;display:flex;align-items:center;gap:8px}
+  .plan-h p{font-size:.76rem;opacity:.7}
+  .plan-b{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+  .step{display:flex;gap:11px;align-items:flex-start}
+  .step .n{width:22px;height:22px;border-radius:50%;background:var(--p1soft);color:var(--p1);font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 22px}
+  .step.p2 .n{background:var(--p2soft);color:#b9740a}
+  .step .t b{font-size:.86rem}.step .t .d{font-size:.74rem;color:var(--muted)}
+  .empty{font-size:.84rem;color:var(--muted);text-align:center;padding:10px}
+  .warns{display:flex;flex-direction:column;gap:7px}
+  .warn{font-size:.76rem;padding:8px 10px;border-radius:9px;display:flex;gap:8px;align-items:flex-start}
+  .warn.e{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}
+  .warn.i{background:#eef3ff;color:#2b54b6;border:1px solid #cfe0ff}
+  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s;letter-spacing:.3px}
+  .btn-go{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 6px 18px rgba(91,79,224,.35)}
+  .btn-go:hover{filter:brightness(1.07)}
+  .btn:disabled{background:#dfe3ee;color:#a7adc2;cursor:not-allowed;box-shadow:none}
+  .legend{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;font-size:.78rem;color:#5b6178}
+  .legend b{color:var(--ink);display:block;margin-bottom:7px;font-size:.82rem}
+  .legend li{margin:5px 0 5px 4px;list-style:none;display:flex;gap:8px}
+  .legend li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:6px;flex:0 0 7px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:#131a4a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:.35s;max-width:560px;z-index:50}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast pre{font-size:.72rem;margin-top:8px;white-space:pre-wrap;opacity:.85;max-height:220px;overflow:auto}
+  .mini{font-size:.72rem;color:var(--muted)}
+  .devbar{margin-top:10px;font-size:.74rem;color:var(--muted);display:flex;align-items:center;gap:10px;background:#f6f7fb;border:1px dashed #d2d7e6;border-radius:10px;padding:8px 12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="brand">
+    <!-- Le vrai logo : déposer le PNG fourni dans ui/assets/leo-logo.png. SVG de secours sinon. -->
+    <svg class="logo" viewBox="0 0 100 100" id="leoFallback">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#7c3aed"/><stop offset=".5" stop-color="#2f6bff"/><stop offset="1" stop-color="#16c1a0"/>
+      </linearGradient></defs>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round" stroke-dasharray="178 60" transform="rotate(-90 50 50)"/>
+      <circle cx="28" cy="22" r="11" fill="#7c3aed"/><text x="28" y="26" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">文A</text>
+      <circle cx="28" cy="80" r="10" fill="#f59e0b"/><rect x="24" y="75" width="8" height="10" rx="1.5" fill="#fff"/>
+      <text x="56" y="60" font-size="34" font-weight="800" fill="#131a4a" text-anchor="middle" font-family="Arial">LEO</text>
+    </svg>
+    <img class="logo" src="assets/leo-logo.png" alt="LEO v1" style="display:none"
+         onload="this.style.display='block';document.getElementById('leoFallback').style.display='none'">
+    <div class="brandtxt">
+      <h1>LEO <span class="v1">v1</span></h1>
+      <p>Localization Engine Operator — <b>by OpenClassrooms</b></p>
+    </div>
+    <div class="pillars">
+      <span class="pillar"><i style="background:#7c3aed"></i>Localisation Thinking</span>
+      <span class="pillar"><i style="background:#22c55e"></i>1st Quality Check</span>
+      <span class="pillar"><i style="background:#2f6bff"></i>Full Automated</span>
+      <span class="pillar"><i style="background:#f59e0b"></i>AI Agent Coordination</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- ===================== MAIN COLUMN ===================== -->
+    <div class="col-main">
+
+      <!-- ----- Identité du cours (global) ----- -->
+      <div class="card">
+        <div class="card-h"><div class="ico" style="background:linear-gradient(135deg,#131a4a,#2a2f66)">🎯</div>
+          <div><h2>Cours cible</h2><div class="sub">Identifiants communs à toutes les actions</div></div></div>
+        <div class="card-b">
+          <div class="row2">
+            <div class="field">
+              <label>Target Course ID <span class="req">*</span></label>
+              <input type="text" id="targetId" placeholder="ex. 8970456" maxlength="7" inputmode="numeric">
+              <div class="hint">ID OpenClassrooms à 7 chiffres du cours <b>cible</b>.</div>
+              <div class="err" id="targetId-err">7 chiffres requis.</div>
+            </div>
+            <div class="field">
+              <label>Rapport par email</label>
+              <div class="opt" style="padding:8px 12px">
+                <label class="switch"><input type="checkbox" id="emailOn"><span class="slider"></span></label>
+                <div class="meta"><b>M'envoyer le rapport</b><div class="d">Sinon, résultats consultables dans Iconik / GitHub.</div></div>
+              </div>
+              <div class="field" id="emailWrap" style="margin-top:10px;display:none">
+                <label>Email <span class="req">*</span> <span class="cond">requis si activé</span></label>
+                <input type="email" id="email" placeholder="prenom.nom@openclassrooms.com">
+                <div class="err" id="email-err">Email valide requis.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PHASE 1 — CONTENU (HTML) ============ -->
+      <div class="card p1">
+        <div class="card-h">
+          <div class="ico">文A</div>
+          <div><h2>Phase 1 — Contenu</h2><div class="sub">Texte du cours (HTML) · agents A1→A6</div></div>
+          <span class="phase-tag">Content</span>
+        </div>
+        <div class="card-b">
+          <div class="opt" id="p1row">
+            <label class="switch"><input type="checkbox" id="p1on"><span class="slider"></span></label>
+            <div class="meta"><b>Lancer la localisation du contenu</b>
+              <div class="d">Extraction → pré-traduction → A1–A6 → livraison.</div></div>
+          </div>
+
+          <div class="collapse" id="p1body">
+            <div class="row2">
+              <div class="field">
+                <label>Source Course ID <span class="req">*</span> <span class="cond">requis Phase 1</span></label>
+                <input type="text" id="sourceId" placeholder="ex. 8787276" maxlength="7" inputmode="numeric">
+                <div class="err" id="sourceId-err">7 chiffres requis.</div>
+              </div>
+              <div class="field">
+                <label>Direction <span class="req">*</span> <span class="cond">requis Phase 1</span></label>
+                <select id="direction">
+                  <option value="">— choisir —</option>
+                  <option value="fr>en">FR → EN</option>
+                  <option value="en>fr">EN → FR</option>
+                </select>
+                <div class="err" id="direction-err">Direction requise.</div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Profondeur de traitement <span class="req">*</span></label>
+              <div class="modes" id="p1modes">
+                <label class="mode" data-mode="audit"><span class="dot"></span><div class="m"><b>Audit A1</b><div class="d">Audit culturel + structurel. Rapport par email.</div></div></label>
+                <label class="mode" data-mode="score"><span class="dot"></span><div class="m"><b>Score de localisabilité</b><div class="d">+ A2 — score /100.</div></div></label>
+                <label class="mode" data-mode="qa"><span class="dot"></span><div class="m"><b>Quality Check</b><div class="d">A1–A5 — rapport QA des segments.</div></div></label>
+                <label class="mode sel" data-mode="full"><span class="dot"></span><div class="m"><b>Localisation complète</b><div class="d">A1–A6 + réassemblage → 8 fichiers GitHub.</div></div><span class="star">débloque la Phase 2</span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PHASE 2 — MULTIMÉDIA & ASSETS ============ -->
+      <div class="card p2">
+        <div class="card-h">
+          <div class="ico">🎬</div>
+          <div><h2>Phase 2 — Multimédia &amp; Assets</h2><div class="sub">Images, annexes, transcripts, liens · A7–A10</div></div>
+          <span class="phase-tag">Multimedia</span>
+        </div>
+        <div class="card-b">
+          <!-- statut prérequis -->
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <span class="mini">Prérequis — Phase 1 du cours :</span>
+            <span id="p1status" class="status-pill status-no">⛔ non disponible</span>
+            <span class="devbar" style="margin:0">🧪 démo : <label class="switch" style="width:40px;height:22px"><input type="checkbox" id="simP1"><span class="slider"></span></label> simuler « Phase 1 déjà faite »</span>
+          </div>
+
+          <div class="gate" id="p2gate">⚠️ <span>La Phase 2 nécessite une <b>première traduction</b> (Gold Master Phase 1) pour ce cours.
+            Active <b>« Localisation complète »</b> en Phase 1 ci-dessus (lancement chaîné), ou choisis un cours déjà traduit.</span></div>
+
+          <div id="p2body" style="display:flex;flex-direction:column;gap:11px">
+            <div class="opt" data-agent="a8">
+              <label class="switch"><input type="checkbox" id="a8"><span class="slider"></span></label>
+              <div class="meta"><b>A8 — Images</b><div class="d">Localise/édite le texte des images (diagrammes, tableaux). Banners exclus.</div></div>
+            </div>
+            <div class="opt" data-agent="a9">
+              <label class="switch"><input type="checkbox" id="a9"><span class="slider"></span></label>
+              <div class="meta"><b>A9 — Annexes</b><div class="d">XLSX / DOCX / PPTX / CSV en miroir (format, formules, liens préservés).</div></div>
+            </div>
+            <div class="opt" data-agent="a7">
+              <label class="switch"><input type="checkbox" id="a7"><span class="slider"></span></label>
+              <div class="meta"><b>A7 — Transcripts / Dubbing</b><div class="d">Adapte les SRT/VTT pour le doublage IA (timecodes préservés).</div></div>
+            </div>
+            <div class="opt" data-agent="a10">
+              <label class="switch"><input type="checkbox" id="a10"><span class="slider"></span></label>
+              <div class="meta"><b>A10 — Liens</b><span class="badge">s'exécute en dernier</span><div class="d">Résout/bascule les liens externes (agrège HTML + annexes + images).</div></div>
+            </div>
+          </div>
+          <div class="mini">Ces options sont <b>combinables</b> (toutes ou une seule) et peuvent tourner <b>indépendamment</b> entre elles.</div>
+        </div>
+      </div>
+
+      <!-- ============ OUTILS (INDÉPENDANTS) ============ -->
+      <div class="card tool">
+        <div class="card-h"><div class="ico">📦</div>
+          <div><h2>Outils</h2><div class="sub">Indépendants — ne nécessitent pas de Phase 1</div></div></div>
+        <div class="card-b">
+          <div class="opt" data-agent="extractor">
+            <label class="switch"><input type="checkbox" id="extractor"><span class="slider"></span></label>
+            <div class="meta"><b>OC Asset Extractor</b><span class="badge">standalone</span>
+              <div class="d">Récupère tous les assets oc-static d'un cours en ZIP (images + documents, banners exclus).</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== PLAN PANEL ===================== -->
+    <div class="panel">
+      <div class="plan">
+        <div class="plan-h"><h3>🚀 Plan d'exécution</h3><p>Ce qui sera lancé, dans l'ordre.</p></div>
+        <div class="plan-b">
+          <div id="steps"><div class="empty">Aucune action sélectionnée.</div></div>
+          <div class="warns" id="warns"></div>
+          <button class="btn btn-go" id="launch" disabled>Sélectionne une action</button>
+          <div class="mini" id="payloadNote" style="text-align:center;display:none">Prototype : aucun appel réel n'est envoyé.</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <b>Règles de dépendance</b>
+        <li>Phase 2 (A7/A8/A9/A10) <b>verrouillée</b> tant qu'il n'existe pas de traduction Phase 1 pour le cours.</li>
+        <li><b>Lancement chaîné</b> : Phase 1 « complète » + Phase 2 → la Phase 2 part juste après.</li>
+        <li>Les agents Phase 2 sont <b>combinables &amp; indépendants</b> ; A10 passe toujours en dernier.</li>
+        <li>Les modes Phase 1 sont <b>exclusifs</b> (un seul à la fois).</li>
+        <li>L'Asset Extractor est <b>indépendant</b> (aucun prérequis).</li>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== STATE =====================
+const S = { target:'', email:'', emailOn:false,
+  p1on:false, sourceId:'', direction:'', p1mode:'full',
+  a7:false,a8:false,a9:false,a10:false, extractor:false,
+  simP1:false };
+const $ = id => document.getElementById(id);
+const is7 = v => /^\d{7}$/.test(v);
+const isEmail = v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+
+// course already has a Phase 1 gold master? (prod = appel BFF ; ici = simulation)
+function phase1AlreadyDone(){ return S.simP1; }
+// Phase 2 unlocked if course already done OR Phase 1 "full" chained in this launch
+function p2Available(){ return phase1AlreadyDone() || (S.p1on && S.p1mode==='full'); }
+function anyP2(){ return S.a7||S.a8||S.a9||S.a10; }
+
+// ===================== BIND =====================
+function bindText(id,key,fmt){ $(id).addEventListener('input',e=>{ let v=e.target.value; if(fmt)v=fmt(v); e.target.value=v; S[key]=v; render(); }); }
+bindText('targetId','target',v=>v.replace(/\D/g,''));
+bindText('sourceId','sourceId',v=>v.replace(/\D/g,''));
+$('email').addEventListener('input',e=>{S.email=e.target.value;render();});
+$('direction').addEventListener('change',e=>{S.direction=e.target.value;render();});
+$('emailOn').addEventListener('change',e=>{S.emailOn=e.target.checked;$('emailWrap').style.display=e.target.checked?'block':'none';render();});
+$('p1on').addEventListener('change',e=>{S.p1on=e.target.checked;$('p1body').classList.toggle('show',e.target.checked);$('p1row').classList.toggle('on',e.target.checked);render();});
+document.querySelectorAll('#p1modes .mode').forEach(m=>m.addEventListener('click',()=>{
+  S.p1mode=m.dataset.mode;
+  document.querySelectorAll('#p1modes .mode').forEach(x=>x.classList.toggle('sel',x===m));
+  render();
+}));
+['a7','a8','a9','a10','extractor'].forEach(a=>$(a).addEventListener('change',e=>{
+  if((a!=='extractor') && e.target.checked && !p2Available()){ e.target.checked=false; flashGate(); return; }
+  S[a]=e.target.checked; render();
+}));
+$('simP1').addEventListener('change',e=>{S.simP1=e.target.checked;render();});
+
+function flashGate(){ const g=$('p2gate'); g.classList.add('show'); g.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300}); }
+
+// ===================== VALIDATE + RENDER =====================
+function render(){
+  // --- Phase 2 gating UI ---
+  const avail=p2Available();
+  $('p1status').className='status-pill '+(avail?'status-ok':'status-no');
+  $('p1status').textContent = avail ? (phase1AlreadyDone()?'✅ disponible':'✅ via lancement chaîné') : '⛔ non disponible';
+  $('p2gate').classList.toggle('show', !avail);
+  document.querySelectorAll('#p2body .opt').forEach(o=>{
+    o.classList.toggle('locked',!avail);
+    const cb=o.querySelector('input'); cb.disabled=!avail;
+    if(!avail){ cb.checked=false; S[o.dataset.agent]=false; }
+    o.classList.toggle('on',cb.checked);
+  });
+  $('extractor').parentElement.parentElement.classList.toggle('on',S.extractor);
+
+  // --- field validation ---
+  const E=[];
+  const setErr=(id,bad)=>{ const el=$(id); if(el){el.classList.toggle('invalid',bad);} const er=$(id+'-err'); if(er)er.style.display=bad?'block':'none'; };
+  const needTarget = S.p1on || anyP2() || S.extractor;
+  let tBad = needTarget && !is7(S.target); setErr('targetId',tBad); if(tBad)E.push('Target Course ID (7 chiffres) requis.');
+  let eBad = S.emailOn && !isEmail(S.email); setErr('email',eBad); if(eBad)E.push('Email valide requis.');
+  if(S.p1on){
+    let sBad=!is7(S.sourceId); setErr('sourceId',sBad); if(sBad)E.push('Source Course ID requis (Phase 1).');
+    let dBad=!S.direction; setErr('direction',dBad); if(dBad)E.push('Direction requise (Phase 1).');
+  } else { setErr('sourceId',false); setErr('direction',false); }
+
+  // --- build plan ---
+  const steps=[]; const warns=[];
+  if(S.p1on){
+    const lbl={audit:'Audit A1',score:'Score de localisabilité',qa:'Quality Check',full:'Localisation complète (A1–A6)'}[S.p1mode];
+    steps.push({p:1,t:'Phase 1 — '+lbl, d:(S.sourceId||'?')+' → '+(S.target||'?')+' · '+(S.direction||'?')});
+  }
+  const p2list=[]; ['a8','a9','a7'].forEach(a=>{ if(S[a])p2list.push(a.toUpperCase()); }); if(S.a10)p2list.push('A10');
+  if(p2list.length){
+    steps.push({p:2,t:'Phase 2 — Assets : '+p2list.join(', '), d:'A8/A9/A7 en parallèle · A10 en dernier'});
+    if(S.p1on && S.p1mode==='full') warns.push({k:'i',m:'Lancement chaîné : la Phase 2 démarre après la livraison de la Phase 1.'});
+    if(S.a10 && p2list.length>1) warns.push({k:'i',m:'A10 s’exécute en dernier (il agrège les liens des autres agents).'});
+  }
+  if(S.extractor) steps.push({p:0,t:'Outil — OC Asset Extractor', d:'ZIP des assets oc-static (indépendant)'});
+  if(anyP2() && !S.p1on && !phase1AlreadyDone()) warns.push({k:'e',m:'Phase 2 demandée sans Phase 1 disponible — impossible.'});
+
+  // render steps
+  const sc=$('steps');
+  if(!steps.length){ sc.innerHTML='<div class="empty">Aucune action sélectionnée.</div>'; }
+  else{ sc.innerHTML=steps.map((s,i)=>`<div class="step ${s.p===2?'p2':''}"><div class="n">${s.p===0?'∙':i+1}</div><div class="t"><b>${s.t}</b><div class="d">${s.d}</div></div></div>`).join(''); }
+  // warns + errors
+  const wc=$('warns');
+  wc.innerHTML = E.map(e=>`<div class="warn e">⛔ ${e}</div>`).join('') + warns.map(w=>`<div class="warn ${w.k}">${w.k==='e'?'⛔':'ℹ️'} ${w.m}</div>`).join('');
+
+  // launch button
+  const hasAction = steps.length>0;
+  const ok = hasAction && E.length===0 && !(anyP2() && !p2Available());
+  const b=$('launch'); b.disabled=!ok;
+  b.textContent = !hasAction ? 'Sélectionne une action' : (ok? '🚀 Lancer LEO' : 'Corrige les champs requis');
+}
+
+// ===================== LAUNCH (prototype) =====================
+$('launch').addEventListener('click',()=>{
+  const payload={
+    target_course_id:S.target,
+    email: S.emailOn? S.email : null,
+    phase1: S.p1on ? {mode:S.p1mode, source_course_id:S.sourceId, direction:S.direction} : null,
+    phase2: anyP2() ? {a7:S.a7,a8:S.a8,a9:S.a9,a10:S.a10} : null,
+    tools: S.extractor ? {asset_extractor:true} : null,
+    chained: S.p1on && S.p1mode==='full' && anyP2()
+  };
+  const t=$('toast');
+  t.innerHTML='✅ <b>Plan validé</b> — payload prêt pour le BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),6000);
+});
+
+render();
+</script>
+</body>
+</html>
