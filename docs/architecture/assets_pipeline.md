@@ -186,8 +186,8 @@ Workaround ponctuel : `docker exec --user root n8n sh -c "echo '<ip> app.iconik.
 | **Branchement A8 dans le MAIN** (mode each + gate case) | ✅ **validé e2e via le form** (run 9446 : 2 localisées + 1 préservée) |
 | **Branchement A7/A9/A10 (inventaire MVP)** | ✅ rapport par module, gated par case (run 9453) |
 | **A10 Links Resolver — SUB construit + PLUGUÉ + validé e2e** | ✅ `qTMzikhSEmYAVZJ0` (2026-06-22, run #9570) — résout les liens (switch même-source / manual review), **rapport dans l'email** + **CSV poussé** sur `07_runs/{source}/output/{target}_links_report.csv`. Cerveau : `gpt-5.5` sync, prompt chargé depuis GitHub raw. |
+| **A9 Annexes Localizer — SUB construit + PLUGUÉ + validé e2e** | ✅ `MNQpFIaYglzO0p0r` (2026-06-23, run #9579) — localise XLSX/DOCX/PPTX/CSV en **miroir** via `jszip` (remplace uniquement le texte des runs `<t>`/`<w:t>`/`<a:t>` → format/formules/liens/structure préservés), traduit via `gpt-5.5` + prompt A9, **upload Iconik** `external_files`. PDF → flag manual. Validé XLSX réel (230 segments, asset Iconik créé). |
 | A7 dubbing complet (SRT/VTT + TTS) | 🔜 SUB dédié |
-| A9 docs complet (régén XLSX/CSV + DOCX/PPTX miroir XML) | 🔜 SUB dédié |
 | Migration secrets (OpenAI/Iconik/Vimeo) → credentials n8n | 🔜 propreté |
 | Build Phase 1 Handoff auto en fin de P1 | 🔜 (dépend refactor lot-synchrone Phase 1) |
 
