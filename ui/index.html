@@ -76,6 +76,10 @@
   .rev{display:flex;align-items:center;gap:12px;padding:13px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}.rev .badge{font-size:.66rem;font-weight:700;padding:3px 8px;border-radius:7px}.b-sw{background:#eafaf0;color:#138a45}.b-rv{background:#fdeef0;color:#b03048}.b-pr{background:#eef1f8;color:#6b7191}.rev .acts{margin-left:auto;display:flex;gap:8px}.sbtn{font-size:.78rem;font-weight:700;padding:7px 13px;border-radius:9px;border:1.5px solid var(--line);background:#fff;cursor:pointer}.sbtn.go{background:var(--green);color:#fff;border-color:var(--green)}.sbtn.no{background:#fff;color:var(--red);border-color:#f5c6cf}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140px);background:#131a4a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:.35s;max-width:620px;z-index:50}.toast.show{transform:translateX(-50%) translateY(0)}.toast pre{font-size:.7rem;margin-top:8px;white-space:pre-wrap;opacity:.9;max-height:240px;overflow:auto}
   .demoflag{font-size:.66rem;background:#fff3cd;color:#8a6d00;border:1px solid #ffe69b;border-radius:6px;padding:2px 7px;margin-left:8px}
+  textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:#fbfcfe;font-family:inherit;resize:vertical}textarea:focus{outline:none;border-color:var(--blue)}
+  .drop{border:2px dashed #cdd6ea;border-radius:14px;padding:22px;display:flex;align-items:center;gap:14px;justify-content:center;cursor:pointer;transition:.15s;text-align:center}.drop.hover{border-color:var(--teal);background:#f1fbf9}.drop .dz-i{font-size:1.8rem}.drop .lk{color:var(--blue);font-weight:700;text-decoration:underline}
+  .frow{display:flex;align-items:center;gap:11px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;font-size:.85rem}.frow .ag{font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:6px}.ag-a8{background:#fff7ec;color:#b9740a}.ag-a9{background:#eef3ff;color:#2b54b6}.ag-na{background:#fdeef0;color:#b03048}.frow .rm{margin-left:auto;cursor:pointer;color:var(--muted);font-weight:700}
+  .chk.oc.on{border-color:var(--teal);background:#f1fbf9}.chk.oc.on .box{background:var(--teal);border-color:var(--teal)}
 </style>
 </head>
 <body>
@@ -90,6 +94,7 @@
       <div><div class="t">LEO <span class="v1">v1</span></div><span class="s">Localization Engine Operator</span></div>
     </div>
     <div class="nav on" data-v="lancer"><span class="ic">🚀</span> Lancer</div>
+    <div class="nav" data-v="assets"><span class="ic">🎯</span> Assets à la demande</div>
     <div class="nav" data-v="suivi"><span class="ic">📡</span> Suivi <span class="badge">2</span></div>
     <div class="nav" data-v="revue"><span class="ic">✅</span> Revue <span class="badge">5</span></div>
     <div class="pillars"><div><i style="background:#7c3aed"></i>Localisation Thinking</div><div><i style="background:#22c55e"></i>1st Quality Check</div><div><i style="background:#2f6bff"></i>Full Automated</div><div><i style="background:#f59e0b"></i>AI Agent Coordination</div></div>
@@ -179,10 +184,7 @@
             </div>
           </div>
 
-          <!-- ===== Outils ===== -->
-          <div class="card tool"><div class="ch"><div class="ico">📦</div><div><h2>Outils</h2><div class="sub">Indépendants — aucun prérequis</div></div></div>
-            <div class="cb"><label class="chk" data-k="extractor" style="border-color:#cdeee9"><span class="box" style="border-color:#7ad0c4"></span><div class="m"><b>OC Asset Extractor</b><div class="d">ZIP des assets oc-static d'un cours (images + documents, banners exclus).</div></div></label></div>
-          </div>
+          <div class="mini" style="text-align:center;padding:4px">Besoin de localiser un fichier isolé (image, doc…) sans pipeline ? → onglet <b>🎯 Assets à la demande</b>.</div>
         </div>
 
         <!-- PLAN -->
@@ -226,6 +228,53 @@
       <div class="card"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🖼️</div><div><h2>A8 — Images</h2><div class="sub">Préservées vs localisées</div></div></div>
         <div class="cb"><div class="rev"><span class="badge b-pr">PRÉSERVÉE</span><div><b>screenshot_packet_tracer.png</b><div class="mini">Vraie UI — non éditée (éviter de falsifier l'interface)</div></div><div class="acts"><button class="sbtn">Forcer l'édition</button></div></div>
           <div class="rev"><span class="badge b-sw">LOCALISÉE</span><div><b>diagramme_ipsec.png</b><div class="mini">13 textes traduits · re-OCR OK</div></div><div class="acts"><button class="sbtn">Voir avant/après</button></div></div></div></div>
+    </section>
+
+    <!-- ====================== ASSETS À LA DEMANDE ======================== -->
+    <section class="view" id="v-assets">
+      <div class="pagehead"><h1>Assets à la demande</h1><p>Localise n'importe quel fichier (image ou document) <b>sans pipeline</b>, piloté par un prompt. Mise en forme préservée. Routage automatique par type.</p></div>
+      <div class="grid">
+        <div class="col">
+          <div class="card tool">
+            <div class="ch"><div class="ico">🎯</div><div><h2>Localiser des assets</h2><div class="sub">Drag &amp; drop · pptx · xlsx · csv · docx · png · jpg · svg…</div></div></div>
+            <div class="cb">
+              <div class="drop" id="drop"><input type="file" id="filein" multiple accept=".png,.jpg,.jpeg,.svg,.gif,.webp,.xlsx,.xls,.csv,.docx,.doc,.pptx,.ppt,.ods,.pdf" hidden>
+                <div class="dz-i">📥</div><div><b>Glisse tes fichiers ici</b> ou <span class="lk">parcourir</span><div class="mini">png · jpg · svg · xlsx · csv · docx · pptx · pdf</div></div></div>
+              <div id="filelist"></div>
+              <div class="f"><label>… ou des URLs d'assets (une par ligne)</label><textarea id="assetUrls" rows="2" placeholder="https://user.oc-static.com/…&#10;https://course.oc-static.com/…"></textarea></div>
+              <div class="row2">
+                <div class="f"><label>Source Language <span class="req">*</span></label><select id="aSrc"><option value="">—</option><option>fr</option><option>en</option></select></div>
+                <div class="f"><label>Target Language <span class="req">*</span></label><select id="aTgt"><option value="">—</option><option>en-US</option><option>fr-FR</option></select></div>
+              </div>
+              <div class="f"><label>Consigne / prompt <span class="cond">recommandé</span></label><textarea id="aPrompt" rows="3" placeholder="Ex. Traduis FR→EN. Préserve les acronymes, RFC, noms de produits et le code. Ton pédagogique OC, accessible."></textarea></div>
+              <div class="f"><label>Glossaire (optionnel)</label><textarea id="aGloss" rows="2" placeholder="terme source = terme cible (un par ligne)"></textarea></div>
+              <div class="f"><label>Sortie</label>
+                <div class="checks" style="flex-direction:row;flex-wrap:wrap;gap:10px">
+                  <label class="chk oc on" data-o="download" style="flex:1;min-width:120px"><span class="box"></span><div class="m"><b>⬇️ Télécharger</b></div></label>
+                  <label class="chk oc" data-o="iconik" style="flex:1;min-width:120px"><span class="box"></span><div class="m"><b>Iconik</b></div></label>
+                  <label class="chk oc" data-o="github" style="flex:1;min-width:120px"><span class="box"></span><div class="m"><b>GitHub</b></div></label>
+                </div></div>
+            </div>
+          </div>
+          <div class="card tool">
+            <div class="ch"><div class="ico">📦</div><div><h2>OC Asset Extractor</h2><div class="sub">Récupère tous les assets oc-static d'un cours en ZIP</div></div></div>
+            <div class="cb"><div class="f"><label>HTML du cours (upload) ou URL</label><input type="text" id="extInput" placeholder="déposer le HTML ou coller l'URL du cours"></div>
+              <button class="sbtn go" style="align-self:flex-start" onclick="alert('Prototype — lancerait l\'extraction ZIP (webhook oc-extractor).')">Extraire le ZIP</button></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="plan"><div class="plan-h"><h3>🎯 À localiser</h3><p>Routage automatique par type</p></div>
+            <div class="plan-b"><div id="aSteps"><div class="empty">Aucun asset ajouté.</div></div>
+              <div class="warns" id="aWarns"></div>
+              <button class="btn btn-go" id="aLaunch" disabled>Ajoute un asset</button>
+              <div class="mini" style="text-align:center">Prototype : aucun appel réel.</div></div></div>
+          <div class="legend"><b>Routage</b>
+            <li>🖼️ images (png/jpg/svg…) → <b>A8</b></li>
+            <li>📄 docs (xlsx/csv/docx/pptx) → <b>A9</b> (miroir)</li>
+            <li>⚠️ pdf → revue manuelle (édition miroir impossible)</li>
+            <li>Autonome : aucun prérequis. Best-effort sur la cohérence ; passe par le pipeline pour un alignement parfait.</li></div>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -295,7 +344,6 @@ function render(){
   const p2=[];if(S.a8){p2.push('A8');cost+=(ci?ci.images*0.10:1.5);}if(S.a9){p2.push('A9');cost+=(ci?ci.annexes*0.15:0.5);}if(S.a7){p2.push('A7');cost+=(ci?ci.videos*0.10:0.3);}if(S.a10){p2.push('A10');cost+=0.1;}
   const p2o=['A8','A9','A7'].filter(x=>p2.includes(x)).concat(p2.includes('A10')?['A10']:[]);
   if(p2o.length){steps.push({p:2,t:'Phase 2 — '+p2o.join(', '),d:'A8/A9/A7 en parallèle · A10 en dernier'});if(S.p1_localize)warns.push({k:'i',m:'Lancement chaîné : Phase 2 après livraison Phase 1.'});if(S.a10&&p2o.length>1)warns.push({k:'i',m:'A10 s’exécute en dernier.'});}
-  if(S.extractor)steps.push({p:0,t:'Outil — OC Asset Extractor',d:'ZIP des assets oc-static'});
   if(anyP2()&&!p2Available())warns.push({k:'e',m:'Phase 2 sans Phase 1 disponible — impossible.'});
   $('steps').innerHTML=steps.length?steps.map((s,i)=>`<div class="step ${s.p===2?'p2':s.p===0?'tl':''}"><div class="n">${s.p===0?'∙':i+1}</div><div class="t"><b>${s.t}</b><div class="d">${s.d}</div></div></div>`).join(''):'<div class="empty">Aucune action sélectionnée.</div>';
   $('costVal').textContent=cost>0?('~$'+(cost<1?cost.toFixed(2):Math.round(cost))):'$0';$('costNote').textContent=cost>0?(ci?'basé sur le contenu détecté':'ordre de grandeur'):'—';
@@ -308,10 +356,56 @@ $('launch').addEventListener('click',()=>{
     identity:isCours()?{source_course_id:S.sourceId,target_course_id:S.targetId}:{gdoc_url:S.gdocUrl,parcours_id:S.pathId,project_no:S.projNo,output:'DOCX'},
     phase1:p1Active()?{localize:S.p1_localize,audit_a1:S.p1_audit,localizability_score:S.p1_score,quality_check:S.p1_qa}:null,
     phase2:anyP2()?{a7:S.a7,a8:S.a8,a9:S.a9,a10:S.a10}:null,
-    tools:S.extractor?{asset_extractor:true}:null, chained:S.p1_localize&&anyP2()};
+    chained:S.p1_localize&&anyP2()};
   const t=$('toast');t.innerHTML='✅ <b>Plan validé</b> — payload BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),8000);
 });
 render();
+
+/* ===================== ASSETS À LA DEMANDE ===================== */
+const A={files:[],urls:'',src:'',tgt:'',prompt:'',gloss:'',out:{download:true,iconik:false,github:false}};
+function routeFor(name){const e=(name.split('?')[0].split('.').pop()||'').toLowerCase();
+  if(['png','jpg','jpeg','svg','gif','webp','bmp','ico'].includes(e))return{ag:'A8',cl:'ag-a8',ok:true};
+  if(['xlsx','xls','csv','docx','doc','pptx','ppt','ods'].includes(e))return{ag:'A9',cl:'ag-a9',ok:true};
+  if(e==='pdf')return{ag:'PDF',cl:'ag-na',ok:false};
+  return{ag:'?',cl:'ag-na',ok:false};}
+const drop=$('drop'),filein=$('filein');
+drop.addEventListener('click',()=>filein.click());
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('hover');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('hover'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('hover');addFiles(e.dataTransfer.files);});
+filein.addEventListener('change',()=>addFiles(filein.files));
+function addFiles(fl){for(const f of fl)A.files.push(f.name);renderAssets();}
+window.rmFile=i=>{A.files.splice(i,1);renderAssets();};
+$('assetUrls').addEventListener('input',e=>{A.urls=e.target.value;renderAssets();});
+$('aSrc').addEventListener('change',e=>{A.src=e.target.value;renderAssets();});
+$('aTgt').addEventListener('change',e=>{A.tgt=e.target.value;renderAssets();});
+$('aPrompt').addEventListener('input',e=>{A.prompt=e.target.value;renderAssets();});
+$('aGloss').addEventListener('input',e=>{A.gloss=e.target.value;});
+document.querySelectorAll('.chk.oc').forEach(c=>c.addEventListener('click',e=>{e.preventDefault();const o=c.dataset.o;A.out[o]=!A.out[o];c.classList.toggle('on',A.out[o]);renderAssets();}));
+function assetUrlList(){return A.urls.split('\n').map(x=>x.trim()).filter(Boolean);}
+function renderAssets(){
+  $('filelist').innerHTML=A.files.map((n,i)=>{const r=routeFor(n);return `<div class="frow"><span>${r.ok?'📄':'⚠️'}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span><span class="ag ${r.cl}">${r.ag}</span><span class="rm" onclick="rmFile(${i})">✕</span></div>`;}).join('');
+  const all=A.files.concat(assetUrlList()); const total=all.length;
+  const c={A8:0,A9:0,manual:0}; all.forEach(n=>{const r=routeFor(n);if(r.ag==='A8')c.A8++;else if(r.ag==='A9')c.A9++;else c.manual++;});
+  const steps=[];
+  if(c.A8)steps.push(`<div class="step p2"><div class="n">${c.A8}</div><div class="t"><b>Images → A8</b><div class="d">texte ré-écrit, image préservée</div></div></div>`);
+  if(c.A9)steps.push(`<div class="step"><div class="n">${c.A9}</div><div class="t"><b>Documents → A9</b><div class="d">miroir (format/formules/liens préservés)</div></div></div>`);
+  if(c.manual)steps.push(`<div class="step tl"><div class="n">${c.manual}</div><div class="t"><b>Revue manuelle</b><div class="d">PDF / type non supporté</div></div></div>`);
+  $('aSteps').innerHTML=total?steps.join(''):'<div class="empty">Aucun asset ajouté.</div>';
+  const W=[];
+  if(total&&(!A.src||!A.tgt))W.push({k:'e',m:'Langues source/cible requises.'});
+  if(total&&!A.prompt)W.push({k:'i',m:'Sans consigne, traduction par défaut (best-effort).'});
+  if(c.manual)W.push({k:'i',m:c.manual+' fichier(s) en revue manuelle (PDF/non supporté).'});
+  $('aWarns').innerHTML=W.map(w=>`<div class="warn ${w.k}">${w.k==='e'?'⛔':'ℹ️'} ${w.m}</div>`).join('');
+  const ok=total>0&&A.src&&A.tgt&&(A.out.download||A.out.iconik||A.out.github);
+  const b=$('aLaunch');b.disabled=!ok;b.textContent=!total?'Ajoute un asset':(ok?('🎯 Localiser ('+total+')'):'Complète les champs requis');
+}
+$('aLaunch').addEventListener('click',()=>{
+  const items=A.files.map(n=>({file:n,route:routeFor(n).ag})).concat(assetUrlList().map(u=>({url:u,route:routeFor(u).ag})));
+  const payload={mode:'adhoc_assets',source_language:A.src,target_language:A.tgt,prompt:A.prompt||null,glossary:A.gloss||null,outputs:Object.keys(A.out).filter(k=>A.out[k]),items};
+  const t=$('toast');t.innerHTML='✅ <b>Localisation d\'assets à la demande</b> — payload BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),9000);
+});
+renderAssets();
 </script>
 </body>
 </html>

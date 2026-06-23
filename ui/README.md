@@ -9,10 +9,17 @@ navigateur. Aucun build, aucun secret. Prototype destiné à être câblé au **
 
 ---
 
-## 1. Les 3 espaces (sidebar)
-- **🚀 Lancer** — lanceur intelligent (détection auto du statut, estimation de coût, moteur de dépendances).
+## 1. Les espaces (sidebar)
+- **🚀 Lancer** — lanceur pipeline (cours/projet) : détection auto du statut, estimation de coût, moteur de dépendances.
+- **🎯 Assets à la demande** — localiseur **autonome & universel** : drag & drop de n'importe quel fichier
+  (pptx/xlsx/csv/docx/png/jpg/svg…) ou URLs + un **prompt** → routage auto **A8** (images) / **A9** (docs miroir),
+  PDF → revue manuelle. **Aucun prérequis Phase 1** (best-effort sur la cohérence ; le pipeline reste la voie
+  « alignée »). Regroupe aussi l'**OC Asset Extractor**. Réutilise les SUB A8/A9 déjà découplés.
 - **📡 Suivi** — monitoring des runs (statut/progression/coût/sorties). *mock → en prod : API n8n.*
 - **✅ Revue** — human-in-the-loop : A5 Quality Gate (≥90), A10 liens « manual review », A8 images préservées/localisées.
+
+> Deux axes assumés : **pipeline** (cours/projet → assets alignés, gated « contenu d'abord ») vs
+> **à la demande** (assets isolés, prompt-driven, ungated). Sortie ad-hoc : `payload {mode:"adhoc_assets", items[], prompt, outputs[]}`.
 
 ## 2. Le modèle métier (ce qui pilote le lanceur)
 
