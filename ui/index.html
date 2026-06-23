@@ -6,330 +6,385 @@
 <title>LEO v1 — Localization Engine Operator</title>
 <style>
   :root{
-    --navy:#131a4a; --indigo:#5b4fe0; --purple:#7c3aed; --blue:#2f6bff;
-    --teal:#16c1a0; --orange:#f59e0b; --coral:#ff6d5a; --green:#22c55e; --red:#ef4444;
-    --bg:#eef1f8; --card:#ffffff; --line:#e6e9f2; --muted:#8a90a6; --ink:#1c2238;
-    --p1:#2f6bff; --p1soft:#eef3ff; --p2:#f59e0b; --p2soft:#fff7ec;
-    --shadow:0 6px 24px rgba(20,26,74,.08);
+    --navy:#131a4a;--indigo:#5b4fe0;--purple:#7c3aed;--blue:#2f6bff;--teal:#16c1a0;
+    --orange:#f59e0b;--coral:#ff6d5a;--green:#22c55e;--red:#ef4444;--amber:#d97706;
+    --bg:#eef1f8;--card:#fff;--line:#e6e9f2;--muted:#8a90a6;--ink:#1c2238;
+    --p1:#2f6bff;--p1soft:#eef3ff;--p2:#f59e0b;--p2soft:#fff7ec;--shadow:0 6px 24px rgba(20,26,74,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
-  .wrap{max-width:1240px;margin:0 auto;padding:24px}
-  header.brand{display:flex;align-items:center;gap:18px;background:var(--card);border-radius:18px;padding:18px 24px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-  header.brand::after{content:"";position:absolute;inset:0;background:radial-gradient(1200px 120px at 80% -40%,rgba(91,79,224,.10),transparent);pointer-events:none}
-  .logo{width:60px;height:60px;flex:0 0 60px}
-  .brandtxt h1{font-size:1.5rem;letter-spacing:.5px;color:var(--navy);display:flex;align-items:center;gap:8px}
-  .v1{font-size:.7rem;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--blue),var(--purple));padding:2px 8px;border-radius:7px;transform:translateY(-2px)}
-  .brandtxt p{color:var(--muted);font-size:.86rem}
-  .pillars{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
-  .pillar{display:flex;align-items:center;gap:7px;font-size:.76rem;color:#5b6178}
-  .pillar i{width:9px;height:9px;border-radius:50%}
-  .grid{display:grid;grid-template-columns:1fr 360px;gap:22px;margin-top:22px;align-items:start}
-  @media(max-width:980px){.grid{grid-template-columns:1fr}}
-  .col-main{display:flex;flex-direction:column;gap:22px}
-  .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--line)}
-  .card-h{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
-  .card-h .ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;flex:0 0 40px}
-  .card-h h2{font-size:1.05rem}.card-h .sub{font-size:.8rem;color:var(--muted)}
-  .phase-tag{margin-left:auto;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:20px}
-  .card-b{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
-  .p1 .card-h{background:var(--p1soft)} .p1 .card-h .ico{background:linear-gradient(135deg,var(--blue),var(--indigo))}
-  .p1 .phase-tag{background:var(--p1soft);color:var(--p1);border:1px solid #cfe0ff} .p1{border-top:4px solid var(--p1)}
-  .p2 .card-h{background:var(--p2soft)} .p2 .card-h .ico{background:linear-gradient(135deg,var(--orange),var(--coral))}
-  .p2 .phase-tag{background:var(--p2soft);color:#b9740a;border:1px solid #ffe2b8} .p2{border-top:4px solid var(--p2)}
-  .tool .card-h .ico{background:linear-gradient(135deg,var(--teal),#0ea5b7)} .tool{border-top:4px solid var(--teal)}
-  .field label{display:block;font-size:.82rem;font-weight:600;margin-bottom:5px;color:#3a4060}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  /* ---------- Sidebar ---------- */
+  .side{background:#0f1542;color:#cbd2f0;padding:20px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+  .side .brand{display:flex;align-items:center;gap:11px;padding:6px 6px 18px}
+  .side .brand svg{width:42px;height:42px}
+  .side .brand .t{font-size:1.25rem;font-weight:800;letter-spacing:.5px;color:#fff;display:flex;align-items:center;gap:6px}
+  .side .brand .v1{font-size:.6rem;background:linear-gradient(135deg,var(--blue),var(--purple));padding:2px 6px;border-radius:6px;color:#fff;font-weight:800}
+  .side .brand .s{font-size:.62rem;color:#8b93c9;display:block;margin-top:1px}
+  .nav{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;cursor:pointer;font-size:.9rem;font-weight:600;color:#aab2e0;transition:.15s}
+  .nav:hover{background:#1a2160;color:#fff}
+  .nav.on{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 4px 14px rgba(91,79,224,.4)}
+  .nav .ic{font-size:1.1rem}
+  .nav .badge{margin-left:auto;font-size:.66rem;background:var(--coral);color:#fff;border-radius:10px;padding:1px 7px;font-weight:800}
+  .side .pillars{margin-top:auto;font-size:.66rem;color:#6f78b5;display:flex;flex-direction:column;gap:6px;padding:10px 6px;border-top:1px solid #20285f}
+  .side .pillars div{display:flex;align-items:center;gap:7px}.side .pillars i{width:7px;height:7px;border-radius:50%}
+  /* ---------- Main ---------- */
+  .main{padding:26px 30px;max-width:1180px}
+  .pagehead{margin-bottom:20px}
+  .pagehead h1{font-size:1.5rem;color:var(--navy)}
+  .pagehead p{color:var(--muted);font-size:.9rem}
+  .view{display:none}.view.on{display:block}
+  .grid{display:grid;grid-template-columns:1fr 350px;gap:22px;align-items:start}
+  @media(max-width:1000px){.grid{grid-template-columns:1fr}.app{grid-template-columns:1fr}.side{position:static;height:auto;flex-direction:row;flex-wrap:wrap}.side .pillars{display:none}}
+  .col{display:flex;flex-direction:column;gap:20px}
+  /* ---------- Cards ---------- */
+  .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
+  .ch{padding:15px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+  .ch .ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:#fff;flex:0 0 38px}
+  .ch h2{font-size:1.02rem}.ch .sub{font-size:.78rem;color:var(--muted)}
+  .ptag{margin-left:auto;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:20px}
+  .cb{padding:18px 20px;display:flex;flex-direction:column;gap:15px}
+  .p1{border-top:4px solid var(--p1)}.p1 .ch{background:var(--p1soft)}.p1 .ch .ico{background:linear-gradient(135deg,var(--blue),var(--indigo))}.p1 .ptag{background:var(--p1soft);color:var(--p1);border:1px solid #cfe0ff}
+  .p2{border-top:4px solid var(--p2)}.p2 .ch{background:var(--p2soft)}.p2 .ch .ico{background:linear-gradient(135deg,var(--orange),var(--coral))}.p2 .ptag{background:var(--p2soft);color:#b9740a;border:1px solid #ffe2b8}
+  .tool{border-top:4px solid var(--teal)}.tool .ch .ico{background:linear-gradient(135deg,var(--teal),#0ea5b7)}
+  /* ---------- Fields ---------- */
+  .f label{display:block;font-size:.82rem;font-weight:600;margin-bottom:5px;color:#3a4060}
   .req{color:var(--red);font-weight:800;margin-left:3px}
-  .cond{font-size:.66rem;font-weight:700;color:var(--orange);background:var(--p2soft);border:1px solid #ffe2b8;padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:middle}
-  input[type=text],input[type=email],select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.92rem;background:#fbfcfe;transition:border .15s}
-  input:focus,select:focus{outline:none;border-color:var(--blue)}
+  .cond{font-size:.64rem;font-weight:700;color:var(--orange);background:var(--p2soft);border:1px solid #ffe2b8;padding:1px 6px;border-radius:6px;margin-left:6px}
+  input[type=text],input[type=email],select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.92rem;background:#fbfcfe;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
   input.invalid,select.invalid{border-color:var(--red);background:#fef4f4}
-  .hint{font-size:.74rem;color:var(--muted);margin-top:4px}
-  .err{font-size:.74rem;color:var(--red);margin-top:4px;display:none}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:560px){.row2{grid-template-columns:1fr}}
+  .hint{font-size:.73rem;color:var(--muted);margin-top:4px}.err{font-size:.73rem;color:var(--red);margin-top:4px;display:none}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:560px){.row2{grid-template-columns:1fr}}
+  .seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{padding:9px 16px;border:none;background:#fff;font-size:.86rem;font-weight:600;cursor:pointer;color:#5b6178}
+  .seg button.on{background:var(--p1);color:#fff}
   .checks{display:flex;flex-direction:column;gap:10px}
   .chk{display:flex;align-items:flex-start;gap:13px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;transition:.15s;background:#fff}
-  .chk:hover{border-color:#c7d0e8}
-  .chk.on{border-color:var(--p1);background:var(--p1soft)}
-  .p2 .chk.on{border-color:var(--orange);background:var(--p2soft)}
-  .chk.locked{opacity:.5;background:#f6f7fb;cursor:not-allowed}
+  .chk:hover{border-color:#c7d0e8}.chk.on{border-color:var(--p1);background:var(--p1soft)}
+  .p2 .chk.on{border-color:var(--orange);background:var(--p2soft)}.chk.locked{opacity:.5;background:#f6f7fb;cursor:not-allowed}
   .box{width:20px;height:20px;border-radius:6px;border:2px solid #c3cae0;flex:0 0 20px;margin-top:1px;position:relative;transition:.15s}
-  .chk.on .box{background:var(--p1);border-color:var(--p1)} .p2 .chk.on .box{background:var(--orange);border-color:var(--orange)}
+  .chk.on .box{background:var(--p1);border-color:var(--p1)}.p2 .chk.on .box{background:var(--orange);border-color:var(--orange)}
   .chk.on .box::after{content:"✓";position:absolute;inset:0;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
   .chk .m{flex:1}.chk .m b{font-size:.92rem}.chk .m .d{font-size:.77rem;color:var(--muted)}
-  .chk .tag{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px}
-  .tag-gm{color:var(--green);background:#eafaf0;border:1px solid #bdedcb}
-  .tag-an{color:#7c3aed;background:#f3effe;border:1px solid #ddd0fb}
-  .tag-last{color:#6b7191;background:#eef1f8}
-  input[type=checkbox].native{display:none}
-  .gate{display:none;font-size:.8rem;color:#8a5a00;background:var(--p2soft);border:1px solid #ffe2b8;border-radius:10px;padding:10px 12px}
-  .gate.show{display:flex;gap:9px;align-items:flex-start}
+  .tag{font-size:.61rem;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px}
+  .tag-gm{color:var(--green);background:#eafaf0;border:1px solid #bdedcb}.tag-an{color:#7c3aed;background:#f3effe;border:1px solid #ddd0fb}.tag-last{color:#6b7191;background:#eef1f8}
+  .adv{font-size:.82rem;color:var(--p1);font-weight:600;cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}
+  .advbody{display:none;flex-direction:column;gap:14px;margin-top:6px;padding-top:14px;border-top:1px dashed var(--line)}.advbody.show{display:flex}
+  .gate{display:none;font-size:.8rem;color:#8a5a00;background:var(--p2soft);border:1px solid #ffe2b8;border-radius:10px;padding:10px 12px}.gate.show{display:flex;gap:9px}
   .status-pill{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:600;padding:6px 11px;border-radius:20px}
-  .status-ok{background:#eafaf0;color:#138a45;border:1px solid #bdedcb}
-  .status-no{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}
+  .status-ok{background:#eafaf0;color:#138a45;border:1px solid #bdedcb}.status-no{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}
   .mini{font-size:.72rem;color:var(--muted)}
-  .devbar{font-size:.74rem;color:var(--muted);display:flex;align-items:center;gap:8px;background:#f6f7fb;border:1px dashed #d2d7e6;border-radius:10px;padding:6px 10px}
-  .switch{position:relative;width:40px;height:22px;flex:0 0 40px;cursor:pointer}
-  .switch input{display:none}.slider{position:absolute;inset:0;background:#cdd3e3;border-radius:30px;transition:.2s}
-  .slider::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-  .switch input:checked + .slider{background:var(--green)} .switch input:checked + .slider::before{transform:translateX(18px)}
+  .devbar{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:8px;background:#f6f7fb;border:1px dashed #d2d7e6;border-radius:9px;padding:5px 9px}
+  .switch{position:relative;width:38px;height:21px;flex:0 0 38px;cursor:pointer}.switch input{display:none}.slider{position:absolute;inset:0;background:#cdd3e3;border-radius:30px;transition:.2s}.slider::before{content:"";position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked + .slider{background:var(--green)}.switch input:checked + .slider::before{transform:translateX(17px)}
+  .ctxcard{background:linear-gradient(135deg,#eef3ff,#f3effe);border:1px solid #d6e0ff;border-radius:12px;padding:13px 15px;font-size:.82rem;display:none}.ctxcard.show{display:block}
+  .ctxcard .h{font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}.chip{font-size:.72rem;background:#fff;border:1px solid #d6e0ff;border-radius:20px;padding:3px 10px;color:#3a4877}
+  /* ---------- Plan panel ---------- */
   .panel{position:sticky;top:24px;display:flex;flex-direction:column;gap:16px}
   .plan{background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
-  .plan-h{padding:15px 18px;background:linear-gradient(135deg,#131a4a,#2a2f66);color:#fff}
-  .plan-h h3{font-size:1rem;display:flex;align-items:center;gap:8px}.plan-h p{font-size:.76rem;opacity:.7}
-  .plan-b{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
-  .step{display:flex;gap:11px;align-items:flex-start}
-  .step .n{width:22px;height:22px;border-radius:50%;background:var(--p1soft);color:var(--p1);font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 22px}
-  .step.p2 .n{background:var(--p2soft);color:#b9740a}.step.tl .n{background:#e8fbf6;color:#0d9488}
-  .step .t b{font-size:.86rem}.step .t .d{font-size:.74rem;color:var(--muted)}
-  .empty{font-size:.84rem;color:var(--muted);text-align:center;padding:10px}
+  .plan-h{padding:15px 18px;background:linear-gradient(135deg,#131a4a,#2a2f66);color:#fff}.plan-h h3{font-size:1rem}.plan-h p{font-size:.75rem;opacity:.7}
+  .plan-b{padding:16px 18px;display:flex;flex-direction:column;gap:13px}
+  .step{display:flex;gap:11px;align-items:flex-start}.step .n{width:22px;height:22px;border-radius:50%;background:var(--p1soft);color:var(--p1);font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 22px}
+  .step.p2 .n{background:var(--p2soft);color:#b9740a}.step.tl .n{background:#e8fbf6;color:#0d9488}.step .t b{font-size:.85rem}.step .t .d{font-size:.73rem;color:var(--muted)}
+  .empty{font-size:.84rem;color:var(--muted);text-align:center;padding:8px}
+  .cost{background:#f7faff;border:1px solid #dbe6ff;border-radius:11px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center}
+  .cost .v{font-size:1.15rem;font-weight:800;color:var(--navy)}.cost .l{font-size:.73rem;color:var(--muted)}
   .warns{display:flex;flex-direction:column;gap:7px}
-  .warn{font-size:.76rem;padding:8px 10px;border-radius:9px;display:flex;gap:8px;align-items:flex-start}
-  .warn.e{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}.warn.i{background:#eef3ff;color:#2b54b6;border:1px solid #cfe0ff}
-  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s;letter-spacing:.3px}
-  .btn-go{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 6px 18px rgba(91,79,224,.35)}
-  .btn-go:hover{filter:brightness(1.07)} .btn:disabled{background:#dfe3ee;color:#a7adc2;cursor:not-allowed;box-shadow:none}
-  .legend{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;font-size:.78rem;color:#5b6178}
-  .legend b{color:var(--ink);display:block;margin-bottom:7px;font-size:.82rem}
-  .legend li{margin:5px 0;list-style:none;display:flex;gap:8px}.legend li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:6px;flex:0 0 7px}
-  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140px);background:#131a4a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:.35s;max-width:600px;z-index:50}
-  .toast.show{transform:translateX(-50%) translateY(0)}
-  .toast pre{font-size:.72rem;margin-top:8px;white-space:pre-wrap;opacity:.9;max-height:240px;overflow:auto}
+  .warn{font-size:.75rem;padding:8px 10px;border-radius:9px;display:flex;gap:7px}.warn.e{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}.warn.i{background:#eef3ff;color:#2b54b6;border:1px solid #cfe0ff}
+  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s}
+  .btn-go{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 6px 18px rgba(91,79,224,.35)}.btn-go:hover{filter:brightness(1.07)}.btn:disabled{background:#dfe3ee;color:#a7adc2;cursor:not-allowed;box-shadow:none}
+  .legend{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;font-size:.77rem;color:#5b6178}.legend b{color:var(--ink);display:block;margin-bottom:7px;font-size:.81rem}.legend li{margin:5px 0;list-style:none;display:flex;gap:8px}.legend li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:6px;flex:0 0 7px}
+  /* ---------- Suivi / Revue tables ---------- */
+  table{width:100%;border-collapse:collapse;font-size:.85rem}
+  th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line)}
+  td{padding:12px 14px;border-bottom:1px solid #f1f3fa}
+  .st{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px}
+  .st.run{background:#fff7ec;color:#b9740a}.st.ok{background:#eafaf0;color:#138a45}.st.err{background:#fdeef0;color:#b03048}
+  .bar{height:6px;background:#eef1f8;border-radius:6px;overflow:hidden;width:90px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
+  .rev{display:flex;align-items:center;gap:12px;padding:13px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+  .rev .badge{font-size:.66rem;font-weight:700;padding:3px 8px;border-radius:7px}
+  .b-sw{background:#eafaf0;color:#138a45}.b-rv{background:#fdeef0;color:#b03048}.b-pr{background:#eef1f8;color:#6b7191}
+  .rev .acts{margin-left:auto;display:flex;gap:8px}
+  .sbtn{font-size:.78rem;font-weight:700;padding:7px 13px;border-radius:9px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+  .sbtn.go{background:var(--green);color:#fff;border-color:var(--green)}.sbtn.no{background:#fff;color:var(--red);border-color:#f5c6cf}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140px);background:#131a4a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:.35s;max-width:620px;z-index:50}.toast.show{transform:translateX(-50%) translateY(0)}.toast pre{font-size:.7rem;margin-top:8px;white-space:pre-wrap;opacity:.9;max-height:240px;overflow:auto}
+  .demoflag{font-size:.66rem;background:#fff3cd;color:#8a6d00;border:1px solid #ffe69b;border-radius:6px;padding:2px 7px;margin-left:8px}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <header class="brand">
-    <svg class="logo" viewBox="0 0 100 100" id="leoFallback">
-      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset=".5" stop-color="#2f6bff"/><stop offset="1" stop-color="#16c1a0"/></linearGradient></defs>
-      <circle cx="50" cy="50" r="38" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round" stroke-dasharray="178 60" transform="rotate(-90 50 50)"/>
-      <circle cx="28" cy="22" r="11" fill="#7c3aed"/><text x="28" y="26" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">文A</text>
-      <circle cx="28" cy="80" r="10" fill="#f59e0b"/><rect x="24" y="75" width="8" height="10" rx="1.5" fill="#fff"/>
-      <text x="56" y="60" font-size="34" font-weight="800" fill="#131a4a" text-anchor="middle" font-family="Arial">LEO</text>
-    </svg>
-    <img class="logo" src="assets/leo-logo.png" alt="LEO v1" style="display:none" onload="this.style.display='block';document.getElementById('leoFallback').style.display='none'">
-    <div class="brandtxt"><h1>LEO <span class="v1">v1</span></h1><p>Localization Engine Operator — <b>by OpenClassrooms</b></p></div>
+<div class="app">
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" id="leoFallback"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset=".5" stop-color="#2f6bff"/><stop offset="1" stop-color="#16c1a0"/></linearGradient></defs>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="url(#g)" stroke-width="7" stroke-linecap="round" stroke-dasharray="178 60" transform="rotate(-90 50 50)"/>
+        <circle cx="28" cy="22" r="11" fill="#7c3aed"/><text x="28" y="26" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">文A</text>
+        <circle cx="28" cy="80" r="10" fill="#f59e0b"/><rect x="24" y="75" width="8" height="10" rx="1.5" fill="#fff"/>
+        <text x="56" y="61" font-size="33" font-weight="800" fill="#fff" text-anchor="middle" font-family="Arial">LEO</text></svg>
+      <div><div class="t">LEO <span class="v1">v1</span></div><span class="s">Localization Engine Operator</span></div>
+    </div>
+    <div class="nav on" data-v="lancer"><span class="ic">🚀</span> Lancer</div>
+    <div class="nav" data-v="suivi"><span class="ic">📡</span> Suivi <span class="badge">2</span></div>
+    <div class="nav" data-v="revue"><span class="ic">✅</span> Revue <span class="badge">5</span></div>
     <div class="pillars">
-      <span class="pillar"><i style="background:#7c3aed"></i>Localisation Thinking</span>
-      <span class="pillar"><i style="background:#22c55e"></i>1st Quality Check</span>
-      <span class="pillar"><i style="background:#2f6bff"></i>Full Automated</span>
-      <span class="pillar"><i style="background:#f59e0b"></i>AI Agent Coordination</span>
+      <div><i style="background:#7c3aed"></i>Localisation Thinking</div>
+      <div><i style="background:#22c55e"></i>1st Quality Check</div>
+      <div><i style="background:#2f6bff"></i>Full Automated</div>
+      <div><i style="background:#f59e0b"></i>AI Agent Coordination</div>
     </div>
-  </header>
+  </aside>
 
-  <div class="grid">
-    <div class="col-main">
-
-      <!-- ===== Identité du cours (champs communs des 2 forms) ===== -->
-      <div class="card">
-        <div class="card-h"><div class="ico" style="background:linear-gradient(135deg,#131a4a,#2a2f66)">🎯</div>
-          <div><h2>Cours</h2><div class="sub">Identifiants — communs Phase 1 &amp; Phase 2</div></div></div>
-        <div class="card-b">
-          <div class="row2">
-            <div class="field">
-              <label>Target Course ID <span class="req">*</span></label>
-              <input type="text" id="targetId" placeholder="ex. 8970456" maxlength="7" inputmode="numeric">
-              <div class="hint">ID du cours <b>cible</b> (7 chiffres).</div>
-              <div class="err" id="targetId-err">7 chiffres requis.</div>
-            </div>
-            <div class="field">
-              <label>Email <span class="req">*</span></label>
-              <input type="email" id="email" placeholder="prenom.nom@openclassrooms.com">
-              <div class="hint">Destinataire des rapports.</div>
-              <div class="err" id="email-err">Email valide requis.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ PHASE 1 — CONTENU ============ -->
-      <div class="card p1">
-        <div class="card-h"><div class="ico">文A</div>
-          <div><h2>Phase 1 — Contenu</h2><div class="sub">CLS v3 — Course Localisation · agents A1→A6</div></div>
-          <span class="phase-tag">Content</span></div>
-        <div class="card-b">
-          <div class="row2">
-            <div class="field">
-              <label>Source Course ID <span class="req">*</span> <span class="cond">requis si Phase 1</span></label>
-              <input type="text" id="sourceId" placeholder="ex. 8787276" maxlength="7" inputmode="numeric">
-              <div class="err" id="sourceId-err">7 chiffres requis.</div>
-            </div>
-            <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <div>
-                <label>Source Language <span class="req">*</span></label>
-                <select id="srcLang"><option value="">—</option><option value="fr">fr</option><option value="en">en</option></select>
-                <div class="err" id="srcLang-err">Requis.</div>
+  <main class="main">
+    <!-- ====================================================== -->
+    <!-- ====================== LANCER ======================== -->
+    <!-- ====================================================== -->
+    <section class="view on" id="v-lancer">
+      <div class="pagehead"><h1>Lancer une localisation</h1><p>Pilote les phases et les agents d'un cours. La Phase 2 se débloque dès qu'une Phase 1 existe.</p></div>
+      <div class="grid">
+        <div class="col">
+          <!-- Cours -->
+          <div class="card">
+            <div class="ch"><div class="ico" style="background:linear-gradient(135deg,#131a4a,#2a2f66)">🎯</div><div><h2>Cours</h2><div class="sub">Identité &amp; détection automatique du statut Phase 1</div></div></div>
+            <div class="cb">
+              <div class="row2">
+                <div class="f"><label>Target Course ID <span class="req">*</span></label>
+                  <input type="text" id="targetId" placeholder="ex. 8970456" maxlength="7" inputmode="numeric">
+                  <div class="hint">Tape l'ID cible → le statut Phase 1 se détecte tout seul. <span class="demoflag">démo : 8970456 = déjà traduit</span></div>
+                  <div class="err" id="targetId-err">7 chiffres requis.</div></div>
+                <div class="f"><label>Email <span class="req">*</span></label>
+                  <input type="email" id="email" placeholder="prenom.nom@openclassrooms.com">
+                  <div class="hint">Destinataire des rapports.</div><div class="err" id="email-err">Email valide requis.</div></div>
               </div>
-              <div>
-                <label>Target Language <span class="req">*</span></label>
-                <select id="tgtLang"><option value="">—</option><option value="en-US">en-US</option><option value="fr-FR">fr-FR</option></select>
-                <div class="err" id="tgtLang-err">Requis.</div>
+              <div class="ctxcard" id="ctx"></div>
+              <div class="devbar" style="align-self:flex-start">🧪 démo <label class="switch"><input type="checkbox" id="simP1"><span class="slider"></span></label> forcer « Phase 1 déjà faite »</div>
+            </div>
+          </div>
+
+          <!-- Phase 1 -->
+          <div class="card p1">
+            <div class="ch"><div class="ico">文A</div><div><h2>Phase 1 — Contenu</h2><div class="sub">CLS v3 — Course Localisation · A1→A6</div></div><span class="ptag">Content</span></div>
+            <div class="cb">
+              <div class="f"><label>Type de contenu</label>
+                <div class="seg" id="ctype"><button class="on" data-t="HTML">COURS (HTML)</button><button data-t="GDOC">PROJET (GDoc)</button></div></div>
+              <div class="row2">
+                <div class="f"><label>Source Course ID <span class="req">*</span> <span class="cond">si Phase 1</span></label>
+                  <input type="text" id="sourceId" placeholder="ex. 8787276" maxlength="7" inputmode="numeric"><div class="err" id="sourceId-err">7 chiffres requis.</div></div>
+                <div class="f" id="gdocWrap" style="display:none"><label>GDoc URL <span class="req">*</span> <span class="cond">si PROJET</span></label>
+                  <input type="text" id="gdocUrl" placeholder="https://docs.google.com/…"><div class="err" id="gdocUrl-err">URL requise.</div></div>
+              </div>
+              <div class="row2">
+                <div class="f"><label>Source Language <span class="req">*</span></label>
+                  <select id="srcLang"><option value="">—</option><option value="fr">fr</option><option value="en">en</option></select><div class="err" id="srcLang-err">Requis.</div></div>
+                <div class="f"><label>Target Language <span class="req">*</span></label>
+                  <select id="tgtLang"><option value="">—</option><option value="en-US">en-US</option><option value="fr-FR">fr-FR</option></select><div class="err" id="tgtLang-err">Requis.</div></div>
+              </div>
+              <div class="f"><label>Domain <span class="cond">aide les agents</span></label>
+                <select id="domain"><option value="">— auto —</option><option>Data</option><option>Web</option><option>AI</option><option>Management</option><option>Design</option><option>Marketing</option></select></div>
+              <div class="f"><label>Actions Phase 1 <span class="mini">(cases indépendantes — combinables, ou une seule)</span></label>
+                <div class="checks" id="p1checks">
+                  <label class="chk" data-k="p1_localize"><span class="box"></span><div class="m"><b>Localiser le cours (HTML)</b><span class="tag tag-gm">produit le Gold Master</span><div class="d">A1–A6 + réassemblage → 8 fichiers GitHub. Débloque la Phase 2.</div></div></label>
+                  <label class="chk" data-k="p1_audit"><span class="box"></span><div class="m"><b>Audit du contenu (A1)</b><span class="tag tag-an">analyse</span><div class="d">Audit culturel + structurel. Rapport.</div></div></label>
+                  <label class="chk" data-k="p1_score"><span class="box"></span><div class="m"><b>Score de localisabilité</b><span class="tag tag-an">analyse</span><div class="d">A1 + A2 — score /100.</div></div></label>
+                  <label class="chk" data-k="p1_qa"><span class="box"></span><div class="m"><b>Quality Check /100</b><span class="tag tag-an">analyse</span><div class="d">A1–A5 — rapport QA des segments.</div></div></label>
+                </div></div>
+              <div class="adv" id="p1advtog">⚙️ Options avancées (entrées manuelles)</div>
+              <div class="advbody" id="p1adv">
+                <div class="f"><label>HTML File (override extraction)</label><input type="text" id="htmlFile" placeholder="(upload — si pas d'extraction auto)"></div>
               </div>
             </div>
           </div>
-          <div class="field">
-            <label>Actions Phase 1 <span class="mini">(cases indépendantes — combinables, ou une seule)</span></label>
-            <div class="checks" id="p1checks">
-              <label class="chk" data-k="p1_localize"><span class="box"></span><input type="checkbox" class="native">
-                <div class="m"><b>Localiser le cours (HTML)</b><span class="tag tag-gm">produit le Gold Master</span>
-                  <div class="d">A1–A6 + réassemblage → 8 fichiers GitHub. Débloque la Phase 2.</div></div></label>
-              <label class="chk" data-k="p1_audit"><span class="box"></span><input type="checkbox" class="native">
-                <div class="m"><b>Audit du contenu (A1)</b><span class="tag tag-an">analyse</span>
-                  <div class="d">Audit culturel + structurel. Rapport.</div></div></label>
-              <label class="chk" data-k="p1_score"><span class="box"></span><input type="checkbox" class="native">
-                <div class="m"><b>Score de localisabilité</b><span class="tag tag-an">analyse</span>
-                  <div class="d">A1 + A2 — score /100.</div></div></label>
-              <label class="chk" data-k="p1_qa"><span class="box"></span><input type="checkbox" class="native">
-                <div class="m"><b>Quality Check /100</b><span class="tag tag-an">analyse</span>
-                  <div class="d">A1–A5 — rapport QA des segments.</div></div></label>
+
+          <!-- Phase 2 -->
+          <div class="card p2">
+            <div class="ch"><div class="ico">🎬</div><div><h2>Phase 2 — Multimédia &amp; Assets</h2><div class="sub">LEO v1 — Assets · A7–A10</div></div><span class="ptag">Multimedia</span></div>
+            <div class="cb">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="mini">Prérequis Phase 1 :</span><span id="p1status" class="status-pill status-no">⛔ non disponible</span></div>
+              <div class="gate" id="p2gate">⚠️ <span>La Phase 2 nécessite une <b>traduction Phase 1</b> (Gold Master). Coche <b>« Localiser le cours (HTML) »</b> (chaîné) ou choisis un cours déjà traduit.</span></div>
+              <div class="checks" id="p2checks">
+                <label class="chk" data-k="a8"><span class="box"></span><div class="m"><b>Images (A8)</b><div class="d">Localise/édite le texte des images (diagrammes, tableaux). Banners exclus.</div></div></label>
+                <label class="chk" data-k="a9"><span class="box"></span><div class="m"><b>Annexes (A9)</b><div class="d">XLSX / DOCX / PPTX / CSV en miroir (format, formules, liens préservés).</div></div></label>
+                <label class="chk" data-k="a7"><span class="box"></span><div class="m"><b>Transcripts / Dubbing (A7)</b><div class="d">Adapte SRT/VTT pour le doublage IA (timecodes préservés).</div></div></label>
+                <label class="chk" data-k="a10"><span class="box"></span><div class="m"><b>Liens (A10)</b><span class="tag tag-last">en dernier</span><div class="d">Résout/bascule les liens externes (agrège les autres).</div></div></label>
+              </div>
+              <div class="adv" id="p2advtog">⚙️ Options avancées</div>
+              <div class="advbody" id="p2adv">
+                <div class="f"><label>UI Context (A8 — optionnel)</label><input type="text" id="uiCtx" placeholder="ex. captures de l'UI Cisco Packet Tracer EN"></div>
+                <div class="f"><label>Video ID / SRT (A7 — si entrée manuelle)</label><input type="text" id="videoId" placeholder="Vimeo ID ou URL .srt"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- ============ PHASE 2 — MULTIMÉDIA & ASSETS ============ -->
-      <div class="card p2">
-        <div class="card-h"><div class="ico">🎬</div>
-          <div><h2>Phase 2 — Multimédia &amp; Assets</h2><div class="sub">LEO v1 — Assets · A7–A10</div></div>
-          <span class="phase-tag">Multimedia</span></div>
-        <div class="card-b">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <span class="mini">Prérequis — Phase 1 du cours :</span>
-            <span id="p1status" class="status-pill status-no">⛔ non disponible</span>
-            <span class="devbar">🧪 démo <label class="switch"><input type="checkbox" id="simP1"><span class="slider"></span></label> simuler « déjà traduit »</span>
+          <!-- Outils -->
+          <div class="card tool">
+            <div class="ch"><div class="ico">📦</div><div><h2>Outils</h2><div class="sub">Indépendants — aucun prérequis</div></div></div>
+            <div class="cb"><label class="chk" data-k="extractor" style="border-color:#cdeee9"><span class="box" style="border-color:#7ad0c4"></span><div class="m"><b>OC Asset Extractor</b><div class="d">ZIP de tous les assets oc-static (images + documents, banners exclus).</div></div></label></div>
           </div>
-          <div class="gate" id="p2gate">⚠️ <span>La Phase 2 nécessite une <b>traduction Phase 1</b> (Gold Master) pour ce cours.
-            Coche <b>« Localiser le cours (HTML) »</b> ci-dessus (lancement chaîné), ou choisis un cours déjà traduit.</span></div>
-          <div class="checks" id="p2checks">
-            <label class="chk" data-k="a8"><span class="box"></span><input type="checkbox" class="native">
-              <div class="m"><b>Images (A8)</b><div class="d">Localise/édite le texte des images (diagrammes, tableaux). Banners exclus.</div></div></label>
-            <label class="chk" data-k="a9"><span class="box"></span><input type="checkbox" class="native">
-              <div class="m"><b>Annexes (A9)</b><div class="d">XLSX / DOCX / PPTX / CSV en miroir (format, formules, liens préservés).</div></div></label>
-            <label class="chk" data-k="a7"><span class="box"></span><input type="checkbox" class="native">
-              <div class="m"><b>Transcripts / Dubbing (A7)</b><div class="d">Adapte les SRT/VTT pour le doublage IA (timecodes préservés).</div></div></label>
-            <label class="chk" data-k="a10"><span class="box"></span><input type="checkbox" class="native">
-              <div class="m"><b>Liens (A10)</b><span class="tag tag-last">en dernier</span><div class="d">Résout/bascule les liens externes (agrège les autres agents).</div></div></label>
+        </div>
+
+        <!-- PLAN -->
+        <div class="panel">
+          <div class="plan">
+            <div class="plan-h"><h3>🚀 Plan d'exécution</h3><p>Ordre · prérequis · estimation</p></div>
+            <div class="plan-b">
+              <div id="steps"><div class="empty">Aucune action sélectionnée.</div></div>
+              <div class="cost"><div><div class="l">Estimation coût IA</div><div class="mini" id="costNote">—</div></div><div class="v" id="costVal">$0</div></div>
+              <div class="warns" id="warns"></div>
+              <button class="btn btn-go" id="launch" disabled>Sélectionne une action</button>
+              <div class="mini" style="text-align:center">Prototype : aucun appel réel.</div>
+            </div>
           </div>
-          <div class="mini">Combinables &amp; indépendants. A10 passe toujours en dernier.</div>
+          <div class="legend"><b>Règles de dépendance</b>
+            <li>Phase 2 <b>verrouillée</b> sans Gold Master Phase 1.</li>
+            <li><b>Chaîné</b> : « Localiser HTML » + Phase 2 → enchaîne.</li>
+            <li>Actions Phase 1 <b>combinables</b> (audit seul, QA seul…).</li>
+            <li>Agents Phase 2 <b>indépendants</b> ; A10 en dernier.</li>
+            <li>Asset Extractor <b>indépendant</b>.</li>
+          </div>
         </div>
       </div>
+    </section>
 
-      <!-- ============ OUTILS ============ -->
-      <div class="card tool">
-        <div class="card-h"><div class="ico">📦</div><div><h2>Outils</h2><div class="sub">Indépendants — aucun prérequis Phase 1</div></div></div>
-        <div class="card-b">
-          <label class="chk" data-k="extractor" style="border-color:#cdeee9"><span class="box" style="border-color:#7ad0c4"></span><input type="checkbox" class="native">
-            <div class="m"><b>OC Asset Extractor</b><div class="d">ZIP de tous les assets oc-static d'un cours (images + documents, banners exclus).</div></div></label>
-        </div>
-      </div>
-    </div>
+    <!-- ====================================================== -->
+    <!-- ====================== SUIVI ========================= -->
+    <!-- ====================================================== -->
+    <section class="view" id="v-suivi">
+      <div class="pagehead"><h1>Suivi des runs <span class="demoflag">démo — données fictives</span></h1><p>État temps réel des exécutions (en prod : API n8n + store de progression).</p></div>
+      <div class="card"><table>
+        <thead><tr><th>Run</th><th>Cours</th><th>Phase / Agents</th><th>Statut</th><th>Progression</th><th>Coût</th><th>Sorties</th></tr></thead>
+        <tbody>
+          <tr><td>#9584</td><td>8787276 → 8970456</td><td>Phase 2 · A7</td><td><span class="st ok">success</span></td><td><div class="bar"><i style="width:100%"></i></div></td><td>$0.10</td><td>Iconik · transcripts</td></tr>
+          <tr><td>#9579</td><td>8787276 → 8970456</td><td>Phase 2 · A9</td><td><span class="st ok">success</span></td><td><div class="bar"><i style="width:100%"></i></div></td><td>$0.12</td><td>Iconik · external_files</td></tr>
+          <tr><td>#9601</td><td>8541233 → 8702991</td><td>Phase 1 · Localisation complète</td><td><span class="st run">running</span></td><td><div class="bar"><i style="width:62%"></i></div></td><td>~$14</td><td>—</td></tr>
+          <tr><td>#9570</td><td>8787276 → 8970456</td><td>Phase 2 · A10</td><td><span class="st ok">success</span></td><td><div class="bar"><i style="width:100%"></i></div></td><td>$0.05</td><td>GitHub · links_report.csv</td></tr>
+          <tr><td>#9555</td><td>8541233 → 8702991</td><td>Phase 1 · Audit A1</td><td><span class="st err">error</span></td><td><div class="bar"><i style="width:30%;background:var(--red)"></i></div></td><td>$0.30</td><td>OC API timeout (504)</td></tr>
+        </tbody></table></div>
+    </section>
 
-    <!-- ===== PLAN ===== -->
-    <div class="panel">
-      <div class="plan">
-        <div class="plan-h"><h3>🚀 Plan d'exécution</h3><p>Ce qui sera lancé, dans l'ordre.</p></div>
-        <div class="plan-b">
-          <div id="steps"><div class="empty">Aucune action sélectionnée.</div></div>
-          <div class="warns" id="warns"></div>
-          <button class="btn btn-go" id="launch" disabled>Sélectionne une action</button>
-          <div class="mini" style="text-align:center">Prototype : aucun appel réel n'est envoyé.</div>
-        </div>
-      </div>
-      <div class="legend"><b>Règles de dépendance</b>
-        <li>Phase 2 <b>verrouillée</b> sans traduction Phase 1 pour le cours (Gold Master).</li>
-        <li><b>Chaîné</b> : « Localiser le cours (HTML) » + Phase 2 → la Phase 2 part juste après.</li>
-        <li>Actions Phase 1 <b>combinables</b> (audit seul, QA seul, ou plusieurs).</li>
-        <li>Agents Phase 2 <b>combinables &amp; indépendants</b> ; A10 toujours en dernier.</li>
-        <li>Asset Extractor <b>indépendant</b>.</li>
-      </div>
-    </div>
-  </div>
+    <!-- ====================================================== -->
+    <!-- ====================== REVUE ========================= -->
+    <!-- ====================================================== -->
+    <section class="view" id="v-revue">
+      <div class="pagehead"><h1>Revue humaine <span class="demoflag">démo — données fictives</span></h1><p>Les décisions qui demandent un œil humain (human-in-the-loop). C'est ce qui fait la qualité.</p></div>
+
+      <div class="card" style="margin-bottom:18px"><div class="ch p1" style="background:var(--p1soft)"><div class="ico" style="background:linear-gradient(135deg,#2f6bff,#5b4fe0)">✓</div><div><h2>A5 — Quality Gate</h2><div class="sub">Score requis ≥ 90/100 pour livrer</div></div></div>
+        <div class="cb">
+          <div class="rev"><span class="badge b-sw">94/100</span><div><b>8970456 — ch3</b><div class="mini">Naturalness OK · 2 termes glossaire à confirmer</div></div><div class="acts"><button class="sbtn go">Valider</button><button class="sbtn">Voir segments</button></div></div>
+          <div class="rev"><span class="badge b-rv">87/100</span><div><b>8702991 — ch2</b><div class="mini">Sous le seuil · boucle A3→A5 recommandée</div></div><div class="acts"><button class="sbtn">Relancer A3–A5</button><button class="sbtn no">Rejeter</button></div></div>
+        </div></div>
+
+      <div class="card" style="margin-bottom:18px"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🔗</div><div><h2>A10 — Liens à arbitrer</h2><div class="sub">Résolutions « manual review »</div></div></div>
+        <div class="cb">
+          <div class="rev"><span class="badge b-pr">MANUAL</span><div><b>openclassrooms.com/fr/courses/…</b><div class="mini">Lien OC — routage interne à confirmer</div></div><div class="acts"><input type="text" placeholder="URL cible…" style="width:200px"><button class="sbtn go">Résoudre</button></div></div>
+          <div class="rev"><span class="badge b-pr">MANUAL</span><div><b>lebigdata.fr/rag-definition</b><div class="mini">Blog FR — pas d'équivalent EN vérifié</div></div><div class="acts"><input type="text" placeholder="URL cible…" style="width:200px"><button class="sbtn go">Résoudre</button></div></div>
+          <div class="rev"><span class="badge b-sw">AUTO</span><div><b>fr.wikipedia.org/wiki/IPsec → en.wikipedia.org/wiki/IPsec</b><div class="mini">Switch même-source (validé auto)</div></div><div class="acts"><button class="sbtn">Annuler</button></div></div>
+        </div></div>
+
+      <div class="card"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🖼️</div><div><h2>A8 — Images</h2><div class="sub">Préservées vs localisées</div></div></div>
+        <div class="cb">
+          <div class="rev"><span class="badge b-pr">PRÉSERVÉE</span><div><b>screenshot_packet_tracer.png</b><div class="mini">Vraie UI — non éditée (éviter de falsifier l'interface)</div></div><div class="acts"><button class="sbtn">Forcer l'édition</button></div></div>
+          <div class="rev"><span class="badge b-sw">LOCALISÉE</span><div><b>diagramme_ipsec.png</b><div class="mini">13 textes traduits · re-OCR OK</div></div><div class="acts"><button class="sbtn">Voir avant/après</button></div></div>
+        </div></div>
+    </section>
+  </main>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-const S={ target:'',email:'', sourceId:'',srcLang:'',tgtLang:'',
+// ===== mock backend (en prod : BFF) =====
+const COURSES={ '8970456':{done:true,source:'8787276',src:'fr',tgt:'en-US',images:9,annexes:2,links:4,videos:1} };
+const S={ target:'',email:'', ctype:'HTML', sourceId:'',gdocUrl:'',srcLang:'',tgtLang:'',domain:'',htmlFile:'',
   p1_localize:false,p1_audit:false,p1_score:false,p1_qa:false,
-  a7:false,a8:false,a9:false,a10:false, extractor:false, simP1:false };
+  a7:false,a8:false,a9:false,a10:false, uiCtx:'',videoId:'', extractor:false, simP1:false };
 const $=id=>document.getElementById(id);
-const is7=v=>/^\d{7}$/.test(v);
-const isEmail=v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+const is7=v=>/^\d{7}$/.test(v), isEmail=v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
 const p1Active=()=>S.p1_localize||S.p1_audit||S.p1_score||S.p1_qa;
 const anyP2=()=>S.a7||S.a8||S.a9||S.a10;
-const phase1Done=()=>S.simP1;                       // prod: statut renvoyé par le BFF
-const p2Available=()=>phase1Done()||S.p1_localize;  // déjà traduit OU localisation chaînée
+const courseInfo=()=>COURSES[S.target]||null;
+const phase1Done=()=>S.simP1||!!(courseInfo()&&courseInfo().done);
+const p2Available=()=>phase1Done()||S.p1_localize;
 
-function bindText(id,key,fmt){$(id).addEventListener('input',e=>{let v=e.target.value;if(fmt)v=fmt(v);e.target.value=v;S[key]=v;render();});}
-bindText('targetId','target',v=>v.replace(/\D/g,''));
-bindText('sourceId','sourceId',v=>v.replace(/\D/g,''));
-$('email').addEventListener('input',e=>{S.email=e.target.value;render();});
-$('srcLang').addEventListener('change',e=>{S.srcLang=e.target.value;render();});
-$('tgtLang').addEventListener('change',e=>{S.tgtLang=e.target.value;render();});
+// nav
+document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>{
+  document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x===n));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  $('v-'+n.dataset.v).classList.add('on');
+}));
+// content type segment
+document.querySelectorAll('#ctype button').forEach(b=>b.addEventListener('click',()=>{
+  S.ctype=b.dataset.t; document.querySelectorAll('#ctype button').forEach(x=>x.classList.toggle('on',x===b));
+  $('gdocWrap').style.display=S.ctype==='GDOC'?'block':'none'; render();
+}));
+// advanced toggles
+$('p1advtog').addEventListener('click',()=>$('p1adv').classList.toggle('show'));
+$('p2advtog').addEventListener('click',()=>$('p2adv').classList.toggle('show'));
+// inputs
+const bindT=(id,k,f)=>$(id).addEventListener('input',e=>{let v=e.target.value;if(f)v=f(v);e.target.value=v;S[k]=v;render();});
+bindT('targetId','target',v=>v.replace(/\D/g,'')); bindT('sourceId','sourceId',v=>v.replace(/\D/g,''));
+['email','gdocUrl','htmlFile','uiCtx','videoId'].forEach(id=>$(id).addEventListener('input',e=>{S[id==='email'?'email':id]=e.target.value;render();}));
+['srcLang','tgtLang','domain'].forEach(id=>$(id).addEventListener('change',e=>{S[id]=e.target.value;render();}));
 $('simP1').addEventListener('change',e=>{S.simP1=e.target.checked;render();});
-
-// checkbox cards (Phase 1, Phase 2, tool)
-document.querySelectorAll('.chk').forEach(c=>{
-  c.addEventListener('click',e=>{
-    e.preventDefault();
-    const k=c.dataset.k;
-    if(['a7','a8','a9','a10'].includes(k) && !S[k] && !p2Available()){ flashGate(); return; }
-    S[k]=!S[k]; render();
-  });
-});
-function flashGate(){const g=$('p2gate');g.classList.add('show');g.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300});}
+document.querySelectorAll('.chk').forEach(c=>c.addEventListener('click',e=>{e.preventDefault();const k=c.dataset.k;
+  if(['a7','a8','a9','a10'].includes(k)&&!S[k]&&!p2Available()){flash();return;} S[k]=!S[k]; render();}));
+function flash(){const g=$('p2gate');g.classList.add('show');g.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300});}
 
 function render(){
-  // sync checkbox visuals
-  document.querySelectorAll('.chk').forEach(c=>{const on=!!S[c.dataset.k];c.classList.toggle('on',on);c.querySelector('input').checked=on;});
-  // Phase 2 gate
+  // auto-context from course id
+  const ci=courseInfo();
+  const ctx=$('ctx');
+  if(ci&&is7(S.target)){ ctx.classList.add('show');
+    ctx.innerHTML=`<div class="h">✅ Phase 1 détectée pour ${S.target}</div>
+      <div class="mini">Source <b>${ci.source}</b> · ${ci.src} → ${ci.tgt} · Gold Master présent.</div>
+      <div class="chips"><span class="chip">🖼️ ${ci.images} images</span><span class="chip">📄 ${ci.annexes} annexes</span><span class="chip">🔗 ${ci.links} liens</span><span class="chip">🎬 ${ci.videos} vidéo</span></div>`;
+    if(!S.srcLang){S.srcLang=ci.src;$('srcLang').value=ci.src;} if(!S.tgtLang){S.tgtLang=ci.tgt;$('tgtLang').value=ci.tgt;} if(!S.sourceId){S.sourceId=ci.source;$('sourceId').value=ci.source;}
+  } else ctx.classList.remove('show');
+
+  document.querySelectorAll('.chk').forEach(c=>{const on=!!S[c.dataset.k];c.classList.toggle('on',on);});
   const avail=p2Available();
   $('p1status').className='status-pill '+(avail?'status-ok':'status-no');
   $('p1status').textContent=avail?(phase1Done()?'✅ disponible':'✅ via lancement chaîné'):'⛔ non disponible';
   $('p2gate').classList.toggle('show',!avail);
-  document.querySelectorAll('#p2checks .chk').forEach(c=>{
-    c.classList.toggle('locked',!avail);
-    if(!avail && S[c.dataset.k]){S[c.dataset.k]=false;c.classList.remove('on');c.querySelector('input').checked=false;}
-  });
+  document.querySelectorAll('#p2checks .chk').forEach(c=>{c.classList.toggle('locked',!avail);if(!avail&&S[c.dataset.k]){S[c.dataset.k]=false;c.classList.remove('on');}});
+
   // validation
   const E=[]; const setErr=(id,bad)=>{const el=$(id);if(el)el.classList.toggle('invalid',bad);const er=$(id+'-err');if(er)er.style.display=bad?'block':'none';};
   const need=p1Active()||anyP2();
-  setErr('targetId', need&&!is7(S.target)); if(need&&!is7(S.target))E.push('Target Course ID (7 chiffres).');
-  setErr('email', need&&!isEmail(S.email)); if(need&&!isEmail(S.email))E.push('Email valide requis.');
+  setErr('targetId',need&&!is7(S.target)); if(need&&!is7(S.target))E.push('Target Course ID (7 chiffres).');
+  setErr('email',need&&!isEmail(S.email)); if(need&&!isEmail(S.email))E.push('Email valide requis.');
   if(p1Active()){
-    setErr('sourceId',!is7(S.sourceId)); if(!is7(S.sourceId))E.push('Source Course ID requis (Phase 1).');
+    setErr('sourceId',!is7(S.sourceId)); if(!is7(S.sourceId))E.push('Source Course ID requis.');
     setErr('srcLang',!S.srcLang); if(!S.srcLang)E.push('Source Language requise.');
     setErr('tgtLang',!S.tgtLang); if(!S.tgtLang)E.push('Target Language requise.');
-  } else { setErr('sourceId',false);setErr('srcLang',false);setErr('tgtLang',false); }
-  // plan
-  const steps=[],warns=[];
-  const p1=[]; if(S.p1_localize)p1.push('Localisation HTML (A1–A6)'); if(S.p1_audit)p1.push('Audit A1'); if(S.p1_score)p1.push('Score'); if(S.p1_qa)p1.push('Quality Check');
-  if(p1.length)steps.push({p:1,t:'Phase 1 — '+p1.join(' + '),d:(S.sourceId||'?')+' → '+(S.target||'?')+' · '+(S.srcLang||'?')+'→'+(S.tgtLang||'?')});
-  const p2=[]; ['a8','a9','a7'].forEach(a=>{if(S[a])p2.push(a.toUpperCase());}); if(S.a10)p2.push('A10');
-  if(p2.length){steps.push({p:2,t:'Phase 2 — '+p2.join(', '),d:'A8/A9/A7 en parallèle · A10 en dernier'});
-    if(S.p1_localize)warns.push({k:'i',m:'Lancement chaîné : Phase 2 après la livraison Phase 1.'});
-    if(S.a10&&p2.length>1)warns.push({k:'i',m:'A10 s’exécute en dernier (agrège les liens).'});}
-  if(S.extractor)steps.push({p:0,t:'Outil — OC Asset Extractor',d:'ZIP des assets oc-static (indépendant)'});
+    if(S.ctype==='GDOC'){setErr('gdocUrl',!S.gdocUrl); if(!S.gdocUrl)E.push('GDoc URL requise (PROJET).');}
+  } else {['sourceId','srcLang','tgtLang','gdocUrl'].forEach(id=>setErr(id,false));}
+
+  // plan + cost
+  const steps=[],warns=[]; let cost=0, costParts=[];
+  const p1=[]; if(S.p1_localize){p1.push('Localisation HTML');cost+=ci?15:15;costParts.push('texte ~$15');} if(S.p1_audit){p1.push('Audit A1');cost+=0.3;} if(S.p1_score){p1.push('Score');cost+=0.6;} if(S.p1_qa){p1.push('Quality Check');cost+=3;}
+  if(p1.length)steps.push({p:1,t:'Phase 1 — '+p1.join(' + '),d:(S.sourceId||'?')+' → '+(S.target||'?')+' · '+(S.srcLang||'?')+'→'+(S.tgtLang||'?')+(S.ctype==='GDOC'?' · GDoc':'')});
+  const p2=[]; if(S.a8){p2.push('A8');cost+=(ci?ci.images*0.10:1.5);costParts.push('images ~$'+(ci?(ci.images*0.10).toFixed(1):'1.5'));}
+  if(S.a9){p2.push('A9');cost+=(ci?ci.annexes*0.15:0.5);} if(S.a7){p2.push('A7');cost+=(ci?ci.videos*0.10:0.3);} if(S.a10){p2.push('A10');cost+=0.1;}
+  // reorder display A8/A9/A7 then A10
+  const p2o=['A8','A9','A7'].filter(x=>p2.includes(x)).concat(p2.includes('A10')?['A10']:[]);
+  if(p2o.length){steps.push({p:2,t:'Phase 2 — '+p2o.join(', '),d:'A8/A9/A7 en parallèle · A10 en dernier'});
+    if(S.p1_localize)warns.push({k:'i',m:'Lancement chaîné : Phase 2 après livraison Phase 1.'});
+    if(S.a10&&p2o.length>1)warns.push({k:'i',m:'A10 s’exécute en dernier (agrège les liens).'});}
+  if(S.extractor)steps.push({p:0,t:'Outil — OC Asset Extractor',d:'ZIP des assets oc-static'});
   if(anyP2()&&!p2Available())warns.push({k:'e',m:'Phase 2 sans Phase 1 disponible — impossible.'});
-  const sc=$('steps');
-  sc.innerHTML = steps.length? steps.map((s,i)=>`<div class="step ${s.p===2?'p2':s.p===0?'tl':''}"><div class="n">${s.p===0?'∙':i+1}</div><div class="t"><b>${s.t}</b><div class="d">${s.d}</div></div></div>`).join('') : '<div class="empty">Aucune action sélectionnée.</div>';
-  $('warns').innerHTML = E.map(e=>`<div class="warn e">⛔ ${e}</div>`).join('')+warns.map(w=>`<div class="warn ${w.k}">${w.k==='e'?'⛔':'ℹ️'} ${w.m}</div>`).join('');
-  const has=steps.length>0, ok=has&&E.length===0&&!(anyP2()&&!p2Available());
+
+  $('steps').innerHTML=steps.length?steps.map((s,i)=>`<div class="step ${s.p===2?'p2':s.p===0?'tl':''}"><div class="n">${s.p===0?'∙':i+1}</div><div class="t"><b>${s.t}</b><div class="d">${s.d}</div></div></div>`).join(''):'<div class="empty">Aucune action sélectionnée.</div>';
+  $('costVal').textContent = cost>0?('~$'+(cost<1?cost.toFixed(2):Math.round(cost))):'$0';
+  $('costNote').textContent = cost>0?(ci?'basé sur le contenu détecté':'ordre de grandeur'):'—';
+  $('warns').innerHTML=E.map(e=>`<div class="warn e">⛔ ${e}</div>`).join('')+warns.map(w=>`<div class="warn ${w.k}">${w.k==='e'?'⛔':'ℹ️'} ${w.m}</div>`).join('');
+  const has=steps.length>0, ok=has&&!E.length&&!(anyP2()&&!p2Available());
   const b=$('launch'); b.disabled=!ok; b.textContent=!has?'Sélectionne une action':(ok?'🚀 Lancer LEO':'Corrige les champs requis');
 }
-
 $('launch').addEventListener('click',()=>{
-  const payload={
-    target_course_id:S.target, email:S.email,
-    phase1: p1Active()? {source_course_id:S.sourceId,source_language:S.srcLang,target_language:S.tgtLang,
-      localize_html:S.p1_localize, audit_a1:S.p1_audit, localizability_score:S.p1_score, quality_check:S.p1_qa} : null,
-    phase2: anyP2()? {a7:S.a7,a8:S.a8,a9:S.a9,a10:S.a10} : null,
-    tools: S.extractor? {asset_extractor:true} : null,
-    chained: S.p1_localize && anyP2()
-  };
-  const t=$('toast'); t.innerHTML='✅ <b>Plan validé</b> — payload BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';
-  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),7000);
+  const payload={target_course_id:S.target,email:S.email,
+    phase1:p1Active()?{content_type:S.ctype,source_course_id:S.sourceId,gdoc_url:S.ctype==='GDOC'?S.gdocUrl:null,source_language:S.srcLang,target_language:S.tgtLang,domain:S.domain||null,localize_html:S.p1_localize,audit_a1:S.p1_audit,localizability_score:S.p1_score,quality_check:S.p1_qa,html_file:S.htmlFile||null}:null,
+    phase2:anyP2()?{a7:S.a7,a8:S.a8,a9:S.a9,a10:S.a10,ui_context:S.uiCtx||null,video_id:S.videoId||null}:null,
+    tools:S.extractor?{asset_extractor:true}:null, chained:S.p1_localize&&anyP2()};
+  const t=$('toast');t.innerHTML='✅ <b>Plan validé</b> — payload BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),8000);
 });
 render();
 </script>
