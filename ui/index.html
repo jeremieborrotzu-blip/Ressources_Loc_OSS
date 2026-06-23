@@ -383,7 +383,7 @@ $('launch').addEventListener('click',async()=>{
   try{
     const r=await fetch('/api/launch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
-    if(r.ok) showToast('🚀 <b>Lancé sur n8n !</b><pre>'+JSON.stringify(d.launched,null,2)+'</pre>');
+    if(r.ok){ const dl=(d.launched||[]).filter(x=>x.download).map(x=>'⬇️ <a href="'+x.download+'" download style="color:#8fd0ff;font-weight:700">'+x.filename+'</a>').join('<br>'); showToast('🚀 <b>Lancé !</b>'+(dl?'<br>'+dl:'')+'<pre>'+JSON.stringify(d.launched,null,2)+'</pre>'); }
     else showToast('⚠️ <b>'+(d.error||'Erreur')+'</b>');
   }catch(e){ showToast('🧪 <b>Mode prototype</b> (BFF non connecté) — payload prêt :<pre>'+JSON.stringify(payload,null,2)+'</pre>'); }
   b.disabled=false; b.textContent=old; render();

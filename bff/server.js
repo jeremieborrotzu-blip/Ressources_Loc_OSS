@@ -14,9 +14,14 @@ const N8N  = process.env.N8N_URL || 'http://localhost:5678';
 const FORM_P1  = `${N8N}/form/f146189f-507c-44da-beb7-6c888a156a3f`; // [MAIN] CLS v3 — Course Localisation
 const FORM_P2  = `${N8N}/form/leo-assets`;                            // [MAIN] LEO v1 — Assets
 const FORM_EXT = `${N8N}/webhook/oc-upload`;                          // OC Asset Extractor (upload)
+const WH_PROJECT = `${N8N}/webhook/leo-project`;                      // Project Localizer (GDoc/DOCX → DOCX)
 
-// ---- static UI ----
+// ---- static UI + downloads ----
+const fsx = require('fs');
+const DL_DIR = path.join(__dirname, 'downloads');
+fsx.mkdirSync(DL_DIR, { recursive: true });
 app.use(express.static(path.join(__dirname, '..', 'ui')));
+app.use('/downloads', express.static(DL_DIR));
 
 // ---- cache de l'arbre GitHub (60s) pour éviter le rate-limit ----
 let _tree = { t: 0, items: null };
@@ -66,9 +71,31 @@ async function submitForm(url, fields) {
 // ---- POST lancer ----
 app.post('/api/launch', async (req, res) => {
   const p = req.body || {};
-  if (p.content_type === 'PROJET')
-    return res.status(501).json({ error: "PROJET (GDoc→DOCX) pas encore câblé côté n8n — à brancher." });
   const id = p.identity || {};
+
+  // ===== PROJET : GDoc/DOCX → DOCX miroir (webhook leo-project) =====
+  if (p.content_type === 'PROJET') {
+    try {
+      const r = await fetch(WH_PROJECT, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gdoc_url: id.gdoc_url || null, docx_url: id.docx_url || null, docx_base64: id.docx_base64 || null,
+          source_language: p.source_language, target_language: p.target_language,
+          parcours_id: id.parcours_id, project_no: id.project_no,
+          filename: `projet_${id.parcours_id || ''}_${id.project_no || ''}`
+        })
+      });
+      const d = await r.json();
+      if (d.ok && d.docx_base64) {
+        const safe = (d.filename || 'projet_localized.docx').replace(/[^\w.\-]+/g, '_');
+        fsx.writeFileSync(path.join(DL_DIR, safe), Buffer.from(d.docx_base64, 'base64'));
+        return res.json({ ok: true, launched: [{ step: 'Projet → DOCX', status: d.status, filename: d.filename,
+          segments: `${d.segments_localized}/${d.segments_total}`, download: `/downloads/${safe}` }] });
+      }
+      return res.status(d.status === 'MANUAL_REVIEW' ? 422 : 500).json({ error: d.error || 'Échec localisation projet', detail: d });
+    } catch (e) { return res.status(500).json({ error: String(e) }); }
+  }
+
   const out = [];
   try {
     if (p.phase1) {
