@@ -15,3 +15,11 @@
 
 # Documents de recherche lourds (gardés en local, non versionnés)
 06_specs/research/*.pdf
+
+# Secrets — NE JAMAIS versionner
+.env
+*.secret
+*secrets*.txt
+# Dumps n8n bruts (contiennent des tokens) — exporter sans secrets uniquement
+07_runs/*.json
+07_runs/workflows/
