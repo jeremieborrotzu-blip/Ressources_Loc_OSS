@@ -187,7 +187,9 @@ Workaround ponctuel : `docker exec --user root n8n sh -c "echo '<ip> app.iconik.
 | **Branchement A7/A9/A10 (inventaire MVP)** | ✅ rapport par module, gated par case (run 9453) |
 | **A10 Links Resolver — SUB construit + PLUGUÉ + validé e2e** | ✅ `qTMzikhSEmYAVZJ0` (2026-06-22, run #9570) — résout les liens (switch même-source / manual review), **rapport dans l'email** + **CSV poussé** sur `07_runs/{source}/output/{target}_links_report.csv`. Cerveau : `gpt-5.5` sync, prompt chargé depuis GitHub raw. |
 | **A9 Annexes Localizer — SUB construit + PLUGUÉ + validé e2e** | ✅ `MNQpFIaYglzO0p0r` (2026-06-23, run #9579) — localise XLSX/DOCX/PPTX/CSV en **miroir** via `jszip` (remplace uniquement le texte des runs `<t>`/`<w:t>`/`<a:t>` → format/formules/liens/structure préservés), traduit via `gpt-5.5` + prompt A9, **upload Iconik** `external_files`. PDF → flag manual. Validé XLSX réel (230 segments, asset Iconik créé). |
-| A7 dubbing complet (SRT/VTT + TTS) | 🔜 SUB dédié |
+| **A7 Dubbing Transcript Adapter — SUB construit + PLUGUÉ + validé e2e** | ✅ `e8IsiWnTdg9NZhee` (2026-06-23, run #9584) — récupère le transcript (Vimeo texttracks **ou** URL SRT/VTT directe), l'adapte **cue par cue pour le doublage IA** (`gpt-5.5` + prompt V2, timecodes préservés, parité de volume oral), réassemble SRT/VTT, **upload Iconik** `transcripts`. TTS = externe (Rask/HeyGen). Validé SRT réel (4 cues). |
+
+> **🏁 Phase 2 « Assets » : les 4 agents (A7/A8/A9/A10) sont branchés dans le MAIN et validés e2e via le form (2026-06-23).** Ordre : Iconik Init → A8/A9/A7 (gated par case) → A10 (dernier, agrège) → rapport email. Restent des raffinements : migration des secrets en credentials n8n, A8 batch, build du Phase 1 handoff auto.
 | Migration secrets (OpenAI/Iconik/Vimeo) → credentials n8n | 🔜 propreté |
 | Build Phase 1 Handoff auto en fin de P1 | 🔜 (dépend refactor lot-synchrone Phase 1) |
 
