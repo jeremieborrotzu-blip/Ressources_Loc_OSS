@@ -122,9 +122,8 @@ Workflow **`[MAIN] LEO v1 — Assets`** (id `iOvLCwyOv8ReIxbG`, actif), construi
 ## 7. Upload Iconik (séquence S3 vérifiée)
 
 Les médias localisés vont dans **Iconik** (MAM), structurés par target id (voir §1).
-Auth : header `App-ID: ***REMOVED***` + `Auth-Token`. Storage
-FILES : `iconik-files-s3` (id `***REMOVED***`, bucket
-`oc-multimedia-iconik`, eu-west-3).
+Auth : headers `App-ID` + `Auth-Token` (valeurs en `$env` / credentials n8n, **jamais dans le repo**).
+Storage FILES : `iconik-files-s3` (bucket `oc-multimedia-iconik`, eu-west-3).
 
 Séquence d'upload (réf : ancien SUB « Copy videos to iconik », `04_n8n_flows/reference_legacy/`) :
 ```
