@@ -297,7 +297,16 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const COURSES={ '8970456':{done:true,source:'8787276',src:'fr',tgt:'en-US',images:9,annexes:2,links:4,videos:1} };
+const COURSES={ '8970456':{done:true,source:'8787276',src:'fr',tgt:'en-US',images:9,annexes:2,links:4,videos:1} }; // fallback si BFF absent
+const live={}; // statut réel par id (rempli par le BFF)
+function fetchStatus(id){ if(id in live) return; live[id]='pending';
+  fetch('/api/content/'+id+'/status').then(r=>r.ok?r.json():null).then(d=>{
+    if(d&&d.done) live[id]={done:true,source:d.source,src:d.src,tgt:d.tgt,images:d.inventory.images,annexes:d.inventory.annexes,links:d.inventory.links,videos:d.inventory.videos};
+    else if(d) live[id]={done:false}; else delete live[id];
+    render();
+  }).catch(()=>{ delete live[id]; });
+}
+function showToast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),9000);}
 const S={ ctype:'COURS', sourceId:'',targetId:'',gdocUrl:'',pathId:'',projNo:'',srcLang:'',tgtLang:'',domain:'',email:'',
   p1_localize:false,p1_audit:false,p1_score:false,p1_qa:false, a7:false,a8:false,a9:false,a10:false, extractor:false, simP1:false };
 const $=id=>document.getElementById(id);
@@ -307,14 +316,15 @@ const isProj=v=>/^P\d{1,2}$/i.test(v);
 const isCours=()=>S.ctype==='COURS';
 const p1Active=()=>S.p1_localize||S.p1_audit||S.p1_score||S.p1_qa;
 const anyP2=()=>S.a8||S.a9||S.a10||(isCours()&&S.a7);
-const courseInfo=()=>isCours()?(COURSES[S.targetId]||null):null;
+const courseInfo=()=>{ if(!isCours())return null; const l=live[S.targetId]; if(l&&l!=='pending'){return l.done?l:null;} return COURSES[S.targetId]||null; };
 const phase1Done=()=>isCours()&&(S.simP1||!!(courseInfo()&&courseInfo().done));
 const p2Available=()=>phase1Done()||S.p1_localize;
 
 document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x===n));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('v-'+n.dataset.v).classList.add('on');}));
 document.querySelectorAll('#ctype button').forEach(b=>b.addEventListener('click',()=>{S.ctype=b.dataset.t;document.querySelectorAll('#ctype button').forEach(x=>x.classList.toggle('on',x===b));render();}));
 const bindT=(id,k,f)=>$(id).addEventListener('input',e=>{let v=e.target.value;if(f)v=f(v);e.target.value=v;S[k]=v;render();});
-bindT('sourceId','sourceId',v=>v.replace(/\D/g,'')); bindT('targetId','targetId',v=>v.replace(/\D/g,'')); bindT('pathId','pathId',v=>v.replace(/\D/g,''));
+bindT('sourceId','sourceId',v=>v.replace(/\D/g,'')); bindT('pathId','pathId',v=>v.replace(/\D/g,''));
+let _st;$('targetId').addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'');e.target.value=v;S.targetId=v;render();clearTimeout(_st);_st=setTimeout(()=>{if(isCours()&&isId(v))fetchStatus(v);},450);});
 ['gdocUrl','projNo','email'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=e.target.value;render();}));
 ['srcLang','tgtLang','domain'].forEach(id=>$(id).addEventListener('change',e=>{S[id]=e.target.value;render();}));
 $('simP1').addEventListener('change',e=>{S.simP1=e.target.checked;render();});
@@ -367,13 +377,20 @@ function render(){
   const has=steps.length>0,ok=has&&!E.length&&!(anyP2()&&!p2Available());
   const b=$('launch');b.disabled=!ok;b.textContent=!has?'Sélectionne une action':(ok?'🚀 Lancer LEO':'Corrige les champs requis');
 }
-$('launch').addEventListener('click',()=>{
+$('launch').addEventListener('click',async()=>{
   const payload={content_type:S.ctype,email:S.email,source_language:S.srcLang,target_language:S.tgtLang,domain:S.domain||null,
     identity:isCours()?{source_course_id:S.sourceId,target_course_id:S.targetId}:{gdoc_url:S.gdocUrl,parcours_id:S.pathId,project_no:S.projNo,output:'DOCX'},
     phase1:p1Active()?{localize:S.p1_localize,audit_a1:S.p1_audit,localizability_score:S.p1_score,quality_check:S.p1_qa}:null,
     phase2:anyP2()?{a7:S.a7,a8:S.a8,a9:S.a9,a10:S.a10}:null,
     chained:S.p1_localize&&anyP2()};
-  const t=$('toast');t.innerHTML='✅ <b>Plan validé</b> — payload BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),8000);
+  const b=$('launch'),old=b.textContent; b.disabled=true; b.textContent='⏳ Envoi à n8n…';
+  try{
+    const r=await fetch('/api/launch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(r.ok) showToast('🚀 <b>Lancé sur n8n !</b><pre>'+JSON.stringify(d.launched,null,2)+'</pre>');
+    else showToast('⚠️ <b>'+(d.error||'Erreur')+'</b>');
+  }catch(e){ showToast('🧪 <b>Mode prototype</b> (BFF non connecté) — payload prêt :<pre>'+JSON.stringify(payload,null,2)+'</pre>'); }
+  b.disabled=false; b.textContent=old; render();
 });
 render();
 

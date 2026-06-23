@@ -1,0 +1,9 @@
+{
+  "name": "leo-bff",
+  "version": "1.0.0",
+  "description": "LEO v1 — Backend-For-Frontend : sert l'UI + proxifie n8n (statut, lancement). Secrets côté serveur uniquement.",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.19.2" }
+}
