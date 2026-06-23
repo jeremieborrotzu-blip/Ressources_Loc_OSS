@@ -33,32 +33,55 @@ async function getTree() {
   return _tree.items;
 }
 
-// ---- GET status d'un cours (statut Phase 1 réel via l'arbre GitHub) ----
+// ---- statut d'un cours (Gold Master Phase 1 présent ? + inventaire) ----
+async function contentStatus(target) {
+  const items = await getTree();
+  const re = new RegExp(`07_runs/(\\d+)/output/${target}_localized_(.+)\\.html$`);
+  let found = null;
+  for (const it of items) { const m = (it.path || '').match(re); if (m) { found = { source: m[1], dir: m[2] }; break; } }
+  if (!found) return { done: false, target };
+  const hpath = `07_runs/${found.source}/output/${target}_phase1_handoff.json`;
+  let inv = { images: 0, annexes: 0, links: 0, videos: 0 }, src = '', tgt = '';
+  if (items.some(it => it.path === hpath)) {
+    try {
+      const h = await fetch(RAW + encodeURI(hpath), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.json());
+      const media = h.media_inventory || []; const banner = u => /banner/i.test(u || '');
+      inv.images  = media.filter(m => m.type === 'image' && !banner(m.url)).length;
+      inv.annexes = media.filter(m => ['pdf','docx','xlsx','pptx','csv'].includes(m.type) || /\.(pdf|docx?|xlsx?|pptx?|csv)$/i.test(m.url || '')).length;
+      inv.links   = media.filter(m => m.type === 'link').length;
+      inv.videos  = media.filter(m => ['video','screencast'].includes(m.type)).length;
+      if (h.meta) { src = h.meta.source_language || ''; tgt = h.meta.target_language || ''; }
+    } catch (e) {}
+  }
+  return { done: true, target, source: found.source, direction: found.dir, src, tgt, inventory: inv };
+}
 app.get('/api/content/:id/status', async (req, res) => {
-  const target = String(req.params.id || '').trim();
-  try {
-    const items = await getTree();
-    const re = new RegExp(`07_runs/(\\d+)/output/${target}_localized_(.+)\\.html$`);
-    let found = null;
-    for (const it of items) { const m = (it.path || '').match(re); if (m) { found = { source: m[1], dir: m[2] }; break; } }
-    if (!found) return res.json({ done: false, target });
-
-    const hpath = `07_runs/${found.source}/output/${target}_phase1_handoff.json`;
-    let inv = { images: 0, annexes: 0, links: 0, videos: 0 }, src = '', tgt = '';
-    if (items.some(it => it.path === hpath)) {
-      try {
-        const h = await fetch(RAW + encodeURI(hpath), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.json());
-        const media = h.media_inventory || []; const banner = u => /banner/i.test(u || '');
-        inv.images  = media.filter(m => m.type === 'image' && !banner(m.url)).length;
-        inv.annexes = media.filter(m => ['pdf','docx','xlsx','pptx','csv'].includes(m.type) || /\.(pdf|docx?|xlsx?|pptx?|csv)$/i.test(m.url || '')).length;
-        inv.links   = media.filter(m => m.type === 'link').length;
-        inv.videos  = media.filter(m => ['video','screencast'].includes(m.type)).length;
-        if (h.meta) { src = h.meta.source_language || ''; tgt = h.meta.target_language || ''; }
-      } catch (e) {}
-    }
-    res.json({ done: true, target, source: found.source, direction: found.dir, src, tgt, inventory: inv });
-  } catch (e) { res.status(500).json({ error: String(e) }); }
+  try { res.json(await contentStatus(String(req.params.id || '').trim())); }
+  catch (e) { res.status(500).json({ error: String(e) }); }
 });
+
+// ---- chaînage Phase 1 → Phase 2 : surveille GitHub puis lance la Phase 2 ----
+const pendingChains = []; // { target, email, phase2, ts }
+function submitPhase2(target, email, phase2) {
+  const f = { 'field-0': target, 'field-1': email || '' };
+  if (phase2.a7) f['field-2'] = '[""]'; if (phase2.a8) f['field-3'] = '[""]';
+  if (phase2.a9) f['field-4'] = '[""]'; if (phase2.a10) f['field-5'] = '[""]';
+  return submitForm(FORM_P2, f);
+}
+setInterval(async () => {
+  for (let i = pendingChains.length - 1; i >= 0; i--) {
+    const c = pendingChains[i];
+    if (Date.now() - c.ts > 6 * 3600 * 1000) { pendingChains.splice(i, 1); continue; } // timeout 6h
+    try {
+      const st = await contentStatus(c.target);
+      if (st.done) {
+        await submitPhase2(c.target, c.email, c.phase2);
+        pendingChains.splice(i, 1);
+        console.log(`[chain] Phase 1 livrée → Phase 2 lancée pour ${c.target}`);
+      }
+    } catch (e) {}
+  }
+}, 30000);
 
 // ---- helper : soumettre un form n8n (multipart) ----
 async function submitForm(url, fields) {
@@ -110,11 +133,13 @@ app.post('/api/launch', async (req, res) => {
       if (p.phase1.audit_a1)            f['field-6'] = '[""]';
       if (p.phase1.localizability_score) f['field-7'] = '[""]';
       if (p.phase1.quality_check)       f['field-8'] = '[""]';
-      out.push({ step: 'Phase 1', form: 'f146189f', ...(await submitForm(FORM_P1, f)) });
+      if (req.query.testChainNoP1) out.push({ step: 'Phase 1', skipped: true, note: 'test : Phase 1 non soumise' });
+      else out.push({ step: 'Phase 1', form: 'f146189f', ...(await submitForm(FORM_P1, f)) });
     }
     if (p.phase2) {
       if (p.chained) {
-        out.push({ step: 'Phase 2', deferred: true, note: "chaîné — à lancer après livraison Phase 1 (le BFF ne poll pas encore)" });
+        pendingChains.push({ target: id.target_course_id, email: p.email, phase2: p.phase2, ts: Date.now() });
+        out.push({ step: 'Phase 2', chained: true, note: "enchaînée — lancée dès la livraison de la Phase 1 (le BFF surveille GitHub toutes les 30 s)" });
       } else {
         const f = { 'field-0': id.target_course_id || '', 'field-1': p.email || '' };
         if (p.phase2.a7) f['field-2'] = '[""]';
@@ -150,7 +175,7 @@ function loadRuns() {
 app.get('/api/runs', (req, res) => {
   try {
     if (Date.now() - _runs.t > 8000) _runs = { t: Date.now(), data: loadRuns() };
-    res.json({ runs: _runs.data });
+    res.json({ runs: _runs.data, chains: pendingChains.map(c => ({ target: c.target, agents: Object.keys(c.phase2).filter(k => c.phase2[k]).map(k => k.toUpperCase()), since: c.ts })) });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 

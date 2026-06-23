@@ -224,6 +224,7 @@
     <!-- ====================== SUIVI ========================= -->
     <section class="view" id="v-suivi">
       <div class="pagehead"><h1>Suivi des runs <span id="suiviLive" class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">● live</span></h1><p>Exécutions n8n en temps réel (rafraîchi toutes les 5 s). Source : le BFF lit la base n8n.</p></div>
+      <div id="chainsBanner"></div>
       <div class="card"><table><thead><tr><th>Run</th><th>Workflow</th><th>Statut</th><th>Démarré</th><th>Durée</th></tr></thead>
         <tbody id="runsBody"><tr><td colspan="5" class="empty">Chargement…</td></tr></tbody></table></div>
     </section>
@@ -445,6 +446,7 @@ async function fetchRuns(){
   try{
     const r=await fetch('/api/runs'); if(!r.ok)throw 0; const d=await r.json();
     $('suiviLive').style.display='inline-block';
+    const cb=$('chainsBanner'); if(cb) cb.innerHTML=(d.chains&&d.chains.length)? d.chains.map(c=>`<div class="warn i" style="margin-bottom:10px;padding:11px 13px">⛓️ <b>Chaînage en attente</b> — cours ${c.target} : la Phase 2 (${c.agents.join(', ')}) se lancera dès la livraison de la Phase 1 (surveillance GitHub).</div>`).join('') : '';
     if(!d.runs.length){ body.innerHTML='<tr><td colspan="5" class="empty">Aucune exécution.</td></tr>'; return; }
     body.innerHTML=d.runs.map(x=>{const[cl,lbl]=runStatus(x.status);return `<tr><td><b>#${x.id}</b></td><td>${x.workflow||''}</td><td><span class="st ${cl}">${lbl}</span></td><td>${fmtTime(x.started)}</td><td>${fmtDur(x.durationMs)}</td></tr>`;}).join('');
   }catch(e){ $('suiviLive').style.display='none'; body.innerHTML='<tr><td colspan="5" class="empty">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code> puis ouvre http://localhost:4317</td></tr>'; }
