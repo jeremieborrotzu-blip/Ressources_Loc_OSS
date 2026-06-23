@@ -101,6 +101,32 @@ app.post('/api/launch', async (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
+// ---- GET runs (Suivi) : exécutions n8n via docker cp + sqlite3 -json (cache 8s) ----
+const { execSync } = require('child_process');
+const fs = require('fs');
+const RUNS_DIR = '/tmp/leo_runs';
+let _runs = { t: 0, data: null };
+function loadRuns() {
+  fs.mkdirSync(RUNS_DIR, { recursive: true });
+  for (const f of ['database.sqlite', 'database.sqlite-wal', 'database.sqlite-shm']) {
+    try { execSync(`docker cp n8n:/home/node/.n8n/.n8n/${f} ${RUNS_DIR}/${f}`, { stdio: 'ignore' }); } catch (e) {}
+  }
+  try { execSync(`sqlite3 ${RUNS_DIR}/database.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"`, { stdio: 'ignore' }); } catch (e) {}
+  const q = "SELECT e.id, e.workflowId, e.status, e.startedAt, e.stoppedAt, w.name FROM execution_entity e LEFT JOIN workflow_entity w ON w.id=e.workflowId ORDER BY e.startedAt DESC LIMIT 30;";
+  const out = execSync(`sqlite3 -json "${RUNS_DIR}/database.sqlite" "${q}"`, { encoding: 'utf-8' });
+  return JSON.parse(out || '[]').map(r => ({
+    id: r.id, workflow: r.name || r.workflowId, status: r.status,
+    started: r.startedAt, stopped: r.stoppedAt,
+    durationMs: (r.startedAt && r.stoppedAt) ? (new Date(r.stoppedAt) - new Date(r.startedAt)) : null
+  }));
+}
+app.get('/api/runs', (req, res) => {
+  try {
+    if (Date.now() - _runs.t > 8000) _runs = { t: Date.now(), data: loadRuns() };
+    res.json({ runs: _runs.data });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;
