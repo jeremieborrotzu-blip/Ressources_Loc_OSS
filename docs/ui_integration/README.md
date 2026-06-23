@@ -77,9 +77,10 @@ la clé OpenAI, le `ocBasic` OC, les tokens Iconik.
 
 ## 6. Index des contrats par agent
 
-| Agent | Contrat | État |
+| Brique | Contrat | État |
 |---|---|---|
-| **A10** Links Resolver | [`A10_links_resolver.md`](A10_links_resolver.md) | ✅ rédigé (1er) |
+| **OC Asset Extractor** (outil) | [`OC_asset_extractor.md`](OC_asset_extractor.md) | ✅ rédigé (meilleur gabarit async) |
+| **A10** Links Resolver | [`A10_links_resolver.md`](A10_links_resolver.md) | ✅ rédigé |
 | A9 Annexes | _à venir_ | 🔜 |
 | A8 Image Localizer | _à venir_ | 🔜 |
 | A7 Dubbing Transcript | _à venir_ | 🔜 |
