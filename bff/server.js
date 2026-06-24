@@ -299,6 +299,29 @@ app.post('/api/phase1/import', async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'git: ' + String((e && e.stderr && e.stderr.toString()) || e.message || e) }); }
 });
 
+// ---- Envoyer une image localisée sur Iconik (collection static_graphics du target) ----
+app.post('/api/iconik/push', async (req, res) => {
+  const p = req.body || {};
+  const tid = String(p.target_course_id || '').replace(/\D/g, '');
+  const file = p.download ? path.basename(p.download) : null;
+  if (!tid) return res.status(400).json({ error: 'target_course_id requis' });
+  if (!file) return res.status(400).json({ error: 'download requis' });
+  const fp = path.join(DL_DIR, file);
+  if (!fsx.existsSync(fp)) return res.status(404).json({ error: 'fichier introuvable: ' + file });
+  const b64 = fsx.readFileSync(fp).toString('base64');
+  const lc = file.toLowerCase();
+  const mime = lc.endsWith('.png') ? 'image/png' : /\.jpe?g$/.test(lc) ? 'image/jpeg' : lc.endsWith('.webp') ? 'image/webp' : 'application/octet-stream';
+  try {
+    const r = await fetch(WH_ADHOC, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'iconik_push', image_base64: b64, filename: file, target_course_id: tid, mime })
+    });
+    const d = await r.json();
+    if (d && d.ok) return res.json({ ok: true, iconik_asset_id: d.iconik_asset_id, collection_id: d.collection_id, filename: d.filename });
+    return res.status(500).json({ error: (d && d.error) || 'échec iconik', detail: d });
+  } catch (e) { return res.status(500).json({ error: String(e) }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;
