@@ -244,6 +244,61 @@ app.post('/api/review/:id/resolve', (req, res) => {
   res.json({ ok: true, count: decisions[t].length, decisions: decisions[t] });
 });
 
+// ---- Importer une Phase 1 existante : HTML localisé → handoff → Git (Phase 2 prête) ----
+const REPO_DIR = path.join(__dirname, '..');
+function scanHtmlAssets(html, localizeImages) {
+  const headPos = [...html.matchAll(/<h[23][\s>]/gi)].map(m => m.index);
+  const chOf = pos => { let n = 0; for (const hp of headPos) { if (hp <= pos) n++; else break; } return 'ch' + Math.max(n, 0); };
+  const media = []; const seen = new Set(); let m;
+  const linkRe = /<a[^>]+href="([^"]+)"/gi;
+  while ((m = linkRe.exec(html))) {
+    const url = m[1]; if (!/^https?:/i.test(url) || seen.has(url)) continue; seen.add(url);
+    const lc = url.toLowerCase().split('?')[0];
+    if (/\.(xlsx?|docx?|pptx?|csv|pdf)$/.test(lc)) { const e = lc.split('.').pop(); const t = e.startsWith('xls') ? 'xlsx' : e.startsWith('doc') ? 'docx' : e.startsWith('ppt') ? 'pptx' : e; media.push({ type: t, url, location: chOf(m.index) }); }
+    else if (/vimeo\.com|youtube\.com|youtu\.be/.test(lc)) { media.push({ type: 'video', url, location: chOf(m.index) }); }
+    else if (!/oc-static\.com/.test(lc)) { media.push({ type: 'link', url, location: chOf(m.index) }); }
+  }
+  const imgRe = /<img[^>]+src="([^"]+)"/gi;
+  while ((m = imgRe.exec(html))) {
+    const url = m[1]; if (!/oc-static\.com/i.test(url) || /banner/i.test(url) || seen.has(url)) continue; seen.add(url);
+    media.push({ type: 'image', url, location: chOf(m.index), risk: localizeImages ? 'fr_only' : 'ok' });
+  }
+  return media;
+}
+app.post('/api/phase1/import', async (req, res) => {
+  const p = req.body || {};
+  const source = String(p.source_id || '').replace(/\D/g, ''), target = String(p.target_id || '').replace(/\D/g, '');
+  if (!source || !target) return res.status(400).json({ error: 'source_id et target_id requis' });
+  const dir = p.direction || ((p.source_language || 'fr').slice(0, 2) + '>' + ((p.target_language || 'en-US').toLowerCase().includes('en') ? 'en' : 'fr'));
+  let html = '';
+  if (p.html_base64) html = Buffer.from(p.html_base64, 'base64').toString('utf-8');
+  else if (p.html) html = p.html;
+  else if (p.html_url) { try { html = await fetch(p.html_url).then(r => r.text()); } catch (e) { return res.status(400).json({ error: 'html_url injoignable' }); } }
+  else return res.status(400).json({ error: 'html requis (html_base64 / html / html_url)' });
+  const media = scanHtmlAssets(html, p.localize_all_images !== false);
+  const htmlPath = `07_runs/${source}/output/${target}_localized_${dir}.html`;
+  const handoffPath = `07_runs/${source}/output/${target}_phase1_handoff.json`;
+  const counts = { image: 0, annexe: 0, link: 0, video: 0 };
+  media.forEach(m => { if (m.type === 'image') counts.image++; else if (m.type === 'link') counts.link++; else if (m.type === 'video') counts.video++; else counts.annexe++; });
+  const handoff = {
+    meta: { source_course_id: source, target_course_id: target, source_language: p.source_language || 'fr', target_language: p.target_language || 'en-US', direction: dir, detected_domain: p.domain || null, phase1_qa_score: null, imported: true, imported_at: new Date().toISOString() },
+    gold_master: { html_path: htmlPath, html_url: RAW + encodeURI(htmlPath) },
+    glossary: { common: [], domain_tm: [], run_terms: [] }, concept_swaps: [], cultural_flags: [],
+    media_inventory: media, dispatch_summary: counts, qa: { a5_scores: {}, a6_issues: [], a6_applied: false }
+  };
+  if (p.dry_run) return res.json({ ok: true, dry_run: true, target, html_path: htmlPath, handoff_path: handoffPath, counts, media_inventory: media });
+  try {
+    fsx.mkdirSync(path.join(REPO_DIR, '07_runs', source, 'output'), { recursive: true });
+    fsx.writeFileSync(path.join(REPO_DIR, htmlPath), html);
+    fsx.writeFileSync(path.join(REPO_DIR, handoffPath), JSON.stringify(handoff, null, 2));
+    execSync(`git add "${htmlPath}" "${handoffPath}"`, { cwd: REPO_DIR, stdio: 'pipe' });
+    execSync(`git commit -m "import(phase1): ${target} HTML localisé + handoff (Phase 2 prête)"`, { cwd: REPO_DIR, stdio: 'pipe' });
+    try { execSync('git pull --rebase origin main', { cwd: REPO_DIR, stdio: 'pipe' }); } catch (e) {}
+    execSync('git push origin main', { cwd: REPO_DIR, stdio: 'pipe' });
+    res.json({ ok: true, target, source, direction: dir, html_path: htmlPath, handoff_path: handoffPath, counts });
+  } catch (e) { res.status(500).json({ error: 'git: ' + String((e && e.stderr && e.stderr.toString()) || e.message || e) }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;

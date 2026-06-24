@@ -123,6 +123,29 @@
       <div class="grid">
         <div class="col">
 
+          <!-- ===== 0) IMPORTER UNE PHASE 1 EXISTANTE ===== -->
+          <div class="card tool">
+            <div class="ch" style="cursor:pointer" onclick="$('importBody').classList.toggle('show')"><div class="ico">📥</div><div><h2>J'ai déjà un HTML localisé</h2><div class="sub">Génère le handoff + prépare la Phase 2 — clique pour ouvrir</div></div></div>
+            <div class="collapse" id="importBody" style="padding:0">
+              <div class="cb">
+                <div class="f"><label>HTML localisé <span class="req">*</span></label>
+                  <div class="drop" id="impDrop" style="padding:14px"><input type="file" id="impFile" accept=".html,.htm,.txt" hidden><div class="dz-i">📄</div><div><b id="impFileName">Choisir un .html</b> ou <span class="lk">parcourir</span></div></div>
+                  <input type="text" id="impUrl" placeholder="…ou colle une URL de HTML" style="margin-top:8px"></div>
+                <div class="row2">
+                  <div class="f"><label>Source Course ID <span class="req">*</span></label><input type="text" id="impSrc" placeholder="ex. 8787276" inputmode="numeric"></div>
+                  <div class="f"><label>Target Course ID <span class="req">*</span></label><input type="text" id="impTgt" placeholder="ex. 8970456" inputmode="numeric"></div>
+                </div>
+                <div class="row2">
+                  <div class="f"><label>Source Language</label><select id="impSL"><option>fr</option><option>en</option></select></div>
+                  <div class="f"><label>Target Language</label><select id="impTL"><option>en-US</option><option>fr-FR</option></select></div>
+                </div>
+                <label class="chk on" id="impAll" data-on="1" style="padding:10px 12px"><span class="box"></span><div class="m"><b>Marquer toutes les images à localiser</b><div class="d">A8 évaluera chaque image (et préservera les screenshots).</div></div></label>
+                <button class="btn btn-go" id="impGo">📥 Importer &amp; préparer la Phase 2</button>
+                <div class="mini" id="impMsg" style="text-align:center"></div>
+              </div>
+            </div>
+          </div>
+
           <!-- ===== 1) CADRAGE ===== -->
           <div class="card scope">
             <div class="ch"><div class="ico">🧭</div><div><h2>Cadrage</h2><div class="sub">Quoi localiser, dans quel sens — l'identité dépend du type</div></div></div>
@@ -479,6 +502,30 @@ async function loadReview(){
 }
 window.relocImg=async(btn,url)=>{ const old=btn.textContent; btn.disabled=true; btn.textContent='⏳…'; try{ const d=await (await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_language:'fr',target_language:'en-US',items:[{name:url.split('/').pop(),url}]})})).json(); const x=(d.results||[])[0]||{}; const dl=x.download?` <a href="${x.download}" download style="color:#8fd0ff;font-weight:700">⬇️ télécharger</a>`:''; showToast(`🖼️ <b>${x.status||'?'}</b> ${x.note||x.error||''}${dl}`); }catch(e){ showToast('⚠️ échec re-localisation'); } btn.disabled=false; btn.textContent=old; };
 window.resolveLink=async(lid,inp)=>{ const tgt=(inp.value||'').trim(); if(!tgt){showToast('Entre une URL cible.');return;} try{ await fetch('/api/review/'+REV.id+'/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:lid,target_url:tgt})}); const row=inp.closest('.rev'); row.querySelector('.acts').innerHTML='<span class="mini">→ '+tgt+'</span>'; const b=row.querySelector('.badge'); b.className='badge b-sw'; b.textContent='résolu'; showToast('✅ Lien résolu : '+lid); }catch(e){ showToast('⚠️ échec'); } };
+
+/* ===================== IMPORT Phase 1 existante ===================== */
+let impFileObj=null;
+$('impDrop').addEventListener('click',()=>$('impFile').click());
+$('impDrop').addEventListener('dragover',e=>{e.preventDefault();$('impDrop').classList.add('hover');});
+$('impDrop').addEventListener('dragleave',()=>$('impDrop').classList.remove('hover'));
+$('impDrop').addEventListener('drop',e=>{e.preventDefault();$('impDrop').classList.remove('hover');if(e.dataTransfer.files[0]){impFileObj=e.dataTransfer.files[0];$('impFileName').textContent=impFileObj.name;}});
+$('impFile').addEventListener('change',()=>{if($('impFile').files[0]){impFileObj=$('impFile').files[0];$('impFileName').textContent=impFileObj.name;}});
+$('impAll').addEventListener('click',e=>{e.preventDefault();const on=$('impAll').classList.toggle('on');$('impAll').dataset.on=on?'1':'0';});
+$('impGo').addEventListener('click',async()=>{
+  const src=($('impSrc').value||'').replace(/\D/g,''), tgt=($('impTgt').value||'').replace(/\D/g,''); const url=$('impUrl').value.trim(); const msg=$('impMsg');
+  if(!src||!tgt){ msg.textContent='Source et Target Course ID requis.'; return; }
+  if(!impFileObj && !url){ msg.textContent='Fournis un fichier HTML ou une URL.'; return; }
+  const b=$('impGo'),old=b.textContent; b.disabled=true; b.textContent='⏳ Import…'; msg.textContent='';
+  const payload={source_id:src,target_id:tgt,source_language:$('impSL').value,target_language:$('impTL').value,localize_all_images:$('impAll').dataset.on==='1'};
+  if(impFileObj){ payload.html_base64=await new Promise(rs=>{const fr=new FileReader();fr.onload=()=>rs(btoa(unescape(encodeURIComponent(String(fr.result)))));fr.readAsText(impFileObj);}); }
+  else payload.html_url=url;
+  try{
+    const d=await (await fetch('/api/phase1/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).json();
+    if(d.ok){ const c=d.counts; showToast('✅ <b>Phase 1 importée</b> pour '+tgt+'<br>'+c.image+' images · '+c.annexe+' docs · '+c.link+' liens · '+c.video+' vidéos<br><span style="opacity:.85">→ va dans « Cadrage », tape '+tgt+' (la Phase 2 sera dispo sous ~1 min, le temps que GitHub se rafraîchisse).</span>'); msg.innerHTML='✅ Importé. Cours <b>'+tgt+'</b> prêt pour la Phase 2.'; delete live[tgt]; }
+    else msg.textContent='⚠️ '+(d.error||'Erreur');
+  }catch(e){ msg.textContent='⚠️ BFF non connecté.'; }
+  b.disabled=false; b.textContent=old;
+});
 </script>
 </body>
 </html>
