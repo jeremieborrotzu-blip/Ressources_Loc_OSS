@@ -233,14 +233,12 @@
     <section class="view" id="v-revue">
       <div class="pagehead"><h1>Revue humaine</h1><p>Les décisions qui demandent un œil humain. Charge un cours pour voir ses <b>vrais liens A10</b> à arbitrer.</p>
         <div style="display:flex;gap:10px;margin-top:12px"><input type="text" id="revId" placeholder="Target Course ID (ex. 8970456)" style="max-width:240px" inputmode="numeric"><button class="sbtn go" onclick="loadReview()">Charger</button></div></div>
-      <div class="card" style="margin-bottom:18px"><div class="ch p1" style="background:var(--p1soft)"><div class="ico" style="background:linear-gradient(135deg,#2f6bff,#5b4fe0)">✓</div><div><h2>A5 — Quality Gate</h2><div class="sub">Score requis ≥ 90/100</div></div></div>
-        <div class="cb"><div class="rev"><span class="badge b-sw">94/100</span><div><b>8970456 — ch3</b><div class="mini">Naturalness OK · 2 termes glossaire à confirmer</div></div><div class="acts"><button class="sbtn go">Valider</button><button class="sbtn">Voir segments</button></div></div>
-          <div class="rev"><span class="badge b-rv">87/100</span><div><b>8702991 — ch2</b><div class="mini">Sous le seuil · boucle A3→A5 recommandée</div></div><div class="acts"><button class="sbtn">Relancer A3–A5</button><button class="sbtn no">Rejeter</button></div></div></div></div>
+      <div class="card" style="margin-bottom:18px"><div class="ch p1" style="background:var(--p1soft)"><div class="ico" style="background:linear-gradient(135deg,#2f6bff,#5b4fe0)">✓</div><div><h2>A5 — Quality Gate <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Scores réels par chapitre (seuil ≥ 90)</div></div></div>
+        <div class="cb" id="a5Body"><div class="empty" style="padding:14px">Charge un cours ci-dessus.</div></div></div>
       <div class="card" style="margin-bottom:18px"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🔗</div><div><h2>A10 — Liens à arbitrer <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Depuis le rapport CSV réel du cours</div></div></div>
         <div class="cb" id="a10ReviewBody"><div class="empty" style="padding:14px">Charge un cours ci-dessus pour voir ses liens.</div></div></div>
-      <div class="card"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🖼️</div><div><h2>A8 — Images</h2><div class="sub">Préservées vs localisées</div></div></div>
-        <div class="cb"><div class="rev"><span class="badge b-pr">PRÉSERVÉE</span><div><b>screenshot_packet_tracer.png</b><div class="mini">Vraie UI — non éditée (éviter de falsifier l'interface)</div></div><div class="acts"><button class="sbtn">Forcer l'édition</button></div></div>
-          <div class="rev"><span class="badge b-sw">LOCALISÉE</span><div><b>diagramme_ipsec.png</b><div class="mini">13 textes traduits · re-OCR OK</div></div><div class="acts"><button class="sbtn">Voir avant/après</button></div></div></div></div>
+      <div class="card"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🖼️</div><div><h2>A8 — Images <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Images du cours + risque (depuis le handoff)</div></div></div>
+        <div class="cb" id="a8Body"><div class="empty" style="padding:14px">Charge un cours ci-dessus.</div></div></div>
     </section>
 
     <!-- ====================== ASSETS À LA DEMANDE ======================== -->
@@ -462,19 +460,25 @@ async function fetchRuns(){
 }
 setInterval(fetchRuns,8000); fetchRuns(); // badge runs en cours + table si onglet Suivi
 
-/* ===================== REVUE (live A10) ===================== */
+/* ===================== REVUE (live A5 / A8 / A10) ===================== */
+let REV={};
+function setRevEmpty(msg){ ['a5Body','a8Body','a10ReviewBody'].forEach(b=>{if($(b))$(b).innerHTML='<div class="empty" style="padding:14px">'+msg+'</div>';}); }
 async function loadReview(){
-  const id=(($('revId')||{}).value||'').replace(/\D/g,''); const body=$('a10ReviewBody'); if(!body)return;
-  if(!/^\d{4,8}$/.test(id)){ body.innerHTML='<div class="empty" style="padding:14px">Entre un Target Course ID valide.</div>'; return; }
-  body.innerHTML='<div class="empty" style="padding:14px">Chargement…</div>';
+  const id=(($('revId')||{}).value||'').replace(/\D/g,'');
+  if(!/^\d{4,8}$/.test(id)){ setRevEmpty('Entre un Target Course ID valide.'); return; }
+  setRevEmpty('Chargement…');
   try{
     const d=await (await fetch('/api/review/'+id)).json();
-    if(!d.done){ body.innerHTML='<div class="empty" style="padding:14px">⛔ Pas de Phase 1 (Gold Master) pour ce cours.</div>'; return; }
-    if(!d.a10||!d.a10.length){ body.innerHTML='<div class="empty" style="padding:14px">✅ Aucun lien à arbitrer (rapport A10 vide / 0 lien externe).</div>'; return; }
-    body.innerHTML=d.a10.map(x=>{const rev=String(x.needs_human_review)==='true'||/MANUAL_REVIEW|BLOCK/i.test(x.decision||'');const badge=rev?'b-rv':(/SWITCH|PRESERVE/i.test(x.decision||'')?'b-sw':'b-pr');const tgt=(x.target_url||'').trim();
-      return `<div class="rev"><span class="badge ${badge}">${x.decision||'?'}</span><div style="flex:1;min-width:0"><b style="word-break:break-all">${(x.source_url||'').slice(0,80)}</b><div class="mini">${(x.reason||'').slice(0,110)}</div></div><div class="acts">${rev?'<input type="text" placeholder="URL cible…" style="width:180px"><button class="sbtn go">Résoudre</button>':'<span class="mini">→ '+(tgt||'—')+'</span>'}</div></div>`;}).join('');
-  }catch(e){ body.innerHTML='<div class="empty" style="padding:14px">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code>.</div>'; }
+    if(!d.done){ setRevEmpty('⛔ Pas de Phase 1 (Gold Master) pour ce cours.'); return; }
+    REV={id, qa_report:d.qa_report, decided:{}}; (d.decisions||[]).forEach(x=>REV.decided[x.id]=x.target_url);
+    $('a5Body').innerHTML=(d.a5&&d.a5.length)? d.a5.map(s=>{const ok=s.score>=90;return `<div class="rev"><span class="badge ${ok?'b-sw':'b-rv'}">${s.score}/100</span><div><b>Chapitre ${s.chapter}</b><div class="mini">${ok?'≥ 90 — validé pour livraison':'sous le seuil — relecture recommandée'}</div></div><div class="acts"><a class="sbtn" href="${d.qa_report}" target="_blank" rel="noopener">Voir le rapport QA</a></div></div>`;}).join('') : '<div class="empty" style="padding:14px">Pas de scores A5.</div>';
+    $('a8Body').innerHTML=(d.a8&&d.a8.length)? d.a8.map(m=>{const flag=m.risk&&m.risk!=='ok';const name=(m.url||'').split('/').pop();return `<div class="rev"><span class="badge ${flag?'b-rv':'b-sw'}">${m.risk||'ok'}</span><div style="min-width:0"><b style="word-break:break-all">${name}</b><div class="mini">${m.location||''} — ${flag?'à vérifier (écran/UI)':'localisable'}</div></div><div class="acts"><a class="sbtn" href="${m.url}" target="_blank" rel="noopener">Voir</a><button class="sbtn go" onclick="relocImg(this,'${m.url}')">Re-localiser</button></div></div>`;}).join('') : '<div class="empty" style="padding:14px">Aucune image.</div>';
+    $('a10ReviewBody').innerHTML=(d.a10&&d.a10.length)? d.a10.map(x=>{const rev=String(x.needs_human_review)==='true'||/MANUAL_REVIEW|BLOCK/i.test(x.decision||'');const badge=rev?'b-rv':(/SWITCH|PRESERVE/i.test(x.decision||'')?'b-sw':'b-pr');const dec=REV.decided[x.id];const tgt=(dec||x.target_url||'').trim();
+      return `<div class="rev"><span class="badge ${dec?'b-sw':badge}">${dec?'résolu':(x.decision||'?')}</span><div style="flex:1;min-width:0"><b style="word-break:break-all">${(x.source_url||'').slice(0,80)}</b><div class="mini">${(x.reason||'').slice(0,110)}</div></div><div class="acts">${(rev&&!dec)?`<input type="text" placeholder="URL cible…" style="width:170px"><button class="sbtn go" onclick="resolveLink('${x.id}',this.previousElementSibling)">Résoudre</button>`:`<span class="mini">→ ${tgt||'—'}</span>`}</div></div>`;}).join('') : '<div class="empty" style="padding:14px">✅ Aucun lien à arbitrer (0 lien externe).</div>';
+  }catch(e){ setRevEmpty('⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code>.'); }
 }
+window.relocImg=async(btn,url)=>{ const old=btn.textContent; btn.disabled=true; btn.textContent='⏳…'; try{ const d=await (await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_language:'fr',target_language:'en-US',items:[{name:url.split('/').pop(),url}]})})).json(); const x=(d.results||[])[0]||{}; const dl=x.download?` <a href="${x.download}" download style="color:#8fd0ff;font-weight:700">⬇️ télécharger</a>`:''; showToast(`🖼️ <b>${x.status||'?'}</b> ${x.note||x.error||''}${dl}`); }catch(e){ showToast('⚠️ échec re-localisation'); } btn.disabled=false; btn.textContent=old; };
+window.resolveLink=async(lid,inp)=>{ const tgt=(inp.value||'').trim(); if(!tgt){showToast('Entre une URL cible.');return;} try{ await fetch('/api/review/'+REV.id+'/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:lid,target_url:tgt})}); const row=inp.closest('.rev'); row.querySelector('.acts').innerHTML='<span class="mini">→ '+tgt+'</span>'; const b=row.querySelector('.badge'); b.className='badge b-sw'; b.textContent='résolu'; showToast('✅ Lien résolu : '+lid); }catch(e){ showToast('⚠️ échec'); } };
 </script>
 </body>
 </html>
