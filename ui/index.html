@@ -109,8 +109,8 @@
     </div>
     <div class="nav on" data-v="lancer"><span class="ic">🚀</span> Lancer</div>
     <div class="nav" data-v="assets"><span class="ic">🎯</span> Assets à la demande</div>
-    <div class="nav" data-v="suivi"><span class="ic">📡</span> Suivi <span class="badge">2</span></div>
-    <div class="nav" data-v="revue"><span class="ic">✅</span> Revue <span class="badge">5</span></div>
+    <div class="nav" data-v="suivi"><span class="ic">📡</span> Suivi <span class="badge" id="suiviBadge" style="display:none"></span></div>
+    <div class="nav" data-v="revue"><span class="ic">✅</span> Revue</div>
     <div class="pillars"><div><i style="background:#7c3aed"></i>Localisation Thinking</div><div><i style="background:#22c55e"></i>1st Quality Check</div><div><i style="background:#2f6bff"></i>Full Automated</div><div><i style="background:#f59e0b"></i>AI Agent Coordination</div></div>
     <div class="byoc">✦ by <b>OpenClassrooms</b></div>
   </aside>
@@ -454,12 +454,13 @@ async function fetchRuns(){
   try{
     const r=await fetch('/api/runs'); if(!r.ok)throw 0; const d=await r.json();
     $('suiviLive').style.display='inline-block';
+    const running=(d.runs||[]).filter(x=>['running','new','waiting'].includes(x.status)).length; const sb=$('suiviBadge'); if(sb){ if(running){sb.textContent=running;sb.style.display='inline-block';} else sb.style.display='none'; }
     const cb=$('chainsBanner'); if(cb) cb.innerHTML=(d.chains&&d.chains.length)? d.chains.map(c=>`<div class="warn i" style="margin-bottom:10px;padding:11px 13px">⛓️ <b>Chaînage en attente</b> — cours ${c.target} : la Phase 2 (${c.agents.join(', ')}) se lancera dès la livraison de la Phase 1 (surveillance GitHub).</div>`).join('') : '';
     if(!d.runs.length){ body.innerHTML='<tr><td colspan="5" class="empty">Aucune exécution.</td></tr>'; return; }
     body.innerHTML=d.runs.map(x=>{const[cl,lbl]=runStatus(x.status);return `<tr><td><b>#${x.id}</b></td><td>${x.workflow||''}</td><td><span class="st ${cl}">${lbl}</span></td><td>${fmtTime(x.started)}</td><td>${fmtDur(x.durationMs)}</td></tr>`;}).join('');
   }catch(e){ $('suiviLive').style.display='none'; body.innerHTML='<tr><td colspan="5" class="empty">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code> puis ouvre http://localhost:4317</td></tr>'; }
 }
-setInterval(()=>{ const v=$('v-suivi'); if(v&&v.classList.contains('on'))fetchRuns(); },5000);
+setInterval(fetchRuns,8000); fetchRuns(); // badge runs en cours + table si onglet Suivi
 
 /* ===================== REVUE (live A10) ===================== */
 async function loadReview(){
