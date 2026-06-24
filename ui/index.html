@@ -231,13 +231,13 @@
 
     <!-- ====================== REVUE ========================= -->
     <section class="view" id="v-revue">
-      <div class="pagehead"><h1>Revue humaine <span class="demoflag">démo — données fictives</span></h1><p>Les décisions qui demandent un œil humain. C'est ce qui fait la qualité.</p></div>
+      <div class="pagehead"><h1>Revue humaine</h1><p>Les décisions qui demandent un œil humain. Charge un cours pour voir ses <b>vrais liens A10</b> à arbitrer.</p>
+        <div style="display:flex;gap:10px;margin-top:12px"><input type="text" id="revId" placeholder="Target Course ID (ex. 8970456)" style="max-width:240px" inputmode="numeric"><button class="sbtn go" onclick="loadReview()">Charger</button></div></div>
       <div class="card" style="margin-bottom:18px"><div class="ch p1" style="background:var(--p1soft)"><div class="ico" style="background:linear-gradient(135deg,#2f6bff,#5b4fe0)">✓</div><div><h2>A5 — Quality Gate</h2><div class="sub">Score requis ≥ 90/100</div></div></div>
         <div class="cb"><div class="rev"><span class="badge b-sw">94/100</span><div><b>8970456 — ch3</b><div class="mini">Naturalness OK · 2 termes glossaire à confirmer</div></div><div class="acts"><button class="sbtn go">Valider</button><button class="sbtn">Voir segments</button></div></div>
           <div class="rev"><span class="badge b-rv">87/100</span><div><b>8702991 — ch2</b><div class="mini">Sous le seuil · boucle A3→A5 recommandée</div></div><div class="acts"><button class="sbtn">Relancer A3–A5</button><button class="sbtn no">Rejeter</button></div></div></div></div>
-      <div class="card" style="margin-bottom:18px"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🔗</div><div><h2>A10 — Liens à arbitrer</h2><div class="sub">Résolutions « manual review »</div></div></div>
-        <div class="cb"><div class="rev"><span class="badge b-pr">MANUAL</span><div><b>openclassrooms.com/fr/courses/…</b><div class="mini">Lien OC — routage interne à confirmer</div></div><div class="acts"><input type="text" placeholder="URL cible…" style="width:200px"><button class="sbtn go">Résoudre</button></div></div>
-          <div class="rev"><span class="badge b-sw">AUTO</span><div><b>fr.wikipedia.org/wiki/IPsec → en.wikipedia.org/wiki/IPsec</b><div class="mini">Switch même-source (validé auto)</div></div><div class="acts"><button class="sbtn">Annuler</button></div></div></div></div>
+      <div class="card" style="margin-bottom:18px"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🔗</div><div><h2>A10 — Liens à arbitrer <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Depuis le rapport CSV réel du cours</div></div></div>
+        <div class="cb" id="a10ReviewBody"><div class="empty" style="padding:14px">Charge un cours ci-dessus pour voir ses liens.</div></div></div>
       <div class="card"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🖼️</div><div><h2>A8 — Images</h2><div class="sub">Préservées vs localisées</div></div></div>
         <div class="cb"><div class="rev"><span class="badge b-pr">PRÉSERVÉE</span><div><b>screenshot_packet_tracer.png</b><div class="mini">Vraie UI — non éditée (éviter de falsifier l'interface)</div></div><div class="acts"><button class="sbtn">Forcer l'édition</button></div></div>
           <div class="rev"><span class="badge b-sw">LOCALISÉE</span><div><b>diagramme_ipsec.png</b><div class="mini">13 textes traduits · re-OCR OK</div></div><div class="acts"><button class="sbtn">Voir avant/après</button></div></div></div></div>
@@ -460,6 +460,20 @@ async function fetchRuns(){
   }catch(e){ $('suiviLive').style.display='none'; body.innerHTML='<tr><td colspan="5" class="empty">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code> puis ouvre http://localhost:4317</td></tr>'; }
 }
 setInterval(()=>{ const v=$('v-suivi'); if(v&&v.classList.contains('on'))fetchRuns(); },5000);
+
+/* ===================== REVUE (live A10) ===================== */
+async function loadReview(){
+  const id=(($('revId')||{}).value||'').replace(/\D/g,''); const body=$('a10ReviewBody'); if(!body)return;
+  if(!/^\d{4,8}$/.test(id)){ body.innerHTML='<div class="empty" style="padding:14px">Entre un Target Course ID valide.</div>'; return; }
+  body.innerHTML='<div class="empty" style="padding:14px">Chargement…</div>';
+  try{
+    const d=await (await fetch('/api/review/'+id)).json();
+    if(!d.done){ body.innerHTML='<div class="empty" style="padding:14px">⛔ Pas de Phase 1 (Gold Master) pour ce cours.</div>'; return; }
+    if(!d.a10||!d.a10.length){ body.innerHTML='<div class="empty" style="padding:14px">✅ Aucun lien à arbitrer (rapport A10 vide / 0 lien externe).</div>'; return; }
+    body.innerHTML=d.a10.map(x=>{const rev=String(x.needs_human_review)==='true'||/MANUAL_REVIEW|BLOCK/i.test(x.decision||'');const badge=rev?'b-rv':(/SWITCH|PRESERVE/i.test(x.decision||'')?'b-sw':'b-pr');const tgt=(x.target_url||'').trim();
+      return `<div class="rev"><span class="badge ${badge}">${x.decision||'?'}</span><div style="flex:1;min-width:0"><b style="word-break:break-all">${(x.source_url||'').slice(0,80)}</b><div class="mini">${(x.reason||'').slice(0,110)}</div></div><div class="acts">${rev?'<input type="text" placeholder="URL cible…" style="width:180px"><button class="sbtn go">Résoudre</button>':'<span class="mini">→ '+(tgt||'—')+'</span>'}</div></div>`;}).join('');
+  }catch(e){ body.innerHTML='<div class="empty" style="padding:14px">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code>.</div>'; }
+}
 </script>
 </body>
 </html>

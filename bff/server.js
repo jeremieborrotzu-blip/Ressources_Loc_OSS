@@ -203,6 +203,28 @@ app.post('/api/assets/localize', async (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
+// ---- Revue : lit les rapports d'un cours (A10 links CSV) depuis GitHub ----
+function parseCsv(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const parse = l => { const o = []; let cur = '', q = false; for (let i = 0; i < l.length; i++) { const ch = l[i]; if (q) { if (ch === '"') { if (l[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; } else { if (ch === '"') q = true; else if (ch === ',') { o.push(cur); cur = ''; } else cur += ch; } } o.push(cur); return o; };
+  const head = parse(lines[0]);
+  return lines.slice(1).map(l => { const c = parse(l); const o = {}; head.forEach((h, i) => o[h] = c[i]); return o; });
+}
+app.get('/api/review/:id', async (req, res) => {
+  const target = String(req.params.id || '').trim();
+  try {
+    const st = await contentStatus(target);
+    if (!st.done) return res.json({ done: false, target });
+    let a10 = [];
+    try {
+      const csv = await fetch(RAW + encodeURI(`07_runs/${st.source}/output/${target}_links_report.csv`), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : null);
+      if (csv) a10 = parseCsv(csv);
+    } catch (e) {}
+    res.json({ done: true, target, source: st.source, a10 });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;
