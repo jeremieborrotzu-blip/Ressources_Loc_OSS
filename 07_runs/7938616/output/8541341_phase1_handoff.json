@@ -1,0 +1,1041 @@
+{
+  "meta": {
+    "source_course_id": "7938616",
+    "target_course_id": "8541341",
+    "source_language": "fr",
+    "target_language": "en-US",
+    "direction": "fr>en",
+    "detected_domain": null,
+    "phase1_qa_score": null,
+    "imported": true,
+    "imported_at": "2026-06-24T12:19:44.762Z"
+  },
+  "gold_master": {
+    "html_path": "07_runs/7938616/output/8541341_localized_fr>en.html",
+    "html_url": "https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/07_runs/7938616/output/8541341_localized_fr%3Een.html"
+  },
+  "glossary": {
+    "common": [],
+    "domain_tm": [],
+    "run_terms": []
+  },
+  "concept_swaps": [],
+  "cultural_flags": [],
+  "media_inventory": [
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524446",
+      "location": "ch0"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780668708",
+      "location": "ch2"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/powershell/",
+      "location": "ch2"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524492",
+      "location": "ch3"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/windows-commands",
+      "location": "ch3"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/powershell/scripting/whats-new/differences-from-windows-powershell?view=powershell-7.6",
+      "location": "ch3"
+    },
+    {
+      "type": "link",
+      "url": "https://code.visualstudio.com/",
+      "location": "ch3"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370590",
+      "location": "ch3"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524533",
+      "location": "ch4"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-5.1",
+      "location": "ch4"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370571",
+      "location": "ch4"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524623",
+      "location": "ch5"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370542",
+      "location": "ch5"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370522",
+      "location": "ch5"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_aliases?view=powershell-5.1",
+      "location": "ch5"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524698",
+      "location": "ch7"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370498",
+      "location": "ch7"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524767",
+      "location": "ch8"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370476",
+      "location": "ch8"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370434",
+      "location": "ch8"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524849",
+      "location": "ch9"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/get-date?view=powershell-5.1",
+      "location": "ch9"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524894",
+      "location": "ch10"
+    },
+    {
+      "type": "link",
+      "url": "https://www.iso.org/obp/ui/#iso:std:iso:5807:ed-1:v1:fr",
+      "location": "ch10"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_switch?view=powershell-5.1",
+      "location": "ch10"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/766524937",
+      "location": "ch12"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370373",
+      "location": "ch14"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370342",
+      "location": "ch14"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370315",
+      "location": "ch15"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370281",
+      "location": "ch15"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370255",
+      "location": "ch16"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy",
+      "location": "ch16"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370227",
+      "location": "ch16"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/780370195",
+      "location": "ch16"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/1671177905593_Development_A%20vous%20de%20jouer.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671008467866_image9.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711174463598_image38.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710090537743_image33.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671009187424_image96.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671009283861_image50.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711178020766_image15b.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710096251559_image5.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710096820484_image17.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716138148424_Screenshot%202022-12-21%20at%2010.09.14.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671009892905_image89.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710104331476_image34.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711794958177_FR_7938616_PowerShell_STATICS_p1c3-2.jpg",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710108668946_image86.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710109557542_image77.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711183240899_image109.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710117948742_image14.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711800684018_Development_A%20vous%20de%20jouer.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716145206568_FR_7938616_PowerShell_STATICS_p1c4-1%20%281%29.jpg",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710170624354_image75.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710172464745_image114.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710173003481_image95.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710174665703_image3.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671017846091_image52b.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710179088626_image52.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710179969434_image13.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710181099056_image48.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710182129446_image31.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711818462315_FR_7938616_PowerShell_STATICS_p1c4-2.jpg",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710184845975_image61.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710184435209_image101.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710185533596_image60.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711820015093_Development_A%20vous%20de%20jouer.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711873039088_FR_7938616_PowerShell_STATICS_p2c1-2%20%281%29.jpg",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711827255705_FR_7938616_PowerShell_STATICS_p2c1-1.jpg",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710213434794_image104.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710214106772_image92.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710215809828_image99.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710220011757_image70.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/167102208337_image107.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671022137215_image57.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710222574395_image91.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710222924407_image83.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710223315599_image80.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711855471278_Screenshot%202022-12-16%20at%2011.10.39.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710225425273_image56.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711206460048_image103.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711857364049_Development_A%20vous%20de%20jouer.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711878205631_FR_7938616_PowerShell_STATICS_p2c2-1.jpg",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710231461111_image69.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711880218528_FR_7938616_PowerShell_STATICS_p2c2-2.jpg",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710232254728_image36.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710234134738_image11.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711883331467_Development_A%20vous%20de%20jouer.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711889318321_FR_7938616_PowerShell_STATICS_p2c3-1.jpg",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/167118901588_FR_7938616_PowerShell_STATICS_p2c3-2.jpg",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671024126495_image7.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711893355308_Development_A%20vous%20de%20jouer.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710243285503_image49.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711896321532_FR_7938616_PowerShell_STATICS_p2c4-1.jpg",
+      "location": "ch10",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710248881915_image82.png",
+      "location": "ch10",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711899400382_Screenshot%202022-12-16%20at%2012.25.24.png",
+      "location": "ch10",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711900009894_Development_A%20vous%20de%20jouer.png",
+      "location": "ch10",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711905214376_Development_A%20vous%20de%20jouer.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/19/16714367551055_FR_7938616_PowerShell_STATICS_p2c4-2.jpg",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711906831158_Screenshot%202022-12-16%20at%2012.37.47.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/19/16714369063263_FR_7938616_PowerShell_STATICS_p2c5-2%20%282%29.jpg",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671621989293_Screenshot%202022-12-21%20at%2012.26.09.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711912248623_Screenshot%202022-12-16%20at%2012.46.45.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711913041523_Screenshot%202022-12-16%20at%2012.46.53.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710306317379_image106.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711913430647_Development_A%20vous%20de%20jouer.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710309510525_image88.png",
+      "location": "ch11",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711915929759_FR_7938616_PowerShell_STATICS_p2c6-1.jpg",
+      "location": "ch12",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710315868928_image94.png",
+      "location": "ch12",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710317032538_image118.png",
+      "location": "ch12",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710317630538_image40.png",
+      "location": "ch12",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/16/16711918743689_Development_A%20vous%20de%20jouer.png",
+      "location": "ch12",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710415248612_image24.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710416366367_image45.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711290237598_image72.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671041926511_image22.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710420028793_image4.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710420630598_image41.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671042165289_image54.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711292545107_image79.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710424011945_image111.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710424758421_image53.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710425964667_image59.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710427367618_image108.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710428253131_image113.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/1671043232016_image10.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710432967261_image87.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710435228313_image98.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710434406798_image6.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710435457722_image97.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710437452306_image19.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710438178947_image58.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/14/16710439190217_image29.png",
+      "location": "ch14",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710948858587_image84.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711038666718_image43.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710950198523_image39.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710951423133_image110.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710951986952_image81.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710953133274_image18.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710954740577_image78.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710955831232_image55.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710956411012_image62.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710957130249_image117.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710957656343_image90.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710958588581_image2.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16710959881946_image51.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/1671096038917_image32.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/1671096108894_image30.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711040210176_image76.png",
+      "location": "ch15",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711042534358_image35.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711044340463_image100.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711046329841_image44.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711047783481_image112.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711050347453_image53.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711051680101_image85.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711053075711_image1.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711054280882_image27.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711054623422_image16.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711055707868_image115.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711056973997_image105.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711058172356_image67.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711059110986_image46.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711059421109_image65.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711059879103_image63.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711060456672_image8.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711061002379_image73.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711062603404_image68.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711063275478_image23.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711063911676_image20.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711064519093_image66.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711065592864_image21.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711065905738_image71.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/15/16711067087028_image25.png",
+      "location": "ch16",
+      "risk": "fr_only"
+    }
+  ],
+  "dispatch_summary": {
+    "image": 139,
+    "annexe": 0,
+    "link": 10,
+    "video": 24
+  },
+  "qa": {
+    "a5_scores": {},
+    "a6_issues": [],
+    "a6_applied": false
+  }
+}
