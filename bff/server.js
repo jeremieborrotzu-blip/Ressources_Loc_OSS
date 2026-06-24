@@ -211,18 +211,37 @@ function parseCsv(text) {
   const head = parse(lines[0]);
   return lines.slice(1).map(l => { const c = parse(l); const o = {}; head.forEach((h, i) => o[h] = c[i]); return o; });
 }
+const decisions = {}; // { target: [ {id, target_url, ts} ] } — arbitrages opérateur (A10)
 app.get('/api/review/:id', async (req, res) => {
   const target = String(req.params.id || '').trim();
   try {
     const st = await contentStatus(target);
     if (!st.done) return res.json({ done: false, target });
+    const base = `07_runs/${st.source}/output/`;
+    let a5 = [], a8 = [];
+    try {
+      const h = await fetch(RAW + encodeURI(base + target + '_phase1_handoff.json'), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.json());
+      const scores = (h.qa && h.qa.a5_scores) || {};
+      a5 = Object.entries(scores).map(([chapter, score]) => ({ chapter, score }));
+      const banner = u => /banner/i.test(u || '');
+      a8 = (h.media_inventory || []).filter(m => m.type === 'image' && !banner(m.url)).map(m => ({ location: m.location, risk: m.risk, url: m.url }));
+    } catch (e) {}
     let a10 = [];
     try {
-      const csv = await fetch(RAW + encodeURI(`07_runs/${st.source}/output/${target}_links_report.csv`), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : null);
+      const csv = await fetch(RAW + encodeURI(base + target + '_links_report.csv'), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : null);
       if (csv) a10 = parseCsv(csv);
     } catch (e) {}
-    res.json({ done: true, target, source: st.source, a10 });
+    const qa_report = RAW + base + target + '_qa_report_' + (st.direction || '').replace('>', '%3E') + '.md';
+    res.json({ done: true, target, source: st.source, direction: st.direction, a5, a8, a10, qa_report, decisions: decisions[target] || [] });
   } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+app.post('/api/review/:id/resolve', (req, res) => {
+  const t = String(req.params.id || '').trim();
+  const { id, target_url } = req.body || {};
+  if (!id || !target_url) return res.status(400).json({ error: 'id + target_url requis' });
+  decisions[t] = (decisions[t] || []).filter(d => d.id !== id);
+  decisions[t].push({ id, target_url, ts: Date.now() });
+  res.json({ ok: true, count: decisions[t].length, decisions: decisions[t] });
 });
 
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
