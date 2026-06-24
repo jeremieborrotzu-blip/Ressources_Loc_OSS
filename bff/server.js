@@ -179,6 +179,30 @@ app.get('/api/runs', (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
+// ---- POST Assets à la demande : localise n'importe quel fichier (webhook leo-adhoc) ----
+const WH_ADHOC = `${N8N}/webhook/leo-adhoc`;
+app.post('/api/assets/localize', async (req, res) => {
+  const p = req.body || {};
+  try {
+    const r = await fetch(WH_ADHOC, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: p.items || [], source_language: p.source_language, target_language: p.target_language, prompt: p.prompt || null, glossary: p.glossary || null })
+    });
+    const d = await r.json();
+    if (!d.ok) return res.status(500).json({ error: 'Échec localisation assets', detail: d });
+    const out = (d.results || []).map(x => {
+      let download = null;
+      if (x.base64) {
+        const base = String(x.filename || x.name || 'asset').split('/').pop().replace(/[^\w.\-]+/g, '_');
+        fsx.writeFileSync(path.join(DL_DIR, base), Buffer.from(x.base64, 'base64'));
+        download = '/downloads/' + base;
+      }
+      return { name: String(x.name || '').split('/').pop(), agent: x.agent, status: x.status, segments: x.segments || null, note: x.note || null, error: x.error || null, download };
+    });
+    res.json({ ok: true, results: out });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;
