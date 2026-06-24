@@ -523,7 +523,7 @@ $('impGo').addEventListener('click',async()=>{
     const d=await (await fetch('/api/phase1/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).json();
     if(d.ok){ const c=d.counts; showToast('✅ <b>Phase 1 importée</b> pour '+tgt+'<br>'+c.image+' images · '+c.annexe+' docs · '+c.link+' liens · '+c.video+' vidéos<br><span style="opacity:.85">→ va dans « Cadrage », tape '+tgt+' (la Phase 2 sera dispo sous ~1 min, le temps que GitHub se rafraîchisse).</span>'); msg.innerHTML='✅ Importé. Cours <b>'+tgt+'</b> prêt pour la Phase 2.'; delete live[tgt]; }
     else msg.textContent='⚠️ '+(d.error||'Erreur');
-  }catch(e){ msg.textContent='⚠️ BFF non connecté.'; }
+  }catch(e){ msg.innerHTML='⚠️ BFF injoignable ('+String(e&&e.message||e)+'). Ouvre bien <b>http://localhost:4317/</b> (pas le fichier en file://) puis recharge (Cmd+Shift+R).'; }
   b.disabled=false; b.textContent=old;
 });
 </script>
