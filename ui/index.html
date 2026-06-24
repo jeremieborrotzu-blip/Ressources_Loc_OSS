@@ -404,7 +404,7 @@ drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('hove
 drop.addEventListener('dragleave',()=>drop.classList.remove('hover'));
 drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('hover');addFiles(e.dataTransfer.files);});
 filein.addEventListener('change',()=>addFiles(filein.files));
-function addFiles(fl){for(const f of fl)A.files.push(f.name);renderAssets();}
+function addFiles(fl){for(const f of fl)A.files.push(f);renderAssets();}
 window.rmFile=i=>{A.files.splice(i,1);renderAssets();};
 $('assetUrls').addEventListener('input',e=>{A.urls=e.target.value;renderAssets();});
 $('aSrc').addEventListener('change',e=>{A.src=e.target.value;renderAssets();});
@@ -414,8 +414,8 @@ $('aGloss').addEventListener('input',e=>{A.gloss=e.target.value;});
 document.querySelectorAll('.chk.oc').forEach(c=>c.addEventListener('click',e=>{e.preventDefault();const o=c.dataset.o;A.out[o]=!A.out[o];c.classList.toggle('on',A.out[o]);renderAssets();}));
 function assetUrlList(){return A.urls.split('\n').map(x=>x.trim()).filter(Boolean);}
 function renderAssets(){
-  $('filelist').innerHTML=A.files.map((n,i)=>{const r=routeFor(n);return `<div class="frow"><span>${r.ok?'📄':'⚠️'}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span><span class="ag ${r.cl}">${r.ag}</span><span class="rm" onclick="rmFile(${i})">✕</span></div>`;}).join('');
-  const all=A.files.concat(assetUrlList()); const total=all.length;
+  $('filelist').innerHTML=A.files.map((f,i)=>{const n=f.name||f;const r=routeFor(n);return `<div class="frow"><span>${r.ok?'📄':'⚠️'}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span><span class="ag ${r.cl}">${r.ag}</span><span class="rm" onclick="rmFile(${i})">✕</span></div>`;}).join('');
+  const all=A.files.map(f=>f.name||f).concat(assetUrlList()); const total=all.length;
   const c={A8:0,A9:0,manual:0}; all.forEach(n=>{const r=routeFor(n);if(r.ag==='A8')c.A8++;else if(r.ag==='A9')c.A9++;else c.manual++;});
   const steps=[];
   if(c.A8)steps.push(`<div class="step p2"><div class="n">${c.A8}</div><div class="t"><b>Images → A8</b><div class="d">texte ré-écrit, image préservée</div></div></div>`);
@@ -430,10 +430,18 @@ function renderAssets(){
   const ok=total>0&&A.src&&A.tgt&&(A.out.download||A.out.iconik||A.out.github);
   const b=$('aLaunch');b.disabled=!ok;b.textContent=!total?'Ajoute un asset':(ok?('🎯 Localiser ('+total+')'):'Complète les champs requis');
 }
-$('aLaunch').addEventListener('click',()=>{
-  const items=A.files.map(n=>({file:n,route:routeFor(n).ag})).concat(assetUrlList().map(u=>({url:u,route:routeFor(u).ag})));
-  const payload={mode:'adhoc_assets',source_language:A.src,target_language:A.tgt,prompt:A.prompt||null,glossary:A.gloss||null,outputs:Object.keys(A.out).filter(k=>A.out[k]),items};
-  const t=$('toast');t.innerHTML='✅ <b>Localisation d\'assets à la demande</b> — payload BFF :<pre>'+JSON.stringify(payload,null,2)+'</pre>';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),9000);
+$('aLaunch').addEventListener('click',async()=>{
+  const b=$('aLaunch'),old=b.textContent; b.disabled=true; b.textContent='⏳ Localisation…';
+  const fileItems=await Promise.all(A.files.map(f=>new Promise(rs=>{const fr=new FileReader();fr.onload=()=>rs({name:f.name,file_base64:String(fr.result).split(',')[1]});fr.readAsDataURL(f);})));
+  const urlItems=assetUrlList().map(u=>({name:u.split('/').pop().split('?')[0],url:u}));
+  const payload={source_language:A.src,target_language:A.tgt,prompt:A.prompt||null,glossary:A.gloss||null,items:fileItems.concat(urlItems)};
+  try{
+    const r=await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(r.ok){ const rows=(d.results||[]).map(x=>{const ic=(x.status==='PASS'||x.status==='localized')?'✅':(x.status==='preserved'?'⬜':'⚠️');const dl=x.download?' <a href="'+x.download+'" download style="color:#8fd0ff;font-weight:700">⬇️ télécharger</a>':'';return ic+' <b>'+x.name+'</b> ['+(x.agent||'?')+' · '+x.status+']'+(x.segments?' '+x.segments:'')+(x.note?' — '+x.note:'')+(x.error?' — '+x.error:'')+dl;}).join('<br>'); showToast('🎯 <b>Assets localisés</b><br>'+rows); }
+    else showToast('⚠️ <b>'+(d.error||'Erreur')+'</b>');
+  }catch(e){ showToast('🧪 <b>Mode prototype</b> (BFF absent) — '+(A.files.length+assetUrlList().length)+' asset(s) prêt(s).'); }
+  b.disabled=false; b.textContent=old; renderAssets();
 });
 renderAssets();
 
