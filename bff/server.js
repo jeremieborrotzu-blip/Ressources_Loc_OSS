@@ -290,6 +290,19 @@ app.post('/api/review/:id/check', (req, res) => {
   res.json({ ok: true, count: checked.length });
 });
 
+// ---- Avant/après persistant : map { image_url -> {download} } des images localisées (par target) ----
+const localizedFile = id => path.join(REVIEW_DIR, String(id).replace(/\D/g, '') + '_localized.json');
+const readLocalized = id => { try { return JSON.parse(fsx.readFileSync(localizedFile(id), 'utf-8')); } catch (e) { return {}; } };
+app.get('/api/review/:id/localized', (req, res) => res.json(readLocalized(req.params.id)));
+app.post('/api/review/:id/localized', (req, res) => {
+  const { url, download } = req.body || {};
+  if (!url || !download) return res.status(400).json({ error: 'url + download requis' });
+  const m = readLocalized(req.params.id);
+  m[url] = { download, ts: Date.now() };
+  fsx.writeFileSync(localizedFile(req.params.id), JSON.stringify(m, null, 2));
+  res.json({ ok: true, count: Object.keys(m).length });
+});
+
 // ---- Importer une Phase 1 existante : HTML localisé → handoff → Git (Phase 2 prête) ----
 const REPO_DIR = path.join(__dirname, '..');
 function scanHtmlAssets(html, localizeImages) {
