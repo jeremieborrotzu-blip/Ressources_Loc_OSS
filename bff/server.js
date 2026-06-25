@@ -213,7 +213,21 @@ function parseCsv(text) {
   const head = parse(lines[0]);
   return lines.slice(1).map(l => { const c = parse(l); const o = {}; head.forEach((h, i) => o[h] = c[i]); return o; });
 }
-const decisions = {}; // { target: [ {id, target_url, ts} ] } — arbitrages opérateur (A10)
+// arbitrages A10 + copie de travail HTML (persistés sur disque, reprenables)
+const decisionsFile = id => path.join(REVIEW_DIR, String(id).replace(/\D/g, '') + '_decisions.json');
+const readDecisions = id => { try { return JSON.parse(fsx.readFileSync(decisionsFile(id), 'utf-8')); } catch (e) { return []; } };
+const writeDecisions = (id, arr) => fsx.writeFileSync(decisionsFile(id), JSON.stringify(arr, null, 2));
+const htmlWork = id => path.join(REVIEW_DIR, String(id).replace(/\D/g, '') + '_fixed.html');
+const htmlOrig = id => path.join(REVIEW_DIR, String(id).replace(/\D/g, '') + '_original.html');
+async function ensureWorkingHtml(target) {
+  if (fsx.existsSync(htmlWork(target))) return;
+  const st = await contentStatus(target);
+  if (!st || !st.source || !st.direction) throw new Error('cours/HTML introuvable');
+  const url = RAW + encodeURI(`07_runs/${st.source}/output/${target}_localized_${st.direction}.html`);
+  const html = await fetch(url, { headers: { 'User-Agent': 'leo-bff' } }).then(r => { if (!r.ok) throw new Error('HTML HTTP ' + r.status); return r.text(); });
+  fsx.writeFileSync(htmlOrig(target), html); // backup original (sécurité)
+  fsx.writeFileSync(htmlWork(target), html); // copie de travail éditable
+}
 app.get('/api/review/:id', async (req, res) => {
   const target = String(req.params.id || '').trim();
   try {
@@ -234,16 +248,32 @@ app.get('/api/review/:id', async (req, res) => {
       if (csv) a10 = parseCsv(csv);
     } catch (e) {}
     const qa_report = RAW + base + target + '_qa_report_' + (st.direction || '').replace('>', '%3E') + '.md';
-    res.json({ done: true, target, source: st.source, direction: st.direction, a5, a8, a10, qa_report, decisions: decisions[target] || [] });
+    res.json({ done: true, target, source: st.source, direction: st.direction, a5, a8, a10, qa_report, decisions: readDecisions(target), html_fixed: fsx.existsSync(htmlWork(target)) });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
-app.post('/api/review/:id/resolve', (req, res) => {
+app.post('/api/review/:id/resolve', async (req, res) => {
   const t = String(req.params.id || '').trim();
-  const { id, target_url } = req.body || {};
+  const { id, source_url, target_url } = req.body || {};
   if (!id || !target_url) return res.status(400).json({ error: 'id + target_url requis' });
-  decisions[t] = (decisions[t] || []).filter(d => d.id !== id);
-  decisions[t].push({ id, target_url, ts: Date.now() });
-  res.json({ ok: true, count: decisions[t].length, decisions: decisions[t] });
+  try {
+    let replaced = false;
+    if (source_url && source_url !== target_url) {
+      await ensureWorkingHtml(t);
+      let html = fsx.readFileSync(htmlWork(t), 'utf-8');
+      if (html.includes(source_url)) { html = html.split(source_url).join(target_url); fsx.writeFileSync(htmlWork(t), html); replaced = true; }
+    }
+    const arr = readDecisions(t).filter(d => d.id !== id);
+    arr.push({ id, source_url: source_url || null, target_url, replaced, ts: Date.now() });
+    writeDecisions(t, arr);
+    res.json({ ok: true, replaced, count: arr.length });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
+// Télécharger le HTML corrigé (copie de travail avec liens résolus) ; l'original reste en backup
+app.get('/api/review/:id/html', (req, res) => {
+  const t = String(req.params.id || '').replace(/\D/g, '');
+  if (!fsx.existsSync(htmlWork(t))) return res.status(404).json({ error: 'aucun HTML corrigé — résous au moins un lien' });
+  res.download(htmlWork(t), t + '_localized_fixed.html');
 });
 
 // ---- Avancement Revue : images cochées "OK" (trace légère par target, reprenable) ----
