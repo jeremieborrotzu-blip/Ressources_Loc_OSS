@@ -72,7 +72,7 @@
   .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s}.btn-go{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 6px 18px rgba(91,79,224,.35)}.btn-go:hover{filter:brightness(1.07)}.btn:disabled{background:#dfe3ee;color:#a7adc2;cursor:not-allowed;box-shadow:none}
   .legend{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;font-size:.77rem;color:#5b6178}.legend b{color:var(--ink);display:block;margin-bottom:7px;font-size:.81rem}.legend li{margin:5px 0;list-style:none;display:flex;gap:8px}.legend li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:6px;flex:0 0 7px}
   table{width:100%;border-collapse:collapse;font-size:.85rem}th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line)}td{padding:12px 14px;border-bottom:1px solid #f1f3fa}
-  .st{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px}.st.run{background:#fff7ec;color:#b9740a}.st.ok{background:#eafaf0;color:#138a45}.st.err{background:#fdeef0;color:#b03048}
+  .st{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px}.st.run{background:#fff7ec;color:#b9740a}.st.ok{background:#eafaf0;color:#138a45}.st.err{background:#fdeef0;color:#b03048}tr.rowbad td{background:#fdeef0}tr.rowbad td:first-child{box-shadow:inset 3px 0 0 #b03048}.badge.bad{background:#b03048;color:#fff}
   .bar{height:6px;background:#eef1f8;border-radius:6px;overflow:hidden;width:90px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
   .rev{display:flex;align-items:center;gap:12px;padding:13px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}.rev .badge{font-size:.66rem;font-weight:700;padding:3px 8px;border-radius:7px}.b-sw{background:#eafaf0;color:#138a45}.b-rv{background:#fdeef0;color:#b03048}.b-pr{background:#eef1f8;color:#6b7191}.rev .acts{margin-left:auto;display:flex;gap:8px}.sbtn{font-size:.78rem;font-weight:700;padding:7px 13px;border-radius:9px;border:1.5px solid var(--line);background:#fff;cursor:pointer}.sbtn.go{background:var(--green);color:#fff;border-color:var(--green)}.sbtn.no{background:#fff;color:var(--red);border-color:#f5c6cf}.rev{flex-wrap:wrap}.baprev{flex:0 0 100%;display:flex;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.bacol{flex:1;min-width:0}.bacol img{width:100%;border-radius:10px;border:1px solid var(--line);display:block;margin-top:5px}.bal{font-size:.66rem;font-weight:800;letter-spacing:.5px;color:#6b7191}.bal.ok{color:#138a45}.baact{flex:0 0 100%;margin-top:6px;display:flex;gap:8px}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140px);background:#131a4a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:.35s;max-width:620px;z-index:50}.toast.show{transform:translateX(-50%) translateY(0)}.toast pre{font-size:.7rem;margin-top:8px;white-space:pre-wrap;opacity:.9;max-height:240px;overflow:auto}
@@ -248,6 +248,7 @@
     <section class="view" id="v-suivi">
       <div class="pagehead"><h1>Suivi des runs <span id="suiviLive" class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">● live</span></h1><p>Exécutions n8n en temps réel (rafraîchi toutes les 5 s). Source : le BFF lit la base n8n.</p></div>
       <div id="chainsBanner"></div>
+      <div id="runsSummary" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"></div>
       <div class="card"><table><thead><tr><th>Run</th><th>Workflow</th><th>Statut</th><th>Démarré</th><th>Durée</th></tr></thead>
         <tbody id="runsBody"><tr><td colspan="5" class="empty">Chargement…</td></tr></tbody></table></div>
     </section>
@@ -467,7 +468,8 @@ $('aLaunch').addEventListener('click',async()=>{
 renderAssets();
 
 /* ===================== SUIVI (live) ===================== */
-function runStatus(s){ if(s==='success')return['ok','success']; if(s==='error'||s==='crashed')return['err',s]; if(s==='canceled')return['err','canceled']; return['run',s||'…']; }
+function runStatus(s){ if(s==='success')return['ok','✓ success']; if(s==='error')return['err','✗ échec']; if(s==='crashed')return['err','✗ crashé']; if(s==='canceled')return['err','⊘ annulé']; return['run','⏳ '+(s||'…')]; }
+const isFail=s=>['error','crashed','canceled'].includes(s);
 function fmtDur(ms){ if(ms==null)return '—'; if(ms<1000)return ms+'ms'; const s=Math.round(ms/1000); return s<60?s+'s':Math.floor(s/60)+'m'+String(s%60).padStart(2,'0'); }
 function fmtTime(t){ return t? t.slice(5,19).replace('T',' ') : '—'; }
 async function fetchRuns(){
@@ -475,10 +477,12 @@ async function fetchRuns(){
   try{
     const r=await fetch('/api/runs'); if(!r.ok)throw 0; const d=await r.json();
     $('suiviLive').style.display='inline-block';
-    const running=(d.runs||[]).filter(x=>['running','new','waiting'].includes(x.status)).length; const sb=$('suiviBadge'); if(sb){ if(running){sb.textContent=running;sb.style.display='inline-block';} else sb.style.display='none'; }
+    const runs=d.runs||[]; const running=runs.filter(x=>['running','new','waiting'].includes(x.status)).length; const failed=runs.filter(x=>isFail(x.status)).length; const okc=runs.filter(x=>x.status==='success').length;
+    const sb=$('suiviBadge'); if(sb){ if(failed){ sb.textContent='✗ '+failed; sb.style.display='inline-block'; sb.classList.add('bad'); } else if(running){ sb.textContent=running; sb.style.display='inline-block'; sb.classList.remove('bad'); } else { sb.style.display='none'; sb.classList.remove('bad'); } }
+    const sm=$('runsSummary'); if(sm) sm.innerHTML = runs.length ? `<span class="st ok">✓ ${okc} ok</span><span class="st run">⏳ ${running} en cours</span>${failed?`<span class="st err">✗ ${failed} échec(s)</span>`:'<span class="st" style="background:#eef1f8;color:#6b7191">✓ 0 échec</span>'}` : '';
     const cb=$('chainsBanner'); if(cb) cb.innerHTML=(d.chains&&d.chains.length)? d.chains.map(c=>`<div class="warn i" style="margin-bottom:10px;padding:11px 13px">⛓️ <b>Chaînage en attente</b> — cours ${c.target} : la Phase 2 (${c.agents.join(', ')}) se lancera dès la livraison de la Phase 1 (surveillance GitHub).</div>`).join('') : '';
     if(!d.runs.length){ body.innerHTML='<tr><td colspan="5" class="empty">Aucune exécution.</td></tr>'; return; }
-    body.innerHTML=d.runs.map(x=>{const[cl,lbl]=runStatus(x.status);return `<tr><td><b>#${x.id}</b></td><td>${x.workflow||''}</td><td><span class="st ${cl}">${lbl}</span></td><td>${fmtTime(x.started)}</td><td>${fmtDur(x.durationMs)}</td></tr>`;}).join('');
+    body.innerHTML=runs.map(x=>{const[cl,lbl]=runStatus(x.status);return `<tr class="${isFail(x.status)?'rowbad':''}"><td><b>#${x.id}</b></td><td>${x.workflow||''}</td><td><span class="st ${cl}">${lbl}</span></td><td>${fmtTime(x.started)}</td><td>${fmtDur(x.durationMs)}</td></tr>`;}).join('');
   }catch(e){ $('suiviLive').style.display='none'; body.innerHTML='<tr><td colspan="5" class="empty">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code> puis ouvre http://localhost:4317</td></tr>'; }
 }
 setInterval(fetchRuns,8000); fetchRuns(); // badge runs en cours + table si onglet Suivi
