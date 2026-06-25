@@ -20,6 +20,8 @@ const WH_PROJECT = `${N8N}/webhook/leo-project`;                      // Project
 const fsx = require('fs');
 const DL_DIR = path.join(__dirname, 'downloads');
 fsx.mkdirSync(DL_DIR, { recursive: true });
+const REVIEW_DIR = path.join(__dirname, 'review_state');
+fsx.mkdirSync(REVIEW_DIR, { recursive: true });
 app.use(express.static(path.join(__dirname, '..', 'ui')));
 app.use('/downloads', express.static(DL_DIR));
 
@@ -242,6 +244,20 @@ app.post('/api/review/:id/resolve', (req, res) => {
   decisions[t] = (decisions[t] || []).filter(d => d.id !== id);
   decisions[t].push({ id, target_url, ts: Date.now() });
   res.json({ ok: true, count: decisions[t].length, decisions: decisions[t] });
+});
+
+// ---- Avancement Revue : images cochées "OK" (trace légère par target, reprenable) ----
+const checksFile = id => path.join(REVIEW_DIR, String(id).replace(/\D/g, '') + '.json');
+const readChecks = id => { try { return JSON.parse(fsx.readFileSync(checksFile(id), 'utf-8')).checked || []; } catch (e) { return []; } };
+app.get('/api/review/:id/checks', (req, res) => res.json({ checked: readChecks(req.params.id) }));
+app.post('/api/review/:id/check', (req, res) => {
+  const { url, done } = req.body || {};
+  if (!url) return res.status(400).json({ error: 'url requis' });
+  const set = new Set(readChecks(req.params.id));
+  if (done) set.add(url); else set.delete(url);
+  const checked = [...set];
+  fsx.writeFileSync(checksFile(req.params.id), JSON.stringify({ checked, updated: new Date().toISOString() }, null, 2));
+  res.json({ ok: true, count: checked.length });
 });
 
 // ---- Importer une Phase 1 existante : HTML localisé → handoff → Git (Phase 2 prête) ----
