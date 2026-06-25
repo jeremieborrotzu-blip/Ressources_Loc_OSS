@@ -470,6 +470,8 @@ renderAssets();
 /* ===================== SUIVI (live) ===================== */
 function runStatus(s){ if(s==='success')return['ok','✓ success']; if(s==='error')return['err','✗ échec']; if(s==='crashed')return['err','✗ crashé']; if(s==='canceled')return['err','⊘ annulé']; return['run','⏳ '+(s||'…')]; }
 const isFail=s=>['error','crashed','canceled'].includes(s);
+function seenFails(){ try{return new Set(JSON.parse(localStorage.getItem('leo_seenFails')||'[]'));}catch(e){return new Set();} }
+function markFailsSeen(ids){ const s=seenFails(); ids.forEach(i=>s.add(i)); try{localStorage.setItem('leo_seenFails',JSON.stringify([...s].slice(-300)));}catch(e){} }
 function fmtDur(ms){ if(ms==null)return '—'; if(ms<1000)return ms+'ms'; const s=Math.round(ms/1000); return s<60?s+'s':Math.floor(s/60)+'m'+String(s%60).padStart(2,'0'); }
 function fmtTime(t){ return t? t.slice(5,19).replace('T',' ') : '—'; }
 async function fetchRuns(){
@@ -477,8 +479,9 @@ async function fetchRuns(){
   try{
     const r=await fetch('/api/runs'); if(!r.ok)throw 0; const d=await r.json();
     $('suiviLive').style.display='inline-block';
-    const runs=d.runs||[]; const running=runs.filter(x=>['running','new','waiting'].includes(x.status)).length; const failed=runs.filter(x=>isFail(x.status)).length; const okc=runs.filter(x=>x.status==='success').length;
-    const sb=$('suiviBadge'); if(sb){ if(failed){ sb.textContent='✗ '+failed; sb.style.display='inline-block'; sb.classList.add('bad'); } else if(running){ sb.textContent=running; sb.style.display='inline-block'; sb.classList.remove('bad'); } else { sb.style.display='none'; sb.classList.remove('bad'); } }
+    const runs=d.runs||[]; const running=runs.filter(x=>['running','new','waiting'].includes(x.status)).length; const failedRuns=runs.filter(x=>isFail(x.status)); const failed=failedRuns.length; const okc=runs.filter(x=>x.status==='success').length;
+    const suiviOpen=$('v-suivi')&&$('v-suivi').classList.contains('on'); const seen=seenFails(); let unseen=failedRuns.filter(r=>!seen.has(r.id)).length; if(suiviOpen&&failed){ markFailsSeen(failedRuns.map(r=>r.id)); unseen=0; }
+    const sb=$('suiviBadge'); if(sb){ if(unseen){ sb.textContent='✗ '+unseen; sb.style.display='inline-block'; sb.classList.add('bad'); } else if(running){ sb.textContent=running; sb.style.display='inline-block'; sb.classList.remove('bad'); } else { sb.style.display='none'; sb.classList.remove('bad'); } }
     const sm=$('runsSummary'); if(sm) sm.innerHTML = runs.length ? `<span class="st ok">✓ ${okc} ok</span><span class="st run">⏳ ${running} en cours</span>${failed?`<span class="st err">✗ ${failed} échec(s)</span>`:'<span class="st" style="background:#eef1f8;color:#6b7191">✓ 0 échec</span>'}` : '';
     const cb=$('chainsBanner'); if(cb) cb.innerHTML=(d.chains&&d.chains.length)? d.chains.map(c=>`<div class="warn i" style="margin-bottom:10px;padding:11px 13px">⛓️ <b>Chaînage en attente</b> — cours ${c.target} : la Phase 2 (${c.agents.join(', ')}) se lancera dès la livraison de la Phase 1 (surveillance GitHub).</div>`).join('') : '';
     if(!d.runs.length){ body.innerHTML='<tr><td colspan="5" class="empty">Aucune exécution.</td></tr>'; return; }
