@@ -1,0 +1,1018 @@
+{
+  "meta": {
+    "source_course_id": "2356306",
+    "target_course_id": "9073871",
+    "source_language": "fr",
+    "target_language": "en-US",
+    "direction": "fr>en",
+    "detected_domain": null,
+    "phase1_qa_score": null,
+    "imported": true,
+    "imported_at": "2026-06-25T23:23:11.097Z"
+  },
+  "gold_master": {
+    "html_path": "07_runs/2356306/output/9073871_localized_fr>en.html",
+    "html_url": "https://raw.githubusercontent.com/jeremieborrotzu-blip/Ressources_Loc_OSS/main/07_runs/2356306/output/9073871_localized_fr%3Een.html"
+  },
+  "glossary": {
+    "common": [],
+    "domain_tm": [],
+    "run_terms": []
+  },
+  "concept_swaps": [],
+  "cultural_flags": [],
+  "media_inventory": [
+    {
+      "type": "video",
+      "url": "https://vimeo.com/1202161257",
+      "location": "ch0"
+    },
+    {
+      "type": "pdf",
+      "url": "https://course.oc-static.com/courses/2356306/Mai%CC%82trisez+les+services+re%CC%81seau+de+base+et+installez+des+services+re%CC%81seau+avance%CC%81s+(1).pdf",
+      "location": "ch1"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/569437436",
+      "location": "ch2"
+    },
+    {
+      "type": "link",
+      "url": "https://www.microsoft.com/en-us/evalcenter/download-windows-server-2025",
+      "location": "ch2"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025?WT.mc_id=AZ-MVP-5004580",
+      "location": "ch2"
+    },
+    {
+      "type": "link",
+      "url": "https://www.microsoft.com/handsonlabs/SelfPacedLabs#products=447518&page=1&sort=Newest",
+      "location": "ch2"
+    },
+    {
+      "type": "link",
+      "url": "https://docs.microsoft.com/en-us/windows-server/administration/server-core/what-is-server-core",
+      "location": "ch2"
+    },
+    {
+      "type": "link",
+      "url": "https://docs.microsoft.com/en-us/windows-server/remote/remote-server-administration-tools",
+      "location": "ch2"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/windows-server/get-started/editions-comparison?pivots=windows-server-2025",
+      "location": "ch2"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/569437607",
+      "location": "ch3"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/569436749",
+      "location": "ch4"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/1185056460",
+      "location": "ch5"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/1185056490",
+      "location": "ch6"
+    },
+    {
+      "type": "link",
+      "url": "https://www.ietf.org/rfc/rfc2131.txt",
+      "location": "ch6"
+    },
+    {
+      "type": "link",
+      "url": "https://social.technet.microsoft.com/wiki/contents/articles/51170.microsoft-windows-server-2016-dhcp-server-installation-configuration.aspx",
+      "location": "ch6"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/569437002",
+      "location": "ch7"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/622199561",
+      "location": "ch7"
+    },
+    {
+      "type": "link",
+      "url": "http://www.example.com",
+      "location": "ch7"
+    },
+    {
+      "type": "link",
+      "url": "http://www.example.com.",
+      "location": "ch7"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/622199815",
+      "location": "ch7"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/622200362",
+      "location": "ch7"
+    },
+    {
+      "type": "link",
+      "url": "https://www.isc.org/community/rfcs/dns/",
+      "location": "ch7"
+    },
+    {
+      "type": "link",
+      "url": "https://en.wikipedia.org/wiki/List_of_DNS_record_types",
+      "location": "ch7"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/powershell/module/dnsserver/get-dnsservercache",
+      "location": "ch7"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/569437079",
+      "location": "ch8"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/622200468",
+      "location": "ch8"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/622200749",
+      "location": "ch8"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/569437247",
+      "location": "ch9"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/622200869",
+      "location": "ch9"
+    },
+    {
+      "type": "video",
+      "url": "https://vimeo.com/622201175",
+      "location": "ch9"
+    },
+    {
+      "type": "link",
+      "url": "https://learn.microsoft.com/en-us/windows-server/networking/technologies/nps/nps-top",
+      "location": "ch9"
+    },
+    {
+      "type": "link",
+      "url": "https://tools.ietf.org/html/rfc2865",
+      "location": "ch9"
+    },
+    {
+      "type": "link",
+      "url": "https://csrc.nist.gov/publications/detail/sp/800-153/final",
+      "location": "ch9"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15434726022962_Windows_logo_%E2%80%93_2012_%28dark_blue%29.svg.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15434726331087_Microsoft-logo_rgb_gray.jpg.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2021/09/29/16329396018998_15434727450104_windows01.jpg",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761550742141_image87.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761551901115_image14.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761554856257_image125.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761553548277_image11.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761555597888_image26.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761559794581_image83.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716204628006_unnamed%20%289%29.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761560894116_image24.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/14/17761564871315_image77.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762561570279_image131.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762575465528_image108.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762576482331_image109.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716211931792_unnamed%20%2814%29.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762578491419_Screenshot%202026-04-15%20at%2014.57.05.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671627349471_unnamed%20%2816%29.png",
+      "location": "ch2",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/1776266226422_Screenshot%202026-04-15%20at%2017.09.17.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762662398647_Screenshot%202026-04-15%20at%2017.06.11.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762662565285_Screenshot%202026-04-15%20at%2017.08.41.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2019/01/10/15471322754797_p1c2.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762665315857_Screenshot%202026-04-15%20at%2017.18.47.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716312763547_unnamed%20%2821%29.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435107016552_image2.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435107414913_image4.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435107755266_image7.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/1543510797576_image11.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2026/04/15/17762665803102_Screenshot%202026-04-15%20at%2017.21.04.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716318202399_unnamed%20%2823%29.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716318724965_unnamed%20%2824%29.png",
+      "location": "ch3",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2019/01/10/15471323228309_p1c3.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716322515114_unnamed%20%2825%29.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435114566556_image7.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435114748238_image5.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716324711692_unnamed%20%2826%29.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671632534228_unnamed%20%2827%29.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671632583823_unnamed%20%2828%29.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435115842649_image6.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435116078685_image1.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/1543511644339_image10.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435116649815_image8.png",
+      "location": "ch4",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2021/10/05/16334213309268_P3C3_Manipulate-Models%20by%20Overriding-Model-Methods.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716327094949_unnamed%20%2829%29.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716327615288_unnamed%20%2830%29.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435129390496_image3.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435129584576_image4.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435130491635_image11.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/1543513067547_image9.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435131340097_image10.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435131555251_image2.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435131919232_image1.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435132292905_image8.png",
+      "location": "ch5",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2021/10/05/16334216652541_P1C0_Course-Summary.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716331307603_unnamed%20%2833%29.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435142769996_image16.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/1543514302363_image13.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/1543514323117_image17.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435143626511_image18.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435143823455_image5.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435144393856_image7.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435144591622_image4.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435144832827_image14.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671633242109_unnamed%20%2834%29.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716334445679_unnamed%20%2835%29.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435145460165_image3.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435145849279_image2.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716335919343_unnamed%20%2836%29.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671633655299_unnamed%20%2837%29.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435147898759_image6.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/154351481552_image9.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435148736261_image12.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716338126703_unnamed%20%2838%29.png",
+      "location": "ch6",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2021/09/30/16330152216642_P2C2-1.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716341926478_unnamed%20%2839%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716342913063_unnamed%20%2840%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716343827812_unnamed%20%2841%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716344507828_unnamed%20%2842%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716346162802_unnamed%20%2843%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716346979453_unnamed%20%2844%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435165937677_image15.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435166030194_image4.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716348090213_unnamed%20%2845%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716348474781_unnamed%20%2846%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716350151844_unnamed%20%2847%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435166715065_image17.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435168087754_image2.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435168357299_image14.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716353491483_unnamed%20%2848%29.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435172452489_image6.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435172788329_image24.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435173338526_image25.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435173503862_image10.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435208540777_image9.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435209682546_image6.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435209950688_image3.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435210172013_image18.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435210476835_image20.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435210665075_image13.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435211786408_image16.png",
+      "location": "ch7",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716365324172_15435214729779_image8.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435215408327_image6.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716367033649_unnamed%20%2849%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716368357937_unnamed%20%2850%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671636890076_unnamed%20%2851%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716371674966_unnamed%20%2852%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716372504158_unnamed%20%2853%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435217121906_image3.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435217336617_image10.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716374170199_unnamed%20%2854%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435217578786_image11.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435217760474_image7.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435217994388_image4.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2021/09/30/16329974476651_pty.PNG",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716375255617_unnamed%20%2855%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2021/09/30/1632997639629_15435220339214_image17.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716377485412_unnamed%20%2856%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435220820328_image18.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716377997589_unnamed%20%2857%29.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435221387367_image1.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435221579001_image16.png",
+      "location": "ch8",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716379150023_unnamed%20%2858%29.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671637957294_unnamed%20%2859%29.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435223510969_image14.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435223844415_image13.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435224370622_image4.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435224688887_image7.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435225044038_image2.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/1671638070387_unnamed%20%2860%29.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716381582657_unnamed%20%2861%29.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716382269618_unnamed%20%2862%29.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/167163827289_unnamed%20%2863%29.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2022/12/21/16716383319134_unnamed%20%2864%29.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435226403458_image6.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/1543522660135_image5.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    },
+    {
+      "type": "image",
+      "url": "https://user.oc-static.com/upload/2018/11/29/15435226750251_image12.png",
+      "location": "ch9",
+      "risk": "fr_only"
+    }
+  ],
+  "dispatch_summary": {
+    "image": 136,
+    "annexe": 1,
+    "link": 16,
+    "video": 16
+  },
+  "qa": {
+    "a5_scores": {},
+    "a6_issues": [],
+    "a6_applied": false
+  }
+}
