@@ -1,0 +1,15 @@
+source_term,target_term,direction,domain,software,subject,category,context_note,do_not_translate,validated,first_seen_course,last_updated
+enregistrement A,A record,ng>in,Systems and Networks,DNS,DNS records,technical_term,DNS record mapping a hostname to an IPv4 address.,false,false,2356306,2026-06-26
+enregistrement PTR,PTR record,ng>in,Systems and Networks,DNS,DNS records,technical_term,DNS record used for reverse DNS lookups.,false,false,2356306,2026-06-26
+nom qualifié,fully qualified domain name,ng>in,Systems and Networks,DNS,domain names,technical_term,Full domain name specifying the exact DNS path.,false,false,2356306,2026-06-26
+Serveur DNS,DNS server,ng>in,Systems and Networks,DNS,DNS infrastructure,technical_term,Standard term for a server providing DNS services.,false,false,2356306,2026-06-26
+zone directe,forward lookup zone,ng>in,Systems and Networks,DNS,DNS zones,technical_term,DNS zone used to resolve names to IP addresses.,false,false,2356306,2026-06-26
+zone inversée,reverse lookup zone,ng>in,Systems and Networks,DNS,DNS zones,technical_term,DNS zone used to resolve IP addresses to names.,false,false,2356306,2026-06-26
+Gift S.A.,Gift Inc.,ng>in,Systems and Networks,general,company example,cultural_swap,Adapt French company legal form to a familiar English-market equivalent.,false,false,2356306,2026-06-26
+En résumé,In Summary,ng>in,Systems and Networks,general,course section heading,pedagogical,Use neutral recap heading; avoid forbidden “Let's Recap!”,false,false,2356306,2026-06-26
+pirate informatique,attacker or cybercriminal,ng>in,Systems and Networks,general,cybersecurity threats,technical_term,Use neutral security terminology; avoid glamorizing “hacker.”,false,false,2356306,2026-06-26
+rôle Serveur DNS,DNS Server role,ng>in,Systems and Networks,Windows Server,server roles,technical_term,Windows Server role for DNS services.,false,false,2356306,2026-06-26
+gestionnaire de serveur,Server Manager,ng>in,Systems and Networks,Windows Server,server administration UI,ui_label,Official Windows Server UI label.,false,false,2356306,2026-06-26
+Gestionnaire DNS,DNS Manager,ng>in,Systems and Networks,Windows Server,DNS administration UI,ui_label,Official Windows Server DNS console label.,false,false,2356306,2026-06-26
+Indication de racine,Root Hints,ng>in,Systems and Networks,Windows Server,DNS configuration UI,ui_label,Official DNS Manager UI label.,false,false,2356306,2026-06-26
+Transfert de zone,Zone Transfers,ng>in,Systems and Networks,Windows Server,DNS configuration UI,ui_label,Official DNS Manager UI label.,false,false,2356306,2026-06-26
