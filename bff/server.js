@@ -454,7 +454,7 @@ app.post('/api/tm/consolidate', async (req, res) => {
     for (const r of rows) {
       const st = r.source_term || ''; if (!st) continue; const key = st.toLowerCase() + '|' + direction;
       const prev = map.get(key);
-      const row = [st, r.target_term || '', direction, cat, r.software || 'general', r.subject || '', r.category || '', r.context_note || '', r.do_not_translate ? 'true' : 'false', 'false', prev ? (prev[10] || source) : source, today];
+      const row = [st, r.target_term || '', direction, cat, r.software || '', r.subject || '', r.category || '', r.context_note || '', r.do_not_translate ? 'true' : 'false', 'false', prev ? (prev[10] || source) : source, today];
       if (prev) updated++; else added++;
       map.set(key, row);
     }
@@ -479,7 +479,7 @@ function mergeTmRows(cat, rows, direction, course, validated) {
   for (const r of rows) {
     const st = r.source_term || ''; if (!st) continue; const key = st.toLowerCase() + '|' + direction; const prev = map.get(key);
     const val = validated ? 'true' : (prev ? prev[9] : 'false');
-    const row = [st, r.target_term || '', direction, cat, r.software || 'general', r.subject || '', r.category || '', r.context_note || '', r.do_not_translate ? 'true' : 'false', val, prev ? (prev[10] || course) : course, today];
+    const row = [st, r.target_term || '', direction, cat, r.software || '', r.subject || '', r.category || '', r.context_note || '', r.do_not_translate ? 'true' : 'false', val, prev ? (prev[10] || course) : course, today];
     if (prev) updated++; else added++; map.set(key, row);
   }
   const all = [...map.values()].sort((a, b) => (a[4] + a[6] + a[0]).localeCompare(b[4] + b[6] + b[0]));
