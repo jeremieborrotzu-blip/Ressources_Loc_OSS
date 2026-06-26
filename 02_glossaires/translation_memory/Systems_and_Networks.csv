@@ -1,15 +1,175 @@
 source_term,target_term,direction,domain,software,subject,category,context_note,do_not_translate,validated,first_seen_course,last_updated
+Copilot,Copilot,fr>en,Systems and Networks,Copilot,Microsoft AI assistant,product_name,Microsoft AI assistant integrated with Windows.,true,true,corpus,2026-06-26
+IA de Microsoft,Microsoft's AI,fr>en,Systems and Networks,Copilot,Artificial intelligence,technical_term,Descriptor for Copilot as Microsoft's AI assistant.,false,true,corpus,2026-06-26
 Indication de racine,Root Hints,fr>en,Systems and Networks,DNS Manager,DNS configuration UI,ui_label,Official English DNS Manager label.,false,false,2356306,2026-06-26
 Transfert de zone,Zone Transfers,fr>en,Systems and Networks,DNS Manager,DNS zone transfer settings,ui_label,Official English DNS Manager tab/setting label.,false,false,2356306,2026-06-26
 enregistrement A,A record,fr>en,Systems and Networks,DNS,DNS records,technical_term,DNS record mapping a hostname to an IPv4 address.,false,false,2356306,2026-06-26
 enregistrement PTR,PTR record,fr>en,Systems and Networks,DNS,DNS records,technical_term,DNS record used for reverse DNS lookups.,false,false,2356306,2026-06-26
 nom qualifié,fully qualified domain name,fr>en,Systems and Networks,DNS,domain names,technical_term,Full domain name including all DNS hierarchy labels.,false,false,2356306,2026-06-26
-Serveur DNS,DNS Server,fr>en,Systems and Networks,DNS,DNS server,technical_term,Standard term for a server providing DNS services.,false,false,2356306,2026-06-26
 zone directe,forward lookup zone,fr>en,Systems and Networks,DNS,DNS zones,technical_term,DNS zone used for name-to-address resolution.,false,false,2356306,2026-06-26
 zone inversée,reverse lookup zone,fr>en,Systems and Networks,DNS,DNS zones,technical_term,DNS zone used for address-to-name resolution.,false,false,2356306,2026-06-26
+DHCP,DHCP,fr>en,Systems and Networks,general,Networking,acronym,Dynamic Host Configuration Protocol.,true,true,corpus,2026-06-26
+EFI,EFI,fr>en,Systems and Networks,general,Firmware and boot,acronym,Extensible Firmware Interface acronym.,true,true,corpus,2026-06-26
+Gio,GiB,fr>en,Systems and Networks,general,Storage units,acronym,English abbreviation for gibibyte.,false,true,corpus,2026-06-26
+IPv4,IPv4,fr>en,Systems and Networks,general,Networking,acronym,Internet Protocol version 4.,true,true,corpus,2026-06-26
+IPv6,IPv6,fr>en,Systems and Networks,general,Networking,acronym,Internet Protocol version 6.,true,true,corpus,2026-06-26
+OEM (Original Equipment Manufacturer),OEM (Original Equipment Manufacturer),fr>en,Systems and Networks,general,Software licensing,acronym,License type acronym expanded identically in English.,true,true,corpus,2026-06-26
+TCP/IP,TCP/IP,fr>en,Systems and Networks,general,Networking,acronym,Networking protocol suite acronym.,true,true,corpus,2026-06-26
+TPM 2.0,TPM 2.0,fr>en,Systems and Networks,general,Hardware security,acronym,Trusted Platform Module version requirement for Windows 11.,true,true,corpus,2026-06-26
+Microsoft,Microsoft,fr>en,Systems and Networks,general,Vendor,brand,Company and software vendor name.,true,true,corpus,2026-06-26
+carte bleue,credit card,fr>en,Systems and Networks,general,Software licensing,cultural_reference,"The French idiom/brand-like term for a bank card was generalized to the culturally neutral English term 'credit card'; use for casual payment references, not for the specific Carte Bleue payment network.",false,true,corpus,2026-06-26
+loto,lottery,fr>en,Systems and Networks,general,Humorous cultural reference,cultural_reference,French reference to lottery draws was generalized to 'lottery' for an English audience; use when the specific French game is not important.,false,true,corpus,2026-06-26
 Gift S.A.,Gift Inc.,fr>en,Systems and Networks,general,company legal form,cultural_swap,Adapt French corporate suffix S.A. to a US-style fictitious company suffix.,false,false,2356306,2026-06-26
+"revendeurs (fnac, Destock-Informatique, euinformatique, ldlc et même la poste !)",resellers,fr>en,Systems and Networks,general,Software licensing,cultural_swap,French retailer examples were generalized for the English target because these brand references are market-specific; use this equivalence when local French reseller names are illustrative rather than essential.,false,true,corpus,2026-06-26
+gestionnaire d'installations informatiques,IT deployment manager,fr>en,Systems and Networks,general,IT job roles,job_title,Role responsible for deploying IT systems or environments.,false,true,corpus,2026-06-26
+responsable IT,IT manager,fr>en,Systems and Networks,general,IT job roles,job_title,Manager role in the workplace scenario.,false,true,corpus,2026-06-26
+stagiaire,intern,fr>en,Systems and Networks,general,Workplace roles,job_title,Learner role in the workplace scenario.,false,true,corpus,2026-06-26
+technicienne,technician,fr>en,Systems and Networks,general,IT job roles,job_title,Generic IT technician role in the instructor biography.,false,true,corpus,2026-06-26
+techniciens informatiques,IT technicians,fr>en,Systems and Networks,general,IT job roles,job_title,Target job profile supported by the course.,false,true,corpus,2026-06-26
+convention de nommage,naming convention,fr>en,Systems and Networks,general,IT administration,methodological,Organizational method for naming computers.,false,true,corpus,2026-06-26
+Concevez votre réseau TCP/IP,Design Your TCP/IP Network,fr>en,Systems and Networks,general,Networking course reference,pedagogical,Translated OpenClassrooms course title.,false,true,corpus,2026-06-26
 En résumé,In Summary,fr>en,Systems and Networks,general,course section heading,pedagogical,Use a standard recap heading; avoid the proposed informal wording.,false,false,2356306,2026-06-26
+fil rouge,Running Case Study,fr>en,Systems and Networks,general,Course structure,pedagogical,OpenClassrooms pedagogical term for the recurring scenario throughout a course.,false,true,corpus,2026-06-26
+StatCounter,StatCounter,fr>en,Systems and Networks,general,Market statistics,proper_noun,Name of the cited statistics source.,true,true,corpus,2026-06-26
+adresse IP,IP address,fr>en,Systems and Networks,general,Networking,technical_term,Address assigned to a network interface.,false,true,corpus,2026-06-26
+antivirus en temps réel,real-time antivirus,fr>en,Systems and Networks,general,Endpoint security,technical_term,Antivirus protection that runs continuously.,false,true,corpus,2026-06-26
+Architecture Zero Trust,Zero Trust Architecture,fr>en,Systems and Networks,general,Security architecture,technical_term,Security model based on continuous verification and least trust.,false,true,corpus,2026-06-26
+booter,boot,fr>en,Systems and Networks,general,Startup process,technical_term,Starting a computer from a specific device or media.,false,true,corpus,2026-06-26
+carte réseau,network adapter,fr>en,Systems and Networks,general,Networking,technical_term,Network interface configured for connectivity.,false,true,corpus,2026-06-26
+clé USB,USB drive,fr>en,Systems and Networks,general,Installation media,technical_term,Removable storage device used as installation media.,false,true,corpus,2026-06-26
+compte de domaine,domain account,fr>en,Systems and Networks,general,Enterprise identity,technical_term,Account authorized in a Windows domain.,false,true,corpus,2026-06-26
+cybermenaces,cyber threats,fr>en,Systems and Networks,general,Cybersecurity,technical_term,Threats against computer systems and data.,false,true,corpus,2026-06-26
+démarrage sécurisé,Secure Boot,fr>en,Systems and Networks,general,Boot security,technical_term,Firmware security feature that restricts startup to trusted software.,false,true,corpus,2026-06-26
+disque dur,hard drive,fr>en,Systems and Networks,general,Storage,technical_term,Storage device or virtual disk used for installation.,false,true,corpus,2026-06-26
+domaine,domain,fr>en,Systems and Networks,general,Enterprise networking,technical_term,Centralized enterprise network identity and resource management entity.,false,true,corpus,2026-06-26
+Ethernet,Ethernet,fr>en,Systems and Networks,general,Networking,technical_term,Network technology and common adapter name.,true,true,corpus,2026-06-26
+fichier ISO,ISO file,fr>en,Systems and Networks,general,Installation media,technical_term,File containing a complete disk image.,false,true,corpus,2026-06-26
+Français AZERTY,French AZERTY,fr>en,Systems and Networks,general,Keyboard layouts,technical_term,French keyboard layout referenced during Windows setup.,false,true,corpus,2026-06-26
+gestionnaire de mots de passe,password manager,fr>en,Systems and Networks,general,Password management,technical_term,Application category for storing and managing passwords.,false,true,corpus,2026-06-26
+hyperviseur,hypervisor,fr>en,Systems and Networks,general,Virtualization,technical_term,Software layer used to run virtual machines.,false,true,corpus,2026-06-26
+identifiants,credentials,fr>en,Systems and Networks,general,Authentication,technical_term,Login information for an authorized account.,false,true,corpus,2026-06-26
+image disque ISO,ISO disk image,fr>en,Systems and Networks,general,Installation media,technical_term,Disk image format used for operating system installation media.,false,true,corpus,2026-06-26
+installation propre,clean install,fr>en,Systems and Networks,general,Operating system installation,technical_term,Installation method that starts from a clean system state.,false,true,corpus,2026-06-26
+laboratoire virtuel,virtual lab,fr>en,Systems and Networks,general,Virtualization and training,technical_term,Training or testing environment built with virtual machines.,false,true,corpus,2026-06-26
+machine virtuelle,virtual machine,fr>en,Systems and Networks,general,Virtualization,technical_term,Virtualized computer used for testing or deployment.,false,true,corpus,2026-06-26
+masque de sous-réseau,subnet mask,fr>en,Systems and Networks,general,Networking,technical_term,IPv4 network mask.,false,true,corpus,2026-06-26
+nom d’utilisateur,username,fr>en,Systems and Networks,general,User accounts,technical_term,Identifier used to sign in.,false,true,corpus,2026-06-26
+ordinateur de bureau,desktop computer,fr>en,Systems and Networks,general,Computer hardware,technical_term,Standard term for a non-portable end-user computer.,false,true,corpus,2026-06-26
+outils métiers,business tools,fr>en,Systems and Networks,general,Enterprise IT,technical_term,Applications or tools used for company-specific business activities.,false,true,corpus,2026-06-26
+parc informatique,computer fleet,fr>en,Systems and Networks,general,IT asset management,technical_term,Set of computers managed by an organization.,false,true,corpus,2026-06-26
+partitionnement,partitioning,fr>en,Systems and Networks,general,Disk management,technical_term,Dividing a disk into sections.,false,true,corpus,2026-06-26
+passerelle,gateway,fr>en,Systems and Networks,general,Networking,technical_term,Default route device for network traffic.,false,true,corpus,2026-06-26
 pirate informatique,attacker,fr>en,Systems and Networks,general,threat actors,technical_term,Use for a malicious actor; avoids ambiguous 'hacker'.,false,false,2356306,2026-06-26
+poste de travail,workstation,fr>en,Systems and Networks,general,Enterprise computing,technical_term,User computer in a professional environment.,false,true,corpus,2026-06-26
+Protocole Internet Version 4,Internet Protocol Version 4,fr>en,Systems and Networks,general,Networking,technical_term,Full name of IPv4 in adapter properties.,false,true,corpus,2026-06-26
+QWERTY,QWERTY,fr>en,Systems and Networks,general,Keyboard layouts,technical_term,Keyboard layout name retained.,true,true,corpus,2026-06-26
+Retail,Retail,fr>en,Systems and Networks,general,Software licensing,technical_term,Windows license type sold separately from hardware.,true,true,corpus,2026-06-26
+serveur DNS,DNS server,fr>en,Systems and Networks,general,DNS,technical_term,Server that resolves domain names.,false,true,2356306,2026-06-26
+support bootable,bootable media,fr>en,Systems and Networks,general,Installation media,technical_term,Media that can start a computer for installation or recovery.,false,true,corpus,2026-06-26
+système d’exploitation,operating system,fr>en,Systems and Networks,general,Operating systems,technical_term,Core systems term.,false,true,corpus,2026-06-26
+Trusted Platform Module,Trusted Platform Module,fr>en,Systems and Networks,general,Hardware security,technical_term,Security hardware technology behind the TPM acronym.,true,true,corpus,2026-06-26
+Volume,Volume,fr>en,Systems and Networks,general,Software licensing,technical_term,Windows license type used for mass activation.,true,true,corpus,2026-06-26
+zone non allouée,unallocated space,fr>en,Systems and Networks,general,Disk management,technical_term,Disk space not yet assigned to a partition or volume.,false,true,corpus,2026-06-26
+KeePassXC,KeePassXC,fr>en,Systems and Networks,KeePassXC,Password management,product_name,Password manager application name.,true,true,corpus,2026-06-26
+Linux,Linux,fr>en,Systems and Networks,Linux,Operating systems,product_name,Operating system family name; retained as a product name.,true,true,corpus,2026-06-26
+macOS,macOS,fr>en,Systems and Networks,macOS,Operating systems,product_name,Apple operating system name; retained as a product name.,true,true,corpus,2026-06-26
+Microsoft 365,Microsoft 365,fr>en,Systems and Networks,Microsoft 365,Microsoft subscriptions,product_name,Microsoft subscription product name.,true,true,corpus,2026-06-26
+Microsoft Defender Antivirus,Microsoft Defender Antivirus,fr>en,Systems and Networks,Microsoft Defender Antivirus,Endpoint security,product_name,Microsoft antivirus product.,true,true,corpus,2026-06-26
+Microsoft Defender for Endpoint,Microsoft Defender for Endpoint,fr>en,Systems and Networks,Microsoft Defender for Endpoint,Endpoint security,product_name,Microsoft enterprise endpoint protection product.,true,true,corpus,2026-06-26
+Microsoft Intune,Microsoft Intune,fr>en,Systems and Networks,Microsoft Intune,Device management,product_name,Microsoft endpoint and device management platform.,true,true,corpus,2026-06-26
+Microsoft Store,Microsoft Store,fr>en,Systems and Networks,Microsoft Store,Application distribution,product_name,Microsoft platform for obtaining licenses and apps.,true,true,corpus,2026-06-26
+ms-windows-store:,ms-windows-store:,fr>en,Systems and Networks,Microsoft Store,Windows app commands,technical_term,URI command for opening the Microsoft Store.,true,true,corpus,2026-06-26
+bibliothèque du Microsoft Store,Microsoft Store library,fr>en,Systems and Networks,Microsoft Store,App management,ui_label,Microsoft Store area listing available or installed apps.,false,true,corpus,2026-06-26
+Installer,Install,fr>en,Systems and Networks,Microsoft Store,App installation,ui_label,Microsoft Store button for installing an app.,false,true,corpus,2026-06-26
+Obtenir,Get,fr>en,Systems and Networks,Microsoft Store,App installation,ui_label,Microsoft Store button for getting an app.,false,true,corpus,2026-06-26
+PowerShell,PowerShell,fr>en,Systems and Networks,PowerShell,Windows administration,product_name,Microsoft command-line shell and scripting environment.,true,true,corpus,2026-06-26
+Rufus,Rufus,fr>en,Systems and Networks,Rufus,Bootable media creation,product_name,Tool used to create bootable USB installation media.,true,true,corpus,2026-06-26
+VirtualBox,VirtualBox,fr>en,Systems and Networks,VirtualBox,Virtualization,product_name,Oracle virtualization software used for demonstrations.,true,true,corpus,2026-06-26
+Enable EFI (special OSes only),Enable EFI (special OSes only),fr>en,Systems and Networks,VirtualBox,Virtual machine setup,ui_label,VirtualBox checkbox label retained in English.,true,true,corpus,2026-06-26
+Skip Unattended Installation,Skip Unattended Installation,fr>en,Systems and Networks,VirtualBox,Virtual machine setup,ui_label,VirtualBox checkbox label retained in English.,true,true,corpus,2026-06-26
+VMware Workstation,VMware Workstation,fr>en,Systems and Networks,VMware Workstation,Virtualization,product_name,VMware desktop virtualization product.,true,true,corpus,2026-06-26
+LTSC,LTSC,fr>en,Systems and Networks,Windows 11,Windows servicing,acronym,Long-Term Servicing Channel acronym used for stable enterprise editions.,true,true,corpus,2026-06-26
+OOBE,OOBE,fr>en,Systems and Networks,Windows 11,Windows initial setup,acronym,Windows acronym for Out-of-Box Experience.,true,true,corpus,2026-06-26
+VBS,VBS,fr>en,Systems and Networks,Windows 11,Windows security,acronym,Acronym for virtualization-based security.,true,true,corpus,2026-06-26
+centre d’évaluation,Evaluation Center,fr>en,Systems and Networks,Windows 11,Microsoft downloads,institutional,Microsoft site for evaluation software downloads.,false,true,corpus,2026-06-26
+BitLocker,BitLocker,fr>en,Systems and Networks,Windows 11,Disk encryption,product_name,Microsoft disk encryption feature.,true,true,corpus,2026-06-26
+Pare-feu Windows,Windows Firewall,fr>en,Systems and Networks,Windows 11,Firewall,product_name,Windows firewall feature name.,false,true,corpus,2026-06-26
+Smart App Control,Smart App Control,fr>en,Systems and Networks,Windows 11,Windows security,product_name,Windows security feature name.,true,true,corpus,2026-06-26
+Windows 11,Windows 11,fr>en,Systems and Networks,Windows 11,Windows 11 installation and configuration,product_name,Main operating system covered in the course.,true,true,corpus,2026-06-26
+Windows 11 Education,Windows 11 Education,fr>en,Systems and Networks,Windows 11,Windows editions,product_name,Windows edition name retained in English.,true,true,corpus,2026-06-26
+Windows 11 Entreprise,Windows 11 Enterprise,fr>en,Systems and Networks,Windows 11,Windows editions,product_name,Localized product edition name.,false,true,corpus,2026-06-26
+Windows 11 Famille,Windows 11 Home,fr>en,Systems and Networks,Windows 11,Windows editions,product_name,Localized product edition name.,false,true,corpus,2026-06-26
+Windows 11 For Workstations,Windows 11 for Workstations,fr>en,Systems and Networks,Windows 11,Windows editions,product_name,Official English capitalization of the Windows workstation edition.,false,true,corpus,2026-06-26
+Windows 11 IoT,Windows 11 IoT,fr>en,Systems and Networks,Windows 11,Windows editions,product_name,Windows edition for IoT and embedded systems.,true,true,corpus,2026-06-26
+Windows 11 Professionnel,Windows 11 Pro,fr>en,Systems and Networks,Windows 11,Windows editions,product_name,Localized product edition name.,false,true,corpus,2026-06-26
+Bureau à distance,Remote Desktop,fr>en,Systems and Networks,Windows 11,Remote access,technical_term,Windows feature for remote access to a computer.,false,true,corpus,2026-06-26
+clé,Product Key,fr>en,Systems and Networks,Windows 11,Windows licensing,technical_term,License activation key; target specifies Windows terminology.,false,true,corpus,2026-06-26
+compte local,local account,fr>en,Systems and Networks,Windows 11,Windows accounts,technical_term,Account that exists only on the local machine.,false,true,corpus,2026-06-26
+compte Microsoft,Microsoft account,fr>en,Systems and Networks,Windows 11,Windows accounts,technical_term,Online account used for Windows sign-in.,false,true,corpus,2026-06-26
+control update,control update,fr>en,Systems and Networks,Windows 11,Windows update commands,technical_term,Windows Run command for opening update settings.,true,true,corpus,2026-06-26
+diskmgmt.msc,diskmgmt.msc,fr>en,Systems and Networks,Windows 11,Windows storage commands,technical_term,Windows Run command for Disk Management.,true,true,corpus,2026-06-26
+données de diagnostic,diagnostic data,fr>en,Systems and Networks,Windows 11,Privacy settings,technical_term,Telemetry data sent to Microsoft.,false,true,corpus,2026-06-26
+Enterprise State Roaming,Enterprise State Roaming,fr>en,Systems and Networks,Windows 11,Enterprise settings synchronization,technical_term,Microsoft enterprise feature name.,true,true,corpus,2026-06-26
+intégrité de la mémoire,memory integrity,fr>en,Systems and Networks,Windows 11,Windows security,technical_term,Core isolation protection feature in Windows.,false,true,corpus,2026-06-26
+ISO Multi-version,multi-edition ISO,fr>en,Systems and Networks,Windows 11,Windows installation media,technical_term,Windows ISO that contains multiple installable editions.,false,true,corpus,2026-06-26
+ISO officiel de Windows 11,official Windows 11 ISO,fr>en,Systems and Networks,Windows 11,Installation media,technical_term,Official installation image for Windows 11.,false,true,corpus,2026-06-26
+isolation du noyau,core isolation,fr>en,Systems and Networks,Windows 11,Windows security,technical_term,Windows security area that includes memory integrity.,false,true,corpus,2026-06-26
+lettre de lecteur,drive letter,fr>en,Systems and Networks,Windows 11,Windows storage,technical_term,Letter assigned to a volume for access in Windows.,false,true,corpus,2026-06-26
+ms-settings:about,ms-settings:about,fr>en,Systems and Networks,Windows 11,Windows system commands,technical_term,URI command for opening the About settings page.,true,true,corpus,2026-06-26
+ms-settings:easeofaccess,ms-settings:easeofaccess,fr>en,Systems and Networks,Windows 11,Accessibility commands,technical_term,URI command for opening accessibility settings.,true,true,corpus,2026-06-26
+ncpa.cpl,ncpa.cpl,fr>en,Systems and Networks,Windows 11,Windows networking commands,technical_term,Windows Run command for network connections.,true,true,corpus,2026-06-26
+nom de volume,volume label,fr>en,Systems and Networks,Windows 11,Windows storage,technical_term,Name assigned to a disk volume.,false,true,corpus,2026-06-26
+Out-Of-Box Experience,Out-Of-Box Experience,fr>en,Systems and Networks,Windows 11,Windows initial setup,technical_term,Microsoft term for initial setup after installation.,true,true,corpus,2026-06-26
+questions de sécurité,security questions,fr>en,Systems and Networks,Windows 11,Account recovery,technical_term,Questions configured during local account setup.,false,true,corpus,2026-06-26
+sécurité basée sur la virtualisation,Virtualization-based security,fr>en,Systems and Networks,Windows 11,Windows security,technical_term,Windows security feature abbreviated as VBS.,false,true,corpus,2026-06-26
+stratégies de groupe,Group Policy,fr>en,Systems and Networks,Windows 11,Windows administration,technical_term,Windows management mechanism for centralized configuration.,false,true,corpus,2026-06-26
+sysdm.cpl,sysdm.cpl,fr>en,Systems and Networks,Windows 11,Windows system commands,technical_term,Windows Run command for System Properties.,true,true,corpus,2026-06-26
+version 24H2,version 24H2,fr>en,Systems and Networks,Windows 11,Windows versions,technical_term,Windows 11 release identifier.,true,true,corpus,2026-06-26
+Windows et R,Windows+R,fr>en,Systems and Networks,Windows 11,Keyboard shortcuts,technical_term,Keyboard shortcut for opening the Run window.,false,true,corpus,2026-06-26
+windowsdefender:,windowsdefender:,fr>en,Systems and Networks,Windows 11,Windows security commands,technical_term,Windows Run command URI for opening Windows Security.,true,true,corpus,2026-06-26
+Activation,Activation,fr>en,Systems and Networks,Windows 11,Windows licensing,ui_label,Windows Settings menu for entering or managing a license.,true,true,corpus,2026-06-26
+Applications installées,Installed apps,fr>en,Systems and Networks,Windows 11,Windows app management,ui_label,Windows Settings page for installed applications.,false,true,corpus,2026-06-26
+assistant de création d’un volume simple,New Simple Volume Wizard,fr>en,Systems and Networks,Windows 11,Windows Disk Management,ui_label,Wizard launched to create a new simple volume.,false,true,corpus,2026-06-26
+centre de sécurité,Security Center,fr>en,Systems and Networks,Windows 11,Windows security,ui_label,Windows interface for security and protection modules.,false,true,corpus,2026-06-26
+clavier visuel,on-screen keyboard,fr>en,Systems and Networks,Windows 11,Accessibility,ui_label,Windows virtual keyboard accessibility tool.,false,true,corpus,2026-06-26
+Confidentialité et sécurité,Privacy & security,fr>en,Systems and Networks,Windows 11,Windows Settings,ui_label,Windows Settings section.,false,true,corpus,2026-06-26
+contraste élevé,high contrast,fr>en,Systems and Networks,Windows 11,Accessibility and display,ui_label,Accessibility display setting.,false,true,corpus,2026-06-26
+Contrôle des applications et du navigateur,App & browser control,fr>en,Systems and Networks,Windows 11,Windows Security,ui_label,Windows Security module label.,false,true,corpus,2026-06-26
+Contrôle vocal,Voice Access,fr>en,Systems and Networks,Windows 11,Accessibility,ui_label,Windows accessibility feature for controlling the system by voice.,false,true,corpus,2026-06-26
+Désinstaller,Uninstall,fr>en,Systems and Networks,Windows 11,App management,ui_label,Windows Settings action for removing an app.,false,true,corpus,2026-06-26
+Domaine ou groupe de travail,Domain or workgroup,fr>en,Systems and Networks,Windows 11,Windows domain membership,ui_label,Windows system property for domain or workgroup membership.,false,true,corpus,2026-06-26
+Effectuer un formatage rapide,Perform a quick format,fr>en,Systems and Networks,Windows 11,Windows Disk Management,ui_label,Quick formatting checkbox in the New Simple Volume Wizard.,false,true,corpus,2026-06-26
+Explorateur de fichiers,File Explorer,fr>en,Systems and Networks,Windows 11,Windows file management,ui_label,Windows file browsing application.,false,true,corpus,2026-06-26
+fenêtre Exécuter,Run window,fr>en,Systems and Networks,Windows 11,Windows navigation,ui_label,Windows dialog used to run commands.,false,true,corpus,2026-06-26
+Formater ce volume,Format this volume,fr>en,Systems and Networks,Windows 11,Windows Disk Management,ui_label,Formatting option in the New Simple Volume Wizard.,false,true,corpus,2026-06-26
+gestionnaire de disques,Disk Management,fr>en,Systems and Networks,Windows 11,Windows storage management,ui_label,Windows utility for initializing disks and creating volumes.,false,true,corpus,2026-06-26
+Historique des mises à jour,Update history,fr>en,Systems and Networks,Windows 11,Windows updates,ui_label,Windows Settings page listing installed updates.,false,true,corpus,2026-06-26
+I agree everything will be deleted,I agree everything will be deleted,fr>en,Systems and Networks,Windows 11,Windows installation,ui_label,Windows setup checkbox text shown in English.,true,true,corpus,2026-06-26
+Joindre le domaine à la place,Domain join instead,fr>en,Systems and Networks,Windows 11,Windows initial setup,ui_label,OOBE link used to create a local account instead of using a Microsoft account.,false,true,corpus,2026-06-26
+Légendes en direct,Live Captions,fr>en,Systems and Networks,Windows 11,Accessibility,ui_label,Windows accessibility feature for real-time captions.,false,true,corpus,2026-06-26
+loupe,Magnifier,fr>en,Systems and Networks,Windows 11,Accessibility,ui_label,Windows screen magnification tool.,false,true,corpus,2026-06-26
+Mode sombre,Dark mode,fr>en,Systems and Networks,Windows 11,Accessibility and display,ui_label,Windows visual display option.,false,true,corpus,2026-06-26
+Narrateur,Narrator,fr>en,Systems and Networks,Windows 11,Accessibility,ui_label,Windows screen reader feature.,false,true,corpus,2026-06-26
+Nouveau volume simple,New Simple Volume,fr>en,Systems and Networks,Windows 11,Windows Disk Management,ui_label,Disk Management option for creating a volume.,false,true,corpus,2026-06-26
+Obligatoire uniquement,Required only,fr>en,Systems and Networks,Windows 11,Privacy settings,ui_label,Lowest diagnostic data option during Windows setup.,false,true,corpus,2026-06-26
+Options de connexion,Sign-in options,fr>en,Systems and Networks,Windows 11,Windows initial setup,ui_label,OOBE option for choosing account sign-in methods.,false,true,corpus,2026-06-26
+Paramètres > Réseau et Internet,Settings > Network & Internet,fr>en,Systems and Networks,Windows 11,Windows network settings,ui_label,Windows Settings path for network configuration.,false,true,corpus,2026-06-26
+Paramètres > Système > Informations système,Settings > System > About,fr>en,Systems and Networks,Windows 11,Windows system settings,ui_label,Windows Settings path for device information.,false,true,corpus,2026-06-26
+paramètres d’accessibilité,accessibility settings,fr>en,Systems and Networks,Windows 11,Accessibility,ui_label,Settings area for Windows accessibility features.,false,true,corpus,2026-06-26
+paramètres réseau,network settings,fr>en,Systems and Networks,Windows 11,Windows network configuration,ui_label,Windows settings area for network configuration.,false,true,corpus,2026-06-26
+Paramètres réseau avancés,Advanced network settings,fr>en,Systems and Networks,Windows 11,Windows network settings,ui_label,Windows Settings page for advanced adapter options.,false,true,corpus,2026-06-26
+Renommer ce PC,Rename this PC,fr>en,Systems and Networks,Windows 11,Windows system settings,ui_label,Windows button used to change the computer name.,false,true,corpus,2026-06-26
+Sécurité des appareils,Device security,fr>en,Systems and Networks,Windows 11,Windows Security,ui_label,Windows Security module label.,false,true,corpus,2026-06-26
+Sécurité Windows,Windows Security,fr>en,Systems and Networks,Windows 11,Windows Security,ui_label,Windows Settings entry for security management.,false,true,corpus,2026-06-26
+Spécifications de l’appareil,Device specifications,fr>en,Systems and Networks,Windows 11,Windows system settings,ui_label,Windows Settings section under About.,false,true,corpus,2026-06-26
+termes du contrat,license terms,fr>en,Systems and Networks,Windows 11,Windows installation,ui_label,License agreement step in Windows setup.,false,true,corpus,2026-06-26
+Utiliser l’adresse de serveur DNS suivante,Use the following DNS server addresses,fr>en,Systems and Networks,Windows 11,DNS configuration,ui_label,Windows adapter properties option for static DNS configuration.,false,true,corpus,2026-06-26
+Utiliser l’adresse IP suivante,Use the following IP address,fr>en,Systems and Networks,Windows 11,IPv4 configuration,ui_label,Windows adapter properties option for static IP configuration.,false,true,corpus,2026-06-26
+Pare-feu Windows Defender,Windows Defender Firewall,fr>en,Systems and Networks,Windows Defender Firewall,Firewall,product_name,Firewall product/feature name used in the final activity.,false,true,corpus,2026-06-26
+Windows Package Manager,Windows Package Manager,fr>en,Systems and Networks,Windows Package Manager,Package management,product_name,Microsoft package management tool for Windows.,true,true,corpus,2026-06-26
 rôle Serveur DNS,DNS Server role,fr>en,Systems and Networks,Windows Server,server roles,technical_term,Windows Server role name for DNS services.,false,false,2356306,2026-06-26
 gestionnaire de serveur,Server Manager,fr>en,Systems and Networks,Windows Server,server administration UI,ui_label,Official English Windows Server management console label.,false,false,2356306,2026-06-26
 Gestionnaire DNS,DNS Manager,fr>en,Systems and Networks,Windows Server,DNS administration UI,ui_label,Official English Windows DNS management console label.,false,false,2356306,2026-06-26
+Windows Update for Business,Windows Update for Business,fr>en,Systems and Networks,Windows Update for Business,Windows update management,product_name,Microsoft service for managing Windows updates in organizations.,true,true,corpus,2026-06-26
+Windows Update,Windows Update,fr>en,Systems and Networks,Windows Update,Windows updates,product_name,Microsoft update service and Windows Settings section.,true,true,corpus,2026-06-26
+Windows,Windows,fr>en,Systems and Networks,Windows,Operating systems,product_name,Microsoft operating system name; retained as a product name.,true,true,corpus,2026-06-26
