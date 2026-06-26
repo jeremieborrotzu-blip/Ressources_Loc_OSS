@@ -411,6 +411,66 @@ app.post('/api/iconik/push', async (req, res) => {
   } catch (e) { return res.status(500).json({ error: String(e) }); }
 });
 
+// ---- Archiviste TM : consolide les termes d'un run dans le CSV de la catégorie OC ----
+const TM_DIR = path.join(REPO_DIR, '02_glossaires', 'translation_memory');
+const TM_HEADER = 'source_term,target_term,direction,domain,software,subject,category,context_note,do_not_translate,validated,first_seen_course,last_updated';
+const TM_COLS = TM_HEADER.split(',');
+const csvCell = v => { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+function parseCsvLine(l) { const o = []; let cur = '', q = false; for (let i = 0; i < l.length; i++) { const c = l[i]; if (q) { if (c === '"') { if (l[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; } else { if (c === '"') q = true; else if (c === ',') { o.push(cur); cur = ''; } else cur += c; } } o.push(cur); return o; }
+const safeCat = c => String(c || 'Other_Uncategorized').replace(/[^\w]+/g, '_').replace(/^_+|_+$/g, '');
+async function gatherRunTerms(source) {
+  let listing = [];
+  try { listing = await fetch(`https://api.github.com/repos/${REPO}/contents/07_runs/${source}/scratch`, { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.json() : []); } catch (e) {}
+  const a5 = (Array.isArray(listing) ? listing : []).filter(f => /A5_.*\.jsonl$/.test(f.name || '')).sort((a, b) => a.name < b.name ? 1 : -1)[0];
+  if (!a5) return { terms: [], domain: 'Tech', direction: 'fr>en' };
+  const txt = await fetch(a5.download_url, { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : '');
+  const seen = new Set(), terms = []; let dm = 'Tech', dir = 'fr>en';
+  const re = /\{"source_term":"([^"]+)","proposed_target":"([^"]+)","category":"([^"]+)"\}/g;
+  for (const line of txt.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    let content = line; try { const o = JSON.parse(line); content = (o.body && o.body.messages && o.body.messages[1] && o.body.messages[1].content) || line; } catch (e) {}
+    let m; re.lastIndex = 0;
+    while ((m = re.exec(content))) { if (seen.has(m[1])) continue; seen.add(m[1]); terms.push({ source_term: m[1], proposed_target: m[2], category: m[3] }); }
+    const d = (content.match(/detected_domain"?\s*:\s*"?([A-Za-z_ ]+?)["',]/) || [])[1]; if (d) dm = d.trim();
+    const dr = (content.match(/([a-z]{2}>[a-z]{2})/) || [])[1]; if (dr) dir = dr;
+  }
+  return { terms, domain: dm, direction: dir };
+}
+app.post('/api/tm/consolidate', async (req, res) => {
+  const p = req.body || {};
+  const source = String(p.source_course_id || '').replace(/\D/g, '');
+  if (!source) return res.status(400).json({ error: 'source_course_id requis' });
+  try {
+    const { terms, domain, direction } = await gatherRunTerms(source);
+    if (!terms.length) return res.status(404).json({ error: 'aucun terme A2 trouvé pour ce run (scratch A5)' });
+    const ar = await fetch(WH_ADHOC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'archivist', domain, direction, context: p.context || '', terms }) }).then(r => r.json());
+    if (!ar || !ar.ok) return res.status(500).json({ error: 'archivist: ' + ((ar && ar.error) || '?') });
+    const cat = ar.oc_category || 'Other/Uncategorized'; const rows = ar.rows || [];
+    const file = path.join(TM_DIR, safeCat(cat) + '.csv'); fsx.mkdirSync(TM_DIR, { recursive: true });
+    // charge existant -> map
+    const map = new Map();
+    if (fsx.existsSync(file)) { const ls = fsx.readFileSync(file, 'utf-8').split(/\r?\n/).filter(l => l.trim()); ls.slice(1).forEach(l => { const c = parseCsvLine(l); map.set((c[0] || '').toLowerCase() + '|' + (c[2] || ''), c); }); }
+    const today = new Date().toISOString().slice(0, 10); let added = 0, updated = 0;
+    for (const r of rows) {
+      const st = r.source_term || ''; if (!st) continue; const key = st.toLowerCase() + '|' + direction;
+      const prev = map.get(key);
+      const row = [st, r.target_term || '', direction, cat, r.software || 'general', r.subject || '', r.category || '', r.context_note || '', r.do_not_translate ? 'true' : 'false', 'false', prev ? (prev[10] || source) : source, today];
+      if (prev) updated++; else added++;
+      map.set(key, row);
+    }
+    const all = [...map.values()].sort((a, b) => (a[4] + a[6] + a[0]).localeCompare(b[4] + b[6] + b[0]));
+    fsx.writeFileSync(file, TM_HEADER + '\n' + all.map(r => TM_COLS.map((_, i) => csvCell(r[i])).join(',')).join('\n') + '\n');
+    try {
+      const rel = path.relative(REPO_DIR, file);
+      execSync(`git add "${rel}"`, { cwd: REPO_DIR, stdio: 'pipe' });
+      execSync(`git commit -m "tm(archivist): +${added}/~${updated} termes — ${cat} (run ${source})"`, { cwd: REPO_DIR, stdio: 'pipe' });
+      try { execSync('git pull --rebase origin main', { cwd: REPO_DIR, stdio: 'pipe' }); } catch (e) {}
+      execSync('git push origin main', { cwd: REPO_DIR, stdio: 'pipe' });
+    } catch (e) { return res.status(500).json({ error: 'git: ' + String((e.stderr && e.stderr.toString()) || e.message), category: cat, added, updated }); }
+    res.json({ ok: true, category: cat, file: path.basename(file), added, updated, total: all.length });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;
