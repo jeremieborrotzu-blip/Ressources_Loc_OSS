@@ -183,12 +183,42 @@ app.get('/api/runs', (req, res) => {
 
 // ---- POST Assets à la demande : localise n'importe quel fichier (webhook leo-adhoc) ----
 const WH_ADHOC = `${N8N}/webhook/leo-adhoc`;
+// ---- Contexte cours pour A8 : titre de section + texte autour de l'image (le HTML aide à identifier le logiciel/UI) ----
+const _courseHtml = {};
+async function getCourseHtml(target) {
+  const k = String(target);
+  if (_courseHtml[k] && Date.now() - _courseHtml[k].t < 60000) return _courseHtml[k].html;
+  try {
+    const st = await contentStatus(target);
+    if (!st || !st.source || !st.direction) return '';
+    const url = RAW + encodeURI(`07_runs/${st.source}/output/${target}_localized_${st.direction}.html`);
+    const html = await fetch(url, { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : '');
+    _courseHtml[k] = { t: Date.now(), html };
+    return html;
+  } catch (e) { return ''; }
+}
+function imageContext(html, url) {
+  if (!html || !url) return '';
+  let i = html.indexOf(url);
+  if (i < 0) { const b = String(url).split('/').pop(); i = b ? html.indexOf(b) : -1; }
+  if (i < 0) return '';
+  const before = html.slice(Math.max(0, i - 5000), i);
+  const hm = [...before.matchAll(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/gi)];
+  const heading = hm.length ? hm[hm.length - 1][1].replace(/<[^>]+>/g, '').trim() : '';
+  const around = html.slice(Math.max(0, i - 700), i + 700).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return (heading ? ('Section: ' + heading + '. ') : '') + around.slice(0, 650);
+}
 app.post('/api/assets/localize', async (req, res) => {
   const p = req.body || {};
   try {
+    let items = p.items || [];
+    if (p.target_course_id && items.length) {
+      const html = await getCourseHtml(p.target_course_id);
+      if (html) items = items.map(it => it.context ? it : ({ ...it, context: imageContext(html, it.url || '') }));
+    }
     const r = await fetch(WH_ADHOC, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: p.items || [], source_language: p.source_language, target_language: p.target_language, prompt: p.prompt || null, glossary: p.glossary || null })
+      body: JSON.stringify({ items, source_language: p.source_language, target_language: p.target_language, prompt: p.prompt || null, glossary: p.glossary || null })
     });
     const d = await r.json();
     if (!d.ok) return res.status(500).json({ error: 'Échec localisation assets', detail: d });
