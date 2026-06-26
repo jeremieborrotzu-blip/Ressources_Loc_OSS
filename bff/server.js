@@ -543,7 +543,7 @@ app.post('/api/tm/patch', async (req, res) => {
       const cid = String(p.course_id).replace(/\D/g, ''); srcId = cid;
       const st = await contentStatus(cid);
       if (st && st.done) html = await fetch(RAW + encodeURI(`07_runs/${st.source}/output/${cid}_localized_${st.direction}.html`), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : '');
-      if (!html) { try { const ex = await fetch(`${N8N}/webhook/cls-v3-extraction`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_id: cid, 'Course ID': cid }) }).then(r => r.ok ? r.text() : ''); if (ex && /<\w/.test(ex)) html = ex; } catch (e) {} }
+      if (!html) { try { const exr = await fetch(`${N8N}/webhook/cls-v3-extraction`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_id: cid, 'Course ID': cid }) }).then(r => r.ok ? r.text() : ''); if (exr) { const fh = o => { if (typeof o === 'string') return (/<\w+[\s>]/.test(o) && o.length > 300) ? o : ''; if (Array.isArray(o)) { for (const x of o) { const h = fh(x); if (h) return h; } } if (o && typeof o === 'object') { for (const k of ['html', 'final_html', 'content', 'body', 'data']) { if (typeof o[k] === 'string' && /<\w/.test(o[k])) return o[k]; } for (const v of Object.values(o)) { const h = fh(v); if (h) return h; } } return ''; }; let cand = ''; try { cand = fh(JSON.parse(exr)); } catch (e) { if (/<\w+[\s>]/.test(exr)) cand = exr; } if (cand) html = cand; } } catch (e) {} }
     }
     if (!html) return res.status(404).json({ error: 'HTML introuvable (ni repo output/, ni extracteur OC) — vérifie l\'ID / le credential ocBasic, ou fournis html_base64' });
     const file = path.join(TM_DIR, safeCat(p.category) + '.csv');
@@ -570,7 +570,7 @@ app.post('/api/tm/apply', async (req, res) => {
       const cid = String(p.course_id).replace(/\D/g, ''); srcId = cid;
       const st = await contentStatus(cid);
       if (st && st.done) html = await fetch(RAW + encodeURI(`07_runs/${st.source}/output/${cid}_localized_${st.direction}.html`), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : '');
-      if (!html) { try { const ex = await fetch(`${N8N}/webhook/cls-v3-extraction`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_id: cid, 'Course ID': cid }) }).then(r => r.ok ? r.text() : ''); if (ex && /<\w/.test(ex)) html = ex; } catch (e) {} }
+      if (!html) { try { const exr = await fetch(`${N8N}/webhook/cls-v3-extraction`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_id: cid, 'Course ID': cid }) }).then(r => r.ok ? r.text() : ''); if (exr) { const fh = o => { if (typeof o === 'string') return (/<\w+[\s>]/.test(o) && o.length > 300) ? o : ''; if (Array.isArray(o)) { for (const x of o) { const h = fh(x); if (h) return h; } } if (o && typeof o === 'object') { for (const k of ['html', 'final_html', 'content', 'body', 'data']) { if (typeof o[k] === 'string' && /<\w/.test(o[k])) return o[k]; } for (const v of Object.values(o)) { const h = fh(v); if (h) return h; } } return ''; }; let cand = ''; try { cand = fh(JSON.parse(exr)); } catch (e) { if (/<\w+[\s>]/.test(exr)) cand = exr; } if (cand) html = cand; } } catch (e) {} }
     }
     if (!html) return res.status(404).json({ error: 'HTML introuvable pour appliquer' });
     let fixed = html, applied = 0;
