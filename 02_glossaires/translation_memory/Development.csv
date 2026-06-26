@@ -1,32 +1,135 @@
 source_term,target_term,direction,domain,software,subject,category,context_note,do_not_translate,validated,first_seen_course,last_updated
+APT,APT,fr>en,Development,APT,Linux package management,product_name,Package manager name; remains unchanged.,true,true,corpus,2026-06-26
+Buildah,Buildah,fr>en,Development,Buildah,OCI image build tools,product_name,Alternative OCI image-building tool; remains unchanged.,true,true,corpus,2026-06-26
 Chrome,Chrome,fr>en,Development,Chrome,Web browsers,product_name,Google browser used in a testing-principles example.,true,true,corpus,2026-06-26
-Docker,Docker,fr>en,Development,Docker,Local development environment,product_name,Tool used to install and run the course website locally.,true,true,corpus,2026-06-26
-conteneur,container,fr>en,Development,Docker,Docker environment,technical_term,Docker container containing the website.,false,true,corpus,2026-06-26
+cowsay,cowsay,fr>en,Development,cowsay,Dockerfile example utility,product_name,Command-line utility used in the Dockerfile example; remains unchanged.,true,true,corpus,2026-06-26
+Crane,Crane,fr>en,Development,Crane,OCI registry tools,product_name,OCI registry utility name; remains unchanged.,true,true,corpus,2026-06-26
+Debian,Debian,fr>en,Development,Debian,Linux distributions,product_name,Linux distribution name; remains unchanged.,true,true,corpus,2026-06-26
+DNF,DNF,fr>en,Development,DNF,Linux package management,product_name,Package manager name; remains unchanged.,true,true,corpus,2026-06-26
+Docker Compose,Docker Compose,fr>en,Development,Docker Compose,Multi-container Docker environments,product_name,Docker tool name; remains unchanged.,true,true,corpus,2026-06-26
+Docker Desktop,Docker Desktop,fr>en,Development,Docker Desktop,Docker installation,product_name,Official Docker desktop application; remains unchanged.,true,true,corpus,2026-06-26
+Docker Engine,Docker Engine,fr>en,Development,Docker Engine,Docker platform architecture,product_name,Official Docker component name; remains unchanged.,true,true,corpus,2026-06-26
+Docker Hub,Docker Hub,fr>en,Development,Docker Hub,Container image registry,product_name,Official Docker registry product name; remains unchanged.,true,true,corpus,2026-06-26
+docker login,docker login,fr>en,Development,Docker Hub,Docker Hub authentication,technical_term,Docker command for authenticating to a registry; unchanged.,true,true,corpus,2026-06-26
+docker pull yourusername/libra:latest,docker pull yourusername/libra:latest,fr>en,Development,Docker Hub,Docker Hub publishing,technical_term,Docker command example for retrieving a published image; unchanged.,true,true,corpus,2026-06-26
+docker push yourusername/libra:latest,docker push yourusername/libra:latest,fr>en,Development,Docker Hub,Docker Hub publishing,technical_term,Docker command example for publishing an image; unchanged.,true,true,corpus,2026-06-26
+Docker Swarm,Docker Swarm,fr>en,Development,Docker Swarm,Docker orchestration,product_name,Docker orchestration product name; remains unchanged.,true,true,corpus,2026-06-26
+cluster,cluster,fr>en,Development,Docker Swarm,Container orchestration,technical_term,Group of machines managed together for scaling and availability.,false,true,corpus,2026-06-26
+mise à l’échelle,scaling,fr>en,Development,Docker Swarm,Application scaling,technical_term,"Increasing application capacity, here using Docker Swarm.",false,true,corpus,2026-06-26
+orchestration,orchestration,fr>en,Development,Docker Swarm,Container orchestration,technical_term,Coordinated management of containers or clusters.,false,true,corpus,2026-06-26
+API REST,REST API,fr>en,Development,Docker,Docker API,acronym,Validated target uses the standard English word order REST API.,false,true,corpus,2026-06-26
+CLI,CLI,fr>en,Development,Docker,Docker CLI,acronym,Acronym for command-line interface; unchanged.,true,true,corpus,2026-06-26
+SHA256,SHA256,fr>en,Development,Docker,Docker image digests,acronym,Hash algorithm used to identify images; unchanged.,true,true,corpus,2026-06-26
+Prenez en main la conteneurisation avec Docker,Get Started With Containerization Using Docker,fr>en,Development,Docker,Course title and Docker containerization,pedagogical,Official translated course title used in the validated target.,false,true,corpus,2026-06-26
+Docker,Docker,fr>en,Development,Docker,Containerization platform,product_name,Product name; remains unchanged.,true,true,corpus,2026-06-26
+Docker Inc.,Docker Inc.,fr>en,Development,Docker,Docker history,proper_noun,Company name; remains unchanged.,true,true,corpus,2026-06-26
+architecture client/serveur,client/server architecture,fr>en,Development,Docker,Docker architecture,technical_term,Architecture model used by Docker.,false,true,corpus,2026-06-26
+ARG,ARG,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+containers,containers,fr>en,Development,Docker,Containerization fundamentals,technical_term,Validated target consistently uses the English term containers for Docker runtime units.,false,true,corpus,2026-06-26
+conteneur,container,fr>en,Development,Docker,Containerization fundamentals,technical_term,Runtime unit for isolated processes in containerization.,false,true,corpus,2026-06-26
+conteneur sidecar,Sidecar container,fr>en,Development,Docker,Docker backup strategies,technical_term,Auxiliary container used with shared volumes for hot backups.,false,true,corpus,2026-06-26
+conteneurisation,containerization,fr>en,Development,Docker,Containerization fundamentals,technical_term,Core technical concept throughout the course.,false,true,corpus,2026-06-26
+content-adressable,content-addressable,fr>en,Development,Docker,Docker image storage,technical_term,Validated target corrects to standard spelling for Docker's content-addressable storage mechanism.,false,true,corpus,2026-06-26
+COPY,COPY,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+cycle de vie,lifecycle,fr>en,Development,Docker,Container management,technical_term,"Container lifecycle operations such as start, stop, inspect, and delete.",false,true,corpus,2026-06-26
+déploiement,deployment,fr>en,Development,Docker,Software deployment,technical_term,Core process of releasing and running an application with Docker.,false,true,corpus,2026-06-26
+docker build,docker build,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command for building an image; unchanged.,true,true,corpus,2026-06-26
+Docker Client,Docker Client,fr>en,Development,Docker,Docker client/server architecture,technical_term,Client-side Docker component used to interact with the daemon.,false,true,corpus,2026-06-26
+docker cp <container>:/path/to/file /local/path,docker cp <container>:/path/to/file /local/path,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for copying files between host and container; unchanged.,true,true,corpus,2026-06-26
+Docker Daemon,Docker Daemon,fr>en,Development,Docker,Docker client/server architecture,technical_term,Server-side Docker component; target omits the French parenthetical dockerd in some explanatory text.,false,true,corpus,2026-06-26
+docker export/import,docker export/import,fr>en,Development,Docker,Docker backup commands,technical_term,Docker backup and restore command pair; unchanged.,true,true,corpus,2026-06-26
+docker images,docker images,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command for listing images; unchanged.,true,true,corpus,2026-06-26
+docker kill <container>,docker kill <container>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for forcefully stopping a container; unchanged.,true,true,corpus,2026-06-26
+docker logs <container>,docker logs <container>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for viewing container logs; unchanged.,true,true,corpus,2026-06-26
+docker network create <network_name>,docker network create <network_name>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for creating a network; unchanged.,true,true,corpus,2026-06-26
+docker network ls,docker network ls,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command for listing networks; unchanged.,true,true,corpus,2026-06-26
+docker network rm <network_name>,docker network rm <network_name>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for deleting a network; unchanged.,true,true,corpus,2026-06-26
+docker pull <image>,docker pull <image>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for downloading an image; unchanged.,true,true,corpus,2026-06-26
+docker rm <container>,docker rm <container>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for deleting a container; unchanged.,true,true,corpus,2026-06-26
+docker rmi <image>,docker rmi <image>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for deleting an image; unchanged.,true,true,corpus,2026-06-26
+docker run -d <image>,docker run -d <image>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for launching a detached container; unchanged.,true,true,corpus,2026-06-26
+docker run -it <image>,docker run -it <image>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for launching an interactive container; unchanged.,true,true,corpus,2026-06-26
+docker run -p <host_port>:<container_port> -it <image>,docker run -p <host_port>:<container_port> -it <image>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for exposing a container port; unchanged.,true,true,corpus,2026-06-26
+docker run -v <volume_name>:/path/to/dir -it <image>,docker run -v <volume_name>:/path/to/dir -it <image>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for running a container with a volume; unchanged.,true,true,corpus,2026-06-26
+docker stop <container>,docker stop <container>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for gracefully stopping a container; unchanged.,true,true,corpus,2026-06-26
+docker tag,docker tag,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command for tagging an image; unchanged.,true,true,corpus,2026-06-26
+docker top <container>,docker top <container>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for viewing processes inside a container; unchanged.,true,true,corpus,2026-06-26
+docker version,docker version,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command; must not be translated.,true,true,corpus,2026-06-26
+docker volume create <volume_name>,docker volume create <volume_name>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for creating a volume; unchanged.,true,true,corpus,2026-06-26
+docker volume ls,docker volume ls,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command for listing volumes; unchanged.,true,true,corpus,2026-06-26
+docker volume rm <volume_name>,docker volume rm <volume_name>,fr>en,Development,Docker,Docker CLI commands,technical_term,Docker command syntax for deleting a volume; unchanged.,true,true,corpus,2026-06-26
 docker-compose up,docker-compose up,fr>en,Development,Docker,Docker commands,technical_term,Command to start the local Docker container.,true,true,corpus,2026-06-26
-virtualisation,virtual environment,fr>en,Development,Docker,Docker environment,technical_term,Target describes Docker as running a lightweight virtual environment.,false,true,corpus,2026-06-26
+Dockerfile,Dockerfile,fr>en,Development,Docker,Docker image build files,technical_term,Docker-specific filename and concept; capitalization preserved in English.,true,true,corpus,2026-06-26
+Dockerfile fraîchement rédigé,freshly written Dockerfile,fr>en,Development,Docker,Docker image build workflow,technical_term,Natural English phrasing used when moving from writing to building an image.,false,true,corpus,2026-06-26
+données persistantes,persistent data,fr>en,Development,Docker,Docker storage and backup,technical_term,Data that must survive container lifecycle events.,false,true,corpus,2026-06-26
+ENTRYPOINT,ENTRYPOINT,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+ENV,ENV,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+EXPOSE,EXPOSE,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+FROM,FROM,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+FROM scratch,FROM scratch,fr>en,Development,Docker,Dockerfile base images,technical_term,Dockerfile syntax for starting from an empty filesystem; unchanged.,true,true,corpus,2026-06-26
+image,image,fr>en,Development,Docker,Docker image management,technical_term,"Container image concept; used in image build, tagging, and registry contexts.",false,true,corpus,2026-06-26
+interface en ligne de commande,command-line interface,fr>en,Development,Docker,Docker CLI,technical_term,Expanded form for CLI in Docker Client explanations.,false,true,corpus,2026-06-26
+LABEL,LABEL,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+latest,latest,fr>en,Development,Docker,Docker image tags,technical_term,Default Docker image tag; remains unchanged.,true,true,corpus,2026-06-26
+layer,layer,fr>en,Development,Docker,Docker image structure,technical_term,Singular Docker image layer; term is kept in English in the source and target.,false,true,corpus,2026-06-26
+Layering,Layering instructions,fr>en,Development,Docker,Dockerfile instructions,technical_term,Category of Dockerfile instructions that create image layers.,false,true,corpus,2026-06-26
+layers,layers,fr>en,Development,Docker,Docker image structure,technical_term,Validated target keeps the English Docker term layers for image filesystem layers.,false,true,corpus,2026-06-26
+logs,logs,fr>en,Development,Docker,Container monitoring,technical_term,Execution logs used for debugging or monitoring containers.,false,true,corpus,2026-06-26
+MAINTAINER,MAINTAINER,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile metadata instruction; must not be translated.,true,true,corpus,2026-06-26
+mapping d'un port,Port Mapping,fr>en,Development,Docker,Docker networking,technical_term,Mapping a container port to a host port.,false,true,corpus,2026-06-26
+Metadata,Metadata instructions,fr>en,Development,Docker,Dockerfile instructions,technical_term,Category of Dockerfile instructions that define image metadata.,false,true,corpus,2026-06-26
+métadonnées,metadata,fr>en,Development,Docker,Docker image metadata,technical_term,"Information associated with an image, such as labels, exposed ports, or environment variables.",false,true,corpus,2026-06-26
+mode interactif,interactive mode,fr>en,Development,Docker,Container execution modes,technical_term,Execution mode for docker run -it.,false,true,corpus,2026-06-26
+moteur de conteneurisation,containerization engine,fr>en,Development,Docker,Container runtimes,technical_term,Generic term for software such as Docker that manages containers.,false,true,corpus,2026-06-26
+networks,networks,fr>en,Development,Docker,Docker networking,technical_term,Validated target uses the English Docker term networks.,false,true,corpus,2026-06-26
+point d'entrée,entry point,fr>en,Development,Docker,Container process model,technical_term,Executable launched as the container entry point.,false,true,corpus,2026-06-26
+port,port,fr>en,Development,Docker,Docker networking,technical_term,Network port exposed or mapped from container to host.,false,true,corpus,2026-06-26
+réseau,network,fr>en,Development,Docker,Docker networking,technical_term,Docker logical entity enabling container communication.,false,true,corpus,2026-06-26
+rollbacks,rollbacks,fr>en,Development,Docker,Deployment versioning,technical_term,Returning to a previous deployed version after an issue.,false,true,corpus,2026-06-26
+RUN,RUN,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+sauvegardes à chaud,hot backups,fr>en,Development,Docker,Backup and restore,technical_term,Backup performed without stopping containers.,false,true,corpus,2026-06-26
+snapshots,Snapshots,fr>en,Development,Docker,Docker backup strategies,technical_term,Backup strategy using docker export/import.,false,true,corpus,2026-06-26
+tâche de fond,background,fr>en,Development,Docker,Container execution modes,technical_term,Used for containers launched detached with docker run -d.,false,true,corpus,2026-06-26
+tagging,tagging,fr>en,Development,Docker,Docker image versioning,technical_term,Strategy for labeling image versions and environments.,false,true,corpus,2026-06-26
+ubuntu:22.04,ubuntu:24.04,fr>en,Development,Docker,Docker base images,technical_term,"Validated target uses ubuntu:24.04 in the Dockerfile example, despite the French comment mentioning ubuntu:22.04.",true,true,corpus,2026-06-26
+ubuntu:noble,ubuntu:noble,fr>en,Development,Docker,Docker base images,technical_term,Docker image tag used as the required base image; unchanged.,true,true,corpus,2026-06-26
+VOLUME,VOLUME,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+volumes,volumes,fr>en,Development,Docker,Docker storage,technical_term,Docker logical entity used for persistent or shared container data.,false,true,corpus,2026-06-26
+WORKDIR,WORKDIR,fr>en,Development,Docker,Dockerfile instructions,technical_term,Dockerfile instruction; must not be translated.,true,true,corpus,2026-06-26
+dumb-init,dumb-init,fr>en,Development,dumb-init,Container init systems,product_name,Container init utility name; remains unchanged.,true,true,corpus,2026-06-26
 version .xlsx,xlsx format,fr>en,Development,Excel,File formats,technical_term,Spreadsheet file format used for course templates and activities.,false,true,corpus,2026-06-26
 Firefox,Firefox,fr>en,Development,Firefox,Web browsers,product_name,Mozilla browser used in a testing-principles example.,true,true,corpus,2026-06-26
-API,APIs,fr>en,Development,general,Software architecture,acronym,Application Programming Interfaces; acronym retained and pluralized in context.,true,true,corpus,2026-06-26
+API,API,fr>en,Development,general,Application programming interfaces,acronym,Acronym for application programming interface; unchanged.,true,true,corpus,2026-06-26
 FAIL,FAIL,fr>en,Development,general,Test status,acronym,English status indicator used to mark a failed test.,true,true,corpus,2026-06-26
+HTTP,HTTP,fr>en,Development,general,Web protocols,acronym,Protocol acronym; unchanged.,true,true,corpus,2026-06-26
 IHM,HMI,fr>en,Development,general,Front-end testing,acronym,French acronym converted to its English equivalent.,false,true,corpus,2026-06-26
 Interface Homme-Machine,HMI,fr>en,Development,general,Front-end testing,acronym,"Human-machine interface, abbreviated as HMI in the target.",false,true,corpus,2026-06-26
 ISTQB,ISTQB,fr>en,Development,general,Software testing certification,acronym,International software testing qualifications organization; acronym retained.,true,true,corpus,2026-06-26
 KO,KO,fr>en,Development,general,Test status,acronym,Status indicator used to mark a failed test; kept as-is in the target.,true,true,corpus,2026-06-26
+OCI,OCI,fr>en,Development,general,Container standards,acronym,Acronym for Open Container Initiative; unchanged.,true,true,corpus,2026-06-26
 OK,OK,fr>en,Development,general,Test status,acronym,Status indicator used to mark a successful test.,true,true,corpus,2026-06-26
-OS,OSs,fr>en,Development,general,Operating systems,acronym,"Acronym for operating systems, pluralized in the target.",true,true,corpus,2026-06-26
+OS,OS,fr>en,Development,general,Operating systems,acronym,Acronym for operating system; unchanged.,true,true,corpus,2026-06-26
 PASS,PASS,fr>en,Development,general,Test status,acronym,English status indicator used to mark a successful test.,true,true,corpus,2026-06-26
 PO,PO,fr>en,Development,general,Agile roles,acronym,Acronym for Product Owner; retained.,true,true,corpus,2026-06-26
+PoC,PoC,fr>en,Development,general,Project delivery,acronym,Acronym for Proof of Concept; unchanged.,true,true,corpus,2026-06-26
 QA,QA,fr>en,Development,general,Quality assurance,acronym,Acronym retained for Quality Assurance.,true,true,corpus,2026-06-26
+SaaS,SaaS,fr>en,Development,general,Application delivery models,acronym,Acronym for Software as a Service; unchanged.,true,true,corpus,2026-06-26
 UI,UI,fr>en,Development,general,User interface design,acronym,Acronym for user interface; retained.,true,true,corpus,2026-06-26
 URL,URL,fr>en,Development,general,Web testing,acronym,Web address acronym retained.,true,true,corpus,2026-06-26
 UX,UX,fr>en,Development,general,User experience design,acronym,Acronym for user experience; retained.,true,true,corpus,2026-06-26
+VM,VM,fr>en,Development,general,Virtualization,acronym,Acronym for virtual machine; unchanged.,true,true,corpus,2026-06-26
+OpenClassrooms,OpenClassrooms,fr>en,Development,general,Learning platform,brand,Platform brand name; remains unchanged.,true,true,corpus,2026-06-26
 JFTL,Association for Software Testing website,fr>en,Development,general,Professional development in testing,cultural_swap,A France-specific acronym was not retained; it was adapted to an English-language professional testing resource for the target audience.,false,true,corpus,2026-06-26
 Journée française des tests logiciels ( JFTL ),Association for Software Testing website,fr>en,Development,general,Professional development in testing,cultural_swap,"French-specific testing conference/resource was replaced by a more broadly relevant English-language testing association resource; use this kind of adaptation only when local training/conference examples need localization, not for technical terms.",false,true,corpus,2026-06-26
 International Software Testing Qualifications Board,International Software Testing Qualifications Board,fr>en,Development,general,Software testing certification,institutional,Full name of ISTQB; retained in English.,true,true,corpus,2026-06-26
+Open Container Initiative,Open Container Initiative,fr>en,Development,general,Container standards,institutional,Name of the standards initiative; remains unchanged.,true,true,corpus,2026-06-26
+administrateurs,administrators,fr>en,Development,general,IT operations roles,job_title,Role responsible for monitoring and managing resources.,false,true,corpus,2026-06-26
 architecte technique,Technical Architect,fr>en,Development,general,Software architecture roles,job_title,Role helping translate user stories into technical specifications.,false,true,corpus,2026-06-26
 business analyste,business analyst,fr>en,Development,general,Project roles,job_title,Role that writes specifications in non-agile teams.,false,true,corpus,2026-06-26
+CEO,CEO,fr>en,Development,general,Company roles,job_title,Executive job title acronym used in the scenario; unchanged.,true,true,corpus,2026-06-26
 chef de projet,project manager,fr>en,Development,general,Project roles,job_title,Role replacing the Product Owner in a sequential team in the validated target.,false,true,corpus,2026-06-26
-développeur,Developer,fr>en,Development,general,Software development roles,job_title,Role responsible for building software features.,false,true,corpus,2026-06-26
+CTO,CTO,fr>en,Development,general,Company roles,job_title,Executive job title acronym used in the scenario; unchanged.,true,true,corpus,2026-06-26
+développeur,developer,fr>en,Development,general,Company roles,job_title,Software development role in the course scenario.,false,true,corpus,2026-06-26
 lead QA,QA Lead,fr>en,Development,general,Quality assurance roles,job_title,Alternative word order used in the validated target for the lead QA role.,false,true,corpus,2026-06-26
 manager de test,Test Manager,fr>en,Development,general,Quality assurance roles,job_title,Alternative role title for lead QA.,false,true,corpus,2026-06-26
 Product Owner,Product Owner,fr>en,Development,general,Agile roles,job_title,Agile role representing the customer and defining features.,true,true,corpus,2026-06-26
@@ -44,38 +147,65 @@ campagne de test,test campaign,fr>en,Development,general,Test management,methodo
 cas de test,test case,fr>en,Development,general,Test design,methodological,Basic element used to validate specific requirements.,false,true,corpus,2026-06-26
 cycle de vie d’un projet,project lifecycle,fr>en,Development,general,Project lifecycle,methodological,Lifecycle in which the tester’s role is positioned.,false,true,corpus,2026-06-26
 cycle en V,V-cycle model,fr>en,Development,general,Development models,methodological,Sequential model pairing production phases with corresponding tests.,false,true,corpus,2026-06-26
+Date-based,Date-based,fr>en,Development,general,Versioning strategy,methodological,Tagging strategy name kept in English.,true,true,corpus,2026-06-26
 développement itératif,iterative development,fr>en,Development,general,Development models,methodological,Development through repeated iterations.,false,true,corpus,2026-06-26
 développement séquentiel,sequential development,fr>en,Development,general,Development models,methodological,Development model in which phases follow one another.,false,true,corpus,2026-06-26
+Environment-specific,Environment-specific,fr>en,Development,general,Versioning strategy,methodological,Tagging strategy name kept in English.,true,true,corpus,2026-06-26
 méthode agile,agile methodology,fr>en,Development,general,Agile development,methodological,Incremental and iterative development approach.,false,true,corpus,2026-06-26
+mise en production,moving to production,fr>en,Development,general,Software deployment,methodological,Deploying an application into a production environment.,false,true,corpus,2026-06-26
 modèle en cascade,waterfall model,fr>en,Development,general,Development models,methodological,Sequential software development model.,false,true,corpus,2026-06-26
 modèle incrémental et itératif,incremental and iterative model,fr>en,Development,general,Development models,methodological,Model used to describe agile development.,false,true,corpus,2026-06-26
 pilotage des tests,test management,fr>en,Development,general,Test management,methodological,Managing and steering testing activities.,false,true,corpus,2026-06-26
 plan de test,test plan,fr>en,Development,general,Test documentation,methodological,"Document describing scope, approach, resources, and schedule for testing activities.",false,true,corpus,2026-06-26
+Proof of Concept,Proof of Concept,fr>en,Development,general,Project delivery,methodological,Expanded form of PoC used in the target.,false,true,corpus,2026-06-26
 pyramide de tests,test pyramid,fr>en,Development,general,Test levels,methodological,Diagram organizing test levels.,false,true,corpus,2026-06-26
 pyramide de tests par niveaux,test pyramid by level,fr>en,Development,general,Test levels,methodological,ISTQB-style representation of levels of testing.,false,true,corpus,2026-06-26
+"release early, release often","release early, release often",fr>en,Development,general,Software delivery strategy,methodological,Established software-release maxim; kept in English in the validated target.,true,true,corpus,2026-06-26
 scénario de test,test scenario,fr>en,Development,general,Test design,methodological,Sequence of steps or test cases covering a complete flow.,false,true,corpus,2026-06-26
+Semver,Semver,fr>en,Development,general,Versioning strategy,methodological,Short name for Semantic Versioning; unchanged in the validated target.,true,true,corpus,2026-06-26
 stratégie de test,test strategy,fr>en,Development,general,Test management,methodological,High-level coordination step for the testing process.,false,true,corpus,2026-06-26
-À vous de jouer,Over to You!,fr>en,Development,general,Course pedagogy,pedagogical,OpenClassrooms activity section label.,false,true,corpus,2026-06-26
+Version Sémantique,Semantic Versioning,fr>en,Development,general,Versioning strategy,methodological,"Versioning convention for major, minor, and patch releases.",false,true,corpus,2026-06-26
+À vous de jouer,Over to You!,fr>en,Development,general,Course activities,pedagogical,Standard OpenClassrooms label for practice activities.,false,true,corpus,2026-06-26
 corrigé,answers,fr>en,Development,general,Course pedagogy,pedagogical,Validated target uses 'answers' for correction files or answer keys.,false,true,corpus,2026-06-26
-En résumé,Summary,fr>en,Development,general,Course pedagogy,pedagogical,OpenClassrooms summary section label.,false,true,corpus,2026-06-26
+En résumé,Summary,fr>en,Development,general,Course recap sections,pedagogical,Standard heading for chapter summaries.,false,true,corpus,2026-06-26
+Fiche résumé,Course summary,fr>en,Development,general,Course resources,pedagogical,Reusable label for a downloadable course summary document.,false,true,corpus,2026-06-26
+Introduction du cours,Course Introduction,fr>en,Development,general,Course structure,pedagogical,Standard heading introducing the course.,false,true,corpus,2026-06-26
 Objectifs pédagogiques,"By the end of this course, you'll be able to:",fr>en,Development,general,Course pedagogy,pedagogical,Learning objectives heading rendered as an outcome sentence in the target.,false,true,corpus,2026-06-26
-projet fil rouge,running case study,fr>en,Development,general,Course pedagogy,pedagogical,Course-long practical project used for applied learning.,false,true,corpus,2026-06-26
+projet fil rouge,Running Case Study,fr>en,Development,general,Course scenario,pedagogical,Course-long scenario used to connect exercises across chapters.,false,true,corpus,2026-06-26
+Rencontrez votre professeur,Meet Your Teacher,fr>en,Development,general,Course structure,pedagogical,Standard OpenClassrooms instructor-introduction heading.,false,true,corpus,2026-06-26
+screencasts tutoriels,Screencast tutorials,fr>en,Development,general,Course media,pedagogical,Label for tutorial demonstration videos.,false,true,corpus,2026-06-26
+Tirez un maximum de ce cours,Make the Most of This Course,fr>en,Development,general,Course structure,pedagogical,Standard OpenClassrooms chapter title for course onboarding.,false,true,corpus,2026-06-26
+Vérifiez votre travail à l’aide de cet exemple de corrigé,Check your work using this sample answer.,fr>en,Development,general,Course activities,pedagogical,Reusable instruction for validating learner work against an example answer.,false,true,corpus,2026-06-26
+dotCloud,dotCloud,fr>en,Development,general,Docker history,proper_noun,Original company behind Docker; remains unchanged.,true,true,corpus,2026-06-26
+HollowMoon Labs,HollowMoon Labs,fr>en,Development,general,Course quiz scenario,proper_noun,Fictional company name used in quizzes; remains unchanged.,true,true,corpus,2026-06-26
 Jardin Actuel,Current Garden,fr>en,Development,general,Course case study,proper_noun,Validated target occasionally translates the fictitious site name in file/container/blog references.,false,true,corpus,2026-06-26
+Liam,Liam,fr>en,Development,general,Course scenario characters,proper_noun,Scenario character name; remains unchanged.,true,true,corpus,2026-06-26
+Libra,Libra,fr>en,Development,general,Course running case study,proper_noun,Fictional application codename in the course scenario; remains unchanged.,true,true,corpus,2026-06-26
+Neil,Neil,fr>en,Development,general,Course scenario characters,proper_noun,Scenario character name; remains unchanged.,true,true,corpus,2026-06-26
+Ophiuchus,Ophiuchus,fr>en,Development,general,Course quiz scenario,proper_noun,Fictional digital astrolabe application name; remains unchanged.,true,true,corpus,2026-06-26
+Sarah,Sarah,fr>en,Development,general,Course scenario characters,proper_noun,Scenario character name; remains unchanged.,true,true,corpus,2026-06-26
+Solomon Hykes,Solomon Hykes,fr>en,Development,general,Docker history,proper_noun,Person name; remains unchanged.,true,true,corpus,2026-06-26
 anomalie,defect,fr>en,Development,general,Defect management,technical_term,Used for a software issue found during testing.,false,true,corpus,2026-06-26
 anomalies,bugs,fr>en,Development,general,Defect management,technical_term,Used when referring to defects found or tracked by testers.,false,true,corpus,2026-06-26
 assurance qualité,Quality Assurance,fr>en,Development,general,Quality assurance,technical_term,French equivalent explained for QA.,false,true,corpus,2026-06-26
 automatisation,automate tests,fr>en,Development,general,Test automation,technical_term,Creating scripts that run tests without human intervention.,false,true,corpus,2026-06-26
 backlog,backlog,fr>en,Development,general,Agile product management,technical_term,Agile product backlog; term retained.,true,true,corpus,2026-06-26
+Bare metal,bare metal,fr>en,Development,general,Virtualization,technical_term,Validated target lowercases the quoted hypervisor type descriptor.,false,true,corpus,2026-06-26
 besoin utilisateur,user expectations,fr>en,Development,general,Requirements,technical_term,User need or expectation to be validated by acceptance testing.,false,true,corpus,2026-06-26
 boucle de feedback,feedback loop,fr>en,Development,general,Team collaboration,technical_term,Cycle through which a team receives and acts on feedback.,false,true,corpus,2026-06-26
+Bundle Specification,Bundle Specification,fr>en,Development,general,OCI specifications,technical_term,Official OCI specification component name; remains unchanged.,true,true,corpus,2026-06-26
 cahier des charges,technical specifications,fr>en,Development,general,Requirements,technical_term,Source document or specifications defining what must be built.,false,true,corpus,2026-06-26
 cas aux limites,boundary cases,fr>en,Development,general,Test design,technical_term,Cases that push the software to its limits.,false,true,corpus,2026-06-26
 cas nominal,nominal case,fr>en,Development,general,Test design,technical_term,Expected or standard path for which the software was specified.,false,true,corpus,2026-06-26
 chemin détourné,non-nominal case,fr>en,Development,general,Test design,technical_term,Unexpected or alternative user behavior outside the nominal path.,false,true,corpus,2026-06-26
 compatibilité,compatibility,fr>en,Development,general,Non-functional testing,technical_term,"Ability to run across operating systems, browsers, or devices.",false,true,corpus,2026-06-26
+Config Specification,Config Specification,fr>en,Development,general,OCI specifications,technical_term,Official OCI specification component name; remains unchanged.,true,true,corpus,2026-06-26
 critères d’acceptation,acceptance criteria,fr>en,Development,general,Agile requirements,technical_term,Minimum expected quality criteria for validating a feature.,false,true,corpus,2026-06-26
+DELETE,DELETE,fr>en,Development,general,HTTP methods,technical_term,HTTP method; unchanged.,true,true,corpus,2026-06-26
 déployer en production,deploy to production,fr>en,Development,general,Deployment,technical_term,Release software into the production environment.,false,true,corpus,2026-06-26
 données de test,test data,fr>en,Development,general,Test data,technical_term,Data needed to execute test cases.,false,true,corpus,2026-06-26
+endpoint,endpoint,fr>en,Development,general,APIs,technical_term,API route available in the OCI registry API documentation.,false,true,corpus,2026-06-26
+enfermement technologique,technological lock-in,fr>en,Development,general,Container standards,technical_term,Risk reduced by OCI standardization.,false,true,corpus,2026-06-26
 environnement de production,production environment,fr>en,Development,general,Deployment environments,technical_term,Live environment used by real users.,false,true,corpus,2026-06-26
 environnement de recette,acceptance environment,fr>en,Development,general,Test environments,technical_term,Dedicated non-production environment used for acceptance testing.,false,true,corpus,2026-06-26
 environnement de test,test environment,fr>en,Development,general,Test execution,technical_term,Environment prepared for running tests.,false,true,corpus,2026-06-26
@@ -84,26 +214,42 @@ exigences,requirements,fr>en,Development,general,Requirements,technical_term,Req
 expérience utilisateur,user experience,fr>en,Development,general,UX design,technical_term,User's overall experience using a product.,false,true,corpus,2026-06-26
 Front Web,Front-End,fr>en,Development,general,Front-end testing,technical_term,Refers to the user-facing web interface.,false,true,corpus,2026-06-26
 Front-End,Front-End,fr>en,Development,general,Front-end testing,technical_term,English term retained for the client-facing interface layer.,true,true,corpus,2026-06-26
+GET,GET,fr>en,Development,general,HTTP methods,technical_term,HTTP method; unchanged.,true,true,corpus,2026-06-26
 graphique radar,radar chart,fr>en,Development,general,Self-assessment activity,technical_term,Visual tool used for self-assessment across tester qualities.,false,true,corpus,2026-06-26
+Hosted,hosted,fr>en,Development,general,Virtualization,technical_term,Validated target lowercases the quoted hypervisor type descriptor.,false,true,corpus,2026-06-26
 http://localhost:8080,http://localhost:8080,fr>en,Development,general,Local web testing,technical_term,Local URL used to access the test website.,true,true,corpus,2026-06-26
+hyperviseur,hypervisor,fr>en,Development,general,Virtualization,technical_term,Software layer used to create and manage virtual machines.,false,true,corpus,2026-06-26
+Hyperviseur de type 1,Type 1 hypervisor,fr>en,Development,general,Virtualization,technical_term,Hypervisor category that runs directly on hardware.,false,true,corpus,2026-06-26
+Hyperviseur de type 2,Type 2 hypervisor,fr>en,Development,general,Virtualization,technical_term,Hypervisor category that runs on a host operating system.,false,true,corpus,2026-06-26
 identifiant client,customer ID,fr>en,Development,general,Test data,technical_term,Example of test data for an e-commerce site.,false,true,corpus,2026-06-26
 illusion d’absence d’erreur,illusion of being error-free,fr>en,Development,general,Testing principles,technical_term,Principle that lack of detected defects does not prove absence of defects.,false,true,corpus,2026-06-26
+Image Specification,Image Specification,fr>en,Development,general,OCI specifications,technical_term,Official OCI image-format specification name; remains unchanged.,true,true,corpus,2026-06-26
+image-spec,image-spec,fr>en,Development,general,OCI specifications,technical_term,Official OCI specification identifier; remains unchanged.,true,true,corpus,2026-06-26
+interopérabilité,interoperability,fr>en,Development,general,Container standards,technical_term,Ability of container tools and platforms to work together.,false,true,corpus,2026-06-26
 jeu de données,data set,fr>en,Development,general,Test data,technical_term,Representative data used in testing.,false,true,corpus,2026-06-26
 jeux de test,test sets,fr>en,Development,general,Test data,technical_term,Validated target presents test sets as synonymous with test data/data sets.,false,true,corpus,2026-06-26
 localhost,localhost,fr>en,Development,general,Local web testing,technical_term,Standard hostname for local machine access.,true,true,corpus,2026-06-26
+machine virtuelle,virtual machine,fr>en,Development,general,Virtualization,technical_term,Reusable virtualization term; plural appears as VMs in the target.,false,true,corpus,2026-06-26
 mise en ligne,go live,fr>en,Development,general,Deployment,technical_term,Publishing a website or software product for users.,false,true,corpus,2026-06-26
-mise en production,goes into production,fr>en,Development,general,Deployment,technical_term,Moment when a system is released to the production environment.,false,true,corpus,2026-06-26
 mise en service,Go-live,fr>en,Development,general,Deployment,technical_term,Final deployment or launch phase in the lifecycle.,false,true,corpus,2026-06-26
 montée en charge,load scaling,fr>en,Development,general,Non-functional testing,technical_term,Gradually increasing requests to find the system limit.,false,true,corpus,2026-06-26
 navigateur web,web browser,fr>en,Development,general,Web testing,technical_term,Browser used to access and test websites.,false,true,corpus,2026-06-26
+normes ouvertes,open standards,fr>en,Development,general,Container standards,technical_term,Public specifications enabling interoperability and compatibility.,false,true,corpus,2026-06-26
+noyau,kernel,fr>en,Development,general,Operating systems,technical_term,Operating-system kernel shared by containers.,false,true,corpus,2026-06-26
 outil de suivi,tracking tool,fr>en,Development,general,Defect management,technical_term,Tool used to log and monitor anomalies.,false,true,corpus,2026-06-26
 paradoxe du pesticide,pesticide paradox,fr>en,Development,general,Testing principles,technical_term,Testing principle stating repeated identical tests become less effective at finding new defects.,false,true,corpus,2026-06-26
 parcours utilisateurs,user flows,fr>en,Development,general,UX design,technical_term,Sequence of screens or steps followed by users.,false,true,corpus,2026-06-26
 performance,performance,fr>en,Development,general,Non-functional testing,technical_term,Quality attribute related to speed and response time.,true,true,corpus,2026-06-26
+portabilité,portability,fr>en,Development,general,Container standards,technical_term,Ability to run OCI-compliant images on compatible platforms.,false,true,corpus,2026-06-26
+POST,POST,fr>en,Development,general,HTTP methods,technical_term,HTTP method; unchanged.,true,true,corpus,2026-06-26
+Pull,Pull,fr>en,Development,general,OCI registry operations,technical_term,OCI registry operation name for downloading an image.,true,true,corpus,2026-06-26
+Push,Push,fr>en,Development,general,OCI registry operations,technical_term,OCI registry operation name for uploading an image.,true,true,corpus,2026-06-26
 qualité logicielle,software quality,fr>en,Development,general,Software testing fundamentals,technical_term,Quality of a software product as assessed through testing.,false,true,corpus,2026-06-26
 Quality Assurance,Quality Assurance,fr>en,Development,general,Quality assurance,technical_term,English full form used in both source and target.,true,true,corpus,2026-06-26
 rapport d’anomalies,bug report,fr>en,Development,general,Defect reporting,technical_term,Report containing information needed to reproduce and fix a defect.,false,true,corpus,2026-06-26
 référence d’article,item reference,fr>en,Development,general,Test data,technical_term,Example of test data for an e-commerce application.,false,true,corpus,2026-06-26
+registre OCI,OCI registry,fr>en,Development,general,Container registries,technical_term,Registry compliant with Open Container Initiative specifications.,false,true,corpus,2026-06-26
+registres OCI,OCI registries,fr>en,Development,general,Container registries,technical_term,Plural form used for repositories storing and sharing container images.,false,true,corpus,2026-06-26
 régression,regression,fr>en,Development,general,Regression testing,technical_term,A defect introduced in functionality that previously worked.,false,true,corpus,2026-06-26
 regroupement de défauts,Defects tend to cluster,fr>en,Development,general,Testing principles,technical_term,Principle that defects often appear near other defects.,false,true,corpus,2026-06-26
 rejouer le test,replay tests,fr>en,Development,general,Test execution,technical_term,Run a test again under the same conditions.,false,true,corpus,2026-06-26
@@ -111,17 +257,26 @@ reproductible,reproducible,fr>en,Development,general,Defect analysis,technical_t
 résultat attendu,expected result,fr>en,Development,general,Test execution,technical_term,Outcome expected for a test step or case.,false,true,corpus,2026-06-26
 résultat obtenu,actual result,fr>en,Development,general,Test execution,technical_term,Observed outcome during test execution.,false,true,corpus,2026-06-26
 rétrospectives,Sprint Retrospectives,fr>en,Development,general,Agile ceremonies,technical_term,Agile meetings for reviewing what went well and what can improve.,false,true,corpus,2026-06-26
+reverse proxy,reverse proxy,fr>en,Development,general,Web architecture,technical_term,Technical architecture term kept in English in the source and target.,true,true,corpus,2026-06-26
 robustesse,robustness,fr>en,Development,general,Non-functional testing,technical_term,Ability of a system to remain stable under demanding or abnormal conditions.,false,true,corpus,2026-06-26
 run de test,test run,fr>en,Development,general,Test execution,technical_term,One execution of a test or set of tests.,false,true,corpus,2026-06-26
+Runtime and Lifecycle Specification,Runtime and Lifecycle Specification,fr>en,Development,general,OCI specifications,technical_term,Official OCI specification component name; remains unchanged.,true,true,corpus,2026-06-26
+Runtime Specification,Runtime Specification,fr>en,Development,general,OCI specifications,technical_term,Official OCI specification name; remains unchanged.,true,true,corpus,2026-06-26
+runtime-spec,runtime-spec,fr>en,Development,general,OCI specifications,technical_term,Official OCI specification identifier; remains unchanged.,true,true,corpus,2026-06-26
 scripts,scripts,fr>en,Development,general,Test automation,technical_term,Programs or commands used to automate testing.,true,true,corpus,2026-06-26
 Scrum,Scrum,fr>en,Development,general,Agile framework,technical_term,Agile framework; name retained.,true,true,corpus,2026-06-26
 sécurité,security,fr>en,Development,general,Non-functional testing,technical_term,Testing to protect user data and prevent misuse.,false,true,corpus,2026-06-26
+serveur HTTP,HTTP server,fr>en,Development,general,Web servers,technical_term,Server serving HTTP requests.,false,true,corpus,2026-06-26
 site e-commerce,e-commerce site,fr>en,Development,general,Web applications,technical_term,Website used for online commerce.,false,true,corpus,2026-06-26
+Software as a Service,Software as a Service,fr>en,Development,general,Application delivery models,technical_term,Expanded SaaS term; already in English in source and target.,true,true,corpus,2026-06-26
 spécifications,specifications,fr>en,Development,general,Requirements,technical_term,Defined requirements used to build and test the product.,false,true,corpus,2026-06-26
 sprint,sprint,fr>en,Development,general,Agile development,technical_term,Short agile work cycle; term retained.,true,true,corpus,2026-06-26
 sprints,sprints,fr>en,Development,general,Agile development,technical_term,Plural of sprint; retained in English.,true,true,corpus,2026-06-26
 stand-ups daily meeting,daily stand-ups,fr>en,Development,general,Agile ceremonies,technical_term,Short daily agile meetings for team alignment.,false,true,corpus,2026-06-26
 suivre les anomalies,track bugs,fr>en,Development,general,Defect management,technical_term,Activity of monitoring reported defects.,false,true,corpus,2026-06-26
+système d’exploitation,operating system,fr>en,Development,general,Operating systems,technical_term,General OS term used in virtualization and containerization explanations.,false,true,corpus,2026-06-26
+système de fichiers,file system,fr>en,Development,general,Operating systems and containers,technical_term,Filesystem term used in container image and namespace contexts.,false,true,corpus,2026-06-26
+Tag,Tag,fr>en,Development,general,OCI registry operations,technical_term,OCI registry operation name for assigning metadata to an image.,true,true,corpus,2026-06-26
 test a échoué,test fails,fr>en,Development,general,Test status,technical_term,Indicates that actual and expected results do not match.,false,true,corpus,2026-06-26
 test logiciel,software testing,fr>en,Development,general,Software testing fundamentals,technical_term,Core course topic; refers to the practice and discipline of testing software.,false,true,corpus,2026-06-26
 test passant,test passes,fr>en,Development,general,Test status,technical_term,Indicates that actual and expected results match.,false,true,corpus,2026-06-26
@@ -143,7 +298,9 @@ tests unitaires,unit testing,fr>en,Development,general,Test levels,technical_ter
 User Stories,User Stories,fr>en,Development,general,Agile requirements,technical_term,Agile artifacts describing features from the end-user perspective.,true,true,corpus,2026-06-26
 User Story,User Story,fr>en,Development,general,Agile requirements,technical_term,Singular form of the agile artifact.,true,true,corpus,2026-06-26
 utilisateurs finaux,end-user,fr>en,Development,general,User needs,technical_term,Users for whom the software is ultimately intended.,false,true,corpus,2026-06-26
+variable d’environnement,environment variable,fr>en,Development,general,Configuration,technical_term,Configuration variable available at runtime or build time.,false,true,corpus,2026-06-26
 version .ods,.ods,fr>en,Development,general,File formats,technical_term,OpenDocument Spreadsheet extension; often kept as-is when mentioned.,true,true,corpus,2026-06-26
+virtualisation,virtualization,fr>en,Development,general,Virtualization vs containerization,technical_term,Core comparison concept in the course.,false,true,corpus,2026-06-26
 voix du client,voice of the customer,fr>en,Development,general,Product management,technical_term,Product Owner role as representative of customer needs.,false,true,corpus,2026-06-26
 bouton “Payer”,“Pay” button,fr>en,Development,general,UI testing examples,ui_label,Example UI button label in an online payment test scenario.,false,true,corpus,2026-06-26
 colonne “Résultat”,“Result” column,fr>en,Development,general,Test plan UI labels,ui_label,Column in the test plan where test execution results are recorded.,false,true,corpus,2026-06-26
@@ -152,8 +309,43 @@ Inscription,Register,fr>en,Development,general,Jardin Actuel test cases,ui_label
 Tri,Sort,fr>en,Development,general,Jardin Actuel test cases,ui_label,Name of one of the first Jardin Actuel test cases.,false,true,corpus,2026-06-26
 Casser les silos,Breaking down silos,fr>en,Development,general,Team collaboration,work_culture,Work-culture expression about improving cross-functional collaboration and feedback loops within a team.,false,true,corpus,2026-06-26
 culture de qualité,culture of quality,fr>en,Development,general,Quality assurance,work_culture,"Refers to a team mindset and shared work practice around quality, not a specific regulation or local culture.",false,true,corpus,2026-06-26
+GitHub,GitHub,fr>en,Development,GitHub,Source code hosting,product_name,Platform name; remains unchanged.,true,true,corpus,2026-06-26
+GNU/Linux,GNU/Linux,fr>en,Development,GNU/Linux,Operating systems,product_name,Operating system family name; remains unchanged.,true,true,corpus,2026-06-26
+google/go-containerregistry,google/go-containerregistry,fr>en,Development,google/go-containerregistry,OCI registry tools,product_name,Go library name used to interact with OCI registries; remains unchanged.,true,true,corpus,2026-06-26
+Go,Go,fr>en,Development,Go,Programming languages,product_name,Programming language name; remains unchanged.,true,true,corpus,2026-06-26
+GPG,GPG,fr>en,Development,GPG,Package repository security,acronym,Acronym for GNU Privacy Guard; unchanged in installation commands.,true,true,corpus,2026-06-26
 Linux,Linux,fr>en,Development,Linux,Operating systems,product_name,Operating system mentioned for compatibility.,true,true,corpus,2026-06-26
+cgroups,cgroups,fr>en,Development,Linux,Linux resource management,technical_term,Linux kernel feature name; remains unchanged.,true,true,corpus,2026-06-26
+control groups,control groups,fr>en,Development,Linux,Linux resource management,technical_term,Expanded form of cgroups used in the validated target.,false,true,corpus,2026-06-26
+espaces de noms,Namespaces,fr>en,Development,Linux,Linux isolation,technical_term,French explanatory equivalent for namespaces; used as a section heading in the target.,false,true,corpus,2026-06-26
+groupes de contrôle,control groups,fr>en,Development,Linux,Linux resource management,technical_term,French explanation of cgroups translated to the standard English expansion.,false,true,corpus,2026-06-26
+Isolation des points de montage,Mount-point isolation,fr>en,Development,Linux,Container isolation,technical_term,Namespace-based isolation of mount points.,false,true,corpus,2026-06-26
+isolation des processus,Process isolation,fr>en,Development,Linux,Container isolation,technical_term,Namespace-based isolation of container processes.,false,true,corpus,2026-06-26
+Isolation du système de fichiers,File-system isolation,fr>en,Development,Linux,Container isolation,technical_term,Namespace-based isolation of file systems in containers.,false,true,corpus,2026-06-26
+Isolation réseau,Network isolation,fr>en,Development,Linux,Container isolation,technical_term,Namespace-based network isolation in containers.,false,true,corpus,2026-06-26
+namespaces,namespaces,fr>en,Development,Linux,Linux isolation,technical_term,Linux kernel feature name; remains unchanged.,true,true,corpus,2026-06-26
+noyau Linux,Linux kernel,fr>en,Development,Linux,Linux container features,technical_term,Kernel capabilities are central to cgroups and namespaces.,false,true,corpus,2026-06-26
+point de montage,mount point,fr>en,Development,Linux,Filesystems and containers,technical_term,"Mount target for disks, volumes, or network filesystems.",false,true,corpus,2026-06-26
+systèmes d'init,init systems,fr>en,Development,Linux,Container process model,technical_term,Specialized init processes such as tini or dumb-init.,false,true,corpus,2026-06-26
 Mac OS,macOS,fr>en,Development,macOS,Operating systems,product_name,Validated target uses current Apple OS branding.,false,true,corpus,2026-06-26
 macOS,macOS,fr>en,Development,macOS,Operating systems,product_name,Apple operating system name retained.,true,true,corpus,2026-06-26
-PowerShell,PowerShell,fr>en,Development,PowerShell,Command-line tools,product_name,Windows terminal tool used to run Docker commands.,true,true,corpus,2026-06-26
-Windows,Windows,fr>en,Development,Windows,Operating systems,product_name,Operating system mentioned for compatibility and Docker instructions.,true,true,corpus,2026-06-26
+Mac,Mac,fr>en,Development,Mac,Operating systems,product_name,Apple computer/OS ecosystem label used in installation instructions; remains unchanged.,true,true,corpus,2026-06-26
+Microsoft Hyper-V,Microsoft Hyper-V,fr>en,Development,Microsoft Hyper-V,Virtualization products,product_name,Hypervisor product name; remains unchanged.,true,true,corpus,2026-06-26
+Microsoft Windows,Microsoft Windows,fr>en,Development,Microsoft Windows,Operating systems,product_name,Operating system product name; remains unchanged.,true,true,corpus,2026-06-26
+Nginx,Nginx,fr>en,Development,Nginx,Web servers,product_name,Web server product name; remains unchanged.,true,true,corpus,2026-06-26
+nginx:latest,nginx:latest,fr>en,Development,Nginx,Docker image examples,technical_term,Official Nginx Docker image reference; unchanged.,true,true,corpus,2026-06-26
+Oracle VM Virtualbox,Oracle VM VirtualBox,fr>en,Development,Oracle VM VirtualBox,Virtualization products,product_name,Validated target uses official VirtualBox capitalization.,true,true,corpus,2026-06-26
+Podman,Podman,fr>en,Development,Podman,Container runtime tools,product_name,Alternative container tool; remains unchanged.,true,true,corpus,2026-06-26
+PowerShell,PowerShell,fr>en,Development,PowerShell,Windows command shells,product_name,Microsoft shell name; remains unchanged.,true,true,corpus,2026-06-26
+runc,runc,fr>en,Development,runc,Container runtime tools,product_name,OCI container runtime; remains unchanged.,true,true,corpus,2026-06-26
+Skopeo,Skopeo,fr>en,Development,Skopeo,OCI registry tools,product_name,CLI tool for inspecting and copying container images; remains unchanged.,true,true,corpus,2026-06-26
+tini,tini,fr>en,Development,tini,Container init systems,product_name,Container init utility name; remains unchanged.,true,true,corpus,2026-06-26
+Ubuntu,Ubuntu,fr>en,Development,Ubuntu,Linux distributions,product_name,Linux distribution name; remains unchanged.,true,true,corpus,2026-06-26
+Unix,Unix,fr>en,Development,Unix,Operating systems,product_name,Operating system family name; remains unchanged.,true,true,corpus,2026-06-26
+VMware ESXi,VMware ESXi,fr>en,Development,VMware ESXi,Virtualization products,product_name,Hypervisor product name; remains unchanged.,true,true,corpus,2026-06-26
+VMWare Workstation,VMware Workstation,fr>en,Development,VMware Workstation,Virtualization products,product_name,Validated target uses standard VMware capitalization.,true,true,corpus,2026-06-26
+CMD,CMD,fr>en,Development,Windows,Windows command shells,product_name,Windows command prompt label used in installation instructions; unchanged.,true,true,corpus,2026-06-26
+Windows,Windows,fr>en,Development,Windows,Operating systems,product_name,Operating system name; remains unchanged.,true,true,corpus,2026-06-26
+WSL2,WSL2,fr>en,Development,WSL2,Windows Linux compatibility,product_name,Windows Subsystem for Linux version name; remains unchanged.,true,true,corpus,2026-06-26
+Xen,Xen,fr>en,Development,Xen,Virtualization products,product_name,Hypervisor product name; remains unchanged.,true,true,corpus,2026-06-26
+YUM,YUM,fr>en,Development,YUM,Linux package management,product_name,Package manager name; remains unchanged.,true,true,corpus,2026-06-26
