@@ -262,7 +262,7 @@
       <div class="card" style="margin-bottom:18px"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🔗</div><div><h2>A10 — Liens à arbitrer <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Depuis le rapport CSV réel du cours</div></div></div>
         <div class="cb" id="a10ReviewBody"><div class="empty" style="padding:14px">Charge un cours ci-dessus pour voir ses liens.</div></div></div>
       <div class="card"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🖼️</div><div><h2>A8 — Images <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Images du cours + risque (depuis le handoff)</div></div></div>
-        <div class="cb" id="a8Body"><div class="empty" style="padding:14px">Charge un cours ci-dessus.</div></div></div>
+        <div style="padding:10px 16px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="sbtn go" id="batch5Btn" onclick="localizeBatch5()">⚡ Localiser 5</button><span class="mini" id="batchInfo">les 5 prochaines images non traitées (séquentiel)</span><div id="batchProg" style="display:none;flex:1;min-width:200px;max-width:300px"><div style="height:8px;background:#eef1f8;border-radius:6px;overflow:hidden"><div id="batchProgFill" style="height:100%;width:0;background:#16a34a;transition:width .3s"></div></div><div class="mini" id="batchProgTxt" style="margin-top:3px"></div></div></div><div class="cb" id="a8Body"><div class="empty" style="padding:14px">Charge un cours ci-dessus.</div></div></div>
     </section>
 
     <!-- ====================== ASSETS À LA DEMANDE ======================== -->
@@ -513,6 +513,29 @@ async function loadReview(){
 window.iconikPush=async(btn,download)=>{ const old=btn.textContent; btn.disabled=true; btn.textContent='⏳'; try{ const d=await (await fetch('/api/iconik/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({download,target_course_id:(REV&&REV.id)||''})})).json(); if(d.ok){ btn.textContent='☁️✓'; btn.style.background='#138a45'; btn.style.borderColor='#138a45'; btn.style.color='#fff'; btn.title='Envoyé sur Iconik (static_graphics)'; const row=btn.closest('.rev'); const okb=row&&row.querySelector('.okbtn'); if(okb&&!okb.classList.contains('done'))toggleOk(okb); showToast(`☁️ <b>Envoyé sur Iconik</b> — asset ${String(d.iconik_asset_id||'').slice(0,8)}… (collection <b>static_graphics</b>)`); } else { showToast('⚠️ Iconik : '+(d.error||'échec')); btn.disabled=false; btn.textContent=old; } }catch(e){ showToast('⚠️ Iconik injoignable'); btn.disabled=false; btn.textContent=old; } };
 function applyOkVisual(b,on){ b.classList.toggle('done',on); b.style.background=on?'#16a34a':''; b.style.color=on?'#fff':''; b.style.borderColor=on?'#16a34a':''; const r=b.closest('.rev'); if(r) r.style.opacity=on?'.55':''; }
 window.toggleOk=(b)=>{ const on=!b.classList.contains('done'); applyOkVisual(b,on); const u=b.dataset.u; if(u&&REV&&REV.id){ fetch('/api/review/'+REV.id+'/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,done:on})}).catch(()=>{}); } };
+let batchRunning=false;
+async function localizeBatch5(){
+  if(batchRunning){ showToast('⏳ Un lot est déjà en cours — attends que les 5 soient finies avant d\'en relancer.'); return; }
+  const LIMIT=5;
+  const rows=[...document.querySelectorAll('#a8Body .rev')].filter(r=>!r.querySelector('.baprev'));
+  const batch=rows.slice(0,LIMIT);
+  if(!batch.length){ showToast('✅ Plus d\'image à traiter dans la file (toutes localisées).'); return; }
+  const btn=$('batch5Btn'), prog=$('batchProg'), fill=$('batchProgFill'), ptxt=$('batchProgTxt');
+  batchRunning=true; btn.disabled=true; const oldTxt=btn.textContent; btn.textContent='⏳ Lot en cours…'; prog.style.display='block'; let ok=0;
+  for(let i=0;i<batch.length;i++){
+    const row=batch[i]; const u=(row.querySelector('.okbtn')||{}).dataset?.u; if(!u)continue;
+    ptxt.textContent='Image '+(i+1)+'/'+batch.length+'…'; fill.style.width=Math.round(i/batch.length*100)+'%';
+    try{
+      const d=await (await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_language:'fr',target_language:'en-US',items:[{name:u.split('/').pop(),url:u}]})})).json();
+      const x=(d.results||[])[0]||{};
+      if(x.status==='localized'&&x.download){ renderBA(row,u,x.download); if(REV&&REV.id)fetch('/api/review/'+REV.id+'/localized',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,download:x.download})}).catch(()=>{}); ok++; }
+    }catch(e){}
+  }
+  fill.style.width='100%'; ptxt.textContent='Terminé : '+ok+'/'+batch.length+' localisées';
+  showToast('⚡ <b>Lot terminé</b> — '+ok+'/'+batch.length+' images localisées. Re-clique « Localiser 5 » pour le lot suivant.');
+  setTimeout(()=>{prog.style.display='none';fill.style.width='0';},5000);
+  batchRunning=false; btn.disabled=false; btn.textContent=oldTxt;
+}
 function renderBA(row,srcUrl,dlUrl){ if(!row)return; const prev=row.querySelector('.baprev'); if(prev)prev.remove(); const ba=document.createElement('div'); ba.className='baprev'; ba.innerHTML=`<div class="bacol"><span class="bal">AVANT</span><a href="${srcUrl}" target="_blank" rel="noopener"><img src="${srcUrl}"></a></div><div class="bacol"><span class="bal ok">APRÈS</span><a href="${dlUrl}" target="_blank" rel="noopener"><img src="${dlUrl}"></a></div>`; row.appendChild(ba); const ib=row.querySelector('.iconikbtn'); if(ib){ ib.style.display='inline-flex'; ib.onclick=()=>iconikPush(ib,dlUrl); } }
 window.relocImg=async(btn,url)=>{ const old=btn.textContent; btn.disabled=true; btn.textContent='⏳…'; const row=btn.closest('.rev'); try{ const d=await (await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_language:'fr',target_language:'en-US',items:[{name:url.split('/').pop(),url}]})})).json(); const x=(d.results||[])[0]||{}; if(x.status==='localized'&&x.download&&row){ renderBA(row,url,x.download); if(REV&&REV.id) fetch('/api/review/'+REV.id+'/localized',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url,download:x.download})}).catch(()=>{}); showToast(`🖼️ <b>localisé</b> — ${x.note||''} <a href="${x.download}" download style="color:#8fd0ff;font-weight:700">⬇️ télécharger</a>`); } else { const prev=row&&row.querySelector('.baprev'); if(prev)prev.remove(); showToast(`🖼️ <b>${x.status||'?'}</b> ${x.note||x.error||''}`); } }catch(e){ showToast('⚠️ échec re-localisation'); } btn.disabled=false; btn.textContent=old; };
 window.resolveLink=async(lid,srcEnc,inp)=>{ const tgt=(inp.value||'').trim(); if(!tgt){showToast('Entre une URL cible.');return;} const src=decodeURIComponent(srcEnc||''); try{ const r=await (await fetch('/api/review/'+REV.id+'/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:lid,source_url:src,target_url:tgt})})).json(); const row=inp.closest('.rev'); row.querySelector('.acts').innerHTML='<span class="mini">→ '+tgt+'</span>'; const b=row.querySelector('.badge'); b.className='badge b-sw'; b.textContent='résolu'; const dl=$('revDownload'); if(dl)dl.style.display='inline-flex'; showToast('✅ Lien résolu'+(r&&r.replaced?' — <b>remplacé dans le HTML</b>':' (enregistré ; URL source non trouvée dans le HTML)')+'. <a href="/api/review/'+REV.id+'/html" style="color:#8fd0ff;font-weight:700">⬇️ HTML corrigé</a>'); }catch(e){ showToast('⚠️ échec'); } };
