@@ -532,6 +532,37 @@ app.get('/api/tm/search', (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
+// ---- Patcher de conformité TM : un cours (par ID/repo/extracteur) confronté à la TM validée du domaine ----
+app.post('/api/tm/patch', async (req, res) => {
+  const p = req.body || {}; const dir = p.direction || 'fr>en';
+  if (!p.category) return res.status(400).json({ error: 'category (domaine TM) requise' });
+  let html = '', srcId = '';
+  try {
+    if (p.html_base64) html = Buffer.from(p.html_base64, 'base64').toString('utf-8');
+    else if (p.course_id) {
+      const cid = String(p.course_id).replace(/\D/g, ''); srcId = cid;
+      const st = await contentStatus(cid);
+      if (st && st.done) html = await fetch(RAW + encodeURI(`07_runs/${st.source}/output/${cid}_localized_${st.direction}.html`), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : '');
+      if (!html) { try { const ex = await fetch(`${N8N}/webhook/cls-v3-extraction`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_id: cid, 'Course ID': cid }) }).then(r => r.ok ? r.text() : ''); if (ex && /<\w/.test(ex)) html = ex; } catch (e) {} }
+    }
+    if (!html) return res.status(404).json({ error: 'HTML introuvable (ni repo output/, ni extracteur OC) — vérifie l\'ID / le credential ocBasic, ou fournis html_base64' });
+    const file = path.join(TM_DIR, safeCat(p.category) + '.csv');
+    if (!fsx.existsSync(file)) return res.status(404).json({ error: 'pas de TM pour ' + p.category });
+    const ls = fsx.readFileSync(file, 'utf-8').split(/\r?\n/).filter(l => l.trim());
+    const tm = ls.slice(1).map(parseCsvLine).filter(c => c[2] === dir && c[9] === 'true').map(c => ({ source_term: c[0], target_term: c[1], do_not_translate: c[8] === 'true' }));
+    if (!tm.length) return res.status(404).json({ error: 'aucun terme validé ' + dir + ' dans ' + p.category });
+    const strip = h => h.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const cf = await fetch(WH_ADHOC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'tm_conform', target_text: strip(html), tm, direction: dir }) }).then(r => r.json());
+    if (!cf || !cf.ok) return res.status(500).json({ error: 'conform: ' + ((cf && cf.error) || '?') });
+    const corr = (cf.corrections || []).filter(c => c.wrong && c.correct && c.wrong !== c.correct && html.includes(c.wrong));
+    let fixed = html, applied = 0;
+    for (const c of corr) { const b = fixed; fixed = fixed.split(c.wrong).join(c.correct); if (fixed !== b) applied++; }
+    const base = ((srcId || 'course') + '_' + dir.replace('>', '-') + '_TMfixed.html').replace(/[^\w.\-]+/g, '_');
+    fsx.writeFileSync(path.join(DL_DIR, base), fixed);
+    res.json({ ok: true, category: p.category, direction: dir, tm_terms: tm.length, proposed: corr.length, applied, conform: corr.length === 0, corrections: corr.slice(0, 100), download: '/downloads/' + base });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;
