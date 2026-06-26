@@ -432,7 +432,7 @@ async function gatherRunTerms(source) {
     let m; re.lastIndex = 0;
     while ((m = re.exec(content))) { if (seen.has(m[1])) continue; seen.add(m[1]); terms.push({ source_term: m[1], proposed_target: m[2], category: m[3] }); }
     const d = (content.match(/detected_domain"?\s*:\s*"?([A-Za-z_ ]+?)["',]/) || [])[1]; if (d) dm = d.trim();
-    const dr = (content.match(/([a-z]{2}>[a-z]{2})/) || [])[1]; if (dr) dir = dr;
+    const dr = (content.match(/\b(fr>en|en>fr|fr>es|es>fr|en>es)\b/) || [])[1]; if (dr) dir = dr;
   }
   return { terms, domain: dm, direction: dir };
 }
@@ -468,6 +468,67 @@ app.post('/api/tm/consolidate', async (req, res) => {
       execSync('git push origin main', { cwd: REPO_DIR, stdio: 'pipe' });
     } catch (e) { return res.status(500).json({ error: 'git: ' + String((e.stderr && e.stderr.toString()) || e.message), category: cat, added, updated }); }
     res.json({ ok: true, category: cat, file: path.basename(file), added, updated, total: all.length });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
+function mergeTmRows(cat, rows, direction, course, validated) {
+  const file = path.join(TM_DIR, safeCat(cat) + '.csv'); fsx.mkdirSync(TM_DIR, { recursive: true });
+  const map = new Map();
+  if (fsx.existsSync(file)) { const ls = fsx.readFileSync(file, 'utf-8').split(/\r?\n/).filter(l => l.trim()); ls.slice(1).forEach(l => { const c = parseCsvLine(l); map.set((c[0] || '').toLowerCase() + '|' + (c[2] || ''), c); }); }
+  const today = new Date().toISOString().slice(0, 10); let added = 0, updated = 0;
+  for (const r of rows) {
+    const st = r.source_term || ''; if (!st) continue; const key = st.toLowerCase() + '|' + direction; const prev = map.get(key);
+    const val = validated ? 'true' : (prev ? prev[9] : 'false');
+    const row = [st, r.target_term || '', direction, cat, r.software || 'general', r.subject || '', r.category || '', r.context_note || '', r.do_not_translate ? 'true' : 'false', val, prev ? (prev[10] || course) : course, today];
+    if (prev) updated++; else added++; map.set(key, row);
+  }
+  const all = [...map.values()].sort((a, b) => (a[4] + a[6] + a[0]).localeCompare(b[4] + b[6] + b[0]));
+  fsx.writeFileSync(file, TM_HEADER + '\n' + all.map(r => TM_COLS.map((_, i) => csvCell(r[i])).join(',')).join('\n') + '\n');
+  const rel = path.relative(REPO_DIR, file);
+  execSync(`git add "${rel}"`, { cwd: REPO_DIR, stdio: 'pipe' });
+  execSync(`git commit -m "tm(archivist): +${added}/~${updated} — ${cat}${validated ? ' [validated]' : ''} (${course})"`, { cwd: REPO_DIR, stdio: 'pipe' });
+  try { execSync('git pull --rebase origin main', { cwd: REPO_DIR, stdio: 'pipe' }); } catch (e) {}
+  execSync('git push origin main', { cwd: REPO_DIR, stdio: 'pipe' });
+  return { file: path.basename(file), added, updated, total: all.length };
+}
+app.post('/api/tm/ingest', async (req, res) => {
+  const p = req.body || {};
+  let fr = p.fr_html || '', en = p.en_html || '';
+  if (p.fr_base64) fr = Buffer.from(p.fr_base64, 'base64').toString('utf-8');
+  if (p.en_base64) en = Buffer.from(p.en_base64, 'base64').toString('utf-8');
+  if (!fr || !en) return res.status(400).json({ error: 'fr + en requis (html ou base64)' });
+  const strip = h => h.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const dir = p.direction || 'fr>en';
+  try {
+    const ar = await fetch(WH_ADHOC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'archivist_extract', fr_text: strip(fr), en_text: strip(en), domain: p.domain || '', direction: dir }) }).then(r => r.json());
+    if (!ar || !ar.ok) return res.status(500).json({ error: 'archivist: ' + ((ar && ar.error) || '?') });
+    const cat = ar.oc_category || 'Other/Uncategorized'; const rows = ar.rows || [];
+    if (!rows.length) return res.json({ ok: true, category: cat, added: 0, updated: 0, total: 0, note: 'aucun terme extrait' });
+    res.json({ ok: true, category: cat, ...mergeTmRows(cat, rows, dir, p.course_id || 'corpus', true) });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+app.get('/api/tm/list', (req, res) => {
+  try {
+    fsx.mkdirSync(TM_DIR, { recursive: true });
+    const files = fsx.readdirSync(TM_DIR).filter(f => f.endsWith('.csv'));
+    const cats = files.map(f => { const ls = fsx.readFileSync(path.join(TM_DIR, f), 'utf-8').split(/\r?\n/).filter(l => l.trim()); const rows = ls.slice(1).map(parseCsvLine); return { category: f.replace(/\.csv$/, '').replace(/_/g, ' '), file: f, terms: rows.length, validated: rows.filter(c => c[9] === 'true').length }; }).sort((a, b) => b.terms - a.terms);
+    res.json({ ok: true, categories: cats, total: cats.reduce((a, b) => a + b.terms, 0), repo: `https://github.com/${REPO}/tree/main/02_glossaires/translation_memory` });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
+app.get('/api/tm/search', (req, res) => {
+  const q = String(req.query.q || '').trim().toLowerCase(); const onlyCat = req.query.category ? safeCat(req.query.category) : null;
+  if (!q) return res.status(400).json({ error: 'q requis' });
+  try {
+    fsx.mkdirSync(TM_DIR, { recursive: true });
+    const files = fsx.readdirSync(TM_DIR).filter(f => f.endsWith('.csv') && (!onlyCat || f === onlyCat + '.csv'));
+    const hits = [];
+    for (const f of files) {
+      const ls = fsx.readFileSync(path.join(TM_DIR, f), 'utf-8').split(/\r?\n/).filter(l => l.trim());
+      ls.slice(1).forEach(l => { const c = parseCsvLine(l); if ((c[0] || '').toLowerCase().includes(q) || (c[1] || '').toLowerCase().includes(q)) hits.push({ source_term: c[0], target_term: c[1], direction: c[2], domain: c[3], software: c[4], subject: c[5], category: c[6], context_note: c[7], validated: c[9] === 'true' }); });
+    }
+    hits.sort((a, b) => { const ae = (a.source_term.toLowerCase() === q || a.target_term.toLowerCase() === q) ? 0 : 1; const be = (b.source_term.toLowerCase() === q || b.target_term.toLowerCase() === q) ? 0 : 1; return ae - be; });
+    res.json({ ok: true, q, count: hits.length, hits: hits.slice(0, 60) });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 

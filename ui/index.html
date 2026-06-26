@@ -111,6 +111,7 @@
     <div class="nav" data-v="assets"><span class="ic">🎯</span> Assets à la demande</div>
     <div class="nav" data-v="suivi"><span class="ic">📡</span> Suivi <span class="badge" id="suiviBadge" style="display:none"></span></div>
     <div class="nav" data-v="revue"><span class="ic">✅</span> Revue</div>
+    <div class="nav" data-v="tmagent"><span class="ic">🗂️</span> TM Agent</div>
     <div class="pillars"><div><i style="background:#7c3aed"></i>Localisation Thinking</div><div><i style="background:#22c55e"></i>1st Quality Check</div><div><i style="background:#2f6bff"></i>Full Automated</div><div><i style="background:#f59e0b"></i>AI Agent Coordination</div></div>
     <div class="byoc">✦ by <b>OpenClassrooms</b></div>
   </aside>
@@ -266,6 +267,46 @@
     </section>
 
     <!-- ====================== ASSETS À LA DEMANDE ======================== -->
+    <!-- ====================== TM AGENT ========================= -->
+    <section class="view" id="v-tmagent">
+      <div class="pagehead"><h1>TM Agent — Mémoire de traduction</h1><p>L'archiviste qui capitalise la terminologie validée, <b>par catégorie OpenClassrooms</b> (avec software, sujet, swaps culturels). Interroge · nourris · consolide.</p></div>
+      <div class="grid"><div class="col">
+        <div class="card tool">
+          <div class="ch"><div class="ico">🔎</div><div><h2>Interroger la mémoire</h2><div class="sub">Même terme, traduction selon le domaine</div></div></div>
+          <div class="cb">
+            <div style="display:flex;gap:8px"><input type="text" id="tmQ" placeholder="terme FR ou EN (ex. cahier de recette)" style="flex:1" onkeydown="if(event.key==='Enter')tmSearch()"><button class="sbtn go" onclick="tmSearch()">Chercher</button></div>
+            <div id="tmSearchRes" style="margin-top:10px"></div>
+          </div>
+        </div>
+        <div class="card tool">
+          <div class="ch"><div class="ico">📥</div><div><h2>Ingérer une paire validée (FR + LOCALISÉ)</h2><div class="sub">Tes HTML QA-validés → termes <b>validated</b> (autorité max)</div></div></div>
+          <div class="cb">
+            <div class="row2">
+              <div class="f"><label>HTML source (FR) <span class="req">*</span></label><input type="file" id="tmFr" accept=".html,.htm,.txt"></div>
+              <div class="f"><label>HTML localisé <span class="req">*</span></label><input type="file" id="tmEn" accept=".html,.htm,.txt"></div>
+            </div>
+            <div class="row2">
+              <div class="f"><label>Course ID (option)</label><input type="text" id="tmCid" placeholder="ex. 9073871"></div>
+              <div class="f"><label>Direction</label><select id="tmDir"><option>fr>en</option><option>en>fr</option></select></div>
+            </div>
+            <button class="btn btn-go" id="tmIngestBtn" onclick="tmIngest()">📥 Archiver (validé)</button>
+            <div class="mini" id="tmIngestMsg" style="text-align:center"></div>
+          </div>
+        </div>
+        <div class="card tool">
+          <div class="ch"><div class="ico">♻️</div><div><h2>Consolider un run du pipeline</h2><div class="sub">Termes A2 d'un run (non validés)</div></div></div>
+          <div class="cb">
+            <div style="display:flex;gap:8px"><input type="text" id="tmRunId" placeholder="Source Course ID (ex. 2356306)" style="flex:1" inputmode="numeric"><button class="sbtn go" onclick="tmConsolidate()">Consolider</button></div>
+            <div class="mini" id="tmConsMsg" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ico">📚</div><div><h2>État de la mémoire</h2><div class="sub">1 CSV par catégorie OC</div></div></div>
+          <div class="cb" id="tmListBody"><div class="empty" style="padding:14px">Chargement…</div></div>
+        </div>
+      </div></div>
+    </section>
+
     <section class="view" id="v-assets">
       <div class="pagehead"><h1>Assets à la demande</h1><p>Localise n'importe quel fichier (image ou document) <b>sans pipeline</b>, piloté par un prompt. Mise en forme préservée. Routage automatique par type.</p></div>
       <div class="grid">
@@ -339,7 +380,7 @@ const courseInfo=()=>{ if(!isCours())return null; const l=live[S.targetId]; if(l
 const phase1Done=()=>isCours()&&(S.simP1||!!(courseInfo()&&courseInfo().done));
 const p2Available=()=>phase1Done()||S.p1_localize;
 
-document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x===n));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('v-'+n.dataset.v).classList.add('on');if(n.dataset.v==='suivi')fetchRuns();}));
+document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x===n));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('v-'+n.dataset.v).classList.add('on');if(n.dataset.v==='suivi')fetchRuns();if(n.dataset.v==='tmagent')tmList();}));
 document.querySelectorAll('#ctype button').forEach(b=>b.addEventListener('click',()=>{S.ctype=b.dataset.t;document.querySelectorAll('#ctype button').forEach(x=>x.classList.toggle('on',x===b));render();}));
 const bindT=(id,k,f)=>$(id).addEventListener('input',e=>{let v=e.target.value;if(f)v=f(v);e.target.value=v;S[k]=v;render();});
 bindT('sourceId','sourceId',v=>v.replace(/\D/g,'')); bindT('pathId','pathId',v=>v.replace(/\D/g,''));
@@ -489,6 +530,12 @@ async function fetchRuns(){
   }catch(e){ $('suiviLive').style.display='none'; body.innerHTML='<tr><td colspan="5" class="empty">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code> puis ouvre http://localhost:4317</td></tr>'; }
 }
 setInterval(fetchRuns,8000); fetchRuns(); // badge runs en cours + table si onglet Suivi
+
+/* ===================== TM AGENT ===================== */
+async function tmList(){ const b=$('tmListBody'); if(!b)return; try{ const d=await (await fetch('/api/tm/list')).json(); b.innerHTML=(d.categories&&d.categories.length)? '<table style="width:100%"><thead><tr><th>Catégorie OC</th><th>Termes</th><th>Validés</th></tr></thead><tbody>'+d.categories.map(c=>`<tr><td><b>${c.category}</b></td><td>${c.terms}</td><td>${c.validated}</td></tr>`).join('')+`</tbody></table><div class="mini" style="margin-top:8px">Total : <b>${d.total}</b> termes · <a href="${d.repo}" target="_blank" rel="noopener">voir sur GitHub</a></div>` : '<div class="empty" style="padding:14px">TM vide — ingère une paire validée ou consolide un run.</div>'; }catch(e){ b.innerHTML='<div class="empty" style="padding:14px">⚠️ BFF non connecté.</div>'; } }
+async function tmSearch(){ const q=($('tmQ').value||'').trim(); const r=$('tmSearchRes'); if(!q){r.innerHTML='<div class="mini">Entre un terme.</div>';return;} r.innerHTML='<div class="mini">…</div>'; try{ const d=await (await fetch('/api/tm/search?q='+encodeURIComponent(q))).json(); if(!d.hits||!d.hits.length){r.innerHTML='<div class="mini">Aucun match pour <b>'+q+'</b> dans la mémoire.</div>';return;} r.innerHTML='<table style="width:100%"><thead><tr><th>Source</th><th>Cible</th><th>Domaine OC</th><th>Software</th><th>Catég.</th></tr></thead><tbody>'+d.hits.map(h=>`<tr><td>${h.source_term}</td><td><b>${h.target_term}</b></td><td>${h.domain}</td><td>${h.software}</td><td class="mini">${h.category}${h.validated?' ✓':''}</td></tr>`).join('')+`</tbody></table><div class="mini" style="margin-top:6px">${d.count} match(s) — note comme le même terme diffère selon le <b>domaine</b>.</div>`; }catch(e){ r.innerHTML='<div class="mini">⚠️ BFF non connecté.</div>'; } }
+async function tmConsolidate(){ const id=($('tmRunId').value||'').replace(/\D/g,''); const m=$('tmConsMsg'); if(!id){m.textContent='Entre un Source Course ID.';return;} m.textContent='⏳ Archiviste en cours…'; try{ const d=await (await fetch('/api/tm/consolidate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_course_id:id})})).json(); if(d.ok){ m.innerHTML='✅ <b>'+d.category+'</b> : +'+d.added+' / ~'+d.updated+' (total '+d.total+')'; tmList(); } else m.textContent='⚠️ '+(d.error||'erreur'); }catch(e){ m.textContent='⚠️ BFF injoignable.'; } }
+async function tmIngest(){ const fr=$('tmFr').files[0], en=$('tmEn').files[0]; const m=$('tmIngestMsg'); if(!fr||!en){m.textContent='Fournis le HTML FR et le localisé.';return;} const b=$('tmIngestBtn'),old=b.textContent; b.disabled=true; b.textContent='⏳ Archivage…'; m.textContent=''; const rd=f=>new Promise(rs=>{const r=new FileReader();r.onload=()=>rs(btoa(unescape(encodeURIComponent(String(r.result)))));r.readAsText(f);}); try{ const fb=await rd(fr), eb=await rd(en); const d=await (await fetch('/api/tm/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fr_base64:fb,en_base64:eb,course_id:($('tmCid').value||'').trim(),direction:$('tmDir').value})})).json(); if(d.ok){ m.innerHTML='✅ <b>'+d.category+'</b> : +'+d.added+' / ~'+d.updated+' termes <b>validés</b> (total '+d.total+')'+(d.note?' — '+d.note:''); tmList(); } else m.textContent='⚠️ '+(d.error||'erreur'); }catch(e){ m.textContent='⚠️ BFF injoignable.'; } b.disabled=false; b.textContent=old; }
 
 /* ===================== REVUE (live A5 / A8 / A10) ===================== */
 let REV={};
