@@ -1,0 +1,159 @@
+source_term,target_term,direction,domain,software,subject,category,context_note,do_not_translate,validated,first_seen_course,last_updated
+Chrome,Chrome,fr>en,Development,Chrome,Web browsers,product_name,Google browser used in a testing-principles example.,true,true,corpus,2026-06-26
+Docker,Docker,fr>en,Development,Docker,Local development environment,product_name,Tool used to install and run the course website locally.,true,true,corpus,2026-06-26
+conteneur,container,fr>en,Development,Docker,Docker environment,technical_term,Docker container containing the website.,false,true,corpus,2026-06-26
+docker-compose up,docker-compose up,fr>en,Development,Docker,Docker commands,technical_term,Command to start the local Docker container.,true,true,corpus,2026-06-26
+virtualisation,virtual environment,fr>en,Development,Docker,Docker environment,technical_term,Target describes Docker as running a lightweight virtual environment.,false,true,corpus,2026-06-26
+version .xlsx,xlsx format,fr>en,Development,Excel,File formats,technical_term,Spreadsheet file format used for course templates and activities.,false,true,corpus,2026-06-26
+Firefox,Firefox,fr>en,Development,Firefox,Web browsers,product_name,Mozilla browser used in a testing-principles example.,true,true,corpus,2026-06-26
+API,APIs,fr>en,Development,general,Software architecture,acronym,Application Programming Interfaces; acronym retained and pluralized in context.,true,true,corpus,2026-06-26
+FAIL,FAIL,fr>en,Development,general,Test status,acronym,English status indicator used to mark a failed test.,true,true,corpus,2026-06-26
+IHM,HMI,fr>en,Development,general,Front-end testing,acronym,French acronym converted to its English equivalent.,false,true,corpus,2026-06-26
+Interface Homme-Machine,HMI,fr>en,Development,general,Front-end testing,acronym,"Human-machine interface, abbreviated as HMI in the target.",false,true,corpus,2026-06-26
+ISTQB,ISTQB,fr>en,Development,general,Software testing certification,acronym,International software testing qualifications organization; acronym retained.,true,true,corpus,2026-06-26
+KO,KO,fr>en,Development,general,Test status,acronym,Status indicator used to mark a failed test; kept as-is in the target.,true,true,corpus,2026-06-26
+OK,OK,fr>en,Development,general,Test status,acronym,Status indicator used to mark a successful test.,true,true,corpus,2026-06-26
+OS,OSs,fr>en,Development,general,Operating systems,acronym,"Acronym for operating systems, pluralized in the target.",true,true,corpus,2026-06-26
+PASS,PASS,fr>en,Development,general,Test status,acronym,English status indicator used to mark a successful test.,true,true,corpus,2026-06-26
+PO,PO,fr>en,Development,general,Agile roles,acronym,Acronym for Product Owner; retained.,true,true,corpus,2026-06-26
+QA,QA,fr>en,Development,general,Quality assurance,acronym,Acronym retained for Quality Assurance.,true,true,corpus,2026-06-26
+UI,UI,fr>en,Development,general,User interface design,acronym,Acronym for user interface; retained.,true,true,corpus,2026-06-26
+URL,URL,fr>en,Development,general,Web testing,acronym,Web address acronym retained.,true,true,corpus,2026-06-26
+UX,UX,fr>en,Development,general,User experience design,acronym,Acronym for user experience; retained.,true,true,corpus,2026-06-26
+JFTL,Association for Software Testing website,fr>en,Development,general,Professional development in testing,cultural_swap,A France-specific acronym was not retained; it was adapted to an English-language professional testing resource for the target audience.,false,true,corpus,2026-06-26
+Journée française des tests logiciels ( JFTL ),Association for Software Testing website,fr>en,Development,general,Professional development in testing,cultural_swap,"French-specific testing conference/resource was replaced by a more broadly relevant English-language testing association resource; use this kind of adaptation only when local training/conference examples need localization, not for technical terms.",false,true,corpus,2026-06-26
+International Software Testing Qualifications Board,International Software Testing Qualifications Board,fr>en,Development,general,Software testing certification,institutional,Full name of ISTQB; retained in English.,true,true,corpus,2026-06-26
+architecte technique,Technical Architect,fr>en,Development,general,Software architecture roles,job_title,Role helping translate user stories into technical specifications.,false,true,corpus,2026-06-26
+business analyste,business analyst,fr>en,Development,general,Project roles,job_title,Role that writes specifications in non-agile teams.,false,true,corpus,2026-06-26
+chef de projet,project manager,fr>en,Development,general,Project roles,job_title,Role replacing the Product Owner in a sequential team in the validated target.,false,true,corpus,2026-06-26
+développeur,Developer,fr>en,Development,general,Software development roles,job_title,Role responsible for building software features.,false,true,corpus,2026-06-26
+lead QA,QA Lead,fr>en,Development,general,Quality assurance roles,job_title,Alternative word order used in the validated target for the lead QA role.,false,true,corpus,2026-06-26
+manager de test,Test Manager,fr>en,Development,general,Quality assurance roles,job_title,Alternative role title for lead QA.,false,true,corpus,2026-06-26
+Product Owner,Product Owner,fr>en,Development,general,Agile roles,job_title,Agile role representing the customer and defining features.,true,true,corpus,2026-06-26
+responsable de la qualité,Quality Manager,fr>en,Development,general,Quality assurance roles,job_title,Role title given in parentheses for Lead QA.,false,true,corpus,2026-06-26
+responsable de qualification,Quality Manager,fr>en,Development,general,Quality assurance roles,job_title,Alternative French role title mapped to the validated English role title.,false,true,corpus,2026-06-26
+Scrum Master,Scrum Master,fr>en,Development,general,Agile roles,job_title,Agile role responsible for supporting Scrum practices.,true,true,corpus,2026-06-26
+testeur,Tester,fr>en,Development,general,Software testing roles,job_title,Role responsible for verifying software quality.,false,true,corpus,2026-06-26
+testeur logiciel,software tester,fr>en,Development,general,Software testing roles,job_title,Role responsible for testing software and reporting defects.,false,true,corpus,2026-06-26
+UI Designer,UI Designer,fr>en,Development,general,Design roles,job_title,Role arranging and styling screens for clarity and intuitiveness.,true,true,corpus,2026-06-26
+UX Designer,UX Designer,fr>en,Development,general,Design roles,job_title,Role mapping user flows and screen sequences.,true,true,corpus,2026-06-26
+UX/UI Designers,UX/UI Designers,fr>en,Development,general,Design roles,job_title,Combined user experience and user interface design roles; retained.,true,true,corpus,2026-06-26
+cahier de recette,test plan,fr>en,Development,general,Test documentation,methodological,Validated target uses 'test plan' for the French testing document listing test scenarios and expected results.,false,true,corpus,2026-06-26
+cahier de test,test book,fr>en,Development,general,Test documentation,methodological,Presented as a synonym for test plan/test documentation.,false,true,corpus,2026-06-26
+campagne de test,test campaign,fr>en,Development,general,Test management,methodological,Also used for the structured campaign behind test scenarios.,false,true,corpus,2026-06-26
+cas de test,test case,fr>en,Development,general,Test design,methodological,Basic element used to validate specific requirements.,false,true,corpus,2026-06-26
+cycle de vie d’un projet,project lifecycle,fr>en,Development,general,Project lifecycle,methodological,Lifecycle in which the tester’s role is positioned.,false,true,corpus,2026-06-26
+cycle en V,V-cycle model,fr>en,Development,general,Development models,methodological,Sequential model pairing production phases with corresponding tests.,false,true,corpus,2026-06-26
+développement itératif,iterative development,fr>en,Development,general,Development models,methodological,Development through repeated iterations.,false,true,corpus,2026-06-26
+développement séquentiel,sequential development,fr>en,Development,general,Development models,methodological,Development model in which phases follow one another.,false,true,corpus,2026-06-26
+méthode agile,agile methodology,fr>en,Development,general,Agile development,methodological,Incremental and iterative development approach.,false,true,corpus,2026-06-26
+modèle en cascade,waterfall model,fr>en,Development,general,Development models,methodological,Sequential software development model.,false,true,corpus,2026-06-26
+modèle incrémental et itératif,incremental and iterative model,fr>en,Development,general,Development models,methodological,Model used to describe agile development.,false,true,corpus,2026-06-26
+pilotage des tests,test management,fr>en,Development,general,Test management,methodological,Managing and steering testing activities.,false,true,corpus,2026-06-26
+plan de test,test plan,fr>en,Development,general,Test documentation,methodological,"Document describing scope, approach, resources, and schedule for testing activities.",false,true,corpus,2026-06-26
+pyramide de tests,test pyramid,fr>en,Development,general,Test levels,methodological,Diagram organizing test levels.,false,true,corpus,2026-06-26
+pyramide de tests par niveaux,test pyramid by level,fr>en,Development,general,Test levels,methodological,ISTQB-style representation of levels of testing.,false,true,corpus,2026-06-26
+scénario de test,test scenario,fr>en,Development,general,Test design,methodological,Sequence of steps or test cases covering a complete flow.,false,true,corpus,2026-06-26
+stratégie de test,test strategy,fr>en,Development,general,Test management,methodological,High-level coordination step for the testing process.,false,true,corpus,2026-06-26
+À vous de jouer,Over to You!,fr>en,Development,general,Course pedagogy,pedagogical,OpenClassrooms activity section label.,false,true,corpus,2026-06-26
+corrigé,answers,fr>en,Development,general,Course pedagogy,pedagogical,Validated target uses 'answers' for correction files or answer keys.,false,true,corpus,2026-06-26
+En résumé,Summary,fr>en,Development,general,Course pedagogy,pedagogical,OpenClassrooms summary section label.,false,true,corpus,2026-06-26
+Objectifs pédagogiques,"By the end of this course, you'll be able to:",fr>en,Development,general,Course pedagogy,pedagogical,Learning objectives heading rendered as an outcome sentence in the target.,false,true,corpus,2026-06-26
+projet fil rouge,running case study,fr>en,Development,general,Course pedagogy,pedagogical,Course-long practical project used for applied learning.,false,true,corpus,2026-06-26
+Jardin Actuel,Current Garden,fr>en,Development,general,Course case study,proper_noun,Validated target occasionally translates the fictitious site name in file/container/blog references.,false,true,corpus,2026-06-26
+anomalie,defect,fr>en,Development,general,Defect management,technical_term,Used for a software issue found during testing.,false,true,corpus,2026-06-26
+anomalies,bugs,fr>en,Development,general,Defect management,technical_term,Used when referring to defects found or tracked by testers.,false,true,corpus,2026-06-26
+assurance qualité,Quality Assurance,fr>en,Development,general,Quality assurance,technical_term,French equivalent explained for QA.,false,true,corpus,2026-06-26
+automatisation,automate tests,fr>en,Development,general,Test automation,technical_term,Creating scripts that run tests without human intervention.,false,true,corpus,2026-06-26
+backlog,backlog,fr>en,Development,general,Agile product management,technical_term,Agile product backlog; term retained.,true,true,corpus,2026-06-26
+besoin utilisateur,user expectations,fr>en,Development,general,Requirements,technical_term,User need or expectation to be validated by acceptance testing.,false,true,corpus,2026-06-26
+boucle de feedback,feedback loop,fr>en,Development,general,Team collaboration,technical_term,Cycle through which a team receives and acts on feedback.,false,true,corpus,2026-06-26
+cahier des charges,technical specifications,fr>en,Development,general,Requirements,technical_term,Source document or specifications defining what must be built.,false,true,corpus,2026-06-26
+cas aux limites,boundary cases,fr>en,Development,general,Test design,technical_term,Cases that push the software to its limits.,false,true,corpus,2026-06-26
+cas nominal,nominal case,fr>en,Development,general,Test design,technical_term,Expected or standard path for which the software was specified.,false,true,corpus,2026-06-26
+chemin détourné,non-nominal case,fr>en,Development,general,Test design,technical_term,Unexpected or alternative user behavior outside the nominal path.,false,true,corpus,2026-06-26
+compatibilité,compatibility,fr>en,Development,general,Non-functional testing,technical_term,"Ability to run across operating systems, browsers, or devices.",false,true,corpus,2026-06-26
+critères d’acceptation,acceptance criteria,fr>en,Development,general,Agile requirements,technical_term,Minimum expected quality criteria for validating a feature.,false,true,corpus,2026-06-26
+déployer en production,deploy to production,fr>en,Development,general,Deployment,technical_term,Release software into the production environment.,false,true,corpus,2026-06-26
+données de test,test data,fr>en,Development,general,Test data,technical_term,Data needed to execute test cases.,false,true,corpus,2026-06-26
+environnement de production,production environment,fr>en,Development,general,Deployment environments,technical_term,Live environment used by real users.,false,true,corpus,2026-06-26
+environnement de recette,acceptance environment,fr>en,Development,general,Test environments,technical_term,Dedicated non-production environment used for acceptance testing.,false,true,corpus,2026-06-26
+environnement de test,test environment,fr>en,Development,general,Test execution,technical_term,Environment prepared for running tests.,false,true,corpus,2026-06-26
+ergonomie et utilisabilité,ergonomics and usability,fr>en,Development,general,Non-functional testing,technical_term,Ease of use and user-centered quality attributes.,false,true,corpus,2026-06-26
+exigences,requirements,fr>en,Development,general,Requirements,technical_term,Requirements that software must meet.,false,true,corpus,2026-06-26
+expérience utilisateur,user experience,fr>en,Development,general,UX design,technical_term,User's overall experience using a product.,false,true,corpus,2026-06-26
+Front Web,Front-End,fr>en,Development,general,Front-end testing,technical_term,Refers to the user-facing web interface.,false,true,corpus,2026-06-26
+Front-End,Front-End,fr>en,Development,general,Front-end testing,technical_term,English term retained for the client-facing interface layer.,true,true,corpus,2026-06-26
+graphique radar,radar chart,fr>en,Development,general,Self-assessment activity,technical_term,Visual tool used for self-assessment across tester qualities.,false,true,corpus,2026-06-26
+http://localhost:8080,http://localhost:8080,fr>en,Development,general,Local web testing,technical_term,Local URL used to access the test website.,true,true,corpus,2026-06-26
+identifiant client,customer ID,fr>en,Development,general,Test data,technical_term,Example of test data for an e-commerce site.,false,true,corpus,2026-06-26
+illusion d’absence d’erreur,illusion of being error-free,fr>en,Development,general,Testing principles,technical_term,Principle that lack of detected defects does not prove absence of defects.,false,true,corpus,2026-06-26
+jeu de données,data set,fr>en,Development,general,Test data,technical_term,Representative data used in testing.,false,true,corpus,2026-06-26
+jeux de test,test sets,fr>en,Development,general,Test data,technical_term,Validated target presents test sets as synonymous with test data/data sets.,false,true,corpus,2026-06-26
+localhost,localhost,fr>en,Development,general,Local web testing,technical_term,Standard hostname for local machine access.,true,true,corpus,2026-06-26
+mise en ligne,go live,fr>en,Development,general,Deployment,technical_term,Publishing a website or software product for users.,false,true,corpus,2026-06-26
+mise en production,goes into production,fr>en,Development,general,Deployment,technical_term,Moment when a system is released to the production environment.,false,true,corpus,2026-06-26
+mise en service,Go-live,fr>en,Development,general,Deployment,technical_term,Final deployment or launch phase in the lifecycle.,false,true,corpus,2026-06-26
+montée en charge,load scaling,fr>en,Development,general,Non-functional testing,technical_term,Gradually increasing requests to find the system limit.,false,true,corpus,2026-06-26
+navigateur web,web browser,fr>en,Development,general,Web testing,technical_term,Browser used to access and test websites.,false,true,corpus,2026-06-26
+outil de suivi,tracking tool,fr>en,Development,general,Defect management,technical_term,Tool used to log and monitor anomalies.,false,true,corpus,2026-06-26
+paradoxe du pesticide,pesticide paradox,fr>en,Development,general,Testing principles,technical_term,Testing principle stating repeated identical tests become less effective at finding new defects.,false,true,corpus,2026-06-26
+parcours utilisateurs,user flows,fr>en,Development,general,UX design,technical_term,Sequence of screens or steps followed by users.,false,true,corpus,2026-06-26
+performance,performance,fr>en,Development,general,Non-functional testing,technical_term,Quality attribute related to speed and response time.,true,true,corpus,2026-06-26
+qualité logicielle,software quality,fr>en,Development,general,Software testing fundamentals,technical_term,Quality of a software product as assessed through testing.,false,true,corpus,2026-06-26
+Quality Assurance,Quality Assurance,fr>en,Development,general,Quality assurance,technical_term,English full form used in both source and target.,true,true,corpus,2026-06-26
+rapport d’anomalies,bug report,fr>en,Development,general,Defect reporting,technical_term,Report containing information needed to reproduce and fix a defect.,false,true,corpus,2026-06-26
+référence d’article,item reference,fr>en,Development,general,Test data,technical_term,Example of test data for an e-commerce application.,false,true,corpus,2026-06-26
+régression,regression,fr>en,Development,general,Regression testing,technical_term,A defect introduced in functionality that previously worked.,false,true,corpus,2026-06-26
+regroupement de défauts,Defects tend to cluster,fr>en,Development,general,Testing principles,technical_term,Principle that defects often appear near other defects.,false,true,corpus,2026-06-26
+rejouer le test,replay tests,fr>en,Development,general,Test execution,technical_term,Run a test again under the same conditions.,false,true,corpus,2026-06-26
+reproductible,reproducible,fr>en,Development,general,Defect analysis,technical_term,A failure must be reproducible to be investigated reliably.,false,true,corpus,2026-06-26
+résultat attendu,expected result,fr>en,Development,general,Test execution,technical_term,Outcome expected for a test step or case.,false,true,corpus,2026-06-26
+résultat obtenu,actual result,fr>en,Development,general,Test execution,technical_term,Observed outcome during test execution.,false,true,corpus,2026-06-26
+rétrospectives,Sprint Retrospectives,fr>en,Development,general,Agile ceremonies,technical_term,Agile meetings for reviewing what went well and what can improve.,false,true,corpus,2026-06-26
+robustesse,robustness,fr>en,Development,general,Non-functional testing,technical_term,Ability of a system to remain stable under demanding or abnormal conditions.,false,true,corpus,2026-06-26
+run de test,test run,fr>en,Development,general,Test execution,technical_term,One execution of a test or set of tests.,false,true,corpus,2026-06-26
+scripts,scripts,fr>en,Development,general,Test automation,technical_term,Programs or commands used to automate testing.,true,true,corpus,2026-06-26
+Scrum,Scrum,fr>en,Development,general,Agile framework,technical_term,Agile framework; name retained.,true,true,corpus,2026-06-26
+sécurité,security,fr>en,Development,general,Non-functional testing,technical_term,Testing to protect user data and prevent misuse.,false,true,corpus,2026-06-26
+site e-commerce,e-commerce site,fr>en,Development,general,Web applications,technical_term,Website used for online commerce.,false,true,corpus,2026-06-26
+spécifications,specifications,fr>en,Development,general,Requirements,technical_term,Defined requirements used to build and test the product.,false,true,corpus,2026-06-26
+sprint,sprint,fr>en,Development,general,Agile development,technical_term,Short agile work cycle; term retained.,true,true,corpus,2026-06-26
+sprints,sprints,fr>en,Development,general,Agile development,technical_term,Plural of sprint; retained in English.,true,true,corpus,2026-06-26
+stand-ups daily meeting,daily stand-ups,fr>en,Development,general,Agile ceremonies,technical_term,Short daily agile meetings for team alignment.,false,true,corpus,2026-06-26
+suivre les anomalies,track bugs,fr>en,Development,general,Defect management,technical_term,Activity of monitoring reported defects.,false,true,corpus,2026-06-26
+test a échoué,test fails,fr>en,Development,general,Test status,technical_term,Indicates that actual and expected results do not match.,false,true,corpus,2026-06-26
+test logiciel,software testing,fr>en,Development,general,Software testing fundamentals,technical_term,Core course topic; refers to the practice and discipline of testing software.,false,true,corpus,2026-06-26
+test passant,test passes,fr>en,Development,general,Test status,technical_term,Indicates that actual and expected results match.,false,true,corpus,2026-06-26
+tester “presse-bouton”,“button-presser” tester,fr>en,Development,general,Tester roles,technical_term,Informal label for a tester who only executes predefined test steps.,false,true,corpus,2026-06-26
+tests d’acceptation,acceptance testing,fr>en,Development,general,Test levels,technical_term,Test level validating conformity with end-user or customer expectations.,false,true,corpus,2026-06-26
+tests d’intégrations,integration testing,fr>en,Development,general,Test levels,technical_term,Test level verifying interactions between components.,false,true,corpus,2026-06-26
+tests de charge,load tests,fr>en,Development,general,Non-functional testing,technical_term,Tests that evaluate behavior under load.,false,true,corpus,2026-06-26
+tests de composants,component testing,fr>en,Development,general,Test levels,technical_term,Synonym for unit-level tests in the ISTQB test levels.,false,true,corpus,2026-06-26
+tests de non-régression,regression tests,fr>en,Development,general,Regression testing,technical_term,Validated target notes that non-regression tests and regression tests refer to the same concept.,false,true,corpus,2026-06-26
+tests de performance,performance tests,fr>en,Development,general,Non-functional testing,technical_term,Tests that assess response time and performance.,false,true,corpus,2026-06-26
+tests de régression,regression tests,fr>en,Development,general,Regression testing,technical_term,Tests ensuring a change or fix did not break previously working functionality.,false,true,corpus,2026-06-26
+tests de stress,stress tests,fr>en,Development,general,Non-functional testing,technical_term,Tests that push the system under extreme conditions.,false,true,corpus,2026-06-26
+tests exhaustifs,Exhaustive testing,fr>en,Development,general,Testing principles,technical_term,Testing principle stating that testing all possible cases is impossible.,false,true,corpus,2026-06-26
+tests exploratoires,exploratory tests,fr>en,Development,general,Test types,technical_term,Informal exploration-based testing used to find additional defects.,false,true,corpus,2026-06-26
+tests fonctionnels,functional tests,fr>en,Development,general,Test types,technical_term,Tests that verify product features work as expected.,false,true,corpus,2026-06-26
+tests non fonctionnels,non-functional tests,fr>en,Development,general,Test types,technical_term,"Tests assessing qualities such as robustness, performance, compatibility, usability, and security.",false,true,corpus,2026-06-26
+tests système,system testing,fr>en,Development,general,Test levels,technical_term,Test level validating the assembled system against specifications.,false,true,corpus,2026-06-26
+tests unitaires,unit testing,fr>en,Development,general,Test levels,technical_term,Test level performed by developers on individual components.,false,true,corpus,2026-06-26
+User Stories,User Stories,fr>en,Development,general,Agile requirements,technical_term,Agile artifacts describing features from the end-user perspective.,true,true,corpus,2026-06-26
+User Story,User Story,fr>en,Development,general,Agile requirements,technical_term,Singular form of the agile artifact.,true,true,corpus,2026-06-26
+utilisateurs finaux,end-user,fr>en,Development,general,User needs,technical_term,Users for whom the software is ultimately intended.,false,true,corpus,2026-06-26
+version .ods,.ods,fr>en,Development,general,File formats,technical_term,OpenDocument Spreadsheet extension; often kept as-is when mentioned.,true,true,corpus,2026-06-26
+voix du client,voice of the customer,fr>en,Development,general,Product management,technical_term,Product Owner role as representative of customer needs.,false,true,corpus,2026-06-26
+bouton “Payer”,“Pay” button,fr>en,Development,general,UI testing examples,ui_label,Example UI button label in an online payment test scenario.,false,true,corpus,2026-06-26
+colonne “Résultat”,“Result” column,fr>en,Development,general,Test plan UI labels,ui_label,Column in the test plan where test execution results are recorded.,false,true,corpus,2026-06-26
+Commentaire,Comment,fr>en,Development,general,Jardin Actuel test cases,ui_label,Name of one of the first Jardin Actuel test cases.,false,true,corpus,2026-06-26
+Inscription,Register,fr>en,Development,general,Jardin Actuel test cases,ui_label,Name of one of the first Jardin Actuel test cases.,false,true,corpus,2026-06-26
+Tri,Sort,fr>en,Development,general,Jardin Actuel test cases,ui_label,Name of one of the first Jardin Actuel test cases.,false,true,corpus,2026-06-26
+Casser les silos,Breaking down silos,fr>en,Development,general,Team collaboration,work_culture,Work-culture expression about improving cross-functional collaboration and feedback loops within a team.,false,true,corpus,2026-06-26
+culture de qualité,culture of quality,fr>en,Development,general,Quality assurance,work_culture,"Refers to a team mindset and shared work practice around quality, not a specific regulation or local culture.",false,true,corpus,2026-06-26
+Linux,Linux,fr>en,Development,Linux,Operating systems,product_name,Operating system mentioned for compatibility.,true,true,corpus,2026-06-26
+Mac OS,macOS,fr>en,Development,macOS,Operating systems,product_name,Validated target uses current Apple OS branding.,false,true,corpus,2026-06-26
+macOS,macOS,fr>en,Development,macOS,Operating systems,product_name,Apple operating system name retained.,true,true,corpus,2026-06-26
+PowerShell,PowerShell,fr>en,Development,PowerShell,Command-line tools,product_name,Windows terminal tool used to run Docker commands.,true,true,corpus,2026-06-26
+Windows,Windows,fr>en,Development,Windows,Operating systems,product_name,Operating system mentioned for compatibility and Docker instructions.,true,true,corpus,2026-06-26
