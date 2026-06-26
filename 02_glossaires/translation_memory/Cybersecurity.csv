@@ -1,0 +1,164 @@
+source_term,target_term,direction,domain,software,subject,category,context_note,do_not_translate,validated,first_seen_course,last_updated
+Any.run,Any.run,fr>en,Cybersecurity,Any.run,malware analysis tools,product_name,Named interactive malware analysis sandbox.,true,true,corpus,2026-06-26
+ELK,ELK,fr>en,Cybersecurity,ELK,log analysis platforms,acronym,Elastic stack acronym as used for log analysis.,true,true,corpus,2026-06-26
+Excel,Excel,fr>en,Cybersecurity,Excel,office software,product_name,Microsoft spreadsheet application named in malicious document examples.,true,true,corpus,2026-06-26
+antivirus (AV),antivirus (AV) software,fr>en,Cybersecurity,general,endpoint protection,acronym,Endpoint software for detecting malware.,false,true,corpus,2026-06-26
+CERT,CERT,fr>en,Cybersecurity,general,incident response teams,acronym,Cyber Emergency Response Team acronym as used in the target.,true,true,corpus,2026-06-26
+CISO,CISO,fr>en,Cybersecurity,general,security governance,acronym,Chief Information Security Officer acronym.,true,true,corpus,2026-06-26
+CSIRT,CSIRT,fr>en,Cybersecurity,general,incident response teams,acronym,Computer Security Incident Response Team acronym.,true,true,corpus,2026-06-26
+CTI,CTI,fr>en,Cybersecurity,general,threat intelligence,acronym,Cyber Threat Intelligence acronym.,true,true,corpus,2026-06-26
+CVE-2020-1472,CVE-2020-1472,fr>en,Cybersecurity,general,vulnerability identifiers,acronym,Common Vulnerabilities and Exposures identifier.,true,true,corpus,2026-06-26
+Cyber Threat Intelligence (CTI),Cyber Threat Intelligence (CTI),fr>en,Cybersecurity,general,threat intelligence,acronym,Threat intelligence discipline and acronym.,true,true,corpus,2026-06-26
+EBIOS RM,EBIOS RM,fr>en,Cybersecurity,general,risk analysis methodologies,acronym,Risk management methodology acronym kept unchanged.,true,true,corpus,2026-06-26
+EDR,EDR,fr>en,Cybersecurity,general,endpoint detection and response,acronym,Endpoint Detection and Response acronym.,true,true,corpus,2026-06-26
+EPP,EPP,fr>en,Cybersecurity,general,endpoint protection,acronym,Endpoint Protection Platform acronym.,true,true,corpus,2026-06-26
+I nformation S ystem (IS),I nformation S ystem (IS),fr>en,Cybersecurity,general,information systems,acronym,Spaced-out acronym presentation preserved in target course style.,false,true,corpus,2026-06-26
+IDS,IDS,fr>en,Cybersecurity,general,intrusion detection,acronym,Intrusion Detection System acronym.,true,true,corpus,2026-06-26
+IoC,IoC,fr>en,Cybersecurity,general,threat intelligence,acronym,Indicator of Compromise acronym.,true,true,corpus,2026-06-26
+IPS,IPS,fr>en,Cybersecurity,general,intrusion prevention,acronym,Intrusion Prevention System acronym.,true,true,corpus,2026-06-26
+ISO 27005,ISO 27005,fr>en,Cybersecurity,general,risk analysis standards,acronym,International risk management standard reference.,true,true,corpus,2026-06-26
+ITSM,ITSM,fr>en,Cybersecurity,general,service management,acronym,IT Service Management acronym used for incident-tracking platforms.,true,true,corpus,2026-06-26
+MDR,MDR,fr>en,Cybersecurity,general,managed detection and response,acronym,Managed Detection and Response acronym.,true,true,corpus,2026-06-26
+NDR,NDR,fr>en,Cybersecurity,general,network detection and response,acronym,Network Detection and Response acronym.,true,true,corpus,2026-06-26
+RAM,RAM,fr>en,Cybersecurity,general,memory analysis,acronym,Volatile memory analyzed during forensics.,true,true,corpus,2026-06-26
+RRA,RRA,fr>en,Cybersecurity,general,risk analysis methodologies,acronym,Risk analysis methodology acronym kept unchanged.,true,true,corpus,2026-06-26
+Security Operations Center (SOC),Security Operations Center (SOC),fr>en,Cybersecurity,general,SOC organization,acronym,Standard English expansion and acronym; keep SOC unchanged.,true,true,corpus,2026-06-26
+SI,IS,fr>en,Cybersecurity,general,information systems,acronym,French 'système d’information' acronym localized to English 'Information System'.,false,true,corpus,2026-06-26
+SIEM,SIEM,fr>en,Cybersecurity,general,security monitoring,acronym,Security Information and Event Management acronym.,true,true,corpus,2026-06-26
+SIRP,SIRP,fr>en,Cybersecurity,general,incident response platforms,acronym,Security Incident Response Platform acronym.,true,true,corpus,2026-06-26
+SOAR,SOAR,fr>en,Cybersecurity,general,security orchestration,acronym,"Security orchestration, automation and response acronym.",true,true,corpus,2026-06-26
+SOC,SOC,fr>en,Cybersecurity,general,SOC organization,acronym,Security Operations Center acronym.,true,true,corpus,2026-06-26
+TTP,TTPs,fr>en,Cybersecurity,general,threat intelligence,acronym,"Acronym for tactics, techniques, and procedures.",false,true,corpus,2026-06-26
+WAF,WAF,fr>en,Cybersecurity,general,web security,acronym,Web Application Firewall acronym.,true,true,corpus,2026-06-26
+XDR,XDR,fr>en,Cybersecurity,general,extended detection and response,acronym,Extended detection and response acronym.,true,true,corpus,2026-06-26
+YAML,YAML,fr>en,Cybersecurity,general,rule formats,acronym,File format used for SIGMA rules.,true,true,corpus,2026-06-26
+ANSSI,NIST,fr>en,Cybersecurity,general,log management guidance,cultural_swap,"The French source cites ANSSI, France’s national cybersecurity agency; the English target adapts guidance references to NIST, a US/internationally recognized standards body. Use this swap only where the validated course intentionally localizes official guidance, not for all mentions of ANSSI.",false,true,corpus,2026-06-26
+socle minimal proposé par l’ANSSI,log management planning and implementation guides recommended by NIST,fr>en,Cybersecurity,general,log management guidance,cultural_swap,"French national baseline guidance was replaced by NIST log-management guidance for the English audience. This is a market/institutional localization, not a literal acronym translation.",false,true,corpus,2026-06-26
+direction des systèmes d’information,IT / IS Department,fr>en,Cybersecurity,general,IT governance,institutional,Department managing IT/information systems.,false,true,corpus,2026-06-26
+analyste cybersécurité,cybersecurity analyst,fr>en,Cybersecurity,general,SOC roles,job_title,Role responsible for security monitoring and incident analysis.,false,true,corpus,2026-06-26
+directeur des systèmes d’information,Chief Information Officer,fr>en,Cybersecurity,general,IT governance,job_title,Executive role responsible for IT/IS.,false,true,corpus,2026-06-26
+DSI,CIO,fr>en,Cybersecurity,general,IT governance,job_title,French 'directeur des systèmes d’information' aligned with English Chief Information Officer.,false,true,corpus,2026-06-26
+responsable de la sécurité des systèmes d’information,Chief Information Security Officer,fr>en,Cybersecurity,general,security governance,job_title,Executive role ultimately responsible for information security.,false,true,corpus,2026-06-26
+RSSI,CISO,fr>en,Cybersecurity,general,security governance,job_title,French role 'responsable de la sécurité des systèmes d’information' aligned with English Chief Information Security Officer.,false,true,corpus,2026-06-26
+analyse de risques,risk analysis,fr>en,Cybersecurity,general,risk management,methodological,Method used to identify critical assets and prioritize risks.,false,true,corpus,2026-06-26
+clôture,closure,fr>en,Cybersecurity,general,incident response process,methodological,Final incident management phase.,false,true,corpus,2026-06-26
+confinement,containment,fr>en,Cybersecurity,general,incident response process,methodological,Incident response phase focused on containing the incident.,false,true,corpus,2026-06-26
+gestion par tickets,ticket management,fr>en,Cybersecurity,general,incident tracking,methodological,Work organization through tickets.,false,true,corpus,2026-06-26
+investigation,investigation,fr>en,Cybersecurity,general,incident response,methodological,Incident response phase to understand what happened.,true,true,corpus,2026-06-26
+kanban,kanban,fr>en,Cybersecurity,general,work management,methodological,Workflow board method used for coordination.,true,true,corpus,2026-06-26
+qualification,classification,fr>en,Cybersecurity,general,alert triage,methodological,"First alert-handling step: decide whether an alert is a false positive, linked to an existing investigation, or needs escalation.",false,true,corpus,2026-06-26
+qualifier une alerte,Classify an Alert,fr>en,Cybersecurity,general,alert triage,methodological,Chapter title for the initial alert triage stage.,false,true,corpus,2026-06-26
+remédiation,resolution,fr>en,Cybersecurity,general,incident response process,methodological,Target uses 'resolution' for fixing/remediating an incident.,false,true,corpus,2026-06-26
+résolution,resolution,fr>en,Cybersecurity,general,incident response process,methodological,Incident response phase focused on resolving the cause or issue.,false,true,corpus,2026-06-26
+À vous de jouer,Over to You!,fr>en,Cybersecurity,general,course activities,pedagogical,Standard heading introducing a learner exercise.,false,true,corpus,2026-06-26
+corrigé,answer key,fr>en,Cybersecurity,general,course activities,pedagogical,Used for solutions to exercises.,false,true,corpus,2026-06-26
+En résumé,Let’s Recap!,fr>en,Cybersecurity,general,course structure,pedagogical,Standard recap heading at the end of chapters.,false,true,corpus,2026-06-26
+fil rouge du cours,Case Study Used in this Course,fr>en,Cybersecurity,general,course scenario,pedagogical,Refers to the recurring course scenario/project.,false,true,corpus,2026-06-26
+mise en pratique,Hands-on practice,fr>en,Cybersecurity,general,course activities,pedagogical,OpenClassrooms exercise/activity terminology.,false,true,corpus,2026-06-26
+Objectifs pédagogiques,Learning Objectives,fr>en,Cybersecurity,general,course structure,pedagogical,Standard OpenClassrooms heading for course learning goals.,false,true,corpus,2026-06-26
+Cyber Kill Chain,Cyber Kill Chain,fr>en,Cybersecurity,general,attack modeling,proper_noun,Established attack-chain model name.,true,true,corpus,2026-06-26
+Méditronique,Méditronique,fr>en,Cybersecurity,general,course case study,proper_noun,Fictional company name used in the course scenario.,true,true,corpus,2026-06-26
+ZeroLogon,Zerologon,fr>en,Cybersecurity,general,Windows vulnerability,proper_noun,Named vulnerability; target uses 'Zerologon' capitalization.,false,true,corpus,2026-06-26
+RGPD,GDPR,fr>en,Cybersecurity,general,data protection,regulatory,French acronym for the EU General Data Protection Regulation is replaced with the English acronym GDPR. Applies to legal/data-protection contexts involving personal data retention.,false,true,corpus,2026-06-26
+accès dérobés,backdoor access,fr>en,Cybersecurity,general,persistence,technical_term,Hidden access left by an attacker to re-enter a system.,false,true,corpus,2026-06-26
+actifs,assets,fr>en,Cybersecurity,general,risk analysis,technical_term,"Systems, accounts, data, or components with security value.",false,true,corpus,2026-06-26
+agent,agent,fr>en,Cybersecurity,general,log forwarding,technical_term,Program installed on machines to transmit logs.,true,true,corpus,2026-06-26
+analyse forensic,forensic analysis,fr>en,Cybersecurity,general,digital forensics,technical_term,Manual investigation of machines and artifacts.,false,true,corpus,2026-06-26
+artefacts,artifacts,fr>en,Cybersecurity,general,digital forensics,technical_term,Digital evidence collected during forensic analysis.,false,true,corpus,2026-06-26
+attaquant,attacker,fr>en,Cybersecurity,general,threat actors,technical_term,Preferred SOC term for a malicious actor.,false,true,corpus,2026-06-26
+bruteforce,bruteforce,fr>en,Cybersecurity,general,credential attacks,technical_term,Attack type involving repeated password attempts; retained as used in target.,true,true,corpus,2026-06-26
+chasser les attaquants,Evict attackers,fr>en,Cybersecurity,general,incident response,technical_term,Blocking or removing attackers from compromised assets.,false,true,corpus,2026-06-26
+commutateurs,switches,fr>en,Cybersecurity,general,network equipment,technical_term,Network switching devices.,false,true,corpus,2026-06-26
+compromis,compromised,fr>en,Cybersecurity,general,incident investigation,technical_term,Asset or account accessed or controlled by an attacker.,false,true,corpus,2026-06-26
+Computer Security Incident Response Team,Computer Security Incident Response Team,fr>en,Cybersecurity,general,incident response teams,technical_term,Expansion of CSIRT.,true,true,corpus,2026-06-26
+contre-mesures,countermeasures,fr>en,Cybersecurity,general,defensive security,technical_term,Defensive actions against attack techniques.,false,true,corpus,2026-06-26
+corrélation,correlation,fr>en,Cybersecurity,general,SIEM analysis,technical_term,Linking events from different sources and times.,false,true,corpus,2026-06-26
+criticité,criticality,fr>en,Cybersecurity,general,incident prioritization,technical_term,Priority/severity assigned to an investigation or incident.,false,true,corpus,2026-06-26
+Cyber Emergency Response Team,Cyber Emergency Response Team,fr>en,Cybersecurity,general,incident response teams,technical_term,Expansion of CERT used in the course.,true,true,corpus,2026-06-26
+cyberattaques,cyberattacks,fr>en,Cybersecurity,general,cybersecurity threats,technical_term,Standard term for attacks against IT systems.,false,true,corpus,2026-06-26
+détection et de la réponse à incidents,incident detection and response,fr>en,Cybersecurity,general,incident management,technical_term,Core SOC activity covering detection and response.,false,true,corpus,2026-06-26
+dump mémoire,memory dump file,fr>en,Cybersecurity,general,memory analysis,technical_term,File containing copied RAM contents.,false,true,corpus,2026-06-26
+durcir,Harden,fr>en,Cybersecurity,general,system hardening,technical_term,Protect systems by reducing attack opportunities.,false,true,corpus,2026-06-26
+empreinte cryptographique,cryptographic fingerprint,fr>en,Cybersecurity,general,malware analysis,technical_term,Fingerprint used to identify a file.,false,true,corpus,2026-06-26
+Endpoint Detection and Response,Endpoint Detection and Response,fr>en,Cybersecurity,general,endpoint detection and response,technical_term,Expansion of EDR.,true,true,corpus,2026-06-26
+Endpoint Protection Platform,Endpoint Protection Platform,fr>en,Cybersecurity,general,endpoint protection,technical_term,Expansion of EPP.,true,true,corpus,2026-06-26
+enrichissement,enrichment,fr>en,Cybersecurity,general,incident investigation,technical_term,"Adding contextual information to an alert, investigation, or incident.",false,true,corpus,2026-06-26
+équipements réseaux,network equipment,fr>en,Cybersecurity,general,network monitoring,technical_term,Infrastructure devices producing network logs.,false,true,corpus,2026-06-26
+event ID,event ID,fr>en,Cybersecurity,general,logging,technical_term,Identifier for an event type in logs.,true,true,corpus,2026-06-26
+fausse alerte,false alarm,fr>en,Cybersecurity,general,alert triage,technical_term,Non-actionable alert that should be filtered.,false,true,corpus,2026-06-26
+faux positif,false positive,fr>en,Cybersecurity,general,alert triage,technical_term,Non-malicious event that triggers an alert.,false,true,corpus,2026-06-26
+faux positifs,false positives,fr>en,Cybersecurity,general,alert triage,technical_term,Alerts triggered by non-malicious activity.,false,true,corpus,2026-06-26
+forwarder,forwarder,fr>en,Cybersecurity,general,log forwarding,technical_term,Program or component that forwards logs.,true,true,corpus,2026-06-26
+hacker malveillant,hacker,fr>en,Cybersecurity,general,threat actors,technical_term,Used in contrast with the preferred term 'attacker'.,false,true,corpus,2026-06-26
+hameçonnage,phishing,fr>en,Cybersecurity,general,social engineering,technical_term,Standard English term for fraudulent email attacks.,false,true,corpus,2026-06-26
+hash,hash,fr>en,Cybersecurity,general,malware analysis,technical_term,Common term for a cryptographic file fingerprint.,true,true,corpus,2026-06-26
+identifiants,login credentials,fr>en,Cybersecurity,general,identity security,technical_term,Credentials used to authenticate to systems.,false,true,corpus,2026-06-26
+indicateurs de compromission,Indicator of Compromise,fr>en,Cybersecurity,general,threat intelligence,technical_term,"Trace associated with a threat actor, such as an IP address, domain, or file.",false,true,corpus,2026-06-26
+Intrusion Detection/Protection System,Intrusion Detection/Protection System,fr>en,Cybersecurity,general,intrusion detection and prevention,technical_term,Expansion used for IDS/IPS in the course.,true,true,corpus,2026-06-26
+journaux,logs,fr>en,Cybersecurity,general,logging,technical_term,English term used for event records.,false,true,corpus,2026-06-26
+logs,logs,fr>en,Cybersecurity,general,logging,technical_term,English loanword retained.,true,true,corpus,2026-06-26
+logs applicatifs,application logs,fr>en,Cybersecurity,general,logging,technical_term,Logs generated by applications.,false,true,corpus,2026-06-26
+Machine Learning,Machine Learning,fr>en,Cybersecurity,general,detection algorithms,technical_term,Algorithmic approach used in detection tools.,true,true,corpus,2026-06-26
+macro piégée,hidden macro,fr>en,Cybersecurity,general,malware delivery,technical_term,Macro embedded in a document to execute malicious code.,false,true,corpus,2026-06-26
+Managed Detection and Response,Managed Detection and Response,fr>en,Cybersecurity,general,managed security services,technical_term,"Service provided by a company, not a tool.",true,true,corpus,2026-06-26
+menace,threat,fr>en,Cybersecurity,general,risk analysis,technical_term,Something that can trigger an incident intentionally or unintentionally.,false,true,corpus,2026-06-26
+menaces informatiques,IT threats,fr>en,Cybersecurity,general,cybersecurity threats,technical_term,General cybersecurity wording for threats affecting information systems.,false,true,corpus,2026-06-26
+Network Detection and Response,Network Detection and Response,fr>en,Cybersecurity,general,network detection and response,technical_term,Expansion of NDR.,true,true,corpus,2026-06-26
+normaliser,standardize,fr>en,Cybersecurity,general,log processing,technical_term,Make collected logs consistent for further processing.,false,true,corpus,2026-06-26
+observable,observable,fr>en,Cybersecurity,general,alert investigation,technical_term,"Attribute such as server name, user name, or file name used to link alerts and investigations.",true,true,corpus,2026-06-26
+organigrammes,organizational charts,fr>en,Cybersecurity,general,organizational context,technical_term,Documents mapping organizational roles and contacts.,false,true,corpus,2026-06-26
+pare-feu applicatif,Web Application Firewall,fr>en,Cybersecurity,general,web security,technical_term,Security tool that inspects web requests.,false,true,corpus,2026-06-26
+pare-feux,Firewalls,fr>en,Cybersecurity,general,network security,technical_term,Network security devices controlling traffic.,false,true,corpus,2026-06-26
+parser,parse,fr>en,Cybersecurity,general,log processing,technical_term,Processing logs into analyzable structure.,false,true,corpus,2026-06-26
+périmètre,security perimeter,fr>en,Cybersecurity,general,security scope,technical_term,Scope of systems monitored and defended by a SOC.,false,true,corpus,2026-06-26
+phishing,phishing,fr>en,Cybersecurity,general,social engineering,technical_term,English cybersecurity term retained where already present.,true,true,corpus,2026-06-26
+politiques de rétention,retention policy,fr>en,Cybersecurity,general,log retention,technical_term,Policy governing how long logs are stored.,false,true,corpus,2026-06-26
+rançongiciel,ransomware,fr>en,Cybersecurity,general,malware,technical_term,English cybersecurity term preferred over literal translation.,false,true,corpus,2026-06-26
+ransomware,ransomware,fr>en,Cybersecurity,general,malware,technical_term,Established English loanword; remains unchanged.,true,true,corpus,2026-06-26
+règle de détection,detection rule,fr>en,Cybersecurity,general,alerting,technical_term,Condition configured to raise security alerts.,false,true,corpus,2026-06-26
+risque,Risk,fr>en,Cybersecurity,general,risk management,technical_term,Defined as the consequence of a possible attack.,false,true,corpus,2026-06-26
+sandbox,sandbox,fr>en,Cybersecurity,general,malware analysis,technical_term,Isolated environment for executing and analyzing suspicious programs.,true,true,corpus,2026-06-26
+scénario,scenario,fr>en,Cybersecurity,general,risk analysis,technical_term,Specific form an attack can take.,false,true,corpus,2026-06-26
+Security Incident Response Platform,Security Incident Response Platform,fr>en,Cybersecurity,general,incident response platforms,technical_term,Platform used to coordinate incident response.,true,true,corpus,2026-06-26
+Security Information and Event Management,Security Information and Event Management,fr>en,Cybersecurity,general,security monitoring,technical_term,Expansion of SIEM.,true,true,corpus,2026-06-26
+"Security orchestration, automation and response","Security orchestration, automation and response",fr>en,Cybersecurity,general,security orchestration,technical_term,Expansion used for SOAR in the target.,true,true,corpus,2026-06-26
+serveur de collecte,collection server,fr>en,Cybersecurity,general,log collection architecture,technical_term,"Server that receives, parses, and normalizes logs.",false,true,corpus,2026-06-26
+sévérité,severity level,fr>en,Cybersecurity,general,alert triage,technical_term,Automatically assigned alert severity used for prioritization.,false,true,corpus,2026-06-26
+switches Wi-Fi,Wireless access point logs,fr>en,Cybersecurity,general,network logging,technical_term,Adapted to the more standard English infrastructure term in the log-source list.,false,true,corpus,2026-06-26
+système d’information,information system,fr>en,Cybersecurity,general,information systems,technical_term,Core cybersecurity term for the organization’s IT environment.,false,true,corpus,2026-06-26
+Tier 0,Tier 0,fr>en,Cybersecurity,general,asset criticality,technical_term,Highest-criticality assets at the core of an organization’s security.,true,true,corpus,2026-06-26
+tromper les attaquants,Deceive attackers,fr>en,Cybersecurity,general,deception defense,technical_term,Defensive deception with false assets.,false,true,corpus,2026-06-26
+vulnérabilité,vulnerability,fr>en,Cybersecurity,general,risk analysis,technical_term,Weakness that an attacker can exploit.,false,true,corpus,2026-06-26
+write-blocker,write-blocker,fr>en,Cybersecurity,general,digital forensics,technical_term,Tool that prevents writing to evidence media.,true,true,corpus,2026-06-26
+duplicata,duplicate,fr>en,Cybersecurity,general,alert triage,ui_label,SOAR status/category for repeated alerts.,false,true,corpus,2026-06-26
+statut,status,fr>en,Cybersecurity,general,alert triage,ui_label,Alert workflow field in SOAR.,false,true,corpus,2026-06-26
+équipes métiers,business teams,fr>en,Cybersecurity,general,incident management stakeholders,work_culture,French workplace term for non-IT operational departments is localized as 'business teams'. Use in organizational/process contexts where teams own or use business systems.,false,true,corpus,2026-06-26
+Hybrid Analysis,Hybrid Analysis,fr>en,Cybersecurity,Hybrid Analysis,malware analysis tools,product_name,Named malware analysis sandbox service.,true,true,corpus,2026-06-26
+Joe Sandbox,Joe Sandbox,fr>en,Cybersecurity,Joe Sandbox,malware analysis tools,product_name,Named sandbox service/tool.,true,true,corpus,2026-06-26
+Linux,Linux,fr>en,Cybersecurity,Linux,operating systems,product_name,Operating system family.,true,true,corpus,2026-06-26
+LogPoint,LogPoint,fr>en,Cybersecurity,LogPoint,SIEM platforms,product_name,Named SIEM/log analysis product.,true,true,corpus,2026-06-26
+MISP,MISP,fr>en,Cybersecurity,MISP,threat intelligence platforms,product_name,Threat intelligence sharing platform.,true,true,corpus,2026-06-26
+"techniques, tactiques et procédures (TTP)","techniques, tactics, and procedures (TTPs)",fr>en,Cybersecurity,MITRE ATT&CK,threat intelligence,acronym,Standard CTI phrase; pluralized as TTPs in English.,false,true,corpus,2026-06-26
+MITRE ATT&CK,MITRE ATT&CK,fr>en,Cybersecurity,MITRE ATT&CK,attack knowledge base,product_name,Named MITRE framework/knowledge base used by SOC teams.,true,true,corpus,2026-06-26
+matrice ATT&CK,ATT&CK matrix,fr>en,Cybersecurity,MITRE ATT&CK,attack knowledge base,technical_term,Matrix of attacker tactics and techniques.,false,true,corpus,2026-06-26
+tactiques,tactics,fr>en,Cybersecurity,MITRE ATT&CK,MITRE ATT&CK,technical_term,ATT&CK columns representing attacker goals.,false,true,corpus,2026-06-26
+Cyber Analytics Repository (CAR),Cyber Analytics Repository (CAR),fr>en,Cybersecurity,MITRE CAR,detection rule repositories,product_name,MITRE repository for analytics and detection rules.,true,true,corpus,2026-06-26
+MITRE CAR,MITRE CAR,fr>en,Cybersecurity,MITRE CAR,detection rule repositories,product_name,Cyber Analytics Repository abbreviation.,true,true,corpus,2026-06-26
+MITRE D3FEND,MITRE D3FEND,fr>en,Cybersecurity,MITRE D3FEND,defensive countermeasures,product_name,Named MITRE defensive countermeasure framework.,true,true,corpus,2026-06-26
+OpenCTI,OpenCTI,fr>en,Cybersecurity,OpenCTI,threat intelligence platforms,product_name,Open-source cyber threat intelligence platform.,true,true,corpus,2026-06-26
+SIGMA,SIGMA,fr>en,Cybersecurity,SIGMA,log detection rules,product_name,Rule format for detection logic in logs.,true,true,corpus,2026-06-26
+règles SIGMA,SIGMA rules,fr>en,Cybersecurity,SIGMA,log detection rules,technical_term,Standardized log detection rule format.,false,true,corpus,2026-06-26
+detection,detection,fr>en,Cybersecurity,SIGMA,SIGMA rules,ui_label,SIGMA rule field name.,true,true,corpus,2026-06-26
+logsource,logsource,fr>en,Cybersecurity,SIGMA,SIGMA rules,ui_label,SIGMA rule field name.,true,true,corpus,2026-06-26
+Snort,Snort,fr>en,Cybersecurity,Snort,security tools,product_name,Named detection/security tool.,true,true,corpus,2026-06-26
+Splunk,Splunk,fr>en,Cybersecurity,Splunk,log analysis platforms,product_name,Named SIEM/log analytics platform.,true,true,corpus,2026-06-26
+Twitch,Twitch,fr>en,Cybersecurity,Twitch,online platforms,brand,Streaming platform brand name.,true,true,corpus,2026-06-26
+VirusTotal,VirusTotal,fr>en,Cybersecurity,VirusTotal,malware databases,product_name,Online malware scanning and reputation database.,true,true,corpus,2026-06-26
+VPN,VPNs,fr>en,Cybersecurity,VPN,network security,acronym,Virtual private network; pluralized in the target.,false,true,corpus,2026-06-26
+Windows,Windows,fr>en,Cybersecurity,Windows,operating systems,product_name,Microsoft operating system.,true,true,corpus,2026-06-26
+journaux d’événements,event logs,fr>en,Cybersecurity,Windows,Windows logging,technical_term,Windows-specific log format.,false,true,corpus,2026-06-26
+Password Last Set,Password Last Set,fr>en,Cybersecurity,Windows,Windows security logs,ui_label,Attribute name used in the SIGMA rule example.,true,true,corpus,2026-06-26
+YARA,YARA,fr>en,Cybersecurity,YARA,malware detection,product_name,Rule language/tool for malware detection.,true,true,corpus,2026-06-26
+règles YARA,YARA rules,fr>en,Cybersecurity,YARA,malware detection,technical_term,Standardized rules for detecting malicious files.,false,true,corpus,2026-06-26
+Yeti,Yeti,fr>en,Cybersecurity,Yeti,threat intelligence platforms,product_name,Threat intelligence tool named in the course.,true,true,corpus,2026-06-26
+YouTube,YouTube,fr>en,Cybersecurity,YouTube,online platforms,brand,Video platform brand name.,true,true,corpus,2026-06-26
