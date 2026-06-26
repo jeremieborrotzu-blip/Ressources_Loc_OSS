@@ -555,11 +555,29 @@ app.post('/api/tm/patch', async (req, res) => {
     const cf = await fetch(WH_ADHOC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'tm_conform', target_text: strip(html), tm, direction: dir }) }).then(r => r.json());
     if (!cf || !cf.ok) return res.status(500).json({ error: 'conform: ' + ((cf && cf.error) || '?') });
     const corr = (cf.corrections || []).filter(c => c.wrong && c.correct && c.wrong !== c.correct && html.includes(c.wrong));
+    res.json({ ok: true, mode: 'analyse', category: p.category, direction: dir, tm_terms: tm.length, proposed: corr.length, conform: corr.length === 0, corrections: corr.slice(0, 200) });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+// ---- Applique UNIQUEMENT les corrections validées par l'humain (review-first) ----
+app.post('/api/tm/apply', async (req, res) => {
+  const p = req.body || {}; const dir = p.direction || 'fr>en';
+  const corrections = Array.isArray(p.corrections) ? p.corrections : [];
+  if (!corrections.length) return res.status(400).json({ error: 'aucune correction sélectionnée' });
+  let html = '', srcId = '';
+  try {
+    if (p.html_base64) html = Buffer.from(p.html_base64, 'base64').toString('utf-8');
+    else if (p.course_id) {
+      const cid = String(p.course_id).replace(/\D/g, ''); srcId = cid;
+      const st = await contentStatus(cid);
+      if (st && st.done) html = await fetch(RAW + encodeURI(`07_runs/${st.source}/output/${cid}_localized_${st.direction}.html`), { headers: { 'User-Agent': 'leo-bff' } }).then(r => r.ok ? r.text() : '');
+      if (!html) { try { const ex = await fetch(`${N8N}/webhook/cls-v3-extraction`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_id: cid, 'Course ID': cid }) }).then(r => r.ok ? r.text() : ''); if (ex && /<\w/.test(ex)) html = ex; } catch (e) {} }
+    }
+    if (!html) return res.status(404).json({ error: 'HTML introuvable pour appliquer' });
     let fixed = html, applied = 0;
-    for (const c of corr) { const b = fixed; fixed = fixed.split(c.wrong).join(c.correct); if (fixed !== b) applied++; }
+    for (const c of corrections) { if (!c || !c.wrong || !c.correct) continue; const b = fixed; fixed = fixed.split(c.wrong).join(c.correct); if (fixed !== b) applied++; }
     const base = ((srcId || 'course') + '_' + dir.replace('>', '-') + '_TMfixed.html').replace(/[^\w.\-]+/g, '_');
     fsx.writeFileSync(path.join(DL_DIR, base), fixed);
-    res.json({ ok: true, category: p.category, direction: dir, tm_terms: tm.length, proposed: corr.length, applied, conform: corr.length === 0, corrections: corr.slice(0, 100), download: '/downloads/' + base });
+    res.json({ ok: true, applied, total: corrections.length, download: '/downloads/' + base });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
