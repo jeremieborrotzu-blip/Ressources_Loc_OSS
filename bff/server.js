@@ -581,6 +581,35 @@ app.post('/api/tm/apply', async (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
+// ---- Liste des projets (dérivée de l'arbre repo : chaque cours localisé = un projet) ----
+app.get('/api/projects', async (req, res) => {
+  try {
+    const items = await getTree();
+    const re = /07_runs\/(\d+)\/output\/(\d+)_localized_(.+)\.html$/;
+    const seen = new Set(), out = [];
+    for (const it of items) {
+      const m = (it.path || '').match(re);
+      if (m) { const key = m[2] + '|' + m[3]; if (seen.has(key)) continue; seen.add(key); out.push({ target: m[2], source: m[1], direction: decodeURIComponent(m[3]) }); }
+    }
+    out.sort((a, b) => b.target.localeCompare(a.target));
+    res.json({ ok: true, projects: out });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
+// ---- Rejets de revue (avec commentaire QA) — consignés par projet pour ML futur ----
+const rejFile = id => path.join(REVIEW_DIR, String(id).replace(/\D/g, '') + '_rejections.json');
+const readRej = id => { try { return JSON.parse(fsx.readFileSync(rejFile(id), 'utf-8')); } catch (e) { return {}; } };
+app.get('/api/review/:id/rejections', (req, res) => res.json(readRej(req.params.id)));
+app.post('/api/review/:id/reject', (req, res) => {
+  const { item_id, item_type, rejected, comment } = req.body || {};
+  if (!item_id) return res.status(400).json({ error: 'item_id requis' });
+  const m = readRej(req.params.id);
+  if (rejected) m[item_id] = { type: item_type || '', rejected: true, comment: (comment || '').slice(0, 400), ts: Date.now() };
+  else delete m[item_id];
+  fsx.writeFileSync(rejFile(req.params.id), JSON.stringify(m, null, 2));
+  res.json({ ok: true, count: Object.keys(m).length });
+});
+
 app.get('/api/health', (req, res) => res.json({ ok: true, n8n: N8N }));
 
 const PORT = process.env.PORT || 4317;
