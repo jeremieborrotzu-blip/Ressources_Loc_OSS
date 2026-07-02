@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LEO v1.1 — project-centric</title>
+<link rel="icon" type="image/png" href="assets/leo-logo.png">
+<style>
+  :root{--navy:#131a4a;--indigo:#5b4fe0;--purple:#7c3aed;--blue:#2f6bff;--teal:#16c1a0;--orange:#f59e0b;--coral:#ff6d5a;--green:#22c55e;--red:#ef4444;--bg:#eef1f8;--card:#fff;--line:#e6e9f2;--muted:#8a90a6;--ink:#1c2238;--p1:#2f6bff;--p1soft:#eef3ff;--p2:#f59e0b;--p2soft:#fff7ec;--shadow:0 6px 24px rgba(20,26,74,.08);}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+  .side{background:#0f1542;color:#cbd2f0;padding:20px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side .brand{display:flex;align-items:center;gap:11px;padding:6px 6px 18px}.side .brand svg{width:42px;height:42px}
+  .side .brand .t{font-size:1.25rem;font-weight:800;letter-spacing:.5px;color:#fff;display:flex;align-items:center;gap:6px}
+  .side .brand .v1{font-size:.6rem;background:linear-gradient(135deg,var(--blue),var(--purple));padding:2px 6px;border-radius:6px;color:#fff;font-weight:800}
+  .side .brand .s{font-size:.62rem;color:#8b93c9;display:block;margin-top:1px}
+  .nav{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;cursor:pointer;font-size:.9rem;font-weight:600;color:#aab2e0;transition:.15s}
+  .nav:hover{background:#1a2160;color:#fff}.nav.on{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+  .nav .ic{font-size:1.1rem}.nav .badge{margin-left:auto;font-size:.66rem;background:var(--coral);color:#fff;border-radius:10px;padding:1px 7px;font-weight:800}
+  .side .pillars{margin-top:auto;font-size:.66rem;color:#6f78b5;display:flex;flex-direction:column;gap:6px;padding:10px 6px;border-top:1px solid #20285f}
+  .side .pillars div{display:flex;align-items:center;gap:7px}.side .pillars i{width:7px;height:7px;border-radius:50%}
+  .main{padding:26px 30px;max-width:1180px}
+  .pagehead{margin-bottom:20px}.pagehead h1{font-size:1.5rem;color:var(--navy)}.pagehead p{color:var(--muted);font-size:.9rem}
+  .view{display:none}.view.on{display:block}
+  .grid{display:grid;grid-template-columns:1fr 350px;gap:22px;align-items:start}
+  @media(max-width:1000px){.grid{grid-template-columns:1fr}.app{grid-template-columns:1fr}.side{position:static;height:auto}.side .pillars{display:none}}
+  .col{display:flex;flex-direction:column;gap:20px}
+  .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
+  .ch{padding:15px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+  .ch .ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:#fff;flex:0 0 38px}
+  .ch h2{font-size:1.02rem}.ch .sub{font-size:.78rem;color:var(--muted)}
+  .ptag{margin-left:auto;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:20px}
+  .cb{padding:18px 20px;display:flex;flex-direction:column;gap:15px}
+  .scope{border-top:4px solid var(--navy)}.scope .ch .ico{background:linear-gradient(135deg,#131a4a,#2a2f66)}
+  .p1{border-top:4px solid var(--p1)}.p1 .ch{background:var(--p1soft)}.p1 .ch .ico{background:linear-gradient(135deg,var(--blue),var(--indigo))}.p1 .ptag{background:var(--p1soft);color:var(--p1);border:1px solid #cfe0ff}
+  .p2{border-top:4px solid var(--p2)}.p2 .ch{background:var(--p2soft)}.p2 .ch .ico{background:linear-gradient(135deg,var(--orange),var(--coral))}.p2 .ptag{background:var(--p2soft);color:#b9740a;border:1px solid #ffe2b8}
+  .tool{border-top:4px solid var(--teal)}.tool .ch .ico{background:linear-gradient(135deg,var(--teal),#0ea5b7)}
+  .f label{display:block;font-size:.82rem;font-weight:600;margin-bottom:5px;color:#3a4060}
+  .req{color:var(--red);font-weight:800;margin-left:3px}
+  .cond{font-size:.64rem;font-weight:700;color:var(--orange);background:var(--p2soft);border:1px solid #ffe2b8;padding:1px 6px;border-radius:6px;margin-left:6px}
+  input[type=text],input[type=email],select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.92rem;background:#fbfcfe;font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--blue)}input.invalid,select.invalid{border-color:var(--red);background:#fef4f4}
+  .hint{font-size:.73rem;color:var(--muted);margin-top:4px}.err{font-size:.73rem;color:var(--red);margin-top:4px;display:none}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:560px){.row2{grid-template-columns:1fr}}
+  .seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{padding:10px 18px;border:none;background:#fff;font-size:.88rem;font-weight:700;cursor:pointer;color:#5b6178}
+  .seg button.on{background:var(--navy);color:#fff}
+  .checks{display:flex;flex-direction:column;gap:10px}
+  .chk{display:flex;align-items:flex-start;gap:13px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;transition:.15s;background:#fff}
+  .chk:hover{border-color:#c7d0e8}.chk.on{border-color:var(--p1);background:var(--p1soft)}.p2 .chk.on{border-color:var(--orange);background:var(--p2soft)}.chk.locked{opacity:.5;background:#f6f7fb;cursor:not-allowed}
+  .box{width:20px;height:20px;border-radius:6px;border:2px solid #c3cae0;flex:0 0 20px;margin-top:1px;position:relative;transition:.15s}
+  .chk.on .box{background:var(--p1);border-color:var(--p1)}.p2 .chk.on .box{background:var(--orange);border-color:var(--orange)}
+  .chk.on .box::after{content:"✓";position:absolute;inset:0;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .chk .m{flex:1}.chk .m b{font-size:.92rem}.chk .m .d{font-size:.77rem;color:var(--muted)}
+  .tag{font-size:.61rem;font-weight:700;padding:2px 7px;border-radius:6px;margin-left:6px}.tag-gm{color:var(--green);background:#eafaf0;border:1px solid #bdedcb}.tag-an{color:#7c3aed;background:#f3effe;border:1px solid #ddd0fb}.tag-last{color:#6b7191;background:#eef1f8}.tag-doc{color:#0d9488;background:#e8fbf6;border:1px solid #b7ece2}
+  .gate{display:none;font-size:.8rem;color:#8a5a00;background:var(--p2soft);border:1px solid #ffe2b8;border-radius:10px;padding:10px 12px}.gate.show{display:flex;gap:9px}
+  .status-pill{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:600;padding:6px 11px;border-radius:20px}.status-ok{background:#eafaf0;color:#138a45;border:1px solid #bdedcb}.status-no{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}
+  .na{font-size:.84rem;color:var(--muted);background:#f6f7fb;border:1px dashed #d2d7e6;border-radius:11px;padding:14px;text-align:center}
+  .mini{font-size:.72rem;color:var(--muted)}
+  .devbar{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:8px;background:#f6f7fb;border:1px dashed #d2d7e6;border-radius:9px;padding:5px 9px}
+  .switch{position:relative;width:38px;height:21px;flex:0 0 38px;cursor:pointer}.switch input{display:none}.slider{position:absolute;inset:0;background:#cdd3e3;border-radius:30px;transition:.2s}.slider::before{content:"";position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}.switch input:checked + .slider{background:var(--green)}.switch input:checked + .slider::before{transform:translateX(17px)}
+  .ctxcard{background:linear-gradient(135deg,#eef3ff,#f3effe);border:1px solid #d6e0ff;border-radius:12px;padding:13px 15px;font-size:.82rem;display:none}.ctxcard.show{display:block}.ctxcard .h{font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;margin-bottom:6px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}.chip{font-size:.72rem;background:#fff;border:1px solid #d6e0ff;border-radius:20px;padding:3px 10px;color:#3a4877}
+  .panel{position:sticky;top:24px;display:flex;flex-direction:column;gap:16px}
+  .plan{background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
+  .plan-h{padding:15px 18px;background:linear-gradient(135deg,#131a4a,#2a2f66);color:#fff}.plan-h h3{font-size:1rem}.plan-h p{font-size:.75rem;opacity:.7}
+  .plan-b{padding:16px 18px;display:flex;flex-direction:column;gap:13px}
+  .step{display:flex;gap:11px;align-items:flex-start}.step .n{width:22px;height:22px;border-radius:50%;background:var(--p1soft);color:var(--p1);font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 22px}.step.p2 .n{background:var(--p2soft);color:#b9740a}.step.tl .n{background:#e8fbf6;color:#0d9488}.step .t b{font-size:.85rem}.step .t .d{font-size:.73rem;color:var(--muted)}
+  .empty{font-size:.84rem;color:var(--muted);text-align:center;padding:8px}
+  .cost{background:#f7faff;border:1px solid #dbe6ff;border-radius:11px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center}.cost .v{font-size:1.15rem;font-weight:800;color:var(--navy)}.cost .l{font-size:.73rem;color:var(--muted)}
+  .warns{display:flex;flex-direction:column;gap:7px}.warn{font-size:.75rem;padding:8px 10px;border-radius:9px;display:flex;gap:7px}.warn.e{background:#fdeef0;color:#b03048;border:1px solid #f5c6cf}.warn.i{background:#eef3ff;color:#2b54b6;border:1px solid #cfe0ff}
+  .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:1rem;font-weight:800;cursor:pointer;transition:.15s}.btn-go{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;box-shadow:0 6px 18px rgba(91,79,224,.35)}.btn-go:hover{filter:brightness(1.07)}.btn:disabled{background:#dfe3ee;color:#a7adc2;cursor:not-allowed;box-shadow:none}
+  .legend{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow);padding:14px 16px;font-size:.77rem;color:#5b6178}.legend b{color:var(--ink);display:block;margin-bottom:7px;font-size:.81rem}.legend li{margin:5px 0;list-style:none;display:flex;gap:8px}.legend li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:6px;flex:0 0 7px}
+  table{width:100%;border-collapse:collapse;font-size:.85rem}th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);padding:10px 14px;border-bottom:1px solid var(--line)}td{padding:12px 14px;border-bottom:1px solid #f1f3fa}
+  .st{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px}.st.run{background:#fff7ec;color:#b9740a}.st.ok{background:#eafaf0;color:#138a45}.st.err{background:#fdeef0;color:#b03048}tr.rowbad td{background:#fdeef0}tr.rowbad td:first-child{box-shadow:inset 3px 0 0 #b03048}.badge.bad{background:#b03048;color:#fff}
+  .bar{height:6px;background:#eef1f8;border-radius:6px;overflow:hidden;width:90px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--purple))}
+  .rev{display:flex;align-items:center;gap:12px;padding:13px 16px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}.rev .badge{font-size:.66rem;font-weight:700;padding:3px 8px;border-radius:7px}.b-sw{background:#eafaf0;color:#138a45}.b-rv{background:#fdeef0;color:#b03048}.b-pr{background:#eef1f8;color:#6b7191}.rev .acts{margin-left:auto;display:flex;gap:8px}.sbtn{font-size:.78rem;font-weight:700;padding:7px 13px;border-radius:9px;border:1.5px solid var(--line);background:#fff;cursor:pointer}.sbtn.go{background:var(--green);color:#fff;border-color:var(--green)}.sbtn.no{background:#fff;color:var(--red);border-color:#f5c6cf}.sbtn.rejbtn{color:var(--red);border-color:#f5c6cf}.sbtn.rejbtn.rejected{background:var(--red);color:#fff;border-color:var(--red)}.rejnote{flex:0 0 100%;margin-top:10px}.rejnote input{width:100%;font-size:.82rem;padding:8px 11px;border-radius:9px;border:1.5px solid #f5c6cf;background:#fdeef0}.rejnote input:focus{outline:none;border-color:var(--red)}.rev:has(.rejbtn.rejected){border-color:#f5c6cf;background:#fff7f8}.rev{flex-wrap:wrap}.baprev{flex:0 0 100%;display:flex;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.bacol{flex:1;min-width:0}.bacol img{width:100%;border-radius:10px;border:1px solid var(--line);display:block;margin-top:5px}.bal{font-size:.66rem;font-weight:800;letter-spacing:.5px;color:#6b7191}.bal.ok{color:#138a45}.baact{flex:0 0 100%;margin-top:6px;display:flex;gap:8px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140px);background:#131a4a;color:#fff;padding:14px 22px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:.35s;max-width:620px;z-index:50}.toast.show{transform:translateX(-50%) translateY(0)}.toast pre{font-size:.7rem;margin-top:8px;white-space:pre-wrap;opacity:.9;max-height:240px;overflow:auto}
+  .demoflag{font-size:.66rem;background:#fff3cd;color:#8a6d00;border:1px solid #ffe69b;border-radius:6px;padding:2px 7px;margin-left:8px}
+  textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.9rem;background:#fbfcfe;font-family:inherit;resize:vertical}textarea:focus{outline:none;border-color:var(--blue)}
+  .drop{border:2px dashed #cdd6ea;border-radius:14px;padding:22px;display:flex;align-items:center;gap:14px;justify-content:center;cursor:pointer;transition:.15s;text-align:center}.drop.hover{border-color:var(--teal);background:#f1fbf9}.drop .dz-i{font-size:1.8rem}.drop .lk{color:var(--blue);font-weight:700;text-decoration:underline}
+  .frow{display:flex;align-items:center;gap:11px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;margin-top:8px;font-size:.85rem}.frow .ag{font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:6px}.ag-a8{background:#fff7ec;color:#b9740a}.ag-a9{background:#eef3ff;color:#2b54b6}.ag-na{background:#fdeef0;color:#b03048}.frow .rm{margin-left:auto;cursor:pointer;color:var(--muted);font-weight:700}
+  .chk.oc.on{border-color:var(--teal);background:#f1fbf9}.chk.oc.on .box{background:var(--teal);border-color:var(--teal)}
+  .hero{margin:-4px 0 22px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);background:#fff;line-height:0;position:relative}
+  .hero img{width:100%;height:auto;display:block}
+  .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#7c3aed,#2f6bff,#16c1a0,#f59e0b)}
+  /* ---- branding ---- */
+  body::before{content:"";position:fixed;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#7c3aed,#2f6bff,#16c1a0,#f59e0b);z-index:200}
+  body{background-image:radial-gradient(rgba(91,79,224,.055) 1.1px,transparent 1.1px);background-size:24px 24px}
+  .side .brand{flex-direction:column;align-items:flex-start;gap:12px;padding:10px 6px 20px;position:relative}
+  .side .brand::before{content:"";position:absolute;top:-6px;left:-12px;width:130px;height:120px;background:radial-gradient(75px 62px at 42% 32%,rgba(124,58,237,.5),transparent 70%);pointer-events:none}
+  .side .brand svg,.side .brand img{width:66px!important;height:66px!important;border-radius:15px;position:relative;z-index:1}
+  .side .brand .t{font-size:1.6rem}
+  .nav.on{box-shadow:0 5px 16px rgba(91,79,224,.45)}
+  .byoc{font-size:.66rem;color:#7c80b5;text-align:center;padding:10px 0 2px;letter-spacing:.3px}.byoc b{color:#cdd3ef}
+  /* ---- project-centric v1.1 ---- */
+  .navlabel{font-size:.6rem;text-transform:uppercase;letter-spacing:.6px;color:#6f78b5;padding:14px 8px 4px;font-weight:800}
+  .ctxbox{background:linear-gradient(135deg,#1a2160,#232a6b);border:1px solid #2c3576;border-radius:12px;padding:12px 13px;margin:2px 2px 6px;position:relative}
+  .ctxbox .cx-id{font-weight:800;color:#fff;font-size:1rem}
+  .ctxbox .cx-sub{color:#9aa2d6;font-size:.72rem;margin-top:2px}
+  .ctxbox .cx-close{margin-top:9px;background:#2c3576;color:#cbd2f0;border:none;border-radius:7px;padding:4px 10px;font-size:.67rem;font-weight:700;cursor:pointer}
+  .ctxbox .cx-close:hover{background:#3a4690;color:#fff}
+  .projgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+  .projcard{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--blue);border-radius:14px;box-shadow:var(--shadow);padding:16px 17px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:6px}
+  .projcard:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(20,26,74,.14);border-top-color:var(--purple)}
+  .projcard .pc-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .projcard .pc-id{font-size:1.2rem;font-weight:800;color:var(--navy)}
+  .projcard .pc-dir{font-size:.63rem;font-weight:800;background:var(--p1soft);color:var(--p1);border:1px solid #cfe0ff;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .projcard .pc-sub{font-size:.76rem;color:var(--muted)}
+  .projcard .pc-foot{margin-top:4px}.projcard .pc-open{font-size:.78rem;font-weight:700;color:var(--blue)}
+  .stepper{display:flex;align-items:center;gap:0;margin:4px 0;flex-wrap:wrap}
+  .stepper .sp{display:flex;align-items:center;gap:8px}
+  .stepper .dot{width:26px;height:26px;border-radius:50%;background:#e6e9f2;color:#8a90a6;font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center;flex:0 0 26px}
+  .stepper .sp.done .dot{background:var(--green);color:#fff}.stepper .sp.cur .dot{background:var(--blue);color:#fff;box-shadow:0 0 0 4px #cfe0ff}
+  .stepper .sp .lbl{font-size:.74rem;font-weight:600;color:#5b6178}
+  .stepper .sp.cur .lbl{color:var(--navy);font-weight:800}
+  .stepper .bar2{width:26px;height:2px;background:#e6e9f2;margin:0 4px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 100 100" id="leoFallback"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c3aed"/><stop offset=".5" stop-color="#2f6bff"/><stop offset="1" stop-color="#16c1a0"/></linearGradient></defs>
+        <circle cx="50" cy="50" r="38" fill="none" stroke="url(#g)" stroke-width="7" stroke-linecap="round" stroke-dasharray="178 60" transform="rotate(-90 50 50)"/>
+        <circle cx="28" cy="22" r="11" fill="#7c3aed"/><text x="28" y="26" font-size="10" fill="#fff" text-anchor="middle" font-weight="700">文A</text>
+        <circle cx="28" cy="80" r="10" fill="#f59e0b"/><rect x="24" y="75" width="8" height="10" rx="1.5" fill="#fff"/>
+        <text x="56" y="61" font-size="33" font-weight="800" fill="#fff" text-anchor="middle" font-family="Arial">LEO</text></svg>
+      <img src="assets/leo-logo.png" alt="LEO" style="object-fit:cover;display:none;box-shadow:0 8px 22px rgba(91,79,224,.4)" onload="this.style.display='block';document.getElementById('leoFallback').style.display='none'">
+      <div><div class="t">LEO <span class="v1">v1.1</span></div><span class="s">Localization Engine Operator</span></div>
+    </div>
+    <div class="nav on" data-v="projets"><span class="ic">🗂️</span> Projets</div>
+    <div id="ctxBox" class="ctxbox" style="display:none"></div>
+    <div id="wsNav" style="display:none">
+      <div class="navlabel">Projet ouvert</div>
+      <div class="nav" data-v="apercu"><span class="ic">📊</span> Aperçu</div>
+      <div class="nav" data-v="lancer"><span class="ic">⚙️</span> Produire</div>
+      <div class="nav" data-v="revue"><span class="ic">✅</span> Revue</div>
+      <div class="nav" data-v="suivi"><span class="ic">📡</span> Suivi <span class="badge" id="suiviBadge" style="display:none"></span></div>
+    </div>
+    <div class="navlabel">Global</div>
+    <div class="nav" data-v="tmagent"><span class="ic">🧠</span> TM Agent</div>
+    <div class="nav" data-v="assets"><span class="ic">🎯</span> Assets à la demande</div>
+    <div class="pillars"><div><i style="background:#7c3aed"></i>Localisation Thinking</div><div><i style="background:#22c55e"></i>1st Quality Check</div><div><i style="background:#2f6bff"></i>Full Automated</div><div><i style="background:#f59e0b"></i>AI Agent Coordination</div></div>
+    <div class="byoc">✦ by <b>OpenClassrooms</b></div>
+  </aside>
+
+  <main class="main">
+    <!-- ====================== PROJETS (home) ======================== -->
+    <section class="view on" id="v-projets">
+      <div class="hero"><img src="assets/leo-banner.png" alt="LEO v1 — Localization Engine Operator by OpenClassrooms"></div>
+      <div class="pagehead"><h1>Projets de localisation</h1><p>Ouvre un projet existant, ou crée-en un avec un Target Course ID. Chaque projet a son cadrage, sa production, sa revue et son suivi.</p></div>
+      <div class="grid">
+        <div class="col">
+          <div id="projGrid" class="projgrid"><div class="empty">Chargement…</div></div>
+        </div>
+        <div class="panel">
+          <div class="card tool">
+            <div class="ch"><div class="ico">🆕</div><div><h2>Nouveau projet</h2><div class="sub">Ouvre par Target Course ID</div></div></div>
+            <div class="cb">
+              <div class="f"><label>Target Course ID</label><input type="text" id="newProjId" placeholder="ex. 8970456" inputmode="numeric" onkeydown="if(event.key==='Enter')createProject()"></div>
+              <button class="btn btn-go" onclick="createProject()">Ouvrir / créer le projet</button>
+              <div class="mini" id="newProjMsg" style="text-align:center"></div>
+            </div>
+          </div>
+          <div class="legend"><b>Le mode projet</b>
+            <li>Un projet = un cours cible (Target ID) et son sens de localisation.</li>
+            <li><b>Aperçu</b> : état d'avancement + inventaire.</li>
+            <li><b>Produire</b> : Phase 1 (contenu) puis Phase 2 (assets &amp; liens).</li>
+            <li><b>Revue</b> : A5 / A8 / A10, conformité TM, rejets QA.</li></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================== APERÇU ======================== -->
+    <section class="view" id="v-apercu">
+      <div class="pagehead"><h1>Aperçu du projet</h1><p>État d'avancement et inventaire du contenu localisé.</p></div>
+      <div id="apercuBody"><div class="empty" style="padding:20px">Ouvre un projet depuis « Projets ».</div></div>
+    </section>
+
+    <!-- ====================== PRODUIRE (ex-Lancer) ======================== -->
+    <section class="view" id="v-lancer">
+      <div class="pagehead"><h1>Produire</h1><p>Le contenu d'abord (Phase 1), puis ses assets &amp; liens (Phase 2). Le cadrage est pré-rempli depuis le projet ouvert.</p></div>
+      <div class="grid">
+        <div class="col">
+
+          <!-- ===== 0) IMPORTER UNE PHASE 1 EXISTANTE ===== -->
+          <div class="card tool">
+            <div class="ch" style="cursor:pointer" onclick="$('importBody').classList.toggle('show')"><div class="ico">📥</div><div><h2>J'ai déjà un HTML localisé</h2><div class="sub">Génère le handoff + prépare la Phase 2 — clique pour ouvrir</div></div></div>
+            <div class="collapse" id="importBody" style="padding:0">
+              <div class="cb">
+                <div class="f"><label>HTML localisé <span class="req">*</span></label>
+                  <div class="drop" id="impDrop" style="padding:14px"><input type="file" id="impFile" accept=".html,.htm,.txt" hidden><div class="dz-i">📄</div><div><b id="impFileName">Choisir un .html</b> ou <span class="lk">parcourir</span></div></div>
+                  <input type="text" id="impUrl" placeholder="…ou colle une URL de HTML" style="margin-top:8px"></div>
+                <div class="row2">
+                  <div class="f"><label>Source Course ID <span class="req">*</span></label><input type="text" id="impSrc" placeholder="ex. 8787276" inputmode="numeric"></div>
+                  <div class="f"><label>Target Course ID <span class="req">*</span></label><input type="text" id="impTgt" placeholder="ex. 8970456" inputmode="numeric"></div>
+                </div>
+                <div class="row2">
+                  <div class="f"><label>Source Language</label><select id="impSL"><option>fr</option><option>en</option></select></div>
+                  <div class="f"><label>Target Language</label><select id="impTL"><option>en-US</option><option>fr-FR</option></select></div>
+                </div>
+                <label class="chk on" id="impAll" data-on="1" style="padding:10px 12px"><span class="box"></span><div class="m"><b>Marquer toutes les images à localiser</b><div class="d">A8 évaluera chaque image (et préservera les screenshots).</div></div></label>
+                <button class="btn btn-go" id="impGo">📥 Importer &amp; préparer la Phase 2</button>
+                <div class="mini" id="impMsg" style="text-align:center"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== 1) CADRAGE ===== -->
+          <div class="card scope">
+            <div class="ch"><div class="ico">🧭</div><div><h2>Cadrage</h2><div class="sub">Quoi localiser, dans quel sens — l'identité dépend du type</div></div></div>
+            <div class="cb">
+              <div class="f"><label>Type de contenu <span class="req">*</span></label>
+                <div class="seg" id="ctype"><button class="on" data-t="COURS">📘 COURS (HTML)</button><button data-t="PROJET">📝 PROJET (GDoc → DOCX)</button></div></div>
+
+              <!-- COURS identity -->
+              <div id="idCours">
+                <div class="row2">
+                  <div class="f"><label>Source Course ID <span class="req">*</span> <span class="cond">si localisation</span></label>
+                    <input type="text" id="sourceId" placeholder="ex. 8787276" inputmode="numeric">
+                    <div class="hint">ID du cours source (récupéré via l'API OC).</div><div class="err" id="sourceId-err">ID cours invalide.</div></div>
+                  <div class="f"><label>Target Course ID <span class="req">*</span></label>
+                    <input type="text" id="targetId" placeholder="ex. 8970456" inputmode="numeric">
+                    <div class="hint">Cible.</div><div class="err" id="targetId-err">ID cours invalide.</div></div>
+                </div>
+                <div class="ctxcard" id="ctx" style="margin-top:6px"></div>
+                <div class="devbar" style="margin-top:8px;align-self:flex-start">🧪 démo <label class="switch"><input type="checkbox" id="simP1"><span class="slider"></span></label> forcer « Phase 1 déjà faite »</div>
+              </div>
+
+              <!-- PROJET identity -->
+              <div id="idProjet" style="display:none">
+                <div class="f"><label>GDoc URL (document source) <span class="req">*</span></label>
+                  <input type="text" id="gdocUrl" placeholder="https://docs.google.com/document/d/…">
+                  <div class="hint">Le document à localiser. Sortie : <b>DOCX localisé, mise en forme intégralement préservée</b>.</div><div class="err" id="gdocUrl-err">URL requise.</div></div>
+                <div class="row2">
+                  <div class="f"><label>Parcours ID <span class="req">*</span> <span class="cond">dossier de sortie</span></label>
+                    <input type="text" id="pathId" placeholder="ex. 1047" inputmode="numeric"><div class="err" id="pathId-err">Requis.</div></div>
+                  <div class="f"><label>N° de projet <span class="req">*</span> <span class="cond">dossier de sortie</span></label>
+                    <input type="text" id="projNo" placeholder="ex. P2"><div class="err" id="projNo-err">Ex. P1, P2…</div></div>
+                </div>
+                <div class="mini">ℹ️ Parcours ID + N° projet servent <b>uniquement à nommer les dossiers de sortie</b> — rien n'est « cherché » avec.</div>
+              </div>
+
+              <!-- common scoping -->
+              <div class="row2">
+                <div class="f"><label>Source Language <span class="req">*</span></label><select id="srcLang"><option value="">—</option><option value="fr">fr</option><option value="en">en</option></select><div class="err" id="srcLang-err">Requis.</div></div>
+                <div class="f"><label>Target Language <span class="req">*</span></label><select id="tgtLang"><option value="">—</option><option value="en-US">en-US</option><option value="fr-FR">fr-FR</option></select><div class="err" id="tgtLang-err">Requis.</div></div>
+              </div>
+              <div class="row2">
+                <div class="f"><label>Domain <span class="cond">aide les agents</span></label><select id="domain"><option value="">— auto —</option><option>Data</option><option>Web</option><option>AI</option><option>Management</option><option>Design</option><option>Marketing</option></select></div>
+                <div class="f"><label>Email <span class="req">*</span></label><input type="email" id="email" placeholder="prenom.nom@openclassrooms.com"><div class="err" id="email-err">Email valide requis.</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== 2) PHASE 1 ===== -->
+          <div class="card p1">
+            <div class="ch"><div class="ico">文A</div><div><h2>Phase 1 — Contenu</h2><div class="sub" id="p1sub">CLS v3 · A1→A6</div></div><span class="ptag">Content</span></div>
+            <div class="cb">
+              <div class="f"><label>Actions <span class="mini">(cases indépendantes — combinables, ou une seule)</span></label>
+                <div class="checks" id="p1checks">
+                  <label class="chk" data-k="p1_localize"><span class="box"></span><div class="m"><b id="locLabel">Localiser le cours (HTML)</b><span class="tag" id="locTag">produit le Gold Master</span><div class="d" id="locDesc">A1–A6 + réassemblage → 8 fichiers GitHub. Débloque la Phase 2.</div></div></label>
+                  <label class="chk" data-k="p1_audit"><span class="box"></span><div class="m"><b>Audit du contenu (A1)</b><span class="tag tag-an">analyse</span><div class="d">Audit culturel + structurel. Rapport.</div></div></label>
+                  <label class="chk" data-k="p1_score"><span class="box"></span><div class="m"><b>Score de localisabilité</b><span class="tag tag-an">analyse</span><div class="d">A1 + A2 — score /100.</div></div></label>
+                  <label class="chk" data-k="p1_qa"><span class="box"></span><div class="m"><b>Quality Check /100</b><span class="tag tag-an">analyse</span><div class="d">A1–A5 — rapport QA des segments.</div></div></label>
+                </div></div>
+            </div>
+          </div>
+
+          <!-- ===== 3) PHASE 2 — Assets externes & Liens (cours ET projet) ===== -->
+          <div class="card p2" id="phase2card">
+            <div class="ch"><div class="ico">🔗</div><div><h2>Phase 2 — Assets externes &amp; Liens</h2><div class="sub" id="p2sub">Scanne la source (HTML / GDoc) · A7–A10</div></div><span class="ptag">Assets</span></div>
+            <div class="cb">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="mini">Prérequis — contenu localisé :</span><span id="p1status" class="status-pill status-no">⛔ non disponible</span></div>
+              <div class="gate" id="p2gate">⚠️ <span>Il faut que le <b>contenu soit localisé d'abord</b>. Coche <b>« Localiser »</b> (chaîné) ou choisis un contenu déjà traduit.</span></div>
+              <div class="checks" id="p2checks">
+                <label class="chk" data-k="a8"><span class="box"></span><div class="m"><b>Images (A8)</b><div class="d">Localise/édite le texte des images. Banners exclus.</div></div></label>
+                <label class="chk" data-k="a9"><span class="box"></span><div class="m"><b>Annexes &amp; docs (A9)</b><div class="d">XLSX / DOCX / PPTX / CSV liés, en miroir (format, formules, liens préservés).</div></div></label>
+                <label class="chk" data-k="a7" id="a7chk"><span class="box"></span><div class="m"><b>Transcripts / Dubbing (A7)</b><div class="d">Adapte SRT/VTT pour le doublage IA (cours avec vidéo).</div></div></label>
+                <label class="chk" data-k="a10"><span class="box"></span><div class="m"><b>Liens (A10)</b><span class="tag tag-last">en dernier</span><div class="d">Résout/bascule les liens externes (agrège les autres).</div></div></label>
+              </div>
+              <div class="mini" id="a7na" style="display:none">ℹ️ A7 (transcripts vidéo) masqué : un projet est relié à un cours et n'a pas de vidéo propre (≈90% des cas).</div>
+            </div>
+          </div>
+
+          <div class="mini" style="text-align:center;padding:4px">Besoin de localiser un fichier isolé (image, doc…) sans pipeline ? → onglet <b>🎯 Assets à la demande</b>.</div>
+        </div>
+
+        <!-- PLAN -->
+        <div class="panel">
+          <div class="plan"><div class="plan-h"><h3>🚀 Plan d'exécution</h3><p>Ordre · prérequis · estimation</p></div>
+            <div class="plan-b"><div id="steps"><div class="empty">Aucune action sélectionnée.</div></div>
+              <div class="cost"><div><div class="l">Estimation coût IA</div><div class="mini" id="costNote">—</div></div><div class="v" id="costVal">$0</div></div>
+              <div class="warns" id="warns"></div>
+              <button class="btn btn-go" id="launch" disabled>Sélectionne une action</button>
+              <div class="mini" style="text-align:center">Envoie le run à n8n.</div></div></div>
+          <div class="legend"><b>Règles de dépendance</b>
+            <li><b>Type de contenu</b> commande l'identité (Cours ID **vs** GDoc + Parcours/Pn).</li>
+            <li>Phase 2 (assets &amp; liens) <b>= cours ET projet</b> ; verrouillée tant que le contenu n'est pas localisé. A7 (vidéo) = cours.</li>
+            <li>Actions Phase 1 <b>combinables</b> (audit seul, QA seul…).</li>
+            <li>Agents Phase 2 <b>indépendants</b> ; A10 en dernier.</li>
+            <li>PROJET → sortie <b>DOCX miroir</b> (mise en forme préservée).</li></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================== SUIVI ========================= -->
+    <section class="view" id="v-suivi">
+      <div class="pagehead"><h1>Suivi des runs <span id="suiviLive" class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">● live</span></h1><p>Exécutions n8n en temps réel (rafraîchi toutes les 5 s). Source : le BFF lit la base n8n.</p></div>
+      <div id="chainsBanner"></div>
+      <div id="runsSummary" style="margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"></div>
+      <div class="card"><table><thead><tr><th>Run</th><th>Workflow</th><th>Statut</th><th>Démarré</th><th>Durée</th></tr></thead>
+        <tbody id="runsBody"><tr><td colspan="5" class="empty">Chargement…</td></tr></tbody></table></div>
+    </section>
+
+    <!-- ====================== REVUE ========================= -->
+    <section class="view" id="v-revue">
+      <div class="pagehead"><h1>Revue humaine</h1><p>Les décisions qui demandent un œil humain. Le cours du projet ouvert est chargé automatiquement.</p>
+        <div style="display:flex;gap:10px;margin-top:12px"><input type="text" id="revId" placeholder="Target Course ID (ex. 8970456)" style="max-width:240px" inputmode="numeric"><button class="sbtn go" onclick="loadReview()">Charger</button><button class="sbtn" id="revDownload" onclick="if(REV&&REV.id)window.open('/api/review/'+REV.id+'/html','_blank')" style="display:none;align-items:center" title="HTML avec les liens résolus (original conservé en backup)">⬇️ HTML corrigé</button></div></div>
+      <div class="card" style="margin-bottom:18px"><div class="ch p1" style="background:var(--p1soft)"><div class="ico" style="background:linear-gradient(135deg,#2f6bff,#5b4fe0)">✓</div><div><h2>A5 — Quality Gate <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Scores réels par chapitre (seuil ≥ 90)</div></div></div>
+        <div class="cb" id="a5Body"><div class="empty" style="padding:14px">Charge un cours ci-dessus.</div></div></div>
+      <div class="card" style="margin-bottom:18px"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🔗</div><div><h2>A10 — Liens à arbitrer <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Depuis le rapport CSV réel du cours</div></div></div>
+        <div class="cb" id="a10ReviewBody"><div class="empty" style="padding:14px">Charge un cours ci-dessus pour voir ses liens.</div></div></div>
+      <div class="card"><div class="ch p2" style="background:var(--p2soft)"><div class="ico" style="background:linear-gradient(135deg,#f59e0b,#ff6d5a)">🖼️</div><div><h2>A8 — Images <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">live</span></h2><div class="sub">Images du cours + risque (depuis le handoff)</div></div></div>
+        <div style="padding:10px 16px 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="sbtn go" id="batch5Btn" onclick="localizeBatch5()">⚡ Localiser 5</button><span class="mini" id="batchInfo">les 5 prochaines images <b>non cochées</b> & non faites — coche ✓ celles à NE PAS traiter</span><div id="batchProg" style="display:none;flex:1;min-width:200px;max-width:300px"><div style="height:8px;background:#eef1f8;border-radius:6px;overflow:hidden"><div id="batchProgFill" style="height:100%;width:0;background:#16a34a;transition:width .3s"></div></div><div class="mini" id="batchProgTxt" style="margin-top:3px"></div></div></div><div class="cb" id="a8Body"><div class="empty" style="padding:14px">Charge un cours ci-dessus.</div></div></div>
+      <div class="card" style="margin-top:18px"><div class="ch p1" style="background:var(--p1soft)"><div class="ico" style="background:linear-gradient(135deg,#2f6bff,#5b4fe0)">🔧</div><div><h2>Conformité TM <span class="demoflag" style="background:#eafaf0;color:#138a45;border-color:#bdedcb">review-first</span></h2><div class="sub">Confronte ce cours à la mémoire validée du domaine — tu relis et tu choisis avant d'appliquer</div></div></div>
+        <div class="cb">
+          <div id="revConfRes"><div class="empty" style="padding:14px">Lance une analyse depuis l'onglet 🧠 <b>TM Agent</b> → « Conformité d'un cours ». Le résultat (écarts à valider) apparaîtra ici.</div></div>
+        </div></div>
+    </section>
+
+    <!-- ====================== TM AGENT ========================= -->
+    <section class="view" id="v-tmagent">
+      <div class="pagehead"><h1>TM Agent — Mémoire de traduction</h1><p>L'archiviste qui capitalise la terminologie validée, <b>par catégorie OpenClassrooms</b> (avec software, sujet, swaps culturels). Interroge · nourris · consolide.</p></div>
+      <div class="grid"><div class="col">
+        <div class="card tool">
+          <div class="ch"><div class="ico">🔎</div><div><h2>Interroger la mémoire</h2><div class="sub">Même terme, traduction selon le domaine</div></div></div>
+          <div class="cb">
+            <div style="display:flex;gap:8px"><input type="text" id="tmQ" placeholder="terme FR ou EN (ex. cahier de recette)" style="flex:1" onkeydown="if(event.key==='Enter')tmSearch()"><button class="sbtn go" onclick="tmSearch()">Chercher</button></div>
+            <div id="tmSearchRes" style="margin-top:10px"></div>
+          </div>
+        </div>
+        <div class="card tool">
+          <div class="ch"><div class="ico">📥</div><div><h2>Ingérer une paire validée (FR + LOCALISÉ)</h2><div class="sub">Tes HTML QA-validés → termes <b>validated</b> (autorité max)</div></div></div>
+          <div class="cb">
+            <div class="row2">
+              <div class="f"><label>HTML source (FR) <span class="req">*</span></label><input type="file" id="tmFr" accept=".html,.htm,.txt"></div>
+              <div class="f"><label>HTML localisé <span class="req">*</span></label><input type="file" id="tmEn" accept=".html,.htm,.txt"></div>
+            </div>
+            <div class="row2">
+              <div class="f"><label>Course ID (option)</label><input type="text" id="tmCid" placeholder="ex. 9073871"></div>
+              <div class="f"><label>Direction</label><select id="tmDir"><option>fr>en</option><option>en>fr</option></select></div>
+            </div>
+            <button class="btn btn-go" id="tmIngestBtn" onclick="tmIngest()">📥 Archiver (validé)</button>
+            <div class="mini" id="tmIngestMsg" style="text-align:center"></div>
+          </div>
+        </div>
+        <div class="card tool">
+          <div class="ch"><div class="ico">♻️</div><div><h2>Consolider un run du pipeline</h2><div class="sub">Termes A2 d'un run (non validés)</div></div></div>
+          <div class="cb">
+            <div style="display:flex;gap:8px"><input type="text" id="tmRunId" placeholder="Source Course ID (ex. 2356306)" style="flex:1" inputmode="numeric"><button class="sbtn go" onclick="tmConsolidate()">Consolider</button></div>
+            <div class="mini" id="tmConsMsg" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="card tool">
+          <div class="ch"><div class="ico">🔧</div><div><h2>Conformité d'un cours</h2><div class="sub">Confronte un cours (Git OU plateforme) à la TM validée — le résultat (écarts à valider) apparaît dans la Revue</div></div></div>
+          <div class="cb">
+            <div class="row2">
+              <div class="f"><label>Sens (Master → cible)</label><select id="tmcDir"><option value="fr>en">Master FR → cible EN</option><option value="en>fr">Master EN → cible FR</option></select></div>
+              <div class="f"><label>Domaine (catégorie OC)</label><select id="tmcCat"><option value="">—</option></select></div>
+            </div>
+            <div class="f"><label>Course ID (si le cours est dans le repo)</label><input type="text" id="tmcId" placeholder="ex. 9073871" inputmode="numeric"></div>
+            <div class="f" style="margin-top:6px"><label>… ou HTML du cours (extrait via ton FORM)</label><input type="file" id="tmcHtml" accept=".html,.htm,.txt"></div>
+            <button class="btn btn-go" style="margin-top:10px" onclick="tmConformAnalyze()">🔎 Analyser → Revue</button>
+            <div class="mini" id="tmcMsg" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ico">📚</div><div><h2>État de la mémoire</h2><div class="sub">1 CSV par catégorie OC</div></div></div>
+          <div class="cb" id="tmListBody"><div class="empty" style="padding:14px">Chargement…</div></div>
+        </div>
+      </div></div>
+    </section>
+
+    <!-- ====================== ASSETS À LA DEMANDE ======================== -->
+    <section class="view" id="v-assets">
+      <div class="pagehead"><h1>Assets à la demande</h1><p>Localise n'importe quel fichier (image ou document) <b>sans pipeline</b>, piloté par un prompt. Mise en forme préservée. Routage automatique par type.</p></div>
+      <div class="grid">
+        <div class="col">
+          <div class="card tool">
+            <div class="ch"><div class="ico">🎯</div><div><h2>Localiser des assets</h2><div class="sub">Drag &amp; drop · pptx · xlsx · csv · docx · png · jpg · svg…</div></div></div>
+            <div class="cb">
+              <div class="drop" id="drop"><input type="file" id="filein" multiple accept=".png,.jpg,.jpeg,.svg,.gif,.webp,.xlsx,.xls,.csv,.docx,.doc,.pptx,.ppt,.ods,.pdf" hidden>
+                <div class="dz-i">📥</div><div><b>Glisse tes fichiers ici</b> ou <span class="lk">parcourir</span><div class="mini">png · jpg · svg · xlsx · csv · docx · pptx · pdf</div></div></div>
+              <div id="filelist"></div>
+              <div class="f"><label>… ou des URLs d'assets (une par ligne)</label><textarea id="assetUrls" rows="2" placeholder="https://user.oc-static.com/…&#10;https://course.oc-static.com/…"></textarea></div>
+              <div class="row2">
+                <div class="f"><label>Source Language <span class="req">*</span></label><select id="aSrc"><option value="">—</option><option>fr</option><option>en</option></select></div>
+                <div class="f"><label>Target Language <span class="req">*</span></label><select id="aTgt"><option value="">—</option><option>en-US</option><option>fr-FR</option></select></div>
+              </div>
+              <div class="f"><label>Consigne / prompt <span class="cond">recommandé</span></label><textarea id="aPrompt" rows="3" placeholder="Ex. Traduis FR→EN. Préserve les acronymes, RFC, noms de produits et le code. Ton pédagogique OC, accessible."></textarea></div>
+              <div class="f"><label>Glossaire (optionnel)</label><textarea id="aGloss" rows="2" placeholder="terme source = terme cible (un par ligne)"></textarea></div>
+              <div class="f"><label>Sortie</label>
+                <div class="checks" style="flex-direction:row;flex-wrap:wrap;gap:10px">
+                  <label class="chk oc on" data-o="download" style="flex:1;min-width:120px"><span class="box"></span><div class="m"><b>⬇️ Télécharger</b></div></label>
+                  <label class="chk oc" data-o="iconik" style="flex:1;min-width:120px"><span class="box"></span><div class="m"><b>Iconik</b></div></label>
+                  <label class="chk oc" data-o="github" style="flex:1;min-width:120px"><span class="box"></span><div class="m"><b>GitHub</b></div></label>
+                </div></div>
+            </div>
+          </div>
+          <div class="card tool">
+            <div class="ch"><div class="ico">📦</div><div><h2>OC Asset Extractor</h2><div class="sub">Récupère tous les assets oc-static d'un cours en ZIP</div></div></div>
+            <div class="cb"><div class="f"><label>HTML du cours (upload) ou URL</label><input type="text" id="extInput" placeholder="déposer le HTML ou coller l'URL du cours"></div>
+              <button class="sbtn go" style="align-self:flex-start" onclick="alert('Prototype — lancerait l\'extraction ZIP (webhook oc-extractor).')">Extraire le ZIP</button></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="plan"><div class="plan-h"><h3>🎯 À localiser</h3><p>Routage automatique par type</p></div>
+            <div class="plan-b"><div id="aSteps"><div class="empty">Aucun asset ajouté.</div></div>
+              <div class="warns" id="aWarns"></div>
+              <button class="btn btn-go" id="aLaunch" disabled>Ajoute un asset</button></div></div>
+          <div class="legend"><b>Routage</b>
+            <li>🖼️ images (png/jpg/svg…) → <b>A8</b></li>
+            <li>📄 docs (xlsx/csv/docx/pptx) → <b>A9</b> (miroir)</li>
+            <li>⚠️ pdf → revue manuelle (édition miroir impossible)</li>
+            <li>Autonome : aucun prérequis. Best-effort sur la cohérence ; passe par le pipeline pour un alignement parfait.</li></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const COURSES={ '8970456':{done:true,source:'8787276',src:'fr',tgt:'en-US',images:9,annexes:2,links:4,videos:1} }; // fallback si BFF absent
+const live={}; // statut réel par id (rempli par le BFF)
+function fetchStatus(id){ if(id in live) return; live[id]='pending';
+  fetch('/api/content/'+id+'/status').then(r=>r.ok?r.json():null).then(d=>{
+    if(d&&d.done) live[id]={done:true,source:d.source,src:d.src,tgt:d.tgt,images:d.inventory.images,annexes:d.inventory.annexes,links:d.inventory.links,videos:d.inventory.videos};
+    else if(d) live[id]={done:false}; else delete live[id];
+    render();
+  }).catch(()=>{ delete live[id]; });
+}
+function showToast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),9000);}
+const S={ ctype:'COURS', sourceId:'',targetId:'',gdocUrl:'',pathId:'',projNo:'',srcLang:'',tgtLang:'',domain:'',email:'',
+  p1_localize:false,p1_audit:false,p1_score:false,p1_qa:false, a7:false,a8:false,a9:false,a10:false, extractor:false, simP1:false };
+const $=id=>document.getElementById(id);
+const isId=v=>/^\d{4,8}$/.test(v);            // cours ~7, parcours ~4 → 4 à 8 chiffres
+const isEmail=v=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+const isProj=v=>/^P\d{1,2}$/i.test(v);
+const isCours=()=>S.ctype==='COURS';
+const p1Active=()=>S.p1_localize||S.p1_audit||S.p1_score||S.p1_qa;
+const anyP2=()=>S.a8||S.a9||S.a10||(isCours()&&S.a7);
+const courseInfo=()=>{ if(!isCours())return null; const l=live[S.targetId]; if(l&&l!=='pending'){return l.done?l:null;} return COURSES[S.targetId]||null; };
+const phase1Done=()=>isCours()&&(S.simP1||!!(courseInfo()&&courseInfo().done));
+const p2Available=()=>phase1Done()||S.p1_localize;
+
+document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('on',x===n));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('v-'+n.dataset.v).classList.add('on');if(n.dataset.v==='suivi')fetchRuns();if(n.dataset.v==='tmagent'){tmList();fillCats('tmcCat');}}));
+document.querySelectorAll('#ctype button').forEach(b=>b.addEventListener('click',()=>{S.ctype=b.dataset.t;document.querySelectorAll('#ctype button').forEach(x=>x.classList.toggle('on',x===b));render();}));
+const bindT=(id,k,f)=>$(id).addEventListener('input',e=>{let v=e.target.value;if(f)v=f(v);e.target.value=v;S[k]=v;render();});
+bindT('sourceId','sourceId',v=>v.replace(/\D/g,'')); bindT('pathId','pathId',v=>v.replace(/\D/g,''));
+let _st;$('targetId').addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'');e.target.value=v;S.targetId=v;render();clearTimeout(_st);_st=setTimeout(()=>{if(isCours()&&isId(v))fetchStatus(v);},450);});
+['gdocUrl','projNo','email'].forEach(id=>$(id).addEventListener('input',e=>{S[id]=e.target.value;render();}));
+['srcLang','tgtLang','domain'].forEach(id=>$(id).addEventListener('change',e=>{S[id]=e.target.value;render();}));
+$('simP1').addEventListener('change',e=>{S.simP1=e.target.checked;render();});
+document.querySelectorAll('.chk').forEach(c=>c.addEventListener('click',e=>{e.preventDefault();const k=c.dataset.k;if(['a7','a8','a9','a10'].includes(k)&&!S[k]&&!p2Available()){flash();return;}S[k]=!S[k];render();}));
+function flash(){const g=$('p2gate');g.classList.add('show');g.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300});}
+
+function render(){
+  const cours=isCours();
+  $('idCours').style.display=cours?'block':'none'; $('idProjet').style.display=cours?'none':'block';
+  // phase 1 labels adapt
+  $('locLabel').textContent=cours?'Localiser le cours (HTML)':'Localiser le projet → DOCX';
+  $('locTag').textContent=cours?'produit le Gold Master':'DOCX miroir'; $('locTag').className='tag '+(cours?'tag-gm':'tag-doc');
+  $('locDesc').textContent=cours?'A1–A6 + réassemblage → 8 fichiers GitHub. Débloque la Phase 2.':'Localise le GDoc → DOCX en préservant toute la mise en forme (liens, styles).';
+  $('p1sub').textContent=cours?'CLS v3 — Course Localisation · A1→A6':'Localisation de projet (GDoc → DOCX miroir)';
+  // phase 2 (assets & liens) applies to both; A7 (vidéo) only for cours
+  $('a7chk').style.display=cours?'flex':'none'; $('a7na').style.display=cours?'none':'block';
+  if(!cours)S.a7=false;
+  // auto-context (cours)
+  const ci=courseInfo(),ctx=$('ctx');
+  if(ci&&isId(S.targetId)){ctx.classList.add('show');ctx.innerHTML=`<div class="h">✅ Phase 1 détectée pour ${S.targetId}</div><div class="mini">Source <b>${ci.source}</b> · ${ci.src} → ${ci.tgt} · Gold Master présent.</div><div class="chips"><span class="chip">🖼️ ${ci.images} images</span><span class="chip">📄 ${ci.annexes} annexes</span><span class="chip">🔗 ${ci.links} liens</span><span class="chip">🎬 ${ci.videos} vidéo</span></div>`;if(!S.srcLang){S.srcLang=ci.src;$('srcLang').value=ci.src;}if(!S.tgtLang){S.tgtLang=ci.tgt;$('tgtLang').value=ci.tgt;}if(!S.sourceId){S.sourceId=ci.source;$('sourceId').value=ci.source;}}else ctx.classList.remove('show');
+  document.querySelectorAll('.chk').forEach(c=>c.classList.toggle('on',!!S[c.dataset.k]));
+  // phase 2 gate
+  {const av=p2Available();$('p1status').className='status-pill '+(av?'status-ok':'status-no');$('p1status').textContent=av?(phase1Done()?'✅ disponible':'✅ via lancement chaîné'):'⛔ non disponible';$('p2gate').classList.toggle('show',!av);document.querySelectorAll('#p2checks .chk').forEach(c=>{if(c.dataset.k==='a7'&&!cours)return;c.classList.toggle('locked',!av);if(!av&&S[c.dataset.k]){S[c.dataset.k]=false;c.classList.remove('on');}});}
+  // validation
+  const E=[];const setErr=(id,bad)=>{const el=$(id);if(el)el.classList.toggle('invalid',bad);const er=$(id+'-err');if(er)er.style.display=bad?'block':'none';};
+  const need=p1Active()||anyP2();
+  setErr('email',need&&!isEmail(S.email));if(need&&!isEmail(S.email))E.push('Email valide requis.');
+  ['sourceId','targetId','gdocUrl','pathId','projNo','srcLang','tgtLang'].forEach(id=>setErr(id,false));
+  if(cours){
+    if(need){setErr('targetId',!isId(S.targetId));if(!isId(S.targetId))E.push('Target Course ID requis.');}
+    if(p1Active()){setErr('sourceId',!isId(S.sourceId));if(!isId(S.sourceId))E.push('Source Course ID requis.');}
+  } else if(p1Active()){
+    setErr('gdocUrl',!S.gdocUrl);if(!S.gdocUrl)E.push('GDoc URL requise.');
+    setErr('pathId',!isId(S.pathId));if(!isId(S.pathId))E.push('Parcours ID requis.');
+    setErr('projNo',!isProj(S.projNo));if(!isProj(S.projNo))E.push('N° de projet (ex. P2).');
+  }
+  if(p1Active()){setErr('srcLang',!S.srcLang);if(!S.srcLang)E.push('Source Language.');setErr('tgtLang',!S.tgtLang);if(!S.tgtLang)E.push('Target Language.');}
+  // plan + cost
+  const steps=[],warns=[];let cost=0;
+  const p1=[];if(S.p1_localize)p1.push(cours?'Localisation HTML':'Localisation DOCX');if(S.p1_audit)p1.push('Audit A1');if(S.p1_score)p1.push('Score');if(S.p1_qa)p1.push('Quality Check');
+  if(S.p1_localize)cost+=cours?15:3; if(S.p1_audit)cost+=.3; if(S.p1_score)cost+=.6; if(S.p1_qa)cost+=3;
+  if(p1.length)steps.push({p:1,t:'Phase 1 — '+p1.join(' + '),d:cours?((S.sourceId||'?')+' → '+(S.targetId||'?')+' · '+(S.srcLang||'?')+'→'+(S.tgtLang||'?')):('Projet '+(S.pathId||'?')+' · '+(S.projNo||'?')+' · '+(S.srcLang||'?')+'→'+(S.tgtLang||'?'))});
+  const p2=[];if(S.a8){p2.push('A8');cost+=(ci?ci.images*0.10:1.5);}if(S.a9){p2.push('A9');cost+=(ci?ci.annexes*0.15:0.5);}if(S.a7){p2.push('A7');cost+=(ci?ci.videos*0.10:0.3);}if(S.a10){p2.push('A10');cost+=0.1;}
+  const p2o=['A8','A9','A7'].filter(x=>p2.includes(x)).concat(p2.includes('A10')?['A10']:[]);
+  if(p2o.length){steps.push({p:2,t:'Phase 2 — '+p2o.join(', '),d:'A8/A9/A7 en parallèle · A10 en dernier'});if(S.p1_localize)warns.push({k:'i',m:'Lancement chaîné : Phase 2 après livraison Phase 1.'});if(S.a10&&p2o.length>1)warns.push({k:'i',m:'A10 s’exécute en dernier.'});}
+  if(anyP2()&&!p2Available())warns.push({k:'e',m:'Phase 2 sans Phase 1 disponible — impossible.'});
+  $('steps').innerHTML=steps.length?steps.map((s,i)=>`<div class="step ${s.p===2?'p2':s.p===0?'tl':''}"><div class="n">${s.p===0?'∙':i+1}</div><div class="t"><b>${s.t}</b><div class="d">${s.d}</div></div></div>`).join(''):'<div class="empty">Aucune action sélectionnée.</div>';
+  $('costVal').textContent=cost>0?('~$'+(cost<1?cost.toFixed(2):Math.round(cost))):'$0';$('costNote').textContent=cost>0?(ci?'basé sur le contenu détecté':'ordre de grandeur'):'—';
+  $('warns').innerHTML=E.map(e=>`<div class="warn e">⛔ ${e}</div>`).join('')+warns.map(w=>`<div class="warn ${w.k}">${w.k==='e'?'⛔':'ℹ️'} ${w.m}</div>`).join('');
+  const has=steps.length>0,ok=has&&!E.length&&!(anyP2()&&!p2Available());
+  const b=$('launch');b.disabled=!ok;b.textContent=!has?'Sélectionne une action':(ok?'🚀 Lancer LEO':'Corrige les champs requis');
+}
+$('launch').addEventListener('click',async()=>{
+  const payload={content_type:S.ctype,email:S.email,source_language:S.srcLang,target_language:S.tgtLang,domain:S.domain||null,
+    identity:isCours()?{source_course_id:S.sourceId,target_course_id:S.targetId}:{gdoc_url:S.gdocUrl,parcours_id:S.pathId,project_no:S.projNo,output:'DOCX'},
+    phase1:p1Active()?{localize:S.p1_localize,audit_a1:S.p1_audit,localizability_score:S.p1_score,quality_check:S.p1_qa}:null,
+    phase2:anyP2()?{a7:S.a7,a8:S.a8,a9:S.a9,a10:S.a10}:null,
+    chained:S.p1_localize&&anyP2()};
+  const b=$('launch'),old=b.textContent; b.disabled=true; b.textContent='⏳ Envoi à n8n…';
+  try{
+    const r=await fetch('/api/launch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(r.ok){ const dl=(d.launched||[]).filter(x=>x.download).map(x=>'⬇️ <a href="'+x.download+'" download style="color:#8fd0ff;font-weight:700">'+x.filename+'</a>').join('<br>'); showToast('🚀 <b>Lancé !</b>'+(dl?'<br>'+dl:'')+'<pre>'+JSON.stringify(d.launched,null,2)+'</pre>'); }
+    else showToast('⚠️ <b>'+(d.error||'Erreur')+'</b>');
+  }catch(e){ showToast('🧪 <b>Mode prototype</b> (BFF non connecté) — payload prêt :<pre>'+JSON.stringify(payload,null,2)+'</pre>'); }
+  b.disabled=false; b.textContent=old; render();
+});
+render();
+
+/* ===================== ASSETS À LA DEMANDE ===================== */
+const A={files:[],urls:'',src:'',tgt:'',prompt:'',gloss:'',out:{download:true,iconik:false,github:false}};
+function routeFor(name){const e=(name.split('?')[0].split('.').pop()||'').toLowerCase();
+  if(['png','jpg','jpeg','svg','gif','webp','bmp','ico'].includes(e))return{ag:'A8',cl:'ag-a8',ok:true};
+  if(['xlsx','xls','csv','docx','doc','pptx','ppt','ods'].includes(e))return{ag:'A9',cl:'ag-a9',ok:true};
+  if(e==='pdf')return{ag:'PDF',cl:'ag-na',ok:false};
+  return{ag:'?',cl:'ag-na',ok:false};}
+const drop=$('drop'),filein=$('filein');
+drop.addEventListener('click',()=>filein.click());
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('hover');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('hover'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('hover');addFiles(e.dataTransfer.files);});
+filein.addEventListener('change',()=>addFiles(filein.files));
+function addFiles(fl){for(const f of fl)A.files.push(f);renderAssets();}
+window.rmFile=i=>{A.files.splice(i,1);renderAssets();};
+$('assetUrls').addEventListener('input',e=>{A.urls=e.target.value;renderAssets();});
+$('aSrc').addEventListener('change',e=>{A.src=e.target.value;renderAssets();});
+$('aTgt').addEventListener('change',e=>{A.tgt=e.target.value;renderAssets();});
+$('aPrompt').addEventListener('input',e=>{A.prompt=e.target.value;renderAssets();});
+$('aGloss').addEventListener('input',e=>{A.gloss=e.target.value;});
+document.querySelectorAll('.chk.oc').forEach(c=>c.addEventListener('click',e=>{e.preventDefault();const o=c.dataset.o;A.out[o]=!A.out[o];c.classList.toggle('on',A.out[o]);renderAssets();}));
+function assetUrlList(){return A.urls.split('\n').map(x=>x.trim()).filter(Boolean);}
+function renderAssets(){
+  $('filelist').innerHTML=A.files.map((f,i)=>{const n=f.name||f;const r=routeFor(n);return `<div class="frow"><span>${r.ok?'📄':'⚠️'}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n}</span><span class="ag ${r.cl}">${r.ag}</span><span class="rm" onclick="rmFile(${i})">✕</span></div>`;}).join('');
+  const all=A.files.map(f=>f.name||f).concat(assetUrlList()); const total=all.length;
+  const c={A8:0,A9:0,manual:0}; all.forEach(n=>{const r=routeFor(n);if(r.ag==='A8')c.A8++;else if(r.ag==='A9')c.A9++;else c.manual++;});
+  const steps=[];
+  if(c.A8)steps.push(`<div class="step p2"><div class="n">${c.A8}</div><div class="t"><b>Images → A8</b><div class="d">texte ré-écrit, image préservée</div></div></div>`);
+  if(c.A9)steps.push(`<div class="step"><div class="n">${c.A9}</div><div class="t"><b>Documents → A9</b><div class="d">miroir (format/formules/liens préservés)</div></div></div>`);
+  if(c.manual)steps.push(`<div class="step tl"><div class="n">${c.manual}</div><div class="t"><b>Revue manuelle</b><div class="d">PDF / type non supporté</div></div></div>`);
+  $('aSteps').innerHTML=total?steps.join(''):'<div class="empty">Aucun asset ajouté.</div>';
+  const W=[];
+  if(total&&(!A.src||!A.tgt))W.push({k:'e',m:'Langues source/cible requises.'});
+  if(total&&!A.prompt)W.push({k:'i',m:'Sans consigne, traduction par défaut (best-effort).'});
+  if(c.manual)W.push({k:'i',m:c.manual+' fichier(s) en revue manuelle (PDF/non supporté).'});
+  $('aWarns').innerHTML=W.map(w=>`<div class="warn ${w.k}">${w.k==='e'?'⛔':'ℹ️'} ${w.m}</div>`).join('');
+  const ok=total>0&&A.src&&A.tgt&&(A.out.download||A.out.iconik||A.out.github);
+  const b=$('aLaunch');b.disabled=!ok;b.textContent=!total?'Ajoute un asset':(ok?('🎯 Localiser ('+total+')'):'Complète les champs requis');
+}
+$('aLaunch').addEventListener('click',async()=>{
+  const b=$('aLaunch'),old=b.textContent; b.disabled=true; b.textContent='⏳ Localisation…';
+  const fileItems=await Promise.all(A.files.map(f=>new Promise(rs=>{const fr=new FileReader();fr.onload=()=>rs({name:f.name,file_base64:String(fr.result).split(',')[1]});fr.readAsDataURL(f);})));
+  const urlItems=assetUrlList().map(u=>({name:u.split('/').pop().split('?')[0],url:u}));
+  const payload={source_language:A.src,target_language:A.tgt,prompt:A.prompt||null,glossary:A.gloss||null,items:fileItems.concat(urlItems)};
+  try{
+    const r=await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(r.ok){ const rows=(d.results||[]).map(x=>{const ic=(x.status==='PASS'||x.status==='localized')?'✅':(x.status==='preserved'?'⬜':'⚠️');const dl=x.download?' <a href="'+x.download+'" download style="color:#8fd0ff;font-weight:700">⬇️ télécharger</a>':'';return ic+' <b>'+x.name+'</b> ['+(x.agent||'?')+' · '+x.status+']'+(x.segments?' '+x.segments:'')+(x.note?' — '+x.note:'')+(x.error?' — '+x.error:'')+dl;}).join('<br>'); showToast('🎯 <b>Assets localisés</b><br>'+rows); }
+    else showToast('⚠️ <b>'+(d.error||'Erreur')+'</b>');
+  }catch(e){ showToast('🧪 <b>Mode prototype</b> (BFF absent) — '+(A.files.length+assetUrlList().length)+' asset(s) prêt(s).'); }
+  b.disabled=false; b.textContent=old; renderAssets();
+});
+renderAssets();
+
+/* ===================== SUIVI (live) ===================== */
+function runStatus(s){ if(s==='success')return['ok','✓ success']; if(s==='error')return['err','✗ échec']; if(s==='crashed')return['err','✗ crashé']; if(s==='canceled')return['err','⊘ annulé']; return['run','⏳ '+(s||'…')]; }
+const isFail=s=>['error','crashed','canceled'].includes(s);
+function seenFails(){ try{return new Set(JSON.parse(localStorage.getItem('leo_seenFails')||'[]'));}catch(e){return new Set();} }
+function markFailsSeen(ids){ const s=seenFails(); ids.forEach(i=>s.add(i)); try{localStorage.setItem('leo_seenFails',JSON.stringify([...s].slice(-300)));}catch(e){} }
+function fmtDur(ms){ if(ms==null)return '—'; if(ms<1000)return ms+'ms'; const s=Math.round(ms/1000); return s<60?s+'s':Math.floor(s/60)+'m'+String(s%60).padStart(2,'0'); }
+function fmtTime(t){ return t? t.slice(5,19).replace('T',' ') : '—'; }
+async function fetchRuns(){
+  const body=$('runsBody'); if(!body)return;
+  try{
+    const r=await fetch('/api/runs'); if(!r.ok)throw 0; const d=await r.json();
+    $('suiviLive').style.display='inline-block';
+    const runs=d.runs||[]; const running=runs.filter(x=>['running','new','waiting'].includes(x.status)).length; const failedRuns=runs.filter(x=>isFail(x.status)); const failed=failedRuns.length; const okc=runs.filter(x=>x.status==='success').length;
+    const suiviOpen=$('v-suivi')&&$('v-suivi').classList.contains('on'); const seen=seenFails(); let unseen=failedRuns.filter(r=>!seen.has(r.id)).length; if(suiviOpen&&failed){ markFailsSeen(failedRuns.map(r=>r.id)); unseen=0; }
+    const sb=$('suiviBadge'); if(sb){ if(unseen){ sb.textContent='✗ '+unseen; sb.style.display='inline-block'; sb.classList.add('bad'); } else if(running){ sb.textContent=running; sb.style.display='inline-block'; sb.classList.remove('bad'); } else { sb.style.display='none'; sb.classList.remove('bad'); } }
+    const sm=$('runsSummary'); if(sm) sm.innerHTML = runs.length ? `<span class="st ok">✓ ${okc} ok</span><span class="st run">⏳ ${running} en cours</span>${failed?`<span class="st err">✗ ${failed} échec(s)</span>`:'<span class="st" style="background:#eef1f8;color:#6b7191">✓ 0 échec</span>'}` : '';
+    const cb=$('chainsBanner'); if(cb) cb.innerHTML=(d.chains&&d.chains.length)? d.chains.map(c=>`<div class="warn i" style="margin-bottom:10px;padding:11px 13px">⛓️ <b>Chaînage en attente</b> — cours ${c.target} : la Phase 2 (${c.agents.join(', ')}) se lancera dès la livraison de la Phase 1 (surveillance GitHub).</div>`).join('') : '';
+    if(!d.runs.length){ body.innerHTML='<tr><td colspan="5" class="empty">Aucune exécution.</td></tr>'; return; }
+    body.innerHTML=runs.map(x=>{const[cl,lbl]=runStatus(x.status);return `<tr class="${isFail(x.status)?'rowbad':''}"><td><b>#${x.id}</b></td><td>${x.workflow||''}</td><td><span class="st ${cl}">${lbl}</span></td><td>${fmtTime(x.started)}</td><td>${fmtDur(x.durationMs)}</td></tr>`;}).join('');
+  }catch(e){ $('suiviLive').style.display='none'; body.innerHTML='<tr><td colspan="5" class="empty">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code> puis ouvre http://localhost:4317</td></tr>'; }
+}
+setInterval(fetchRuns,8000); fetchRuns(); // badge runs en cours + table si onglet Suivi
+
+/* ===================== TM AGENT ===================== */
+async function tmList(){ const b=$('tmListBody'); if(!b)return; try{ const d=await (await fetch('/api/tm/list')).json(); b.innerHTML=(d.categories&&d.categories.length)? '<table style="width:100%"><thead><tr><th>Catégorie OC</th><th>Termes</th><th>Validés</th></tr></thead><tbody>'+d.categories.map(c=>`<tr><td><b>${c.category}</b></td><td>${c.terms}</td><td>${c.validated}</td></tr>`).join('')+`</tbody></table><div class="mini" style="margin-top:8px">Total : <b>${d.total}</b> termes · <a href="${d.repo}" target="_blank" rel="noopener">voir sur GitHub</a></div>` : '<div class="empty" style="padding:14px">TM vide — ingère une paire validée ou consolide un run.</div>'; const sel=$('tmCat'); if(sel&&d.categories){ const cur=sel.value; sel.innerHTML='<option value="">—</option>'+d.categories.map(c=>'<option>'+c.category+'</option>').join(''); sel.value=cur; } }catch(e){ b.innerHTML='<div class="empty" style="padding:14px">⚠️ BFF non connecté.</div>'; } }
+async function fillCats(selId){ try{ const d=await (await fetch('/api/tm/list')).json(); const sel=$(selId); if(sel&&d.categories){ const cur=sel.value; sel.innerHTML='<option value="">—</option>'+d.categories.map(c=>'<option>'+c.category+'</option>').join(''); sel.value=cur; } }catch(e){} }
+async function tmConformAnalyze(){ const id=($('tmcId').value||'').replace(/\D/g,''); const cat=$('tmcCat').value; const dir=$('tmcDir').value; const m=$('tmcMsg'); const file=($('tmcHtml')&&$('tmcHtml').files[0])||null; if(!id&&!file){m.textContent='Donne un Course ID (repo) OU un fichier HTML extrait.';return;} if(!cat){m.textContent='Choisis le domaine (catégorie OC).';return;} m.innerHTML='⏳ Analyse de conformité… (rien n\'est modifié)'; try{ const payload={category:cat,direction:dir}; if(file) payload.html_base64=await new Promise(rs=>{const r=new FileReader();r.onload=()=>rs(btoa(unescape(encodeURIComponent(String(r.result)))));r.readAsText(file);}); if(id) payload.course_id=id; const d=await (await fetch('/api/tm/patch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).json(); if(!d.ok){ m.innerHTML='⚠️ '+(d.error||'erreur'); return; } window.REVCONF={id:id||'course',cat,dir,corr:d.corrections||[],html_base64:payload.html_base64||null}; renderConf(d); m.innerHTML='✅ Analyse faite — <b>'+d.proposed+'</b> écart(s) → ouverte dans la <b>Revue</b>.'; const nav=document.querySelector('.nav[data-v="revue"]'); if(nav)nav.click(); }catch(e){ m.textContent='⚠️ BFF injoignable.'; } }
+function renderConf(d){ const r=$('revConfRes'); if(!r)return; if(d.conform){ r.innerHTML='<div class="mini">✅ <b>Conforme</b> — aucun écart vs '+d.tm_terms+' termes validés ('+d.direction+' · '+d.category+').</div>'; return; } r.innerHTML='<div class="mini" style="margin-bottom:6px">🔎 <b>'+d.proposed+'</b> écart(s) — <b>rien n\'est modifié</b>. Décoche ce que tu ne veux PAS corriger, puis applique.</div><table style="width:100%"><thead><tr><th><input type="checkbox" checked onchange="document.querySelectorAll(\'.rvck\').forEach(x=>x.checked=this.checked)"></th><th>Dans le cours</th><th>→ Validé</th><th>Terme / raison</th></tr></thead><tbody>'+(d.corrections||[]).map((c,i)=>`<tr><td><input type="checkbox" class="rvck" data-i="${i}" checked></td><td>${c.wrong}</td><td><b>${c.correct}</b></td><td class="mini">${c.term||''}${c.reason?' — '+c.reason:''}</td></tr>`).join('')+'</tbody></table><button class="sbtn go" style="margin-top:10px" onclick="revApply()">✅ Appliquer la sélection → HTML corrigé</button><div class="mini" id="revApplyMsg" style="margin-top:6px"></div>'; }
+async function revApply(){ const P=window.REVCONF; const m=$('revApplyMsg'); if(!P)return; const sel=[...document.querySelectorAll('.rvck')].filter(x=>x.checked).map(x=>P.corr[+x.dataset.i]).filter(Boolean); if(!sel.length){m.textContent='Coche au moins une correction.';return;} m.textContent='⏳ Application de la sélection…'; try{ const d=await (await fetch('/api/tm/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({course_id:P.id,html_base64:P.html_base64||undefined,category:P.cat,direction:P.dir,corrections:sel})})).json(); if(d.ok){ m.innerHTML='✅ <b>'+d.applied+'</b> correction(s) appliquée(s) — <a href="'+d.download+'" download style="color:#8fd0ff;font-weight:700">⬇️ HTML corrigé</a>'; } else m.textContent='⚠️ '+(d.error||'erreur'); }catch(e){ m.textContent='⚠️ BFF injoignable.'; } }
+async function tmSearch(){ const q=($('tmQ').value||'').trim(); const r=$('tmSearchRes'); if(!q){r.innerHTML='<div class="mini">Entre un terme.</div>';return;} r.innerHTML='<div class="mini">…</div>'; try{ const d=await (await fetch('/api/tm/search?q='+encodeURIComponent(q))).json(); if(!d.hits||!d.hits.length){r.innerHTML='<div class="mini">Aucun match pour <b>'+q+'</b> dans la mémoire.</div>';return;} r.innerHTML='<table style="width:100%"><thead><tr><th>Source</th><th>Cible</th><th>Domaine OC</th><th>Software</th><th>Catég.</th></tr></thead><tbody>'+d.hits.map(h=>`<tr><td>${h.source_term}</td><td><b>${h.target_term}</b></td><td>${h.domain}</td><td>${h.software}</td><td class="mini">${h.category}${h.validated?' ✓':''}</td></tr>`).join('')+`</tbody></table><div class="mini" style="margin-top:6px">${d.count} match(s) — note comme le même terme diffère selon le <b>domaine</b>.</div>`; }catch(e){ r.innerHTML='<div class="mini">⚠️ BFF non connecté.</div>'; } }
+async function tmConsolidate(){ const id=($('tmRunId').value||'').replace(/\D/g,''); const m=$('tmConsMsg'); if(!id){m.textContent='Entre un Source Course ID.';return;} m.textContent='⏳ Archiviste en cours…'; try{ const d=await (await fetch('/api/tm/consolidate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_course_id:id})})).json(); if(d.ok){ m.innerHTML='✅ <b>'+d.category+'</b> : +'+d.added+' / ~'+d.updated+' (total '+d.total+')'; tmList(); } else m.textContent='⚠️ '+(d.error||'erreur'); }catch(e){ m.textContent='⚠️ BFF injoignable.'; } }
+async function tmIngest(){ const fr=$('tmFr').files[0], en=$('tmEn').files[0]; const m=$('tmIngestMsg'); if(!fr||!en){m.textContent='Fournis le HTML FR et le localisé.';return;} const b=$('tmIngestBtn'),old=b.textContent; b.disabled=true; b.textContent='⏳ Archivage…'; m.textContent=''; const rd=f=>new Promise(rs=>{const r=new FileReader();r.onload=()=>rs(btoa(unescape(encodeURIComponent(String(r.result)))));r.readAsText(f);}); try{ const fb=await rd(fr), eb=await rd(en); const d=await (await fetch('/api/tm/ingest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fr_base64:fb,en_base64:eb,course_id:($('tmCid').value||'').trim(),direction:$('tmDir').value})})).json(); if(d.ok){ m.innerHTML='✅ <b>'+d.category+'</b> : +'+d.added+' / ~'+d.updated+' termes <b>validés</b> (total '+d.total+')'+(d.note?' — '+d.note:''); tmList(); } else m.textContent='⚠️ '+(d.error||'erreur'); }catch(e){ m.textContent='⚠️ BFF injoignable.'; } b.disabled=false; b.textContent=old; }
+
+/* ===================== REVUE (live A5 / A8 / A10) ===================== */
+let REV={};
+function setRevEmpty(msg){ ['a5Body','a8Body','a10ReviewBody'].forEach(b=>{if($(b))$(b).innerHTML='<div class="empty" style="padding:14px">'+msg+'</div>';}); }
+async function loadReview(){
+  const id=(($('revId')||{}).value||'').replace(/\D/g,'');
+  if(!/^\d{4,8}$/.test(id)){ setRevEmpty('Entre un Target Course ID valide.'); return; }
+  setRevEmpty('Chargement…');
+  try{
+    const d=await (await fetch('/api/review/'+id)).json();
+    if(!d.done){ setRevEmpty('⛔ Pas de Phase 1 (Gold Master) pour ce cours.'); return; }
+    REV={id, qa_report:d.qa_report, decided:{}}; (d.decisions||[]).forEach(x=>REV.decided[x.id]=x.target_url);
+    $('a5Body').innerHTML=(d.a5&&d.a5.length)? d.a5.map(s=>{const ok=s.score>=90;return `<div class="rev"><span class="badge ${ok?'b-sw':'b-rv'}">${s.score}/100</span><div><b>Chapitre ${s.chapter}</b><div class="mini">${ok?'≥ 90 — validé pour livraison':'sous le seuil — relecture recommandée'}</div></div><div class="acts"><a class="sbtn" href="${d.qa_report}" target="_blank" rel="noopener">Voir le rapport QA</a><button class="sbtn okbtn" data-u="a5:${s.chapter}" onclick="toggleOk(this)" title="Marquer OK (sauvegardé)">✓</button></div></div>`;}).join('') : '<div class="empty" style="padding:14px">Pas de scores A5.</div>';
+    $('a8Body').innerHTML=(d.a8&&d.a8.length)? d.a8.map(m=>{const flag=m.risk&&m.risk!=='ok';const name=(m.url||'').split('/').pop();return `<div class="rev"><span class="badge ${flag?'b-rv':'b-sw'}">${m.risk||'ok'}</span><img src="${m.url}" loading="lazy" referrerpolicy="no-referrer" style="width:46px;height:46px;object-fit:cover;border-radius:6px;flex:0 0 auto;background:#0a1020;border:1px solid #1e293b" onerror="this.style.display='none'"><div style="min-width:0"><b style="word-break:break-all">${name}</b><div class="mini">${m.location||''} — ${flag?'à vérifier (écran/UI)':'localisable'}</div></div><div class="acts"><a class="sbtn" href="${m.url}" target="_blank" rel="noopener">Voir</a><button class="sbtn iconikbtn" style="display:none;align-items:center" title="Envoyer sur ICONIK (static_graphics du target)">⬆️</button><button class="sbtn go" onclick="relocImg(this,'${m.url}')">Localiser</button><button class="sbtn okbtn" data-u="${m.url}" onclick="toggleOk(this)" title="Cocher = NE PAS traiter cette image (ignorée par « Localiser 5 »). Sauvegardé.">✓</button><button class="sbtn rejbtn" data-r="image:${m.url}" onclick="toggleReject(this)" title="Rejeter (revue QA) — le commentaire est consigné pour le ML">✕</button></div></div>`;}).join('') : '<div class="empty" style="padding:14px">Aucune image.</div>';
+    $('a10ReviewBody').innerHTML=(d.a10&&d.a10.length)? d.a10.map(x=>{const rev=String(x.needs_human_review)==='true'||/MANUAL_REVIEW|BLOCK/i.test(x.decision||'');const badge=rev?'b-rv':(/SWITCH|PRESERVE/i.test(x.decision||'')?'b-sw':'b-pr');const dec=REV.decided[x.id];const tgt=(dec||x.target_url||'').trim();
+      return `<div class="rev"><span class="badge ${dec?'b-sw':badge}">${dec?'résolu':(x.decision||'?')}</span><div style="flex:1;min-width:0"><b style="word-break:break-all">${(x.source_url||'').slice(0,80)}</b><div class="mini">${(x.reason||'').slice(0,110)}</div></div><div class="acts">${(rev&&!dec)?`<input type="text" placeholder="URL cible…" style="width:170px"><button class="sbtn go" onclick="resolveLink('${x.id}','${encodeURIComponent(x.source_url||'')}',this.previousElementSibling)">Résoudre</button>`:`<span class="mini">→ ${tgt||'—'}</span>`}<button class="sbtn okbtn" data-u="link:${x.id}" onclick="toggleOk(this)" title="Marquer OK (sauvegardé)">✓</button><button class="sbtn rejbtn" data-r="link:${x.id}" onclick="toggleReject(this)" title="Rejeter (revue QA) — le commentaire est consigné pour le ML">✕</button></div></div>`;}).join('') : '<div class="empty" style="padding:14px">✅ Aucun lien à arbitrer (0 lien externe).</div>';
+    try{ const cs=await (await fetch('/api/review/'+id+'/checks')).json(); const set=new Set(cs.checked||[]); if(set.size)document.querySelectorAll('#a5Body .okbtn,#a8Body .okbtn,#a10ReviewBody .okbtn').forEach(b=>{ if(set.has(b.dataset.u)) applyOkVisual(b,true); }); }catch(e){}
+    try{ const lm=await (await fetch('/api/review/'+id+'/localized')).json(); document.querySelectorAll('#a8Body .rev').forEach(row=>{ const ok=row.querySelector('.okbtn'); const u=ok&&ok.dataset.u; const ent=u&&lm[u]; if(ent&&ent.download) renderBA(row,u,ent.download); }); }catch(e){}
+    try{ const rj=await (await fetch('/api/review/'+id+'/rejections')).json(); document.querySelectorAll('#a8Body .rejbtn,#a10ReviewBody .rejbtn').forEach(b=>{ const e=rj&&rj[b.dataset.r]; if(e&&e.rejected) applyRejVisual(b,e.comment); }); }catch(e){}
+    if(d.html_fixed){ const dl=$('revDownload'); if(dl)dl.style.display='inline-flex'; }
+  }catch(e){ setRevEmpty('⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code>.'); }
+}
+window.iconikPush=async(btn,download)=>{ const old=btn.textContent; btn.disabled=true; btn.textContent='⏳'; try{ const d=await (await fetch('/api/iconik/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({download,target_course_id:(REV&&REV.id)||''})})).json(); if(d.ok){ btn.textContent='☁️✓'; btn.style.background='#138a45'; btn.style.borderColor='#138a45'; btn.style.color='#fff'; btn.title='Envoyé sur Iconik (static_graphics)'; const row=btn.closest('.rev'); const okb=row&&row.querySelector('.okbtn'); if(okb&&!okb.classList.contains('done'))toggleOk(okb); showToast(`☁️ <b>Envoyé sur Iconik</b> — asset ${String(d.iconik_asset_id||'').slice(0,8)}… (collection <b>static_graphics</b>)`); } else { showToast('⚠️ Iconik : '+(d.error||'échec')); btn.disabled=false; btn.textContent=old; } }catch(e){ showToast('⚠️ Iconik injoignable'); btn.disabled=false; btn.textContent=old; } };
+function applyOkVisual(b,on){ b.classList.toggle('done',on); b.style.background=on?'#16a34a':''; b.style.color=on?'#fff':''; b.style.borderColor=on?'#16a34a':''; const r=b.closest('.rev'); if(r) r.style.opacity=on?'.55':''; }
+window.toggleOk=(b)=>{ const on=!b.classList.contains('done'); applyOkVisual(b,on); const u=b.dataset.u; if(u&&REV&&REV.id){ fetch('/api/review/'+REV.id+'/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,done:on})}).catch(()=>{}); } };
+function ensureRejNote(row){ let n=row.querySelector('.rejnote'); if(!n){ n=document.createElement('div'); n.className='rejnote'; const i=document.createElement('input'); i.type='text'; i.placeholder='Commentaire QA (1 phrase : pourquoi le rejet ?) — consigné pour le ML'; i.onchange=()=>saveRejComment(i); n.appendChild(i); row.appendChild(n); } return n; }
+function setRej(item,rejected,comment){ if(!REV||!REV.id)return; fetch('/api/review/'+REV.id+'/reject',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({item_id:item,item_type:(item.split(':')[0]||''),rejected,comment})}).catch(()=>{}); }
+function saveRejComment(inp){ const row=inp.closest('.rev'); const b=row.querySelector('.rejbtn'); if(b&&b.classList.contains('rejected')){ setRej(b.dataset.r,true,inp.value); showToast('✕ Rejet consigné — merci, ce retour servira au ML.'); } }
+function applyRejVisual(b,comment){ b.classList.add('rejected'); const row=b.closest('.rev'); const n=ensureRejNote(row); n.style.display='block'; n.querySelector('input').value=comment||''; }
+window.toggleReject=(b)=>{ const row=b.closest('.rev'); const on=b.classList.toggle('rejected'); const n=ensureRejNote(row); if(on){ n.style.display='block'; setRej(b.dataset.r,true,n.querySelector('input').value||''); n.querySelector('input').focus(); } else { n.style.display='none'; setRej(b.dataset.r,false,''); } };
+let batchRunning=false;
+async function localizeBatch5(){
+  if(batchRunning){ showToast('⏳ Un lot est déjà en cours — attends que les 5 soient finies avant d\'en relancer.'); return; }
+  const LIMIT=5;
+  const rows=[...document.querySelectorAll('#a8Body .rev')].filter(r=>{ if(r.querySelector('.baprev'))return false; const ok=r.querySelector('.okbtn'); if(ok&&ok.classList.contains('done'))return false; return true; });
+  const batch=rows.slice(0,LIMIT);
+  if(!batch.length){ showToast('✅ Plus d\'image non cochée à traiter (tout est soit fait, soit coché ✓ à ignorer).'); return; }
+  const btn=$('batch5Btn'), prog=$('batchProg'), fill=$('batchProgFill'), ptxt=$('batchProgTxt');
+  batchRunning=true; btn.disabled=true; const oldTxt=btn.textContent; btn.textContent='⏳ Lot en cours…'; prog.style.display='block'; let ok=0;
+  for(let i=0;i<batch.length;i++){
+    const row=batch[i]; const u=(row.querySelector('.okbtn')||{}).dataset?.u; if(!u)continue;
+    ptxt.textContent='Image '+(i+1)+'/'+batch.length+'…'; fill.style.width=Math.round(i/batch.length*100)+'%';
+    try{
+      const d=await (await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_language:'fr',target_language:'en-US',target_course_id:(REV&&REV.id)||'',items:[{name:u.split('/').pop(),url:u}]})})).json();
+      const x=(d.results||[])[0]||{};
+      if(x.status==='localized'&&x.download){ renderBA(row,u,x.download); if(REV&&REV.id)fetch('/api/review/'+REV.id+'/localized',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,download:x.download})}).catch(()=>{}); ok++; }
+    }catch(e){}
+  }
+  fill.style.width='100%'; ptxt.textContent='Terminé : '+ok+'/'+batch.length+' localisées';
+  showToast('⚡ <b>Lot terminé</b> — '+ok+'/'+batch.length+' images localisées. Re-clique « Localiser 5 » pour le lot suivant.');
+  setTimeout(()=>{prog.style.display='none';fill.style.width='0';},5000);
+  batchRunning=false; btn.disabled=false; btn.textContent=oldTxt;
+}
+function renderBA(row,srcUrl,dlUrl){ if(!row)return; const prev=row.querySelector('.baprev'); if(prev)prev.remove(); const ba=document.createElement('div'); ba.className='baprev'; ba.innerHTML=`<div class="bacol"><span class="bal">AVANT</span><a href="${srcUrl}" target="_blank" rel="noopener"><img src="${srcUrl}"></a></div><div class="bacol"><span class="bal ok">APRÈS</span><a href="${dlUrl}" target="_blank" rel="noopener"><img src="${dlUrl}"></a></div>`; row.appendChild(ba); const ib=row.querySelector('.iconikbtn'); if(ib){ ib.style.display='inline-flex'; ib.onclick=()=>iconikPush(ib,dlUrl); } }
+window.relocImg=async(btn,url)=>{ if(batchRunning){ showToast('⏳ <b>Vous avez déjà 5 images en cours de traitement</b> — attendez la fin du run en cours avant de relancer une image.'); return; } const old=btn.textContent; btn.disabled=true; btn.textContent='⏳…'; const row=btn.closest('.rev'); try{ const d=await (await fetch('/api/assets/localize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_language:'fr',target_language:'en-US',target_course_id:(REV&&REV.id)||'',items:[{name:url.split('/').pop(),url}]})})).json(); const x=(d.results||[])[0]||{}; if(x.status==='localized'&&x.download&&row){ renderBA(row,url,x.download); if(REV&&REV.id) fetch('/api/review/'+REV.id+'/localized',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url,download:x.download})}).catch(()=>{}); showToast(`🖼️ <b>localisé</b> — ${x.note||''} <a href="${x.download}" download style="color:#8fd0ff;font-weight:700">⬇️ télécharger</a>`); } else { const prev=row&&row.querySelector('.baprev'); if(prev)prev.remove(); showToast(`🖼️ <b>${x.status||'?'}</b> ${x.note||x.error||''}`); } }catch(e){ showToast('⚠️ échec re-localisation'); } btn.disabled=false; btn.textContent=old; };
+window.resolveLink=async(lid,srcEnc,inp)=>{ const tgt=(inp.value||'').trim(); if(!tgt){showToast('Entre une URL cible.');return;} const src=decodeURIComponent(srcEnc||''); try{ const r=await (await fetch('/api/review/'+REV.id+'/resolve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:lid,source_url:src,target_url:tgt})})).json(); const row=inp.closest('.rev'); row.querySelector('.acts').innerHTML='<span class="mini">→ '+tgt+'</span>'; const b=row.querySelector('.badge'); b.className='badge b-sw'; b.textContent='résolu'; const dl=$('revDownload'); if(dl)dl.style.display='inline-flex'; showToast('✅ Lien résolu'+(r&&r.replaced?' — <b>remplacé dans le HTML</b>':' (enregistré ; URL source non trouvée dans le HTML)')+'. <a href="/api/review/'+REV.id+'/html" style="color:#8fd0ff;font-weight:700">⬇️ HTML corrigé</a>'); }catch(e){ showToast('⚠️ échec'); } };
+
+/* ===================== IMPORT Phase 1 existante ===================== */
+let impFileObj=null;
+$('impDrop').addEventListener('click',()=>$('impFile').click());
+$('impDrop').addEventListener('dragover',e=>{e.preventDefault();$('impDrop').classList.add('hover');});
+$('impDrop').addEventListener('dragleave',()=>$('impDrop').classList.remove('hover'));
+$('impDrop').addEventListener('drop',e=>{e.preventDefault();$('impDrop').classList.remove('hover');if(e.dataTransfer.files[0]){impFileObj=e.dataTransfer.files[0];$('impFileName').textContent=impFileObj.name;}});
+$('impFile').addEventListener('change',()=>{if($('impFile').files[0]){impFileObj=$('impFile').files[0];$('impFileName').textContent=impFileObj.name;}});
+$('impAll').addEventListener('click',e=>{e.preventDefault();const on=$('impAll').classList.toggle('on');$('impAll').dataset.on=on?'1':'0';});
+$('impGo').addEventListener('click',async()=>{
+  const src=($('impSrc').value||'').replace(/\D/g,''), tgt=($('impTgt').value||'').replace(/\D/g,''); const url=$('impUrl').value.trim(); const msg=$('impMsg');
+  if(!src||!tgt){ msg.textContent='Source et Target Course ID requis.'; return; }
+  if(!impFileObj && !url){ msg.textContent='Fournis un fichier HTML ou une URL.'; return; }
+  const b=$('impGo'),old=b.textContent; b.disabled=true; b.textContent='⏳ Import…'; msg.textContent='';
+  const payload={source_id:src,target_id:tgt,source_language:$('impSL').value,target_language:$('impTL').value,localize_all_images:$('impAll').dataset.on==='1'};
+  if(impFileObj){ payload.html_base64=await new Promise(rs=>{const fr=new FileReader();fr.onload=()=>rs(btoa(unescape(encodeURIComponent(String(fr.result)))));fr.readAsText(impFileObj);}); }
+  else payload.html_url=url;
+  try{
+    const d=await (await fetch('/api/phase1/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})).json();
+    if(d.ok){ const c=d.counts; showToast('✅ <b>Phase 1 importée</b> pour '+tgt+'<br>'+c.image+' images · '+c.annexe+' docs · '+c.link+' liens · '+c.video+' vidéos<br><span style="opacity:.85">→ va dans « Cadrage », tape '+tgt+' (la Phase 2 sera dispo sous ~1 min, le temps que GitHub se rafraîchisse).</span>'); msg.innerHTML='✅ Importé. Cours <b>'+tgt+'</b> prêt pour la Phase 2.'; delete live[tgt]; }
+    else msg.textContent='⚠️ '+(d.error||'Erreur');
+  }catch(e){ msg.innerHTML='⚠️ BFF injoignable ('+String(e&&e.message||e)+'). Ouvre bien <b>http://localhost:4317/leo-v1.1.html</b> (pas le fichier en file://) puis recharge (Cmd+Shift+R).'; }
+  b.disabled=false; b.textContent=old;
+});
+
+/* ===================== COUCHE PROJET (v1.1 project-centric) ===================== */
+let CURPROJ=null;
+async function loadProjects(){
+  const g=$('projGrid'); if(!g)return; g.innerHTML='<div class="empty" style="padding:20px">Chargement…</div>';
+  try{ const d=await (await fetch('/api/projects')).json(); const ps=d.projects||[];
+    g.innerHTML = ps.length ? ps.map(p=>`<div class="projcard" onclick="openProject('${p.target}','${p.source}','${p.direction}')"><div class="pc-h"><span class="pc-id">${p.target}</span><span class="pc-dir">${p.direction}</span></div><div class="pc-sub">source ${p.source}</div><div class="pc-foot"><span class="pc-open">Ouvrir →</span></div></div>`).join('')
+      : '<div class="empty" style="padding:20px">Aucun projet livré pour le moment. Crée-en un avec un Target Course ID.</div>';
+  }catch(e){ g.innerHTML='<div class="empty" style="padding:20px">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code>.</div>'; }
+}
+function goView(v){ const n=document.querySelector('.nav[data-v="'+v+'"]'); if(n)n.click(); }
+window.openProject=(target,source,direction)=>{
+  CURPROJ={target,source:source||'',direction:direction||''};
+  const cx=$('ctxBox'); cx.style.display='block';
+  cx.innerHTML=`<div class="cx-id">📘 ${target}</div><div class="cx-sub">${source?('source '+source+' · '):''}${direction||''}</div><button class="cx-close" onclick="closeProject()">✕ fermer le projet</button>`;
+  $('wsNav').style.display='block';
+  // pré-remplir le cadrage (Produire) + la Revue
+  S.ctype='COURS'; document.querySelectorAll('#ctype button').forEach(x=>x.classList.toggle('on',x.dataset.t==='COURS'));
+  if(source){ S.sourceId=source; $('sourceId').value=source; }
+  S.targetId=target; $('targetId').value=target;
+  const dir=(direction||'').split('>');
+  if(dir[0]){ S.srcLang=dir[0]; if([...$('srcLang').options].some(o=>o.value===dir[0]))$('srcLang').value=dir[0]; }
+  if(dir[1]){ const tl=dir[1]==='en'?'en-US':(dir[1]==='fr'?'fr-FR':dir[1]); if([...$('tgtLang').options].some(o=>o.value===tl)){ S.tgtLang=tl; $('tgtLang').value=tl; } }
+  $('revId').value=target;
+  if(isId(target))fetchStatus(target);
+  render();
+  goView('apercu');
+};
+window.closeProject=()=>{ CURPROJ=null; $('ctxBox').style.display='none'; $('wsNav').style.display='none'; goView('projets'); };
+window.createProject=()=>{ const id=($('newProjId').value||'').replace(/\D/g,''); const m=$('newProjMsg'); if(!/^\d{4,8}$/.test(id)){ m.textContent='Entre un Target Course ID valide (4–8 chiffres).'; return; } m.textContent=''; openProject(id,'',''); showToast('🆕 Projet <b>'+id+'</b> ouvert — configure la source dans Produire puis lance la Phase 1.'); };
+async function renderApercu(){
+  const el=$('apercuBody'); if(!el)return;
+  if(!CURPROJ){ el.innerHTML='<div class="empty" style="padding:20px">Ouvre un projet depuis « Projets ».</div>'; return; }
+  const t=CURPROJ.target; el.innerHTML='<div class="empty" style="padding:20px">Analyse du projet '+t+'…</div>';
+  let done=false, inv=null, src=CURPROJ.source||'?';
+  try{ const d=await (await fetch('/api/content/'+t+'/status')).json(); if(d&&d.done){done=true;inv=d.inventory;src=d.source||src;} }catch(e){}
+  let rej=0; try{ const rj=await (await fetch('/api/review/'+t+'/rejections')).json(); rej=Object.values(rj||{}).filter(x=>x&&x.rejected).length; }catch(e){}
+  const STATES=['Nouveau','Gold Master','Revue','Assets (P2)','Livré'];
+  const cur=done?2:0;
+  const stepper='<div class="stepper">'+STATES.map((s,i)=>{const cls=i<cur?'done':(i===cur?'cur':'');return `<div class="sp ${cls}"><div class="dot">${i<cur?'✓':i+1}</div><div class="lbl">${s}</div></div>`+(i<STATES.length-1?'<div class="bar2"></div>':'');}).join('')+'</div>';
+  const chips = inv? `<div class="chips"><span class="chip">🖼️ ${inv.images} images</span><span class="chip">📄 ${inv.annexes} annexes</span><span class="chip">🔗 ${inv.links} liens</span><span class="chip">🎬 ${inv.videos} vidéo(s)</span></div>` : '<div class="mini">Inventaire indisponible (pas encore de Gold Master pour ce cours).</div>';
+  el.innerHTML=`<div class="grid"><div class="col">
+    <div class="card scope"><div class="ch"><div class="ico">📘</div><div><h2>Cours ${t}</h2><div class="sub">source ${src} · ${CURPROJ.direction||''}</div></div><span class="ptag" style="background:${done?'#eafaf0':'#fdeef0'};color:${done?'#138a45':'#b03048'}">${done?'Gold Master ✓':'À produire'}</span></div>
+      <div class="cb">${stepper}<div style="margin-top:6px">${chips}</div>
+      ${rej?`<div class="warn e" style="margin-top:4px">✕ ${rej} rejet(s) QA consigné(s) — voir Revue.</div>`:''}
+      <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap">
+        <button class="sbtn go" onclick="goView('lancer')">⚙️ Produire</button>
+        <button class="sbtn" onclick="goView('revue');setTimeout(loadReview,60)">✅ Revue</button>
+        <button class="sbtn" onclick="goView('suivi')">📡 Suivi</button>
+      </div></div></div>
+  </div>
+  <div class="panel"><div class="legend"><b>État du projet</b>
+    <li>${done?'✅ Contenu localisé (Gold Master présent) — Phase 2 débloquée.':'⛔ Pas encore de Gold Master — lance la Phase 1 dans Produire.'}</li>
+    <li>Revue : arbitrage liens (A10), images (A8), conformité TM, rejets QA.</li>
+    <li>Suivi : exécutions n8n en direct.</li></div></div></div>`;
+}
+document.querySelector('.nav[data-v="projets"]').addEventListener('click',loadProjects);
+document.querySelector('.nav[data-v="apercu"]').addEventListener('click',renderApercu);
+loadProjects();
+</script>
+</body>
+</html>
