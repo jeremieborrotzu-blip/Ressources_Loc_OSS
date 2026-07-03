@@ -610,6 +610,12 @@ async function courseTitle(source, target) {
   titlesCache[key] = t || null; saveTitles();
   return titlesCache[key];
 }
+// ---- override manuel du titre par projet (source de vérité, éditable) ----
+const projMetaFile = path.join(REVIEW_DIR, 'project_meta.json');
+let projMeta = {};
+try { projMeta = JSON.parse(fsx.readFileSync(projMetaFile, 'utf-8')); } catch (e) {}
+function saveProjMeta() { try { fsx.writeFileSync(projMetaFile, JSON.stringify(projMeta, null, 2)); } catch (e) {} }
+const titleOverride = id => (projMeta[id] && projMeta[id].title) || null;
 
 app.get('/api/projects', async (req, res) => {
   try {
@@ -621,7 +627,11 @@ app.get('/api/projects', async (req, res) => {
       if (m) { const key = m[2] + '|' + m[3]; if (seen.has(key)) continue; seen.add(key); out.push({ target: m[2], source: m[1], direction: decodeURIComponent(m[3]) }); }
     }
     out.sort((a, b) => b.target.localeCompare(a.target));
-    await Promise.all(out.map(async p => { p.title = await courseTitle(p.source, p.target) || ''; }));
+    await Promise.all(out.map(async p => {
+      const ov = titleOverride(p.target);
+      p.title = ov || (await courseTitle(p.source, p.target)) || '';
+      p.title_edited = !!ov;
+    }));
     res.json({ ok: true, projects: out });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
@@ -629,8 +639,19 @@ app.get('/api/projects', async (req, res) => {
 // titre à la demande (pour ouverture d'un projet créé par ID)
 app.get('/api/course/:id/title', async (req, res) => {
   const id = String(req.params.id).replace(/\D/g, '');
-  const t = await courseTitle(id, id);
-  res.json({ ok: true, id, title: t || '' });
+  const ov = titleOverride(id);
+  const t = ov || (await courseTitle(id, id));
+  res.json({ ok: true, id, title: t || '', title_edited: !!ov });
+});
+
+// enregistrer / effacer le titre manuel d'un projet (source de vérité)
+app.post('/api/project/:id/title', (req, res) => {
+  const id = String(req.params.id).replace(/\D/g, '');
+  const title = String((req.body && req.body.title) || '').slice(0, 200).trim();
+  if (title) projMeta[id] = Object.assign({}, projMeta[id], { title, ts: Date.now() });
+  else if (projMeta[id]) { delete projMeta[id].title; if (!Object.keys(projMeta[id]).length) delete projMeta[id]; }
+  saveProjMeta();
+  res.json({ ok: true, id, title, title_edited: !!title });
 });
 
 // ---- Rejets de revue (avec commentaire QA) — consignés par projet pour ML futur ----

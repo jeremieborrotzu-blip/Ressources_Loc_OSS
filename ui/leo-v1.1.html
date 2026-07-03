@@ -747,7 +747,7 @@ async function renderApercu(){
   const stepper='<div class="stepper">'+STATES.map((s,i)=>{const cls=i<cur?'done':(i===cur?'cur':'');return `<div class="sp ${cls}"><div class="dot">${i<cur?'✓':i+1}</div><div class="lbl">${s}</div></div>`+(i<STATES.length-1?'<div class="bar2"></div>':'');}).join('')+'</div>';
   const chips = inv? `<div class="chips"><span class="chip">🖼️ ${inv.images} images</span><span class="chip">📄 ${inv.annexes} annexes</span><span class="chip">🔗 ${inv.links} liens</span><span class="chip">🎬 ${inv.videos} vidéo(s)</span></div>` : '<div class="mini">Inventaire indisponible (pas encore de Gold Master pour ce cours).</div>';
   el.innerHTML=`<div class="grid"><div class="col">
-    <div class="card scope"><div class="ch"><div class="ico">📘</div><div><h2>${CURPROJ.title?esc(CURPROJ.title):('Cours '+t)}</h2><div class="sub">#${t} · source ${src} · ${CURPROJ.direction||''}</div></div><span class="ptag" style="background:${done?'#eafaf0':'#fdeef0'};color:${done?'#138a45':'#b03048'}">${done?'Gold Master ✓':'À produire'}</span></div>
+    <div class="card scope"><div class="ch"><div class="ico">📘</div><div style="flex:1;min-width:0"><div id="apTitleWrap" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">${CURPROJ.title?esc(CURPROJ.title):('Cours '+t)}</h2><button class="sbtn" style="padding:3px 9px;font-size:.7rem" onclick="editTitle()" title="Éditer le titre (devient la source de vérité, prioritaire sur l'auto-détection)">✏️</button></div><div class="sub">#${t} · source ${src} · ${CURPROJ.direction||''}</div></div><span class="ptag" style="background:${done?'#eafaf0':'#fdeef0'};color:${done?'#138a45':'#b03048'}">${done?'Gold Master ✓':'À produire'}</span></div>
       <div class="cb">${stepper}<div style="margin-top:6px">${chips}</div>
       ${rej?`<div class="warn e" style="margin-top:4px">✕ ${rej} rejet(s) QA consigné(s) — voir Revue.</div>`:''}
       <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap">
@@ -761,6 +761,18 @@ async function renderApercu(){
     <li>Revue : arbitrage liens (A10), images (A8), conformité TM, rejets QA.</li>
     <li>Suivi : exécutions n8n en direct.</li></div></div></div>`;
 }
+window.editTitle=()=>{
+  const w=$('apTitleWrap'); if(!w||!CURPROJ)return;
+  w.innerHTML=`<input type="text" id="apTitleInput" value="${esc(CURPROJ.title||'')}" placeholder="Titre du cours" style="font-size:1rem;font-weight:700;max-width:460px"> <button class="sbtn go" onclick="saveTitle()">Enregistrer</button> <button class="sbtn" onclick="renderApercu()">Annuler</button>`;
+  const inp=$('apTitleInput'); inp.focus(); inp.select(); inp.onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault();saveTitle();} if(e.key==='Escape')renderApercu(); };
+};
+window.saveTitle=async()=>{
+  const inp=$('apTitleInput'); if(!inp||!CURPROJ)return; const v=(inp.value||'').trim(); const target=CURPROJ.target;
+  CURPROJ.title=v; if(PROJ[target])PROJ[target].title=v;
+  try{ await fetch('/api/project/'+target+'/title',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:v})}); }catch(e){}
+  renderCtx(); renderApercu();
+  showToast(v?('✏️ Titre enregistré — <b>'+esc(v)+'</b>'):'✏️ Titre vidé — l\'auto-détection reprend la main.');
+};
 document.querySelector('.nav[data-v="projets"]').addEventListener('click',loadProjects);
 document.querySelector('.nav[data-v="apercu"]').addEventListener('click',renderApercu);
 loadProjects();
