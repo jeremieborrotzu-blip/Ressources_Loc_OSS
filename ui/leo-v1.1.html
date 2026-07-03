@@ -104,10 +104,14 @@
   .projcard{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--blue);border-radius:14px;box-shadow:var(--shadow);padding:16px 17px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:6px}
   .projcard:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(20,26,74,.14);border-top-color:var(--purple)}
   .projcard .pc-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
-  .projcard .pc-id{font-size:1.2rem;font-weight:800;color:var(--navy)}
+  .projcard .pc-id{font-size:.8rem;font-weight:800;color:var(--muted)}
   .projcard .pc-dir{font-size:.63rem;font-weight:800;background:var(--p1soft);color:var(--p1);border:1px solid #cfe0ff;padding:2px 8px;border-radius:20px;white-space:nowrap}
-  .projcard .pc-sub{font-size:.76rem;color:var(--muted)}
+  .projcard .pc-title{font-size:1.02rem;font-weight:800;color:var(--navy);line-height:1.25;min-height:2.4em;display:flex;align-items:center}
+  .projcard .pc-title .pc-untitled{color:var(--muted);font-weight:600}
+  .projcard .pc-sub{font-size:.74rem;color:var(--muted)}
   .projcard .pc-foot{margin-top:4px}.projcard .pc-open{font-size:.78rem;font-weight:700;color:var(--blue)}
+  .ctxbox .cx-title{font-weight:800;color:#fff;font-size:.92rem;line-height:1.25}
+  .ctxbox .cx-meta{color:#9aa2d6;font-size:.7rem;margin-top:3px}
   .stepper{display:flex;align-items:center;gap:0;margin:4px 0;flex-wrap:wrap}
   .stepper .sp{display:flex;align-items:center;gap:8px}
   .stepper .dot{width:26px;height:26px;border-radius:50%;background:#e6e9f2;color:#8a90a6;font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center;flex:0 0 26px}
@@ -698,34 +702,39 @@ $('impGo').addEventListener('click',async()=>{
 });
 
 /* ===================== COUCHE PROJET (v1.1 project-centric) ===================== */
-let CURPROJ=null;
+let CURPROJ=null; let PROJ={};
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 async function loadProjects(){
   const g=$('projGrid'); if(!g)return; g.innerHTML='<div class="empty" style="padding:20px">Chargement…</div>';
   try{ const d=await (await fetch('/api/projects')).json(); const ps=d.projects||[];
-    g.innerHTML = ps.length ? ps.map(p=>`<div class="projcard" onclick="openProject('${p.target}','${p.source}','${p.direction}')"><div class="pc-h"><span class="pc-id">${p.target}</span><span class="pc-dir">${p.direction}</span></div><div class="pc-sub">source ${p.source}</div><div class="pc-foot"><span class="pc-open">Ouvrir →</span></div></div>`).join('')
+    PROJ={}; ps.forEach(p=>PROJ[p.target]=p);
+    g.innerHTML = ps.length ? ps.map(p=>`<div class="projcard" onclick="openProject('${p.target}')"><div class="pc-h"><span class="pc-dir">${esc(p.direction)}</span><span class="pc-id">#${esc(p.target)}</span></div><div class="pc-title">${p.title?esc(p.title):'<span class="pc-untitled">Cours '+esc(p.target)+'</span>'}</div><div class="pc-sub">source ${esc(p.source)}</div><div class="pc-foot"><span class="pc-open">Ouvrir →</span></div></div>`).join('')
       : '<div class="empty" style="padding:20px">Aucun projet livré pour le moment. Crée-en un avec un Target Course ID.</div>';
   }catch(e){ g.innerHTML='<div class="empty" style="padding:20px">⚠️ BFF non connecté — lance <code>cd bff &amp;&amp; npm start</code>.</div>'; }
 }
 function goView(v){ const n=document.querySelector('.nav[data-v="'+v+'"]'); if(n)n.click(); }
-window.openProject=(target,source,direction)=>{
-  CURPROJ={target,source:source||'',direction:direction||''};
-  const cx=$('ctxBox'); cx.style.display='block';
-  cx.innerHTML=`<div class="cx-id">📘 ${target}</div><div class="cx-sub">${source?('source '+source+' · '):''}${direction||''}</div><button class="cx-close" onclick="closeProject()">✕ fermer le projet</button>`;
+function renderCtx(){ if(!CURPROJ)return; const cx=$('ctxBox'); cx.style.display='block'; const t=CURPROJ.title; cx.innerHTML=(t?`<div class="cx-title">📘 ${esc(t)}</div><div class="cx-meta">#${esc(CURPROJ.target)}${CURPROJ.source?(' · source '+esc(CURPROJ.source)):''} · ${esc(CURPROJ.direction||'')}</div>`:`<div class="cx-title">📘 Cours ${esc(CURPROJ.target)}</div><div class="cx-meta">${CURPROJ.source?('source '+esc(CURPROJ.source)+' · '):''}${esc(CURPROJ.direction||'')}</div>`)+'<button class="cx-close" onclick="closeProject()">✕ fermer le projet</button>'; }
+window.openProject=(target)=>{
+  const p=PROJ[target]||{target,source:'',direction:'',title:''};
+  CURPROJ={target:p.target,source:p.source||'',direction:p.direction||'',title:p.title||''};
+  renderCtx();
   $('wsNav').style.display='block';
   // pré-remplir le cadrage (Produire) + la Revue
   S.ctype='COURS'; document.querySelectorAll('#ctype button').forEach(x=>x.classList.toggle('on',x.dataset.t==='COURS'));
-  if(source){ S.sourceId=source; $('sourceId').value=source; }
+  if(CURPROJ.source){ S.sourceId=CURPROJ.source; $('sourceId').value=CURPROJ.source; }
   S.targetId=target; $('targetId').value=target;
-  const dir=(direction||'').split('>');
+  const dir=(CURPROJ.direction||'').split('>');
   if(dir[0]){ S.srcLang=dir[0]; if([...$('srcLang').options].some(o=>o.value===dir[0]))$('srcLang').value=dir[0]; }
   if(dir[1]){ const tl=dir[1]==='en'?'en-US':(dir[1]==='fr'?'fr-FR':dir[1]); if([...$('tgtLang').options].some(o=>o.value===tl)){ S.tgtLang=tl; $('tgtLang').value=tl; } }
   $('revId').value=target;
   if(isId(target))fetchStatus(target);
   render();
   goView('apercu');
+  // titre manquant (projet créé par ID) → récup à la demande
+  if(!CURPROJ.title){ fetch('/api/course/'+target+'/title').then(r=>r.json()).then(d=>{ if(d&&d.title&&CURPROJ&&CURPROJ.target===target){ CURPROJ.title=d.title; if(PROJ[target])PROJ[target].title=d.title; renderCtx(); if($('v-apercu').classList.contains('on'))renderApercu(); } }).catch(()=>{}); }
 };
 window.closeProject=()=>{ CURPROJ=null; $('ctxBox').style.display='none'; $('wsNav').style.display='none'; goView('projets'); };
-window.createProject=()=>{ const id=($('newProjId').value||'').replace(/\D/g,''); const m=$('newProjMsg'); if(!/^\d{4,8}$/.test(id)){ m.textContent='Entre un Target Course ID valide (4–8 chiffres).'; return; } m.textContent=''; openProject(id,'',''); showToast('🆕 Projet <b>'+id+'</b> ouvert — configure la source dans Produire puis lance la Phase 1.'); };
+window.createProject=()=>{ const id=($('newProjId').value||'').replace(/\D/g,''); const m=$('newProjMsg'); if(!/^\d{4,8}$/.test(id)){ m.textContent='Entre un Target Course ID valide (4–8 chiffres).'; return; } m.textContent=''; if(!PROJ[id])PROJ[id]={target:id,source:'',direction:'',title:''}; openProject(id); showToast('🆕 Projet <b>'+id+'</b> ouvert — configure la source dans Produire puis lance la Phase 1.'); };
 async function renderApercu(){
   const el=$('apercuBody'); if(!el)return;
   if(!CURPROJ){ el.innerHTML='<div class="empty" style="padding:20px">Ouvre un projet depuis « Projets ».</div>'; return; }
@@ -738,7 +747,7 @@ async function renderApercu(){
   const stepper='<div class="stepper">'+STATES.map((s,i)=>{const cls=i<cur?'done':(i===cur?'cur':'');return `<div class="sp ${cls}"><div class="dot">${i<cur?'✓':i+1}</div><div class="lbl">${s}</div></div>`+(i<STATES.length-1?'<div class="bar2"></div>':'');}).join('')+'</div>';
   const chips = inv? `<div class="chips"><span class="chip">🖼️ ${inv.images} images</span><span class="chip">📄 ${inv.annexes} annexes</span><span class="chip">🔗 ${inv.links} liens</span><span class="chip">🎬 ${inv.videos} vidéo(s)</span></div>` : '<div class="mini">Inventaire indisponible (pas encore de Gold Master pour ce cours).</div>';
   el.innerHTML=`<div class="grid"><div class="col">
-    <div class="card scope"><div class="ch"><div class="ico">📘</div><div><h2>Cours ${t}</h2><div class="sub">source ${src} · ${CURPROJ.direction||''}</div></div><span class="ptag" style="background:${done?'#eafaf0':'#fdeef0'};color:${done?'#138a45':'#b03048'}">${done?'Gold Master ✓':'À produire'}</span></div>
+    <div class="card scope"><div class="ch"><div class="ico">📘</div><div><h2>${CURPROJ.title?esc(CURPROJ.title):('Cours '+t)}</h2><div class="sub">#${t} · source ${src} · ${CURPROJ.direction||''}</div></div><span class="ptag" style="background:${done?'#eafaf0':'#fdeef0'};color:${done?'#138a45':'#b03048'}">${done?'Gold Master ✓':'À produire'}</span></div>
       <div class="cb">${stepper}<div style="margin-top:6px">${chips}</div>
       ${rej?`<div class="warn e" style="margin-top:4px">✕ ${rej} rejet(s) QA consigné(s) — voir Revue.</div>`:''}
       <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap">

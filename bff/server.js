@@ -582,6 +582,35 @@ app.post('/api/tm/apply', async (req, res) => {
 });
 
 // ---- Liste des projets (dérivée de l'arbre repo : chaque cours localisé = un projet) ----
+// ---- titre de cours (page publique OC, best-effort) + cache persistant ----
+const titlesFile = path.join(REVIEW_DIR, 'course_titles.json');
+let titlesCache = {};
+try { titlesCache = JSON.parse(fsx.readFileSync(titlesFile, 'utf-8')); } catch (e) {}
+function saveTitles() { try { fsx.writeFileSync(titlesFile, JSON.stringify(titlesCache, null, 2)); } catch (e) {} }
+async function fetchOcTitle(id) {
+  try {
+    const ctrl = new AbortController(); const to = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(`https://openclassrooms.com/fr/courses/${id}`, { redirect: 'follow', signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0 leo-bff' } });
+    clearTimeout(to);
+    if (!r.ok) return null;
+    const html = await r.text();
+    const og = html.match(/property=["']og:title["']\s+content=["']([^"']+)/i);
+    let t = og && og[1];
+    if (!t) { const tt = html.match(/<title>([^<]*)<\/title>/i); t = tt && tt[1].replace(/\s*[-–|]\s*OpenClassrooms\s*$/i, '').trim(); }
+    t = (t || '').trim();
+    return (t && !/^openclassrooms$/i.test(t)) ? t : null;
+  } catch (e) { return null; }
+}
+// titre d'un projet : essaie source (FR original, souvent public) puis target
+async function courseTitle(source, target) {
+  const key = source + '|' + target;
+  if (key in titlesCache) return titlesCache[key];   // inclut les null (échecs) pour ne pas re-frapper OC
+  let t = await fetchOcTitle(source);
+  if (!t) t = await fetchOcTitle(target);
+  titlesCache[key] = t || null; saveTitles();
+  return titlesCache[key];
+}
+
 app.get('/api/projects', async (req, res) => {
   try {
     const items = await getTree();
@@ -592,8 +621,16 @@ app.get('/api/projects', async (req, res) => {
       if (m) { const key = m[2] + '|' + m[3]; if (seen.has(key)) continue; seen.add(key); out.push({ target: m[2], source: m[1], direction: decodeURIComponent(m[3]) }); }
     }
     out.sort((a, b) => b.target.localeCompare(a.target));
+    await Promise.all(out.map(async p => { p.title = await courseTitle(p.source, p.target) || ''; }));
     res.json({ ok: true, projects: out });
   } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
+// titre à la demande (pour ouverture d'un projet créé par ID)
+app.get('/api/course/:id/title', async (req, res) => {
+  const id = String(req.params.id).replace(/\D/g, '');
+  const t = await courseTitle(id, id);
+  res.json({ ok: true, id, title: t || '' });
 });
 
 // ---- Rejets de revue (avec commentaire QA) — consignés par projet pour ML futur ----
