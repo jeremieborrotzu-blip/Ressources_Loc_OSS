@@ -333,6 +333,21 @@ app.post('/api/review/:id/localized', (req, res) => {
   res.json({ ok: true, count: Object.keys(m).length });
 });
 
+// ---- statut Iconik par image (persistant : {source_url -> {asset_id, filename, ts}}) ----
+const iconikFile = id => path.join(REVIEW_DIR, String(id).replace(/\D/g, '') + '_iconik.json');
+const readIconikState = id => { try { return JSON.parse(fsx.readFileSync(iconikFile(id), 'utf-8')); } catch (e) { return {}; } };
+const writeIconikState = (id, m) => fsx.writeFileSync(iconikFile(id), JSON.stringify(m, null, 2));
+app.get('/api/review/:id/iconik', (req, res) => res.json(readIconikState(req.params.id)));
+app.post('/api/review/:id/iconik', (req, res) => {
+  const { url, asset_id, filename, uploaded } = req.body || {};
+  if (!url) return res.status(400).json({ error: 'url requis' });
+  const m = readIconikState(req.params.id);
+  if (uploaded === false) delete m[url];
+  else m[url] = { asset_id: asset_id || '', filename: filename || '', ts: Date.now() };
+  writeIconikState(req.params.id, m);
+  res.json({ ok: true, count: Object.keys(m).length });
+});
+
 // ---- Importer une Phase 1 existante : HTML localisé → handoff → Git (Phase 2 prête) ----
 const REPO_DIR = path.join(__dirname, '..');
 function scanHtmlAssets(html, localizeImages) {
