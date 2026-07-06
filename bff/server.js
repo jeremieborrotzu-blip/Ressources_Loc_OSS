@@ -363,7 +363,7 @@ app.post('/api/review/:id/iconik/verify', async (req, res) => {
       if (fn && titleMap[fn]) { store[url] = { asset_id: titleMap[fn] || '', filename: fn, ts: Date.now(), verified: true }; matched++; }
     }
     writeIconikState(id, store);
-    res.json({ ok: true, collection_id: d.collection_id, iconik_assets: d.count, localized: Object.keys(loc).length, matched });
+    res.json({ ok: true, collection_id: d.collection_id, iconik_assets: d.count, localized: Object.keys(loc).length, matched, folders: d.folders || [] });
   } catch (e) { res.status(500).json({ error: String(e) }); }
 });
 
