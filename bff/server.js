@@ -347,6 +347,25 @@ app.post('/api/review/:id/iconik', (req, res) => {
   writeIconikState(req.params.id, m);
   res.json({ ok: true, count: Object.keys(m).length });
 });
+// vérifie la réalité Iconik (liste la collection static_graphics) et réconcilie le statut
+app.post('/api/review/:id/iconik/verify', async (req, res) => {
+  const id = String(req.params.id).replace(/\D/g, '');
+  try {
+    const r = await fetch(WH_ADHOC, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'iconik_list', target_course_id: id }) });
+    let d = await r.json(); if (Array.isArray(d)) d = d[0];
+    if (!d || !d.ok) return res.status(500).json({ error: (d && d.error) || 'iconik_list échec', detail: d });
+    const titleMap = {}; (d.assets || []).forEach(a => { if (a.title) titleMap[a.title] = a.id; });
+    const loc = readLocalized(id);
+    const store = readIconikState(id);
+    let matched = 0;
+    for (const [url, ent] of Object.entries(loc)) {
+      const fn = ent && ent.download ? path.basename(ent.download) : null;
+      if (fn && titleMap[fn]) { store[url] = { asset_id: titleMap[fn] || '', filename: fn, ts: Date.now(), verified: true }; matched++; }
+    }
+    writeIconikState(id, store);
+    res.json({ ok: true, collection_id: d.collection_id, iconik_assets: d.count, localized: Object.keys(loc).length, matched });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
 
 // ---- Importer une Phase 1 existante : HTML localisé → handoff → Git (Phase 2 prête) ----
 const REPO_DIR = path.join(__dirname, '..');
